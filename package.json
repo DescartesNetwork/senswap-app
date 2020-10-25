@@ -1,0 +1,22 @@
+{
+  "name": "senswap_prototype",
+  "version": "1.0.0",
+  "description": "This is the first prototype of SenSwap",
+  "main": "server.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:DescartesNetwork/senswap-app.git"
+  },
+  "author": "ntphuong163",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
