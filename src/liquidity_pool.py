@@ -1,4 +1,5 @@
 import numpy as np
+from utils import init_pool, get_marginal_price
 
 # token = {
 #     'name': "dfafd",
@@ -14,9 +15,9 @@ class LiquidityPool(object):
         self.token_2 = token_2
         
         # Parameters
-        self.a = None
-        self.b = None
-        self.f = None
+        self.b = 0
+        self.f = 1
+        self.a = init_pool(token_1.reserve, token_2.reserve, self.b, self.f)
         
 
     def swap(self, token_out=None, out_=0., token_in=None):
@@ -29,4 +30,7 @@ class LiquidityPool(object):
         return 0
 
     def get_price_oracle(self):
-        return 0
+        return get_marginal_price(self.token_1.reserve,
+                                self.token_2.reserve,
+                                self.a,
+                                self.b)
