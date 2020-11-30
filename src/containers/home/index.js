@@ -15,11 +15,11 @@ import styles from './styles';
 class Home extends Component {
 
   render() {
-    // const { classes } = this.props;
+    const { classes } = this.props;
 
     return <Grid container spacing={2} justify="center">
-      <Grid item xs={12}>
-        <Typography >Home</Typography>
+      <Grid item xs={10}>
+        <Typography variant="h1">Home</Typography>
       </Grid>
     </Grid>
   }
