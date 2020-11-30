@@ -32,7 +32,7 @@ class App extends Component {
           <Header />
         </Grid>
         <Grid item xs={12}>
-          <Drain small />
+          <Drain />
         </Grid>
         {/* Pages */}
         <Grid item xs={12}>

@@ -10,11 +10,12 @@ import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Image from 'material-ui-image';
 
 import {
-  SwapCallsRounded, PoolRounded, LockRounded,
-  SettingsRounded, GavelRounded,
+  SwapCallsRounded, LocalGasStationRounded, LockRounded,
+  GavelRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -37,7 +38,10 @@ class Header extends Component {
               <Link color="textPrimary" underline="none" component={RouterLink} to={'/home'}>
                 <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
                   <Grid item style={{ width: 35 }}>
-                    <Image src={LOGO} aspectRatio={(512 / 512)} />
+                    <Image
+                      src={LOGO}
+                      loading={<CircularProgress size={17} />}
+                    />
                   </Grid>
                   <Grid item>
                     <Typography variant="body2" noWrap>SenSwap</Typography>
@@ -60,7 +64,7 @@ class Header extends Component {
                 <Grid item>
                   <Tooltip title="Liquidity Provider">
                     <IconButton size="small" color="secondary">
-                      <PoolRounded />
+                      <LocalGasStationRounded />
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -69,14 +73,6 @@ class Header extends Component {
                   <Tooltip title="Swap">
                     <IconButton size="small" color="secondary">
                       <SwapCallsRounded />
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-                {/* Setting */}
-                <Grid item>
-                  <Tooltip title="Settings">
-                    <IconButton size="small" color="secondary">
-                      <SettingsRounded />
                     </IconButton>
                   </Tooltip>
                 </Grid>

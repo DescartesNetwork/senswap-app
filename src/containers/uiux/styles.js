@@ -1,3 +1,1 @@
-export default theme => {
-  console.info(theme);
-};
+export default theme => ({});
