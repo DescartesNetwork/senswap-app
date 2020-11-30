@@ -1,0 +1,12 @@
+html {
+  scroll-behavior: smooth;
+  background-color: #fafafa;
+}
+
+body {
+  font-family: "Pridi";
+}
+
+[contenteditable] {
+  outline: 0;
+}
