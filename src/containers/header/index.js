@@ -19,7 +19,7 @@ import {
 
 import { BaseCard } from 'components/cards';
 
-import LOGO from 'static/images/logo.svg';
+import LOGO from 'static/images/logo.png';
 import styles from './styles';
 
 class Header extends Component {
@@ -37,7 +37,7 @@ class Header extends Component {
               <Link color="textPrimary" underline="none" component={RouterLink} to={'/home'}>
                 <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
                   <Grid item style={{ width: 35 }}>
-                    <Image src={LOGO} aspectRatio={(365 / 403)} />
+                    <Image src={LOGO} aspectRatio={(512 / 512)} />
                   </Grid>
                   <Grid item>
                     <Typography variant="body2" noWrap>SenSwap</Typography>

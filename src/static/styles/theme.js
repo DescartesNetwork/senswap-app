@@ -2,7 +2,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 
 const theme = createMuiTheme({
   palette: {
-    primary: { main: '#FF3E3C' },
+    primary: { main: '#ed423b' },
     secondary: { main: '#012639' },
     textPrimary: { main: '#000000' },
     textSecondary: { main: '#FFFFFF' },
@@ -11,7 +11,7 @@ const theme = createMuiTheme({
     borderRadius: 12,
   },
   typography: {
-    fontFamily: 'Pridi',
+    fontFamily: 'Barlow',
     fontSize: 12,
     h1: { fontWeight: 300, textTransform: 'None' },
     h2: { fontWeight: 700, textTransform: 'None' },
