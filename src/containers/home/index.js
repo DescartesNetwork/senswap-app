@@ -29,7 +29,7 @@ class Home extends Component {
     const mainBlog = blogs[0];
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11}>
+      <Grid item xs={10}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <Grid container spacing={2}>
