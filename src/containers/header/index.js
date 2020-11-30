@@ -19,7 +19,7 @@ import {
 
 import { BaseCard } from 'components/cards';
 
-import LOGO from 'static/images/logo.png';
+import LOGO from 'static/images/logo.svg';
 import styles from './styles';
 
 class Header extends Component {
