@@ -14,6 +14,7 @@ import Drain from 'components/drain';
 // Pages
 import NotFound from 'containers/404';
 import Home from 'containers/home';
+import Swap from 'containers/swap';
 
 // CSS
 import theme from 'static/styles/theme';
@@ -39,6 +40,7 @@ class App extends Component {
           <Switch>
             <Redirect exact from="/" to="/home" />
             <Route exact path='/home' component={Home} />
+            <Route exact path='/swap' component={Swap} />
             <Route exact path='*' component={NotFound} />
           </Switch>
         </Grid>

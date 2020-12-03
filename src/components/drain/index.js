@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -14,6 +15,18 @@ class Drain extends Component {
       return <Grid container className={classes.large}></Grid>
     return <Grid container className={classes.default}></Grid>
   }
+}
+
+Drain.defaultProps = {
+  small: false,
+  large: false,
+  default: true
+}
+
+Drain.propTypes = {
+  small: PropTypes.bool,
+  large: PropTypes.bool,
+  default: PropTypes.bool,
 }
 
 export default withStyles(styles)(Drain);

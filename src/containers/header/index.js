@@ -55,7 +55,7 @@ class Header extends Component {
                 {/* Governance */}
                 <Grid item>
                   <Tooltip title="Governance">
-                    <IconButton size="small" color="secondary">
+                    <IconButton size="small" color="secondary" component={RouterLink} to={'/governance'}>
                       <GavelRounded />
                     </IconButton>
                   </Tooltip>
@@ -63,7 +63,7 @@ class Header extends Component {
                 {/* Liquidity Provider */}
                 <Grid item>
                   <Tooltip title="Liquidity Provider">
-                    <IconButton size="small" color="secondary">
+                    <IconButton size="small" color="secondary" component={RouterLink} to={'/liquidity'}>
                       <LocalGasStationRounded />
                     </IconButton>
                   </Tooltip>
@@ -71,7 +71,7 @@ class Header extends Component {
                 {/* Swap */}
                 <Grid item>
                   <Tooltip title="Swap">
-                    <IconButton size="small" color="secondary">
+                    <IconButton size="small" color="secondary" component={RouterLink} to={'/swap'}>
                       <SwapCallsRounded />
                     </IconButton>
                   </Tooltip>

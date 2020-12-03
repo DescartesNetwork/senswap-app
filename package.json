@@ -23,7 +23,8 @@
     "react-scripts": "4.0.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "serve": "^11.3.2"
+    "serve": "^11.3.2",
+    "swiper": "^6.3.0"
   },
   "scripts": {
     "start": "REACT_APP_ENV=development react-scripts start",
