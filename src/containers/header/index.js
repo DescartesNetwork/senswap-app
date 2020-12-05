@@ -63,7 +63,7 @@ class Header extends Component {
                 {/* Liquidity Provider */}
                 <Grid item>
                   <Tooltip title="Liquidity Provider">
-                    <IconButton size="small" color="secondary" component={RouterLink} to={'/liquidity'}>
+                    <IconButton size="small" color="secondary" component={RouterLink} to={'/pool'}>
                       <LocalGasStationRounded />
                     </IconButton>
                   </Tooltip>
