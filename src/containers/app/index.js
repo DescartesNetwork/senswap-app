@@ -7,10 +7,12 @@ import { withStyles } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 
+import Drain from 'components/drain';
+
 // Static component
 import Header from 'containers/header';
 import UiUx from 'containers/uiux';
-import Drain from 'components/drain';
+import Wallet from 'containers/wallet';
 // Pages
 import NotFound from 'containers/404';
 import Home from 'containers/home';
@@ -46,9 +48,10 @@ class App extends Component {
             <Route exact path='*' component={NotFound} />
           </Switch>
         </Grid>
-        {/* Hidden application */}
+        {/* Application */}
         <Grid item xs={12} >
           <UiUx />
+          <Wallet />
         </Grid>
       </Grid>
     </ThemeProvider>

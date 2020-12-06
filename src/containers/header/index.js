@@ -23,11 +23,13 @@ import { BaseCard } from 'components/cards';
 
 import LOGO from 'static/images/logo.svg';
 import styles from './styles';
+import { openWallet } from 'modules/wallet.reducer';
+
 
 class Header extends Component {
 
   connectWallet = () => {
-
+    return this.props.openWallet();
   }
 
   walletConnectionButton = () => {
@@ -119,6 +121,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  openWallet,
 }, dispatch);
 
 export default withRouter(connect(
