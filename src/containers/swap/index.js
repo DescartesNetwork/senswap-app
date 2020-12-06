@@ -11,7 +11,10 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 
-import { BaseCard } from 'components/cards';
+import { } from '@material-ui/icons';
+
+import Drain from 'components/drain';
+import { BaseCard, NotiCard } from 'components/cards';
 
 import styles from './styles';
 
@@ -38,9 +41,19 @@ class Swap extends Component {
     const { classes } = this.props;
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={10}>
-        <Grid container justify="center" spacing={2}>
-          <Grid item xs={6}>
+      <Grid item xs={11} md={10}>
+        <Grid container spacing={2} justify="center">
+          <Grid item xs={12} md={6}>
+            <NotiCard
+              title="Notification"
+              description="Liquidity providers earn a 0.3% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
+              source="#"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Drain small />
+          </Grid>
+          <Grid item xs={12} md={6}>
             <BaseCard>
               <Grid container alignItems="center" spacing={2}>
                 <Grid item xs={12}>

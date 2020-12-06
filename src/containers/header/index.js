@@ -15,7 +15,7 @@ import Image from 'material-ui-image';
 
 import {
   SwapCallsRounded, LocalGasStationRounded, LockRounded,
-  GavelRounded,
+  GavelRounded, AccountBalanceWalletRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -24,6 +24,32 @@ import LOGO from 'static/images/logo.svg';
 import styles from './styles';
 
 class Header extends Component {
+
+  connectWallet = () => {
+
+  }
+
+  walletConnectionButton = () => {
+    const { ui: { width } } = this.props;
+    if (width >= 960) return <Grid item>
+      <Button
+        size="small"
+        variant="contained"
+        color="primary"
+        onClick={this.connectWallet}
+        endIcon={<LockRounded size="small" />}
+      >
+        <Typography noWrap>Connect Wallet</Typography>
+      </Button>
+    </Grid>
+    return <Grid item>
+      <Tooltip title="Connect wallet">
+        <IconButton size="small" color="primary" onClick={this.connectWallet}>
+          <AccountBalanceWalletRounded />
+        </IconButton>
+      </Tooltip>
+    </Grid>
+  }
 
   render() {
     const { classes } = this.props;
@@ -51,7 +77,7 @@ class Header extends Component {
             </Grid>
             {/* Menu */}
             <Grid item className={classes.stretch}>
-              <Grid container alignItems="center" justify="flex-end" spacing={width >= 960 ? 5 : 3}>
+              <Grid container alignItems="center" justify="flex-end" spacing={width >= 960 ? 5 : 2}>
                 {/* Governance */}
                 <Grid item>
                   <Tooltip title="Governance">
@@ -77,16 +103,7 @@ class Header extends Component {
                   </Tooltip>
                 </Grid>
                 {/* Connect wallet */}
-                <Grid item>
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    endIcon={<LockRounded size="small" />}
-                  >
-                    <Typography noWrap>Connect Wallet</Typography>
-                  </Button>
-                </Grid>
+                {this.walletConnectionButton()}
               </Grid>
             </Grid>
           </Grid>

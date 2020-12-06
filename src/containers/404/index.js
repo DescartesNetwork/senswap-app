@@ -18,8 +18,12 @@ class NotFound extends Component {
     // const { classes } = this.props;
 
     return <Grid container spacing={2} justify="center">
-      <Grid item xs={10}>
-        <Typography variant="h1">Page not found</Typography>
+      <Grid item xs={11} md={10}>
+        <Grid container spacing={2} alignItems="center">
+          <Grid item xs={12}>
+            <Typography variant="h1">Page not found!</Typography>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   }

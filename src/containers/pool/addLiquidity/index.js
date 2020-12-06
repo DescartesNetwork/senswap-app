@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
-import { AddRounded } from '@material-ui/icons';
+import { AddCircleOutlineRounded } from '@material-ui/icons';
 
 import styles from './styles';
 
@@ -35,12 +35,13 @@ class AddLiquidity extends Component {
         <Typography variant="h6">Add liquidity</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Typography>You are the first liquidity provider. The ratio of tokens you add will set the price of this pool. Once you are happy with the rate click supply to review.</Typography>
+        <Typography>The price of token you add will follow the current marginal price of token.</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
           label="Token Factory Address"
           variant="outlined"
+          size="small"
           value={this.state.tokenFactoryAddress}
           fullWidth
         />
@@ -49,6 +50,7 @@ class AddLiquidity extends Component {
         <TextField
           label="Token Address"
           variant="outlined"
+          size="small"
           value={this.state.tokenAddress}
           fullWidth
         />
@@ -57,6 +59,7 @@ class AddLiquidity extends Component {
         <TextField
           label="Amount"
           variant="outlined"
+          size="small"
           value={this.state.amount}
           fullWidth
         />
@@ -65,8 +68,7 @@ class AddLiquidity extends Component {
         <Button
           variant="contained"
           color="primary"
-          size="large"
-          startIcon={<AddRounded />}
+          startIcon={<AddCircleOutlineRounded />}
           onClick={this.addLiquidity}
           fullWidth
         >

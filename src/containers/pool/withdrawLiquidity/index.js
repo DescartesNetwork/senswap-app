@@ -9,12 +9,12 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
-import { CheckCircleOutlineRounded } from '@material-ui/icons';
+import { RemoveCircleOutlineRounded } from '@material-ui/icons';
 
 import styles from './styles';
 
 
-class NewPool extends Component {
+class WithdrawLiquidity extends Component {
   constructor() {
     super();
 
@@ -22,21 +22,20 @@ class NewPool extends Component {
       tokenFactoryAddress: '0x',
       tokenAddress: '0x',
       amount: 0,
-      price: 0
     }
   }
 
-  newPool = () => {
+  withdrawLiquidity = () => {
 
   }
 
   render() {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h6">New pool</Typography>
+        <Typography variant="h6">Withdraw liquidity</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Typography>You are the first liquidity provider. Once you are happy with the rate click supply to review.</Typography>
+        <Typography>You will no longer receive liquidity incentive when you withdraw all your token out of the pool.</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -56,21 +55,12 @@ class NewPool extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={12}>
         <TextField
-          label="Initial amount"
+          label="Amount"
           variant="outlined"
           size="small"
           value={this.state.amount}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Initial price"
-          variant="outlined"
-          size="small"
-          value={this.state.price}
           fullWidth
         />
       </Grid>
@@ -78,11 +68,11 @@ class NewPool extends Component {
         <Button
           variant="contained"
           color="primary"
-          startIcon={<CheckCircleOutlineRounded />}
-          onClick={this.newPool}
+          startIcon={<RemoveCircleOutlineRounded />}
+          onClick={this.withdrawLiquidity}
           fullWidth
         >
-          <Typography variant="body2">Create</Typography>
+          <Typography variant="body2">Withdraw</Typography>
         </Button>
       </Grid>
     </Grid>
@@ -99,4 +89,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(NewPool)));
+)(withStyles(styles)(WithdrawLiquidity)));
