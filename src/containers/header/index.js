@@ -11,11 +11,12 @@ import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Fab from '@material-ui/core/Fab';
 import Image from 'material-ui-image';
 
 import {
-  SwapCallsRounded, LocalGasStationRounded, LockRounded,
-  GavelRounded, AccountBalanceWalletRounded,
+  SwapCallsRounded, LocalGasStationRounded, PhonelinkLockRounded,
+  GavelRounded, MobileFriendlyRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -31,22 +32,22 @@ class Header extends Component {
 
   walletConnectionButton = () => {
     const { ui: { width } } = this.props;
-    if (width >= 960) return <Grid item>
+    if (width >= 600) return <Grid item>
       <Button
         size="small"
         variant="contained"
         color="primary"
         onClick={this.connectWallet}
-        endIcon={<LockRounded size="small" />}
+        endIcon={<PhonelinkLockRounded size="small" />}
       >
         <Typography noWrap>Connect Wallet</Typography>
       </Button>
     </Grid>
     return <Grid item>
       <Tooltip title="Connect wallet">
-        <IconButton size="small" color="primary" onClick={this.connectWallet}>
-          <AccountBalanceWalletRounded />
-        </IconButton>
+        <Fab size="small" color="primary" onClick={this.connectWallet}>
+          <MobileFriendlyRounded />
+        </Fab>
       </Tooltip>
     </Grid>
   }
