@@ -8,9 +8,10 @@ import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 
-import { SaveAltRounded } from '@material-ui/icons';
+import { SaveAltRounded, DescriptionRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import { setWallet } from 'modules/wallet.reducer';
@@ -27,6 +28,21 @@ class KeyStore extends Component {
     const { classes } = this.props;
 
     return <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
+          <Grid item>
+            <IconButton size="small" color="primary">
+              <DescriptionRounded />
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <Typography variant="body2">Keystore</Typography>
+          </Grid>
+          <Grid item className={classes.stretch}>
+            <Divider />
+          </Grid>
+        </Grid>
+      </Grid>
       <Grid item xs={12}>
         <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
       </Grid>

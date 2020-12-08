@@ -33,22 +33,25 @@ class Header extends Component {
   }
 
   walletConnectionButton = () => {
-    const { ui: { width } } = this.props;
+    const { ui: { width }, wallet: { address } } = this.props;
+    const icon = address ? <MobileFriendlyRounded size="small" /> : <PhonelinkLockRounded size="small" />;
+    const text = address ? 'Connected' : 'Connect Wallet';
+
     if (width >= 600) return <Grid item>
       <Button
         size="small"
         variant="contained"
         color="primary"
         onClick={this.connectWallet}
-        endIcon={<PhonelinkLockRounded size="small" />}
+        endIcon={icon}
       >
-        <Typography noWrap>Connect Wallet</Typography>
+        <Typography noWrap>{text}</Typography>
       </Button>
     </Grid>
     return <Grid item>
-      <Tooltip title="Connect wallet">
+      <Tooltip title={text}>
         <Fab size="small" color="primary" onClick={this.connectWallet}>
-          <MobileFriendlyRounded />
+          {icon}
         </Fab>
       </Tooltip>
     </Grid>
@@ -118,6 +121,7 @@ class Header extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

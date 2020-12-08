@@ -1,7 +1,13 @@
 import dateformat from 'dateformat';
+import {
+  Account, Connection, PublicKey,
+  LAMPORTS_PER_SOL
+} from '@solana/web3.js';
+
+import configs from 'configs';
 
 
-let Utils = function () { }
+const Utils = {}
 
 Utils.scrollTop = () => {
   let root = document.getElementById("root");
@@ -77,6 +83,24 @@ Utils.isEmail = (email) => {
   const domainParts = address.split('.');
   if (domainParts.some(p => p.length > 63)) return false;
   return true;
+}
+
+Utils.fromSecretKey = (secretKey) => {
+  const account = new Account(Buffer.from(secretKey, 'hex'));
+  return account;
+}
+
+Utils.getBalance = (address) => {
+  return new Promise((resolve, reject) => {
+    const { sol: { node } } = configs;
+    const connection = new Connection(node, 'recent');
+    const publicKey = new PublicKey(address);
+    return connection.getBalance(publicKey).then(re => {
+      return resolve(re / LAMPORTS_PER_SOL);
+    }).catch(er => {
+      return reject(er);
+    });
+  })
 }
 
 export default Utils;

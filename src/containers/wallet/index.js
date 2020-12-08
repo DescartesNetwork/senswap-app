@@ -6,25 +6,41 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Divider from '@material-ui/core/Divider';
 
-import { RoomServiceRounded, CloseRounded } from '@material-ui/icons';
+import { CloseRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 import SecretKey from './secretKey';
 import Keystore from './keystore';
+import Info from './info';
 
 import styles from './styles';
-import { closeWallet, setWallet } from 'modules/wallet.reducer';
+import { closeWallet } from 'modules/wallet.reducer';
 
 
 class Wallet extends Component {
+
+  renderComponent = () => {
+    const { wallet: { address } } = this.props;
+
+    if (!address) return <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <SecretKey />
+      </Grid>
+      <Grid item xs={12}>
+        <Keystore />
+      </Grid>
+    </Grid>
+    return <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Info />
+      </Grid>
+    </Grid>
+  }
 
   render() {
     const { classes } = this.props;
@@ -43,28 +59,18 @@ class Wallet extends Component {
                   <CloseRounded />
                 </IconButton>
               </Grid>
-            </Grid></DialogTitle>
+            </Grid>
+          </DialogTitle>
           <DialogContent>
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <SecretKey />
-              </Grid>
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-              <Grid item xs={12}>
-                <Keystore />
+                {this.renderComponent()}
               </Grid>
               <Grid item xs={12}>
                 <Drain small />
               </Grid>
             </Grid>
           </DialogContent>
-          <DialogActions>
-            <Button color="primary" startIcon={<RoomServiceRounded />}>
-              <Typography>Need support?</Typography>
-            </Button>
-          </DialogActions>
         </Dialog>
       </Grid>
     </Grid>
@@ -77,7 +83,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  closeWallet, setWallet
+  closeWallet,
 }, dispatch);
 
 export default withRouter(connect(

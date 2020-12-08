@@ -1,4 +1,5 @@
-const KEY = 'thieng';
+const KEY = 'senswap';
+const db = window.sessionStorage;
 
 const storage = {}
 
@@ -11,7 +12,7 @@ storage.convert = (value) => {
 }
 
 storage.set = (key, value) => {
-  let data = storage.convert(window.localStorage.getItem(KEY));
+  let data = storage.convert(db.getItem(KEY));
   if (!data || typeof data !== 'object') {
     data = {}
     data[key] = value;
@@ -19,11 +20,11 @@ storage.set = (key, value) => {
   else {
     data[key] = value;
   }
-  window.localStorage.setItem(KEY, JSON.stringify(data));
+  db.setItem(KEY, JSON.stringify(data));
 }
 
 storage.get = (key) => {
-  let data = storage.convert(window.localStorage.getItem(KEY));
+  let data = storage.convert(db.getItem(KEY));
   if (!data || typeof data !== 'object') return null;
   return data[key];
 }
