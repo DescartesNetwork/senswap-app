@@ -3,6 +3,7 @@ import {
   Account, Connection, PublicKey,
   LAMPORTS_PER_SOL
 } from '@solana/web3.js';
+import soproxABI from 'soprox-abi';
 
 import configs from 'configs';
 
@@ -90,13 +91,39 @@ Utils.fromSecretKey = (secretKey) => {
   return account;
 }
 
+Utils.createConnection = () => {
+  const { sol: { node } } = configs;
+  const connection = new Connection(node, 'recent');
+  return connection;
+}
+
 Utils.getBalance = (address) => {
   return new Promise((resolve, reject) => {
-    const { sol: { node } } = configs;
-    const connection = new Connection(node, 'recent');
+    const connection = Utils.createConnection();
     const publicKey = new PublicKey(address);
     return connection.getBalance(publicKey).then(re => {
       return resolve(re / LAMPORTS_PER_SOL);
+    }).catch(er => {
+      return reject(er);
+    });
+  })
+}
+
+Utils.getTokenAccountData = (address) => {
+  return new Promise((resolve, reject) => {
+    const connection = Utils.createConnection();
+    const publicKey = new PublicKey(address);
+    const schema = [
+      { key: 'owner', type: 'pub' },
+      { key: 'token', type: 'pub' },
+      { key: 'amount', type: 'u64' },
+      { key: 'initialized', type: 'bool' }
+    ]
+    return connection.getAccountInfo(publicKey).then(({ data }) => {
+      if (!data) return reject('Cannot find data of', address);
+      const layout = new soproxABI.struct(schema);
+      layout.fromBuffer(data);
+      return resolve(layout.value);
     }).catch(er => {
       return reject(er);
     });

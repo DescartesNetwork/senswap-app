@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Grid, IconButton } from '@material-ui/core';
@@ -11,6 +12,8 @@ import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 
 import { PowerSettingsNewRounded, DeleteForeverRounded, AddRounded } from '@material-ui/icons';
+
+import AccountInfo from './account';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -22,24 +25,36 @@ class Info extends Component {
     super();
 
     this.state = {
-      balance: 0,
       error: '',
       token: '',
+      balances: [],
     }
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { wallet: prevWallet } = prevProps;
+    const { wallet } = this.props;
+    if (!isEqual(wallet, prevWallet)) this.fetchData();
+  }
+
+  fetchData = () => {
+    const { wallet: { tokens } } = this.props;
+    return Promise.all(tokens.map(token => {
+      return utils.getTokenAccountData(token);
+    })).then(values => {
+      return this.setState({ balances: values.map(({ amount }) => amount.toString()) });
+    }).catch(er => {
+      return console.error(er);
+    });
   }
 
   disconnect = () => {
     return this.props.unsetWallet().then(re => {
       return this.props.closeWallet();
-    }).catch(er => {
-      return this.setState({ error: er });
-    });
-  }
-
-  getBalance = () => {
-    const { wallet: { address } } = this.props;
-    return utils.getBalance(address).then(re => {
-      return this.setState({ balance: re });
     }).catch(er => {
       return this.setState({ error: er });
     });
@@ -68,52 +83,10 @@ class Info extends Component {
     return updateToken(newTokens);
   }
 
-  renderInfo = () => {
-    const { classes } = this.props;
-    const { wallet: { address } } = this.props;
-    const { balance } = this.state;
-
-    return <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-          <Grid item>
-            <Typography variant="body2">Account</Typography>
-          </Grid>
-          <Grid item className={classes.stretch}>
-            <Divider />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
-      </Grid>
-      <Grid item xs={8}>
-        <TextField
-          label="Address"
-          variant="outlined"
-          color="primary"
-          value={address}
-          size="small"
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <TextField
-          label="SOL"
-          variant="outlined"
-          color="primary"
-          value={balance}
-          size="small"
-          fullWidth
-        />
-      </Grid>
-    </Grid>
-  }
-
   renderToken = () => {
     const { classes } = this.props;
     const { wallet: { tokens } } = this.props;
-    const { token } = this.state;
+    const { token, balances } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -129,7 +102,7 @@ class Info extends Component {
       <Grid item xs={12}>
         <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
       </Grid>
-      {tokens.map(address => <Grid item key={address} xs={12}>
+      {tokens.map((address, index) => <Grid item key={address} xs={12}>
         <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
           <Grid item>
             <IconButton
@@ -155,7 +128,7 @@ class Info extends Component {
               label="Balance"
               variant="outlined"
               color="primary"
-              value={0}
+              value={balances[index] || 0}
               size="small"
               fullWidth
             />
@@ -193,11 +166,10 @@ class Info extends Component {
 
   render() {
     const { error } = this.state;
-    this.getBalance();
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        {this.renderInfo()}
+        <AccountInfo />
       </Grid>
       <Grid item xs={12}>
         {this.renderToken()}
