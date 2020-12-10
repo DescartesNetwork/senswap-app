@@ -4,9 +4,9 @@ import {
   LAMPORTS_PER_SOL
 } from '@solana/web3.js';
 import soproxABI from 'soprox-abi';
+import BN from 'bn.js';
 
 import configs from 'configs';
-
 
 const Utils = {}
 
@@ -112,18 +112,32 @@ Utils.getBalance = (address) => {
 Utils.getTokenAccountData = (address) => {
   return new Promise((resolve, reject) => {
     const connection = Utils.createConnection();
-    const publicKey = new PublicKey(address);
-    const schema = [
+    const accountSchema = [
       { key: 'owner', type: 'pub' },
       { key: 'token', type: 'pub' },
       { key: 'amount', type: 'u64' },
       { key: 'initialized', type: 'bool' }
     ]
-    return connection.getAccountInfo(publicKey).then(({ data }) => {
-      if (!data) return reject('Cannot find data of', address);
-      const layout = new soproxABI.struct(schema);
-      layout.fromBuffer(data);
-      return resolve(layout.value);
+    const tokenSchema = [
+      { key: 'symbol', type: '[char;4]' },
+      { key: 'total_supply', type: 'u64' },
+      { key: 'decimals', type: 'u8' },
+      { key: 'initialized', type: 'bool' }
+    ]
+    const accountPublicKey = new PublicKey(address);
+    return connection.getAccountInfo(accountPublicKey).then(({ data: accountData }) => {
+      if (!accountData) return reject(`Cannot find data of ${address}`);
+      const accountLayout = new soproxABI.struct(accountSchema);
+      accountLayout.fromBuffer(accountData);
+      const accountValue = { ...accountLayout.value };
+
+      return connection.getAccountInfo(new PublicKey(accountValue.token)).then(({ data: tokenData }) => {
+        if (!tokenData) return reject(`Cannot find data of ${accountValue.token}`);
+        const tokenLayout = new soproxABI.struct(tokenSchema);
+        tokenLayout.fromBuffer(tokenData);
+        const tokenValue = { ...tokenLayout.value };
+        return resolve({ ...accountValue, ...tokenValue });
+      })
     }).catch(er => {
       return reject(er);
     });

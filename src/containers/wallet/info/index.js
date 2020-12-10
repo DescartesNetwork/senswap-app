@@ -27,7 +27,7 @@ class Info extends Component {
     this.state = {
       error: '',
       token: '',
-      balances: [],
+      values: [],
     }
   }
 
@@ -46,7 +46,7 @@ class Info extends Component {
     return Promise.all(tokens.map(token => {
       return utils.getTokenAccountData(token);
     })).then(values => {
-      return this.setState({ balances: values.map(({ amount }) => amount.toString()) });
+      return this.setState({ values });
     }).catch(er => {
       return console.error(er);
     });
@@ -68,9 +68,10 @@ class Info extends Component {
   addToken = () => {
     const { token } = this.state;
     const { wallet: { tokens }, updateToken } = this.props;
+    const newTokens = [...tokens];
     if (!token) return console.error('Invalid input');
-    tokens.push(token);
-    return updateToken(tokens).then(re => {
+    newTokens.push(token);
+    return updateToken(newTokens).then(re => {
       return this.setState({ token: '' });
     }).catch(er => {
       return this.setState({ error: er });
@@ -86,7 +87,7 @@ class Info extends Component {
   renderToken = () => {
     const { classes } = this.props;
     const { wallet: { tokens } } = this.props;
-    const { token, balances } = this.state;
+    const { token, values } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -102,39 +103,52 @@ class Info extends Component {
       <Grid item xs={12}>
         <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
       </Grid>
-      {tokens.map((address, index) => <Grid item key={address} xs={12}>
-        <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
-          <Grid item>
-            <IconButton
-              color="secondary"
-              onClick={() => this.removeToken(address)}
-              size="small"
-            >
-              <DeleteForeverRounded />
-            </IconButton>
-          </Grid>
-          <Grid item className={classes.stretch}>
-            <TextField
-              label="Token"
-              variant="outlined"
-              color="primary"
-              value={address}
-              size="small"
-              fullWidth
-            />
-          </Grid>
-          <Grid item>
-            <TextField
-              label="Balance"
-              variant="outlined"
-              color="primary"
-              value={balances[index] || 0}
-              size="small"
-              fullWidth
-            />
+      {tokens.map((address, index) => {
+        const value = values[index];
+        if (!value) return null;
+        const symbol = value.symbol.join('').replace('-', '');
+        const token = value.token;
+        const balance = (value.amount / global.BigInt(10 ** value.decimals)).toString();
+        const balanceDecimals = (value.amount % global.BigInt(10 ** value.decimals)).toString();
+        const totalSupply = (value.total_supply / global.BigInt(10 ** value.decimals)).toString();
+        const totalSupplyDecimals = (value.total_supply % global.BigInt(10 ** value.decimals)).toString();
+
+        return <Grid item key={address} xs={12}>
+          <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
+            <Grid item>
+              <IconButton
+                color="secondary"
+                onClick={() => this.removeToken(address)}
+                size="small"
+              >
+                <DeleteForeverRounded />
+              </IconButton>
+            </Grid>
+            <Grid item className={classes.stretch}>
+              <TextField
+                label={symbol}
+                variant="outlined"
+                color="primary"
+                value={address}
+                size="small"
+                helperText={token}
+                fullWidth
+              />
+            </Grid>
+            <Grid item>
+              <TextField
+                label="Balance"
+                variant="outlined"
+                color="primary"
+                value={Number(balance + '.' + balanceDecimals)}
+                helperText={Number(totalSupply + '.' + totalSupplyDecimals)}
+                size="small"
+                fullWidth
+              />
+            </Grid>
           </Grid>
         </Grid>
-      </Grid>)}
+      })}
       <Grid item xs={12}>
         <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
           <Grid item className={classes.stretch}>
