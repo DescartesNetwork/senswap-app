@@ -11,7 +11,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 
-import { PowerSettingsNewRounded, DeleteForeverRounded, AddRounded } from '@material-ui/icons';
+import { PowerSettingsNewRounded, RemoveCircleOutlineRounded, AddRounded } from '@material-ui/icons';
 
 import AccountInfo from './account';
 
@@ -121,7 +121,7 @@ class Info extends Component {
                 onClick={() => this.removeToken(address)}
                 size="small"
               >
-                <DeleteForeverRounded />
+                <RemoveCircleOutlineRounded />
               </IconButton>
             </Grid>
             <Grid item className={classes.stretch}>

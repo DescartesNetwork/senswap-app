@@ -63,25 +63,29 @@ class AccountInfo extends Component {
       <Grid item xs={12}>
         <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
       </Grid>
-      <Grid item xs={8}>
-        <TextField
-          label="Address"
-          variant="outlined"
-          color="primary"
-          value={address}
-          size="small"
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <TextField
-          label="SOL"
-          variant="outlined"
-          color="primary"
-          value={balance}
-          size="small"
-          fullWidth
-        />
+      <Grid item xs={12}>
+        <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
+          <Grid item className={classes.stretch}>
+            <TextField
+              label="Address"
+              variant="outlined"
+              color="primary"
+              value={address}
+              size="small"
+              fullWidth
+            />
+          </Grid>
+          <Grid item>
+            <TextField
+              label="SOL"
+              variant="outlined"
+              color="primary"
+              value={balance}
+              size="small"
+              fullWidth
+            />
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   }
