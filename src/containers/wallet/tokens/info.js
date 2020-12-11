@@ -6,22 +6,22 @@ import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import Divider from '@material-ui/core/Divider';
 
 import { } from '@material-ui/icons';
 
 import styles from './styles';
 import utils from 'helpers/utils';
+import { } from 'modules/wallet.reducer';
 
 
-class AccountInfo extends Component {
+class Info extends Component {
   constructor() {
     super();
 
     this.state = {
-      balance: 0,
+      error: '',
+      value: {},
     }
   }
 
@@ -36,9 +36,9 @@ class AccountInfo extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { address } } = this.props;
-    return utils.getBalance(address).then(re => {
-      return this.setState({ balance: re });
+    const { wallet: { token } } = this.props;
+    return utils.getTokenAccountData(token).then(value => {
+      return this.setState({ value });
     }).catch(er => {
       return console.error(er);
     });
@@ -46,28 +46,19 @@ class AccountInfo extends Component {
 
   render() {
     const { classes } = this.props;
-    const { wallet: { address } } = this.props;
-    const { balance } = this.state;
+    const { wallet: { token: address } } = this.props;
+    const { value } = this.state;
+    if (!value.token) return null;
+    const symbol = value.symbol.join('').replace('-', '');
+    const balance = (value.amount / global.BigInt(10 ** value.decimals)).toString();
+    const balanceDecimals = (value.amount % global.BigInt(10 ** value.decimals)).toString();
 
     return <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-          <Grid item>
-            <Typography variant="body2">Account</Typography>
-          </Grid>
-          <Grid item className={classes.stretch}>
-            <Divider />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
-      </Grid>
       <Grid item xs={12}>
         <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
           <Grid item className={classes.stretch}>
             <TextField
-              label="Address"
+              label={symbol}
               variant="outlined"
               color="primary"
               value={address}
@@ -77,10 +68,10 @@ class AccountInfo extends Component {
           </Grid>
           <Grid item>
             <TextField
-              label="SOL"
+              label="Balance"
               variant="outlined"
               color="primary"
-              value={balance}
+              value={Number(balance + '.' + balanceDecimals)}
               size="small"
               fullWidth
             />
@@ -89,7 +80,6 @@ class AccountInfo extends Component {
       </Grid>
     </Grid>
   }
-
 }
 
 const mapStateToProps = state => ({
@@ -104,4 +94,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(AccountInfo)));
+)(withStyles(styles)(Info)));

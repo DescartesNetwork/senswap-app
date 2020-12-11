@@ -9,11 +9,13 @@ import storage from 'helpers/storage';
 const address = storage.get('address');
 const secretKey = storage.get('secretKey');
 const tokens = storage.get('tokens') || [];
+const token = storage.get('token');
 const defaultState = {
   visible: false,
   address,
   secretKey,
   tokens,
+  token,
 }
 
 
@@ -135,8 +137,8 @@ export const UPDATE_TOKEN = 'UPDATE_TOKEN';
 export const UPDATE_TOKEN_OK = 'UPDATE_TOKEN_OK';
 export const UPDATE_TOKEN_FAIL = 'UPDATE_TOKEN_FAIL';
 
-export const updateToken = (tokens) => {
-  return dispatch => {
+export const updateToken = (tokens, token) => {
+  return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: UPDATE_TOKEN });
 
@@ -146,10 +148,16 @@ export const updateToken = (tokens) => {
         return reject(er);
       }
 
+      if (!token) {
+        const { wallet: { token: _token } } = getState();
+        token = _token || tokens[tokens.length - 1];
+      }
+
       // Local storage
       storage.set('tokens', tokens);
+      storage.set('token', token);
 
-      const data = { tokens };
+      const data = { tokens, token };
       dispatch({ type: UPDATE_TOKEN_OK, data });
       return resolve(data);
     });
