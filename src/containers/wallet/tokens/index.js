@@ -6,23 +6,39 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import Collapse from '@material-ui/core/Collapse';
 
-import { AccountBalanceRounded } from '@material-ui/icons';
+import { AccountBalanceRounded, ExpandMoreRounded, ExpandLessRounded } from '@material-ui/icons';
 
 import Manage from './manage';
 import List from './list';
 import Info from './info';
 import Create from './create';
+import Transfer from './transfer';
 
 import styles from './styles';
 import { updateToken } from 'modules/wallet.reducer';
 
 
 class Tokens extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      visible: false
+    }
+  }
+
+  onAdvanced = () => {
+    const { visible } = this.state;
+    return this.setState({ visible: !visible });
+  }
 
   render() {
     const { classes } = this.props;
+    const { visible } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -47,7 +63,21 @@ class Tokens extends Component {
         <Info />
       </Grid>
       <Grid item xs={12}>
-        <Create />
+        <Transfer />
+      </Grid>
+      <Grid item xs={12}>
+        <Collapse in={visible}>
+          <Create />
+        </Collapse>
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container justify="center" spacing={2}>
+          <Grid item>
+            <Button startIcon={visible ? <ExpandLessRounded /> : <ExpandMoreRounded />} onClick={this.onAdvanced}>
+              <Typography>{visible ? 'Less' : 'Advanced'}</Typography>
+            </Button>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   }

@@ -37,7 +37,7 @@ class List extends Component {
     return Promise.all(tokens.map(token => {
       return utils.getTokenAccountData(token);
     })).then(values => {
-      return this.setState({ values, token: tokens[tokens.length - 1] });
+      return this.setState({ values });
     }).catch(er => {
       return console.error(er);
     });
@@ -50,16 +50,12 @@ class List extends Component {
   }
 
   render() {
-    const { classes } = this.props;
     const { wallet: { tokens, token } } = this.props;
     const { values } = this.state;
 
     return <Select
       variant="outlined"
       value={token}
-      inputProps={{
-        className: classes.selectPadding
-      }}
       onChange={this.onSelect}
     >
       {values.map((value, index) => {

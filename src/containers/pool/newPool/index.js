@@ -11,6 +11,7 @@ import Button from '@material-ui/core/Button';
 
 import { CheckCircleOutlineRounded } from '@material-ui/icons';
 
+import configs from 'configs';
 import styles from './styles';
 
 
@@ -19,7 +20,6 @@ class NewPool extends Component {
     super();
 
     this.state = {
-      tokenFactoryAddress: '0x',
       tokenAddress: '0x',
       amount: 0,
       price: 0
@@ -31,10 +31,10 @@ class NewPool extends Component {
   }
 
   render() {
+    const { sol: { tokenFactoryAddress } } = configs;
+    const { tokenAddress, amount, price } = this.state;
+
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant="h6">New pool</Typography>
-      </Grid>
       <Grid item xs={12}>
         <Typography>You are the first liquidity provider. Once you are happy with the rate click supply to review.</Typography>
       </Grid>
@@ -42,8 +42,7 @@ class NewPool extends Component {
         <TextField
           label="Token Factory Address"
           variant="outlined"
-          size="small"
-          value={this.state.tokenFactoryAddress}
+          value={tokenFactoryAddress}
           fullWidth
         />
       </Grid>
@@ -51,8 +50,7 @@ class NewPool extends Component {
         <TextField
           label="Token Address"
           variant="outlined"
-          size="small"
-          value={this.state.tokenAddress}
+          value={tokenAddress}
           fullWidth
         />
       </Grid>
@@ -60,8 +58,7 @@ class NewPool extends Component {
         <TextField
           label="Initial amount"
           variant="outlined"
-          size="small"
-          value={this.state.amount}
+          value={amount}
           fullWidth
         />
       </Grid>
@@ -69,8 +66,7 @@ class NewPool extends Component {
         <TextField
           label="Initial price"
           variant="outlined"
-          size="small"
-          value={this.state.price}
+          value={price}
           fullWidth
         />
       </Grid>

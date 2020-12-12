@@ -93,7 +93,6 @@ class Create extends Component {
               variant="outlined"
               color="primary"
               value={value.token}
-              size="small"
               InputProps={{
                 endAdornment: <CircularProgress
                   variant="determinate"
@@ -107,7 +106,7 @@ class Create extends Component {
           </Grid>
           <Grid item>
             <Button
-              variant="outlined"
+              // variant="outlined"
               color="primary"
               onClick={this.newAccount}
               startIcon={<AddRounded />}

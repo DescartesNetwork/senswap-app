@@ -112,7 +112,6 @@ class Manage extends Component {
           variant="outlined"
           color="primary"
           value={token}
-          size="small"
           fullWidth
         />
       </Grid>
@@ -123,7 +122,6 @@ class Manage extends Component {
           color="primary"
           value={total_supply.toString()}
           helperText={`Decimals: ${decimals}`}
-          size="small"
           fullWidth
         />
       </Grid>
@@ -133,7 +131,6 @@ class Manage extends Component {
           variant="outlined"
           color="primary"
           value={owner}
-          size="small"
           fullWidth
         />
       </Grid>
@@ -143,7 +140,6 @@ class Manage extends Component {
           variant="outlined"
           color="primary"
           value={amount.toString()}
-          size="small"
           fullWidth
         />
       </Grid>
@@ -182,7 +178,6 @@ class Manage extends Component {
                 variant="outlined"
                 color="primary"
                 value={address}
-                size="small"
                 helperText={token}
                 fullWidth
               />
@@ -194,7 +189,6 @@ class Manage extends Component {
                 color="primary"
                 value={Number(balance + '.' + balanceDecimals)}
                 helperText={Number(totalSupply + '.' + totalSupplyDecimals)}
-                size="small"
                 fullWidth
               />
             </Grid>
@@ -243,7 +237,7 @@ class Manage extends Component {
               <Typography>A token address is to store token information like decimals, total supply, token name and others, which are automatically loaded. Otherwise, a token account address is to store your information like balance, owner of the token. So, please enter your token account address.</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Grid container className={classes.noWrap} spacing={2}>
+              <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
                 <Grid item className={classes.stretch}>
                   <TextField
                     label="Add a token account"
@@ -251,7 +245,6 @@ class Manage extends Component {
                     color="primary"
                     onChange={this.onToken}
                     value={token}
-                    size="small"
                     error={Boolean(error)}
                     helperText={error}
                     InputProps={{

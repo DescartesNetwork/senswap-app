@@ -32,16 +32,12 @@ class WithdrawLiquidity extends Component {
   render() {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h6">Withdraw liquidity</Typography>
-      </Grid>
-      <Grid item xs={12}>
         <Typography>You will no longer receive liquidity incentive when you withdraw all your token out of the pool.</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
           label="Token Factory Address"
           variant="outlined"
-          size="small"
           value={this.state.tokenFactoryAddress}
           fullWidth
         />
@@ -50,7 +46,6 @@ class WithdrawLiquidity extends Component {
         <TextField
           label="Token Address"
           variant="outlined"
-          size="small"
           value={this.state.tokenAddress}
           fullWidth
         />
@@ -59,7 +54,6 @@ class WithdrawLiquidity extends Component {
         <TextField
           label="Amount"
           variant="outlined"
-          size="small"
           value={this.state.amount}
           fullWidth
         />

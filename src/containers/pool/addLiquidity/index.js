@@ -32,16 +32,12 @@ class AddLiquidity extends Component {
   render() {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h6">Add liquidity</Typography>
-      </Grid>
-      <Grid item xs={12}>
         <Typography>The price of token you add will follow the current marginal price of token.</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
           label="Token Factory Address"
           variant="outlined"
-          size="small"
           value={this.state.tokenFactoryAddress}
           fullWidth
         />
@@ -50,7 +46,6 @@ class AddLiquidity extends Component {
         <TextField
           label="Token Address"
           variant="outlined"
-          size="small"
           value={this.state.tokenAddress}
           fullWidth
         />
@@ -59,7 +54,6 @@ class AddLiquidity extends Component {
         <TextField
           label="Amount"
           variant="outlined"
-          size="small"
           value={this.state.amount}
           fullWidth
         />

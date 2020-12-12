@@ -60,9 +60,6 @@ class Payer extends Component {
           <Grid item>
             <Typography variant="h6">Main Account</Typography>
           </Grid>
-          {/* <Grid item className={classes.stretch}>
-            <Divider />
-          </Grid> */}
         </Grid>
       </Grid>
       <Grid item xs={12}>
@@ -73,7 +70,6 @@ class Payer extends Component {
               variant="outlined"
               color="primary"
               value={address}
-              size="small"
               fullWidth
             />
           </Grid>
@@ -83,7 +79,6 @@ class Payer extends Component {
               variant="outlined"
               color="primary"
               value={balance}
-              size="small"
               fullWidth
             />
           </Grid>

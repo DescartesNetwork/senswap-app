@@ -5,8 +5,9 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
-  selectPadding: {
-    paddingTop: 10.5,
-    paddingBottom: 10.5
+  error: {
+    marginTop: -11,
+    marginLeft: 14,
+    fontSize: 10
   }
 });

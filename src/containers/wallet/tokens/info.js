@@ -7,12 +7,10 @@ import isEqual from 'react-fast-compare';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-
-import { } from '@material-ui/icons';
+import Typography from '@material-ui/core/Typography';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import { } from 'modules/wallet.reducer';
 
 
 class Info extends Component {
@@ -54,6 +52,9 @@ class Info extends Component {
     const balanceDecimals = (value.amount % global.BigInt(10 ** value.decimals)).toString();
 
     return <Grid container spacing={2}>
+    <Grid item xs={12}>
+      <Typography variant="body2">Info</Typography>
+    </Grid>
       <Grid item xs={12}>
         <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
           <Grid item className={classes.stretch}>
@@ -62,7 +63,6 @@ class Info extends Component {
               variant="outlined"
               color="primary"
               value={address}
-              size="small"
               fullWidth
             />
           </Grid>
@@ -72,7 +72,6 @@ class Info extends Component {
               variant="outlined"
               color="primary"
               value={Number(balance + '.' + balanceDecimals)}
-              size="small"
               fullWidth
             />
           </Grid>
