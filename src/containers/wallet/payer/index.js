@@ -13,7 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { EmojiEventsRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 
 
 class Payer extends Component {
@@ -37,7 +37,7 @@ class Payer extends Component {
 
   fetchData = () => {
     const { wallet: { address } } = this.props;
-    return utils.getBalance(address).then(re => {
+    return sol.getBalance(address).then(re => {
       return this.setState({ balance: re });
     }).catch(er => {
       return console.error(er);

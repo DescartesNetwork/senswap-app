@@ -16,6 +16,11 @@ const defaultState = {
   secretKey,
   tokens,
   token,
+  transferToken: {
+    visible:false,
+    amount:0,
+    dst:'',
+  }
 }
 
 

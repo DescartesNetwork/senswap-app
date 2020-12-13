@@ -14,7 +14,7 @@ import TextField from '@material-ui/core/TextField';
 import { AddRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 import { updateToken } from 'modules/wallet.reducer';
 
 
@@ -41,7 +41,7 @@ class Create extends Component {
 
   fetchData = () => {
     const { wallet: { token } } = this.props;
-    return utils.getTokenAccountData(token).then(value => {
+    return sol.getTokenAccountData(token).then(value => {
       return this.setState({ value });
     }).catch(er => {
       return console.error(er);
@@ -51,9 +51,9 @@ class Create extends Component {
   newAccount = () => {
     const { wallet: { tokens, secretKey }, updateToken } = this.props;
     const { value } = this.state;
-    const payer = utils.fromSecretKey(secretKey);
-    const tokenPublicKey = utils.fromAddress(value.token);
-    return utils.newSRC20Account(tokenPublicKey, payer).then(re => {
+    const payer = sol.fromSecretKey(secretKey);
+    const tokenPublicKey = sol.fromAddress(value.token);
+    return sol.newSRC20Account(tokenPublicKey, payer).then(re => {
       const newTokens = [...tokens];
       newTokens.push(re.publicKey.toBase58());
       return updateToken(newTokens);

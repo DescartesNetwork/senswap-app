@@ -22,7 +22,7 @@ import { CloseRounded, WidgetsRounded, RemoveCircleOutlineRounded } from '@mater
 import Drain from 'components/drain';
 
 import styles from './styles';
-import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 import { updateToken } from 'modules/wallet.reducer';
 
 
@@ -53,7 +53,7 @@ class Manage extends Component {
   fetchData = () => {
     const { wallet: { tokens } } = this.props;
     return Promise.all(tokens.map(token => {
-      return utils.getTokenAccountData(token);
+      return sol.getTokenAccountData(token);
     })).then(values => {
       return this.setState({ values });
     }).catch(er => {
@@ -65,7 +65,7 @@ class Manage extends Component {
     const token = e.target.value || '';
     return this.setState({ token, loading: true, error: '' }, () => {
       if (token.length !== 44) return this.setState({ loading: false, data: {}, error: 'Invalid address length' });
-      return utils.getTokenAccountData(token).then(data => {
+      return sol.getTokenAccountData(token).then(data => {
         return this.setState({ loading: false, data, error: '' });
       }).catch(er => {
         return this.setState({ loading: false, data: {}, error: er });

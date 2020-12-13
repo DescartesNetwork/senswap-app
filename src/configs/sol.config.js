@@ -8,7 +8,8 @@ const configs = {}
  */
 configs.development = {
   node: 'http://localhost:8899',
-  tokenFactoryAddress: '2MsLqshDGm9LtVU98hCny5XAXG77RXsXueKXJxKLf9RM'
+  tokenFactoryAddress: '2MsLqshDGm9LtVU98hCny5XAXG77RXsXueKXJxKLf9RM',
+  swapFactoryAddress: 'FqjXa5neZeJghrMDvx7uU6RDgf2o3beXpLQyX9FQ18aR'
 }
 
 /**
@@ -16,7 +17,8 @@ configs.development = {
  */
 configs.staging = {
   node: '',
-  tokenFactoryAddress: '2MsLqshDGm9LtVU98hCny5XAXG77RXsXueKXJxKLf9RM'
+  tokenFactoryAddress: '',
+  swapFactoryAddress: ''
 }
 
 /**
@@ -24,7 +26,8 @@ configs.staging = {
  */
 configs.production = {
   node: '',
-  tokenFactoryAddress: ''
+  tokenFactoryAddress: '',
+  swapFactoryAddress: ''
 }
 
 /**

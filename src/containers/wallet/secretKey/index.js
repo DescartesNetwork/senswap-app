@@ -14,7 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { VpnKeyRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 import { setWallet } from 'modules/wallet.reducer';
 
 
@@ -36,7 +36,7 @@ class SecretKey extends Component {
     const { setWallet } = this.props;
     const { secretKey } = this.state;
     if (!secretKey) return console.error('Invalid secret key');
-    const account = utils.fromSecretKey(secretKey);
+    const account = sol.fromSecretKey(secretKey);
     const address = account.publicKey.toBase58()
     return setWallet(address, secretKey);
   }

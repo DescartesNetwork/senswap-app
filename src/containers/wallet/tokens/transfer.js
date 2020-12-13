@@ -14,7 +14,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { FlightTakeoffRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 
 
 class Transfer extends Component {
@@ -42,7 +42,7 @@ class Transfer extends Component {
   fetchData = () => {
     const { wallet: { tokens } } = this.props;
     return Promise.all(tokens.map(token => {
-      return utils.getTokenAccountData(token);
+      return sol.getTokenAccountData(token);
     })).then(values => {
       return this.setState({ values });
     }).catch(er => {

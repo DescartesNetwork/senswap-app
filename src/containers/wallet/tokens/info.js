@@ -9,8 +9,8 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 
+import sol from 'helpers/sol';
 import styles from './styles';
-import utils from 'helpers/utils';
 
 
 class Info extends Component {
@@ -35,7 +35,7 @@ class Info extends Component {
 
   fetchData = () => {
     const { wallet: { token } } = this.props;
-    return utils.getTokenAccountData(token).then(value => {
+    return sol.getTokenAccountData(token).then(value => {
       return this.setState({ value });
     }).catch(er => {
       return console.error(er);
