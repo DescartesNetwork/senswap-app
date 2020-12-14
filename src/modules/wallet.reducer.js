@@ -6,21 +6,20 @@ import storage from 'helpers/storage';
  */
 
 // Local storage
-const address = storage.get('address');
-const secretKey = storage.get('secretKey');
-const tokens = storage.get('tokens') || [];
-const token = storage.get('token');
+const ADDRESS = storage.get('address');
+const SECRET_KEY = storage.get('secretKey');
+const TOKENS = storage.get('tokens') || [];
+const TOKEN = storage.get('token');
+const POOLS = storage.get('pools') || [];
+const POOL = storage.get('pool');
 const defaultState = {
   visible: false,
-  address,
-  secretKey,
-  tokens,
-  token,
-  transferToken: {
-    visible:false,
-    amount:0,
-    dst:'',
-  }
+  address: ADDRESS,
+  secretKey: SECRET_KEY,
+  tokens: TOKENS,
+  token: TOKEN,
+  pools: POOLS,
+  pool: POOL,
 }
 
 
@@ -170,6 +169,40 @@ export const updateToken = (tokens, token) => {
 };
 
 /**
+ * Update pool
+ */
+export const UPDATE_POOL = 'UPDATE_POOL';
+export const UPDATE_POOL_OK = 'UPDATE_POOL_OK';
+export const UPDATE_POOL_FAIL = 'UPDATE_POOL_FAIL';
+
+export const updatePool = (pools, pool) => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: UPDATE_POOL });
+
+      if (!pools) {
+        const er = 'Invalid input';
+        dispatch({ type: UPDATE_POOL_FAIL, reason: er });
+        return reject(er);
+      }
+
+      if (!pool) {
+        const { wallet: { pool: _pool } } = getState();
+        pool = _pool || pools[pools.length - 1];
+      }
+
+      // Local storage
+      storage.set('pools', pools);
+      storage.set('pool', pool);
+
+      const data = { pools, pool };
+      dispatch({ type: UPDATE_POOL_OK, data });
+      return resolve(data);
+    });
+  };
+};
+
+/**
  * Reducder
  */
 export default (state = defaultState, action) => {
@@ -193,6 +226,10 @@ export default (state = defaultState, action) => {
     case UPDATE_TOKEN_OK:
       return { ...state, ...action.data };
     case UPDATE_TOKEN_FAIL:
+      return { ...state, ...action.data };
+    case UPDATE_POOL_OK:
+      return { ...state, ...action.data };
+    case UPDATE_POOL_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

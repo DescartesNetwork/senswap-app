@@ -74,6 +74,37 @@ SOL.getTokenAccountData = (address) => {
   });
 }
 
+SOL.getPoolAccountData = (address) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const poolSchema = [
+      { key: 'token', type: 'pub' },
+      { key: 'treasury', type: 'pub' },
+      { key: 'reserve', type: 'u64' },
+      { key: 'sen', type: 'u64' },
+      { key: 'fee_numerator', type: 'u64' },
+      { key: 'fee_denominator', type: 'u64' },
+      { key: 'initialized', type: 'bool' }
+    ];
+    // const senSchema = [
+    //   { key: 'owner', type: 'pub' },
+    //   { key: 'pool', type: 'pub' },
+    //   { key: 'sen', type: 'u64' },
+    //   { key: 'initialized', type: 'bool' }
+    // ];
+    const poolPublicKey = SOL.fromAddress(address);
+    return connection.getAccountInfo(poolPublicKey).then(({ data: poolData }) => {
+      if (!poolData) return reject(`Cannot find data of ${address}`);
+      const poolLayout = new soproxABI.struct(poolSchema);
+      poolLayout.fromBuffer(poolData);
+      const poolValue = { ...poolLayout.value };
+      return resolve({ ...poolValue });
+    }).catch(er => {
+      return reject('Cannot read the pool data');
+    });
+  });
+}
+
 SOL.newSRC20Account = (tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
@@ -137,6 +168,7 @@ SOL.newPoolAndTreasuryAccount = (reserve, stable, srcTokenPublickKey, tokenPubli
     const pool = new Account();
     const poolSchema = [
       { key: 'token', type: 'pub' },
+      { key: 'treasury', type: 'pub' },
       { key: 'reserve', type: 'u64' },
       { key: 'sen', type: 'u64' },
       { key: 'fee_numerator', type: 'u64' },

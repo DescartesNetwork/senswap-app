@@ -12,9 +12,11 @@ import { BottomDrawer } from 'components/drawers';
 import Drain from 'components/drain';
 import Header from './header';
 import Payer from './payer';
+import Tokens from './tokens';
+import Pools from './pools';
+
 import SecretKey from './secretKey';
 import Keystore from './keystore';
-import Tokens from './tokens';
 
 import styles from './styles';
 import { closeWallet } from 'modules/wallet.reducer';
@@ -59,6 +61,9 @@ class Wallet extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <Tokens />
+                </Grid>
+                <Grid item xs={12}>
+                  <Pools />
                 </Grid>
 
                 <Grid item xs={12}>

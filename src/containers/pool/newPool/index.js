@@ -16,6 +16,7 @@ import { CheckCircleOutlineRounded } from '@material-ui/icons';
 import configs from 'configs';
 import sol from 'helpers/sol';
 import styles from './styles';
+import { updatePool } from 'modules/wallet.reducer';
 
 
 class NewPool extends Component {
@@ -63,10 +64,17 @@ class NewPool extends Component {
 
   newPool = () => {
     const { value, amount, price } = this.state;
-    const { wallet: { token: address, secretKey } } = this.props;
+    const {
+      wallet: {
+        token: address,
+        secretKey,
+        pools
+      },
+      updatePool
+    } = this.props;
     if (!value.token || !secretKey || !amount || !price) console.error('Invalid input');
     const reserve = global.BigInt(amount * 10 ** value.decimals);
-    const stable = global.BigInt(amount / price * 10 ** value.decimals);
+    const stable = global.BigInt(price * amount * 10 ** value.decimals);
 
     const srcTokenPublicKey = sol.fromAddress(address);
     const tokenPublicKey = sol.fromAddress(value.token);
@@ -76,11 +84,14 @@ class NewPool extends Component {
       reserve, stable,
       srcTokenPublicKey, tokenPublicKey, payer
     ).then(({ pool, treasury, sen }) => {
-      return this.setState({
+      this.setState({
         pool: pool.publicKey.toBase58(),
         treasury: treasury.publicKey.toBase58(),
         sen: sen.publicKey.toBase58(),
-      }, this.fetchData);
+      });
+      const newPools = [...pools];
+      newPools.push(pool.publicKey.toBase58());
+      return updatePool(newPools);
     }).catch(er => {
       return console.error(er);
     });
@@ -205,6 +216,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  updatePool,
 }, dispatch);
 
 export default withRouter(connect(
