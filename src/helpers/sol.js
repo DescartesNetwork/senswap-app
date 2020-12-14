@@ -126,22 +126,13 @@ SOL.newSRC20Account = (tokenPublicKey, payer) => {
   });
 }
 
-SOL.newPoolAndTreasuryAccount = (tokenPublicKey, payer) => {
+SOL.newPoolAndTreasuryAccount = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
 
     const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
     const swapProgramId = SOL.fromAddress(swapFactoryAddress);
-    // Treasury
-    const treasury = new Account();
-    const treasurySchema = [
-      { key: 'owner', type: 'pub' },
-      { key: 'token', type: 'pub' },
-      { key: 'amount', type: 'u64' },
-      { key: 'initialized', type: 'bool' }
-    ];
-    const treasurySpace = (new soproxABI.struct(treasurySchema)).space;
     // Pool
     const pool = new Account();
     const poolSchema = [
@@ -152,23 +143,27 @@ SOL.newPoolAndTreasuryAccount = (tokenPublicKey, payer) => {
       { key: 'fee_denominator', type: 'u64' },
       { key: 'initialized', type: 'bool' }
     ];
+    // Treasury
+    const treasury = new Account();
+    const treasurySchema = [
+      { key: 'owner', type: 'pub' },
+      { key: 'token', type: 'pub' },
+      { key: 'amount', type: 'u64' },
+      { key: 'initialized', type: 'bool' }
+    ];
+    // Sen
+    const sen = new Account();
+    const senSchema = [
+      { key: 'owner', type: 'pub' },
+      { key: 'pool', type: 'pub' },
+      { key: 'sen', type: 'u64' },
+      { key: 'initialized', type: 'bool' }
+    ];
     const poolSpace = (new soproxABI.struct(poolSchema)).space;
+    const treasurySpace = (new soproxABI.struct(treasurySchema)).space;
+    const senSpace = (new soproxABI.struct(senSchema)).space;
     //Create accounts
-    return connection.getMinimumBalanceForRentExemption(treasurySpace).then(lamports => {
-      const transaction = new Transaction();
-      transaction.add(SystemProgram.createAccount({
-        fromPubkey: payer.publicKey,
-        newAccountPubkey: treasury.publicKey,
-        lamports,
-        space: treasurySpace,
-        programId: tokenProgramId,
-      }));
-      return sendAndConfirmTransaction(
-        connection, transaction, [payer, treasury],
-        { skipPreflight: true, commitment: 'recent' });
-    }).then(re => {
-      return connection.getMinimumBalanceForRentExemption(poolSpace);
-    }).then(lamports => {
+    return connection.getMinimumBalanceForRentExemption(poolSpace).then(lamports => {
       const transaction = new Transaction();
       transaction.add(SystemProgram.createAccount({
         fromPubkey: payer.publicKey,
@@ -181,14 +176,49 @@ SOL.newPoolAndTreasuryAccount = (tokenPublicKey, payer) => {
         connection, transaction, [payer, pool],
         { skipPreflight: true, commitment: 'recent' });
     }).then(re => {
+      return connection.getMinimumBalanceForRentExemption(treasurySpace);
+    }).then(lamports => {
+      const transaction = new Transaction();
+      transaction.add(SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        newAccountPubkey: treasury.publicKey,
+        lamports,
+        space: treasurySpace,
+        programId: tokenProgramId,
+      }));
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, treasury],
+        { skipPreflight: true, commitment: 'recent' });
+    }).then(re => {
+      return connection.getMinimumBalanceForRentExemption(senSpace);
+    }).then(lamports => {
+      const transaction = new Transaction();
+      transaction.add(SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        newAccountPubkey: sen.publicKey,
+        lamports,
+        space: senSpace,
+        programId: swapProgramId,
+      }));
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, sen],
+        { skipPreflight: true, commitment: 'recent' });
+    }).then(re => {
       const layout = new soproxABI.struct(
-        [{ key: 'code', type: 'u8' }],
-        { code: 0, }
+        [
+          { key: 'code', type: 'u8' },
+          { key: 'reserve', type: 'u64' },
+          { key: 'sen', type: 'u64' },
+        ],
+        { code: 0, reserve, sen: stable }
       );
       const instruction = new TransactionInstruction({
         keys: [
+          { pubkey: payer.publicKey, isSigner: true, isWritable: true },
           { pubkey: pool.publicKey, isSigner: true, isWritable: true },
           { pubkey: treasury.publicKey, isSigner: true, isWritable: true },
+          { pubkey: sen.publicKey, isSigner: true, isWritable: true },
+          { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
           { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
           { pubkey: tokenProgramId, isSigner: false, isWritable: false },
         ],
@@ -198,10 +228,10 @@ SOL.newPoolAndTreasuryAccount = (tokenPublicKey, payer) => {
       const transaction = new Transaction();
       transaction.add(instruction);
       return sendAndConfirmTransaction(
-        connection, transaction, [payer, pool, treasury],
+        connection, transaction, [payer, pool, treasury, sen],
         { skipPreflight: true, commitment: 'recent', });
     }).then(re => {
-      return resolve({ pool, treasury });
+      return resolve({ pool, treasury, sen });
     }).catch(er => {
       return reject('Cannot create a pool or a treasury account');
     });

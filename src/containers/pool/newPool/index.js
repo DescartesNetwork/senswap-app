@@ -28,6 +28,7 @@ class NewPool extends Component {
       value: {},
       pool: '',
       treasury: '',
+      sen: '',
     }
   }
 
@@ -50,25 +51,44 @@ class NewPool extends Component {
     });
   }
 
+  onAmount = (e) => {
+    const amount = e.target.value;
+    return this.setState({ amount });
+  }
+
+  onPrice = (e) => {
+    const price = e.target.value;
+    return this.setState({ price });
+  }
+
   newPool = () => {
-    const { value } = this.state;
-    const { wallet: { secretKey } } = this.props;
-    if (!value.token || !secretKey) console.error('Invalid input');
+    const { value, amount, price } = this.state;
+    const { wallet: { token: address, secretKey } } = this.props;
+    if (!value.token || !secretKey || !amount || !price) console.error('Invalid input');
+    const reserve = global.BigInt(amount * 10 ** value.decimals);
+    const stable = global.BigInt(amount / price * 10 ** value.decimals);
+
+    const srcTokenPublicKey = sol.fromAddress(address);
     const tokenPublicKey = sol.fromAddress(value.token);
     const payer = sol.fromSecretKey(secretKey);
-    return sol.newPoolAndTreasuryAccount(tokenPublicKey, payer).then(({ pool, treasury }) => {
+
+    return sol.newPoolAndTreasuryAccount(
+      reserve, stable,
+      srcTokenPublicKey, tokenPublicKey, payer
+    ).then(({ pool, treasury, sen }) => {
       return this.setState({
         pool: pool.publicKey.toBase58(),
         treasury: treasury.publicKey.toBase58(),
-      });
+        sen: sen.publicKey.toBase58(),
+      }, this.fetchData);
     }).catch(er => {
       return console.error(er);
     });
   }
 
   renderResult = () => {
-    const { pool, treasury } = this.state;
-    if (!pool || !treasury) return null;
+    const { pool, treasury, sen } = this.state;
+    if (!pool || !treasury || !sen) return null;
     return <Grid item xs={12}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
@@ -90,6 +110,14 @@ class NewPool extends Component {
             label="Treasury Address"
             variant="outlined"
             value={treasury}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            label="Sen Address"
+            variant="outlined"
+            value={sen}
             fullWidth
           />
         </Grid>
@@ -141,6 +169,7 @@ class NewPool extends Component {
           label="Initial amount"
           variant="outlined"
           value={amount}
+          onChange={this.onAmount}
           helperText={Number(balance + '.' + balanceDecimals)}
           fullWidth
         />
@@ -150,6 +179,7 @@ class NewPool extends Component {
           label="Initial price"
           variant="outlined"
           value={price}
+          onChange={this.onPrice}
           fullWidth
         />
       </Grid>
