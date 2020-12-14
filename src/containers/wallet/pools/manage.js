@@ -165,7 +165,7 @@ class Manage extends Component {
             <Grid item>
               <IconButton
                 color="secondary"
-                onClick={() => this.removeToken(address)}
+                onClick={() => this.removePool(address)}
                 size="small"
               >
                 <RemoveCircleOutlineRounded />

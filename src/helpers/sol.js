@@ -246,7 +246,7 @@ SOL.newPoolAndTreasuryAccount = (reserve, stable, srcTokenPublickKey, tokenPubli
       );
       const instruction = new TransactionInstruction({
         keys: [
-          { pubkey: payer.publicKey, isSigner: true, isWritable: true },
+          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
           { pubkey: pool.publicKey, isSigner: true, isWritable: true },
           { pubkey: treasury.publicKey, isSigner: true, isWritable: true },
           { pubkey: sen.publicKey, isSigner: true, isWritable: true },
@@ -266,6 +266,68 @@ SOL.newPoolAndTreasuryAccount = (reserve, stable, srcTokenPublickKey, tokenPubli
       return resolve({ pool, treasury, sen });
     }).catch(er => {
       return reject('Cannot create a pool or a treasury account');
+    });
+  });
+}
+
+SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, srcTokenPublickKey, tokenPublicKey, payer) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
+
+    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
+    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    // Sen
+    const sen = new Account();
+    const senSchema = [
+      { key: 'owner', type: 'pub' },
+      { key: 'pool', type: 'pub' },
+      { key: 'sen', type: 'u64' },
+      { key: 'initialized', type: 'bool' }
+    ];
+    const senSpace = (new soproxABI.struct(senSchema)).space;
+    return connection.getMinimumBalanceForRentExemption(senSpace).then(lamports => {
+      const transaction = new Transaction();
+      transaction.add(SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        newAccountPubkey: sen.publicKey,
+        lamports,
+        space: senSpace,
+        programId: swapProgramId,
+      }));
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, sen],
+        { skipPreflight: true, commitment: 'recent' });
+    }).then(re => {
+      const layout = new soproxABI.struct(
+        [
+          { key: 'code', type: 'u8' },
+          { key: 'reserve', type: 'u64' },
+        ],
+        { code: 1, reserve }
+      );
+      const instruction = new TransactionInstruction({
+        keys: [
+          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+          { pubkey: poolPublicKey, isSigner: false, isWritable: true },
+          { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
+          { pubkey: sen.publicKey, isSigner: true, isWritable: true },
+          { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
+          { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenProgramId, isSigner: false, isWritable: false },
+        ],
+        programId: swapProgramId,
+        data: layout.toBuffer()
+      });
+      const transaction = new Transaction();
+      transaction.add(instruction);
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, sen],
+        { skipPreflight: true, commitment: 'recent', });
+    }).then(re => {
+      return resolve(sen);
+    }).catch(er => {
+      return reject('Cannot add liquidity to the pool');
     });
   });
 }
