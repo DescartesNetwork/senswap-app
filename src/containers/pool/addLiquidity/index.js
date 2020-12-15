@@ -87,7 +87,7 @@ class AddLiquidity extends Component {
       return console.log(sen);
     }).catch(er => {
       return console.error(er);
-    })
+    });
   }
 
   render() {

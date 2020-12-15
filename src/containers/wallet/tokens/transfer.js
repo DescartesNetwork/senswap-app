@@ -7,11 +7,11 @@ import isEqual from 'react-fast-compare';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
-import { FlightTakeoffRounded } from '@material-ui/icons';
+import { SendRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -84,8 +84,8 @@ class Transfer extends Component {
         <Typography variant="body2">Transfer</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-          <Grid item className={classes.stretch}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={8}>
             <Autocomplete
               options={options}
               getOptionLabel={option => option.address}
@@ -97,19 +97,24 @@ class Transfer extends Component {
               fullWidth
             />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} md={4}>
             <TextField
               label="Amount"
               variant="outlined"
               onChange={this.onAmount}
               value={amount}
+              InputProps={{
+                endAdornment:
+                  <IconButton
+                    color="primary"
+                    variant="contained"
+                    onClick={this.transfer}
+                  >
+                    <SendRounded />
+                  </IconButton>
+              }}
               fullWidth
             />
-          </Grid>
-          <Grid item>
-            <Button color="primary" startIcon={<FlightTakeoffRounded />} onClick={this.transfer}>
-              <Typography>Transfer</Typography>
-            </Button>
           </Grid>
         </Grid>
       </Grid>

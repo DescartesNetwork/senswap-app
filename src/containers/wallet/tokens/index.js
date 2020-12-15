@@ -52,10 +52,10 @@ class Tokens extends Component {
             <Typography variant="h6">Tokens</Typography>
           </Grid>
           <Grid item>
-            <Manage />
+            <List />
           </Grid>
           <Grid item>
-            <List />
+            <Manage />
           </Grid>
         </Grid>
       </Grid>

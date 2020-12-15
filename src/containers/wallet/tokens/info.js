@@ -18,8 +18,7 @@ class Info extends Component {
     super();
 
     this.state = {
-      error: '',
-      value: {},
+      tokenData: {},
     }
   }
 
@@ -35,38 +34,44 @@ class Info extends Component {
 
   fetchData = () => {
     const { wallet: { token } } = this.props;
-    return sol.getTokenAccountData(token).then(value => {
-      return this.setState({ value });
+    return sol.getTokenData(token).then(re => {
+      return this.setState({ tokenData: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   render() {
-    const { classes } = this.props;
-    const { wallet: { token: address } } = this.props;
-    const { value } = this.state;
-    if (!value.token) return null;
-    const symbol = value.symbol.join('').replace('-', '');
-    const balance = (value.amount / global.BigInt(10 ** value.decimals)).toString();
-    const balanceDecimals = (value.amount % global.BigInt(10 ** value.decimals)).toString();
+    const { wallet: { address: payerAddress } } = this.props;
+    const { tokenData: { address, amount, initialized, owner, token } } = this.state;
+    if (!initialized) return null;
+    const symbol = token.symbol.join('').replace('-', '');
+    const balance = (amount / global.BigInt(10 ** token.decimals)).toString();
+    const balanceDecimals = (amount % global.BigInt(10 ** token.decimals)).toString();
 
     return <Grid container spacing={2}>
-    <Grid item xs={12}>
-      <Typography variant="body2">Info</Typography>
-    </Grid>
       <Grid item xs={12}>
-        <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
-          <Grid item className={classes.stretch}>
+        <Typography variant="body2">Info</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={8}>
             <TextField
               label={symbol}
               variant="outlined"
               color="primary"
               value={address}
+              error={payerAddress !== owner}
+              helperText={
+                payerAddress !== owner ?
+                  `The owner, ${owner}, is unmatched to the main account`
+                  :
+                  `Token: ${token.address}`
+              }
               fullWidth
             />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} md={4}>
             <TextField
               label="Balance"
               variant="outlined"

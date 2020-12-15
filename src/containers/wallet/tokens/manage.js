@@ -11,13 +11,11 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { CloseRounded, WidgetsRounded, RemoveCircleOutlineRounded } from '@material-ui/icons';
+import { CloseRounded, SettingsRounded, RemoveRounded, AddRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 
@@ -33,10 +31,9 @@ class Manage extends Component {
     this.state = {
       visible: false,
       token: '',
-      loading: false,
       error: '',
-      data: {},
-      values: []
+      tokenData: {},
+      tokensData: []
     }
   }
 
@@ -53,9 +50,9 @@ class Manage extends Component {
   fetchData = () => {
     const { wallet: { tokens } } = this.props;
     return Promise.all(tokens.map(token => {
-      return sol.getTokenAccountData(token);
-    })).then(values => {
-      return this.setState({ values });
+      return sol.getTokenData(token);
+    })).then(re => {
+      return this.setState({ tokensData: re });
     }).catch(er => {
       return console.error(er);
     });
@@ -63,26 +60,24 @@ class Manage extends Component {
 
   onToken = (e) => {
     const token = e.target.value || '';
-    return this.setState({ token, loading: true, error: '' }, () => {
-      if (token.length !== 44) return this.setState({ loading: false, data: {}, error: 'Invalid address length' });
-      return sol.getTokenAccountData(token).then(data => {
-        return this.setState({ loading: false, data, error: '' });
+    return this.setState({ token, error: '' }, () => {
+      return sol.getTokenData(token).then(re => {
+        return this.setState({ tokenData: re, error: '' });
       }).catch(er => {
-        return this.setState({ loading: false, data: {}, error: er });
+        return this.setState({ tokenData: {}, error: er });
       })
     });
   }
 
   addToken = () => {
-    const { token, loading, error } = this.state;
-    if (loading) return this.setState({ error: 'Validating token' });
+    const { token, error } = this.state;
     if (error) return this.setState({ error });
     if (!token) return this.setState({ error: 'Empty token' });
     const { wallet: { tokens }, updateToken } = this.props;
     const newTokens = [...tokens];
     newTokens.push(token);
     return updateToken(newTokens).then(re => {
-      return this.setState({ loading: false, data: {}, error: '', token: '' });
+      return this.setState({ data: {}, error: '', token: '' });
     }).catch(er => {
       return this.setState({ error: er });
     });
@@ -103,15 +98,16 @@ class Manage extends Component {
   }
 
   renderTokenInfo = () => {
-    const { data: { amount, decimals, owner, symbol, token, total_supply } } = this.state;
-    if (!token) return null;
+    const { tokenData: { address, amount, initialized, owner, token } } = this.state;
+    if (!initialized) return null;
+    const symbol = token.symbol.join('').replace('-', '');
     return <Grid container spacing={2}>
       <Grid item xs={6}>
         <TextField
-          label={symbol.join('').replace('-', '')}
+          label={symbol}
           variant="outlined"
           color="primary"
-          value={token}
+          value={address}
           fullWidth
         />
       </Grid>
@@ -120,8 +116,8 @@ class Manage extends Component {
           label="Total Supply"
           variant="outlined"
           color="primary"
-          value={total_supply.toString()}
-          helperText={`Decimals: ${decimals}`}
+          value={token.total_supply.toString()}
+          helperText={`Decimals: ${token.decimals}`}
           fullWidth
         />
       </Grid>
@@ -147,48 +143,40 @@ class Manage extends Component {
   }
 
   renderTokenList = () => {
-    const { classes } = this.props;
-    const { wallet: { tokens } } = this.props;
-    const { values } = this.state;
+    const { tokensData } = this.state;
     return <Grid container spacing={2}>
-      {values.map((value, index) => {
-        const address = tokens[index];
-        if (!address) return null;
-        const symbol = value.symbol.join('').replace('-', '');
-        const token = value.token;
-        const balance = (value.amount / global.BigInt(10 ** value.decimals)).toString();
-        const balanceDecimals = (value.amount % global.BigInt(10 ** value.decimals)).toString();
-        const totalSupply = (value.total_supply / global.BigInt(10 ** value.decimals)).toString();
-        const totalSupplyDecimals = (value.total_supply % global.BigInt(10 ** value.decimals)).toString();
+      {tokensData.map(({ address, amount, initialized, token }) => {
+        if (!initialized) return null;
+        const symbol = token.symbol.join('').replace('-', '');
+        const balance = (amount / global.BigInt(10 ** token.decimals)).toString();
+        const balanceDecimals = (amount % global.BigInt(10 ** token.decimals)).toString();
+        const totalSupply = (token.total_supply / global.BigInt(10 ** token.decimals)).toString();
+        const totalSupplyDecimals = (token.total_supply % global.BigInt(10 ** token.decimals)).toString();
 
         return <Grid key={address} item xs={12}>
-          <Grid item container className={classes.noWrap} spacing={2}>
-            <Grid item>
-              <IconButton
-                color="secondary"
-                onClick={() => this.removeToken(address)}
-                size="small"
-              >
-                <RemoveCircleOutlineRounded />
-              </IconButton>
-            </Grid>
-            <Grid item className={classes.stretch}>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={8}>
               <TextField
                 label={symbol}
                 variant="outlined"
                 color="primary"
                 value={address}
-                helperText={token}
+                helperText={`Token: ${token.address}`}
                 fullWidth
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={12} md={4}>
               <TextField
                 label="Balance"
                 variant="outlined"
                 color="primary"
                 value={Number(balance + '.' + balanceDecimals)}
-                helperText={Number(totalSupply + '.' + totalSupplyDecimals)}
+                helperText={`Total supply: ${Number(totalSupply + '.' + totalSupplyDecimals)}`}
+                InputProps={{
+                  endAdornment: <IconButton color="primary" onClick={() => this.removeToken(address)}>
+                    <RemoveRounded />
+                  </IconButton>
+                }}
                 fullWidth
               />
             </Grid>
@@ -200,19 +188,19 @@ class Manage extends Component {
 
   render() {
     const { classes } = this.props;
-    const { visible, loading, token, error } = this.state;
+    const { visible, token, error } = this.state;
 
     return <Fragment>
       <Tooltip title="Add/Remove your token accounts">
         <IconButton onClick={this.onOpen} size="small" color="primary">
-          <WidgetsRounded />
+          <SettingsRounded />
         </IconButton>
       </Tooltip>
       <Dialog open={visible} onClose={this.onClose}>
         <DialogTitle>
           <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
             <Grid item className={classes.stretch}>
-              <Typography variant="h6">Manage your token accounts</Typography>
+              <Typography variant="h6">Token Settings</Typography>
             </Grid>
             <Grid item>
               <IconButton onClick={this.onClose}>
@@ -248,15 +236,13 @@ class Manage extends Component {
                     error={Boolean(error)}
                     helperText={error}
                     InputProps={{
-                      endAdornment: loading ? <CircularProgress size={16} /> : null
+                      endAdornment:
+                        <IconButton color="primary" variant="contained" onClick={this.addToken}>
+                          <AddRounded />
+                        </IconButton>
                     }}
                     fullWidth
                   />
-                </Grid>
-                <Grid item>
-                  <Button color="primary" onClick={this.addToken} size="large">
-                    <Typography>OK</Typography>
-                  </Button>
                 </Grid>
               </Grid>
             </Grid>

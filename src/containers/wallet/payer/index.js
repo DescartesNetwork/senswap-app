@@ -63,8 +63,8 @@ class Payer extends Component {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Grid container className={classes.noWrap} alignItems="center" spacing={2}>
-          <Grid item className={classes.stretch}>
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={8}>
             <TextField
               label="Address"
               variant="outlined"
@@ -73,7 +73,7 @@ class Payer extends Component {
               fullWidth
             />
           </Grid>
-          <Grid item>
+          <Grid item xs={12} md={4}>
             <TextField
               label="SOL"
               variant="outlined"

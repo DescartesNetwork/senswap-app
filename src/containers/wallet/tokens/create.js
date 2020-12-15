@@ -24,7 +24,7 @@ class Create extends Component {
 
     this.state = {
       message: '',
-      value: {},
+      tokenData: {},
       counter: 10000
     }
   }
@@ -41,8 +41,8 @@ class Create extends Component {
 
   fetchData = () => {
     const { wallet: { token } } = this.props;
-    return sol.getTokenAccountData(token).then(value => {
-      return this.setState({ value });
+    return sol.getTokenData(token).then(re => {
+      return this.setState({ tokenData: re });
     }).catch(er => {
       return console.error(er);
     });
@@ -50,9 +50,11 @@ class Create extends Component {
 
   newAccount = () => {
     const { wallet: { tokens, secretKey }, updateToken } = this.props;
-    const { value } = this.state;
+    const { tokenData: { initialized, token } } = this.state;
+    if (!initialized) return console.error('Invalid input');
+
     const payer = sol.fromSecretKey(secretKey);
-    const tokenPublicKey = sol.fromAddress(value.token);
+    const tokenPublicKey = sol.fromAddress(token.address);
     return sol.newSRC20Account(tokenPublicKey, payer).then(re => {
       const newTokens = [...tokens];
       newTokens.push(re.publicKey.toBase58());
@@ -77,36 +79,37 @@ class Create extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { value, counter, message } = this.state;
-    if (!value.token) return null;
+    const { tokenData: { address, initialized, token }, counter, message } = this.state;
+    if (!initialized) return null;
+    const symbol = token.symbol.join('').replace('-', '');
+    const percentage = Math.round((10000 - counter) / 10000 * 100);
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="body2">Create a new token account</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-          <Grid item className={classes.stretch}>
-            <TextField
-              label={`${value.symbol.join('').replace('-', '')} Contract`}
-              variant="outlined"
-              color="primary"
-              value={value.token}
-              InputProps={{
-                endAdornment: <CircularProgress
-                  variant="determinate"
-                  size={16}
-                  value={Math.round((10000 - counter) / 10000 * 100)}
-                />
-              }}
-              helperText={message}
-              fullWidth
+        <TextField
+          label={symbol}
+          variant="outlined"
+          color="primary"
+          value={address}
+          InputProps={{
+            endAdornment: <CircularProgress
+              variant="determinate"
+              size={16}
+              value={percentage}
             />
-          </Grid>
+          }}
+          helperText={message}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container justify="flex-end" spacing={2}>
           <Grid item>
             <Button
-              // variant="outlined"
+              variant="contained"
               color="primary"
               onClick={this.newAccount}
               startIcon={<AddRounded />}

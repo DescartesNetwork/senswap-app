@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -6,17 +6,13 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
 
-import { } from '@material-ui/icons';
-
 import { BottomDrawer } from 'components/drawers';
 import Drain from 'components/drain';
 import Header from './header';
+import LogIn from './login';
 import Payer from './payer';
 import Tokens from './tokens';
 import Pools from './pools';
-
-import SecretKey from './secretKey';
-import Keystore from './keystore';
 
 import styles from './styles';
 import { closeWallet } from 'modules/wallet.reducer';
@@ -24,21 +20,33 @@ import { closeWallet } from 'modules/wallet.reducer';
 
 class Wallet extends Component {
 
-  renderComponent = () => {
+  renderComponents = () => {
     const { wallet: { address } } = this.props;
-    if (address) return;
-    return <Grid container spacing={2}>
+    if (!address) return <Fragment>
+      <Grid iten xs={12}>
+        <LogIn />
+      </Grid>
+    </Fragment>
+    return <Fragment>
       <Grid item xs={12}>
-        <SecretKey />
+        <Payer />
       </Grid>
       <Grid item xs={12}>
-        <Keystore />
+        <Drain />
       </Grid>
-    </Grid>
+      <Grid item xs={12}>
+        <Tokens />
+      </Grid>
+      <Grid item xs={12}>
+        <Drain />
+      </Grid>
+      <Grid item xs={12}>
+        <Pools />
+      </Grid>
+    </Fragment>
   }
 
   render() {
-    const { classes } = this.props;
     const { wallet: { visible }, closeWallet } = this.props;
 
     return <Grid container spacing={2}>
@@ -53,28 +61,9 @@ class Wallet extends Component {
                 <Grid item xs={12}>
                   <Drain />
                 </Grid>
+                {this.renderComponents()}
                 <Grid item xs={12}>
-                  <Payer />
-                </Grid>
-                <Grid item xs={12}>
-                  <Drain small />
-                </Grid>
-                <Grid item xs={12}>
-                  <Tokens />
-                </Grid>
-                <Grid item xs={12}>
-                  <Pools />
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      {this.renderComponent()}
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Drain small />
-                    </Grid>
-                  </Grid>
+                  <Drain />
                 </Grid>
               </Grid>
             </Grid>

@@ -8,56 +8,41 @@ import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 
-import { VpnKeyRounded } from '@material-ui/icons';
+import { PublishRounded, DescriptionRounded, PowerRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setWallet } from 'modules/wallet.reducer';
 
 
-class SecretKey extends Component {
+class KeyStore extends Component {
   constructor() {
     super();
 
     this.state = {
-      secretKey: ''
+      file: ''
     }
   }
 
-  onSecretKey = (e) => {
-    const secretKey = e.target.value || '';
-    return this.setState({ secretKey });
-  }
-
   onSave = () => {
-    const { setWallet } = this.props;
-    const { secretKey } = this.state;
-    if (!secretKey) return console.error('Invalid secret key');
-    const account = sol.fromSecretKey(secretKey);
-    const address = account.publicKey.toBase58()
-    return setWallet(address, secretKey);
+    console.warn('Not implement yet');
   }
 
   render() {
     const { classes } = this.props;
-    const { secretKey } = this.state;
+    const { file } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
           <Grid item>
             <IconButton size="small" color="primary">
-              <VpnKeyRounded />
+              <DescriptionRounded />
             </IconButton>
           </Grid>
           <Grid item>
-            <Typography variant="body2">Secret Key</Typography>
-          </Grid>
-          <Grid item className={classes.stretch}>
-            <Divider />
+            <Typography variant="h6">Keystore</Typography>
           </Grid>
         </Grid>
       </Grid>
@@ -66,26 +51,23 @@ class SecretKey extends Component {
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+          <Grid item>
+            <Button startIcon={<PublishRounded />}>
+              <Typography>Upload keystore</Typography>
+            </Button>
+          </Grid>
           <Grid item className={classes.stretch}>
             <TextField
-              label="Secret Key"
+              label="Password (optional)"
               variant="outlined"
-              size="small"
-              onChange={this.onSecretKey}
-              value={secretKey}
+              value={file}
+              InputProps={{
+                endAdornment: <IconButton color="primary" onClick={this.onSave}>
+                  <PowerRounded />
+                </IconButton>
+              }}
               fullWidth
             />
-          </Grid>
-          <Grid item>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={this.onSave}
-              disabled={!secretKey}
-              fullWidth
-            >
-              <Typography>OK</Typography>
-            </Button>
           </Grid>
         </Grid>
       </Grid>
@@ -105,4 +87,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(SecretKey)));
+)(withStyles(styles)(KeyStore)));

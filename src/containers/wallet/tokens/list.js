@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -6,6 +6,7 @@ import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Select from '@material-ui/core/Select';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import styles from './styles';
@@ -18,7 +19,7 @@ class List extends Component {
     super();
 
     this.state = {
-      values: [],
+      tokensData: [],
     }
   }
 
@@ -35,9 +36,9 @@ class List extends Component {
   fetchData = () => {
     const { wallet: { tokens } } = this.props;
     return Promise.all(tokens.map(token => {
-      return sol.getTokenAccountData(token);
-    })).then(values => {
-      return this.setState({ values });
+      return sol.getTokenData(token);
+    })).then(re => {
+      return this.setState({ tokensData: re });
     }).catch(er => {
       return console.error(er);
     });
@@ -50,20 +51,22 @@ class List extends Component {
   }
 
   render() {
-    const { wallet: { tokens, token } } = this.props;
-    const { values } = this.state;
+    const { wallet: { token } } = this.props;
+    const { tokensData } = this.state;
 
     return <Select
       variant="outlined"
       value={token}
       onChange={this.onSelect}
     >
-      {values.map((value, index) => {
-        const address = tokens[index];
-        if (!address) return null;
-        const symbol = value.symbol.join('').replace('-', '');
-        const shortAddress = address.substring(0, 4) + '...';
-        return <MenuItem key={address} value={address}>{`${symbol} - ${shortAddress}`}</MenuItem>
+      {tokensData.map(({ initialized, address, token }) => {
+        if (!initialized) return null;
+        const symbol = token.symbol.join('').replace('-', '');
+        const shortAddress = address.substring(0, 8) + '...';
+        return [
+          <ListSubheader>{symbol}</ListSubheader>,
+          <MenuItem value={address}>{shortAddress}</MenuItem>
+        ]
       })}
     </Select>
   }

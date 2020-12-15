@@ -7,39 +7,52 @@ import { withStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 
-import { SaveAltRounded, DescriptionRounded } from '@material-ui/icons';
+import { VpnKeyRounded, PowerRounded } from '@material-ui/icons';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import { setWallet } from 'modules/wallet.reducer';
 
 
-class KeyStore extends Component {
+class SecretKey extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      secretKey: ''
+    }
+  }
+
+  onSecretKey = (e) => {
+    const secretKey = e.target.value || '';
+    return this.setState({ secretKey });
+  }
 
   onSave = () => {
     const { setWallet } = this.props;
-    return setWallet();
+    const { secretKey } = this.state;
+    if (!secretKey) return console.error('Invalid secret key');
+    const account = sol.fromSecretKey(secretKey);
+    const address = account.publicKey.toBase58()
+    return setWallet(address, secretKey);
   }
 
   render() {
     const { classes } = this.props;
+    const { secretKey } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
           <Grid item>
             <IconButton size="small" color="primary">
-              <DescriptionRounded />
+              <VpnKeyRounded />
             </IconButton>
           </Grid>
           <Grid item>
-            <Typography variant="body2">Keystore</Typography>
-          </Grid>
-          <Grid item className={classes.stretch}>
-            <Divider />
+            <Typography variant="h6">Secret Key</Typography>
           </Grid>
         </Grid>
       </Grid>
@@ -47,31 +60,18 @@ class KeyStore extends Component {
         <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
       </Grid>
       <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-          <Grid item>
-            <Button startIcon={<SaveAltRounded />}>
-              <Typography>Upload keystore</Typography>
-            </Button>
-          </Grid>
-          <Grid item className={classes.stretch}>
-            <TextField
-              label="Password (optional)"
-              variant="outlined"
-              size="small"
-              fullWidth
-            />
-          </Grid>
-          <Grid item>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={this.onSave}
-              fullWidth
-            >
-              <Typography>OK</Typography>
-            </Button>
-          </Grid>
-        </Grid>
+        <TextField
+          label="Secret Key"
+          variant="outlined"
+          onChange={this.onSecretKey}
+          value={secretKey}
+          InputProps={{
+            endAdornment: <IconButton color="primary" onClick={this.onSave}>
+              <PowerRounded />
+            </IconButton>
+          }}
+          fullWidth
+        />
       </Grid>
     </Grid>
   }
@@ -89,4 +89,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(KeyStore)));
+)(withStyles(styles)(SecretKey)));
