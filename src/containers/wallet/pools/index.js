@@ -50,10 +50,10 @@ class Pools extends Component {
             <Typography variant="h6">Pools</Typography>
           </Grid>
           <Grid item>
-            <Manage />
+            <List />
           </Grid>
           <Grid item>
-            <List />
+            <Manage />
           </Grid>
         </Grid>
       </Grid>

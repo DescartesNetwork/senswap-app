@@ -77,7 +77,7 @@ class Manage extends Component {
     const newTokens = [...tokens];
     newTokens.push(token);
     return updateToken(newTokens).then(re => {
-      return this.setState({ data: {}, error: '', token: '' });
+      return this.setState({ tokenData: {}, error: '', token: '' });
     }).catch(er => {
       return this.setState({ error: er });
     });

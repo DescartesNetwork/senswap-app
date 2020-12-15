@@ -17,7 +17,7 @@ import TextField from '@material-ui/core/TextField';
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { CloseRounded, WidgetsRounded, RemoveCircleOutlineRounded } from '@material-ui/icons';
+import { CloseRounded, SettingsRounded, RemoveRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 
@@ -147,7 +147,6 @@ class Manage extends Component {
   }
 
   renderPoolList = () => {
-    const { classes } = this.props;
     const { wallet: { pools } } = this.props;
     const { values } = this.state;
     return <Grid container spacing={2}>
@@ -161,17 +160,8 @@ class Manage extends Component {
         const fee = (Number(value.fee_numerator) / Number(value.fee_denominator)).toString();
 
         return <Grid key={address} item xs={12}>
-          <Grid item container className={classes.noWrap} spacing={2}>
-            <Grid item>
-              <IconButton
-                color="secondary"
-                onClick={() => this.removePool(address)}
-                size="small"
-              >
-                <RemoveCircleOutlineRounded />
-              </IconButton>
-            </Grid>
-            <Grid item className={classes.stretch}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
               <TextField
                 label="Pool"
                 variant="outlined"
@@ -181,13 +171,18 @@ class Manage extends Component {
                 fullWidth
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={12}>
               <TextField
                 label="Balance"
                 variant="outlined"
                 color="primary"
                 value={treasury}
                 helperText={`Reserve: ${reserve} - Price: ${price} - Fee: ${fee}`}
+                InputProps={{
+                  endAdornment: <IconButton color="secondary" onClick={() => this.removePool(address)}>
+                    <RemoveRounded />
+                  </IconButton>
+                }}
                 fullWidth
               />
             </Grid>
@@ -204,7 +199,7 @@ class Manage extends Component {
     return <Fragment>
       <Tooltip title="Add/Remove your pool accounts">
         <IconButton onClick={this.onOpen} size="small" color="primary">
-          <WidgetsRounded />
+          <SettingsRounded />
         </IconButton>
       </Tooltip>
       <Dialog open={visible} onClose={this.onClose}>

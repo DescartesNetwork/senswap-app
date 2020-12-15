@@ -56,6 +56,7 @@ class List extends Component {
 
     return <Select
       variant="outlined"
+      margin="dense"
       value={token}
       onChange={this.onSelect}
     >
