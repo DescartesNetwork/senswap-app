@@ -107,7 +107,7 @@ class Manage extends Component {
           label={symbol}
           variant="outlined"
           color="primary"
-          value={address}
+          value={token.address}
           fullWidth
         />
       </Grid>
@@ -162,6 +162,15 @@ class Manage extends Component {
                 color="primary"
                 value={address}
                 helperText={`Token: ${token.address}`}
+                InputProps={{
+                  startAdornment: <IconButton
+                    color="primary"
+                    onClick={() => this.removeToken(address)}
+                    edge="start"
+                  >
+                    <RemoveRounded />
+                  </IconButton>
+                }}
                 fullWidth
               />
             </Grid>
@@ -172,11 +181,6 @@ class Manage extends Component {
                 color="primary"
                 value={Number(balance + '.' + balanceDecimals)}
                 helperText={`Total supply: ${Number(totalSupply + '.' + totalSupplyDecimals)}`}
-                InputProps={{
-                  endAdornment: <IconButton color="primary" onClick={() => this.removeToken(address)}>
-                    <RemoveRounded />
-                  </IconButton>
-                }}
                 fullWidth
               />
             </Grid>
@@ -237,7 +241,11 @@ class Manage extends Component {
                     helperText={error}
                     InputProps={{
                       endAdornment:
-                        <IconButton color="primary" variant="contained" onClick={this.addToken}>
+                        <IconButton
+                          color="primary"
+                          onClick={this.addToken}
+                          edge="end"
+                        >
                           <AddRounded />
                         </IconButton>
                     }}

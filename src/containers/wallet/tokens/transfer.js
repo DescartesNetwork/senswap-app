@@ -107,7 +107,7 @@ class Transfer extends Component {
                 endAdornment:
                   <IconButton
                     color="primary"
-                    variant="contained"
+                    edge="end"
                     onClick={this.transfer}
                   >
                     <SendRounded />

@@ -58,11 +58,10 @@ class WithdrawLiquidity extends Component {
   }
 
   onSen = (e) => {
-    const pool = e.target.value;
+    const sen = e.target.value;
     return this.setState({ sen }, () => {
-      if (!pool) return console.error('Invalid pool address');
-      if (pool.length !== 44) return console.error('Invalid address length');
-      return sol.getSenAccountData(pool).then(senValue => {
+      if (!sen) return console.error('Invalid sen address');
+      return sol.getSenAccountData(sen).then(senValue => {
         return this.setState({ senValue });
       }).catch(er => {
         return console.error(er);
@@ -71,12 +70,13 @@ class WithdrawLiquidity extends Component {
   }
 
   withdrawLiquidity = () => {
-    const { amount, poolValue, tokenValue } = this.state;
+    const { amount, sen: senAddress, poolValue, tokenValue } = this.state;
     const { wallet: { token, pool, secretKey } } = this.props;
     if (!poolValue.token || !tokenValue.token || !secretKey || !amount) console.error('Invalid input');
     const sen = global.BigInt(amount * 10 ** tokenValue.decimals);
     const poolPublicKey = sol.fromAddress(pool);
     const treasuryPublicKey = sol.fromAddress(poolValue.treasury);
+    const senPublicKey = sol.fromAddress(senAddress);
     const dstTokenPublickKey = sol.fromAddress(token);
     const tokenPublicKey = sol.fromAddress(poolValue.token);
     const payer = sol.fromSecretKey(secretKey);

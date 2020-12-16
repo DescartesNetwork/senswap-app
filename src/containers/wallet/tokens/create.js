@@ -95,13 +95,17 @@ class Create extends Component {
           color="primary"
           value={address}
           InputProps={{
-            endAdornment: percentage ? <CircularProgress
-              variant="determinate"
-              size={16}
-              value={percentage}
-            /> : <IconButton color="primary" onClick={this.newAccount}>
-                <AddRounded />
-              </IconButton>
+            endAdornment: <IconButton
+              color="primary"
+              onClick={this.newAccount}
+              edge="end"
+            >
+              {percentage ? <CircularProgress
+                variant="determinate"
+                size={16}
+                value={percentage}
+              /> : <AddRounded />}
+            </IconButton>
           }}
           helperText={message}
           fullWidth

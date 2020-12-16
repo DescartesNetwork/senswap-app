@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -50,9 +50,29 @@ class List extends Component {
     return updateToken(tokens, token);
   }
 
+  renderGroupedTokensData = () => {
+    const { tokensData } = this.state;
+    let groupedTokensData = {};
+    tokensData.forEach(({ address, token }) => {
+      const symbol = token.symbol.join('').replace('-', '');
+      const shortAddress = address.substring(0, 6) + '...';
+      if (!groupedTokensData[symbol]) groupedTokensData[symbol] = [];
+      groupedTokensData[symbol].push({ address, shortAddress });
+    });
+
+    let render = [];
+    for (let symbol in groupedTokensData) {
+      render.push(<ListSubheader>{symbol}</ListSubheader>)
+      groupedTokensData[symbol].forEach(({ address, shortAddress }) => {
+        render.push(<MenuItem value={address}>{shortAddress}</MenuItem>)
+      });
+    }
+
+    return render;
+  }
+
   render() {
     const { wallet: { token } } = this.props;
-    const { tokensData } = this.state;
 
     return <Select
       variant="outlined"
@@ -60,15 +80,7 @@ class List extends Component {
       value={token}
       onChange={this.onSelect}
     >
-      {tokensData.map(({ initialized, address, token }) => {
-        if (!initialized) return null;
-        const symbol = token.symbol.join('').replace('-', '');
-        const shortAddress = address.substring(0, 8) + '...';
-        return [
-          <ListSubheader>{symbol}</ListSubheader>,
-          <MenuItem value={address}>{shortAddress}</MenuItem>
-        ]
-      })}
+      {this.renderGroupedTokensData()}
     </Select>
   }
 }

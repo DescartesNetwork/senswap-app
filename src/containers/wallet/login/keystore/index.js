@@ -62,7 +62,11 @@ class KeyStore extends Component {
               variant="outlined"
               value={file}
               InputProps={{
-                endAdornment: <IconButton color="primary" onClick={this.onSave}>
+                endAdornment: <IconButton
+                  color="primary"
+                  onClick={this.onSave}
+                  edge="end"
+                >
                   <PowerRounded />
                 </IconButton>
               }}

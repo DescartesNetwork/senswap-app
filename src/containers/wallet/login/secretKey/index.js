@@ -66,7 +66,11 @@ class SecretKey extends Component {
           onChange={this.onSecretKey}
           value={secretKey}
           InputProps={{
-            endAdornment: <IconButton color="primary" onClick={this.onSave}>
+            endAdornment: <IconButton
+              color="primary"
+              onClick={this.onSave}
+              edge="end"
+            >
               <PowerRounded />
             </IconButton>
           }}
