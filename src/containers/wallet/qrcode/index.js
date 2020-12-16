@@ -15,7 +15,7 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 
-import { CloseRounded, ArrowUpwardRounded } from '@material-ui/icons';
+import { CloseRounded, GetAppRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 
@@ -44,6 +44,17 @@ class _QRCode extends Component {
     });
   }
 
+  onDownload = () => {
+    const canvas = document.getElementById('senwallet-qrcode');
+    const pngUrl = canvas.toDataURL('image/png').replace('image/png', 'image/octet-stream');
+    let downloadLink = document.createElement('a');
+    downloadLink.href = pngUrl;
+    downloadLink.download = 'senwallet-qrcode.png';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+  }
+
   render() {
     const { classes } = this.props;
     const { wallet: { qrcode: { visible, message } } } = this.props;
@@ -67,7 +78,7 @@ class _QRCode extends Component {
           <Grid item xs={12}>
             <Grid container justify="center" spacing={2}>
               <Grid item>
-                <QRCode value={message} renderAs='svg' size={256} />
+                <QRCode id="senwallet-qrcode" value={message} size={256} />
               </Grid>
             </Grid>
           </Grid>
@@ -101,10 +112,11 @@ class _QRCode extends Component {
             <Button
               color="primary"
               variant="outlined"
-              startIcon={<ArrowUpwardRounded />}
+              startIcon={<GetAppRounded />}
+              onClick={this.onDownload}
               fullWidth
             >
-              <Typography>Share</Typography>
+              <Typography>Download</Typography>
             </Button>
           </Grid>
           <Grid item xs={12} /> {/* Safe space */}
