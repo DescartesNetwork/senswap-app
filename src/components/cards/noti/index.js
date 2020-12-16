@@ -12,33 +12,16 @@ import { PageviewRounded } from '@material-ui/icons';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import liquid1 from 'static/images/liquid1.jpg';
-import liquid2 from 'static/images/liquid2.jpg';
-import liquid3 from 'static/images/liquid3.jpg';
-import liquid4 from 'static/images/liquid4.jpg';
 
 
 class NotiCard extends Component {
-  constructor() {
-    super();
-
-    this.state = {
-      backgrounds: [liquid1, liquid2, liquid3, liquid4]
-    }
-  }
-
-  randBackground = () => {
-    const { backgrounds } = this.state;
-    const rand = Math.floor(Math.random() * backgrounds.length);
-    return backgrounds[rand];
-  }
 
   render() {
     const { classes } = this.props;
     const { title, description, source } = this.props;
 
     return <Grid container spacing={2} justify="center">
-      <Grid item xs={12} style={{ backgroundImage: `url('${this.randBackground()}')` }} className={classes.gallery}>
+      <Grid item xs={12} className={classes.gallery}>
         <BaseCard variant="fluent">
           <Grid container spacing={2} justify="flex-end">
             <Grid item xs={12}>

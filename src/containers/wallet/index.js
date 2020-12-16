@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -8,11 +8,14 @@ import { Grid } from '@material-ui/core';
 
 import { BottomDrawer } from 'components/drawers';
 import Drain from 'components/drain';
+// Main components
 import Header from './header';
 import LogIn from './login';
 import Payer from './payer';
 import Tokens from './tokens';
 import Pools from './pools';
+// Subapp
+import QRCode from './qrcode';
 
 import styles from './styles';
 import { closeWallet } from 'modules/wallet.reducer';
@@ -22,28 +25,21 @@ class Wallet extends Component {
 
   renderComponents = () => {
     const { wallet: { address } } = this.props;
-    if (!address) return <Fragment>
-      <Grid iten xs={12}>
-        <LogIn />
-      </Grid>
-    </Fragment>
-    return <Fragment>
-      <Grid item xs={12}>
+    if (!address) return <LogIn />
+    return <Grid container spacing={2}>
+      <Grid item xs={12} md={6}>
         <Payer />
       </Grid>
-      <Grid item xs={12}>
-        <Drain />
-      </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} md={6}>
         <Tokens />
       </Grid>
       <Grid item xs={12}>
         <Drain />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} md={6}>
         <Pools />
       </Grid>
-    </Fragment>
+    </Grid>
   }
 
   render() {
@@ -61,7 +57,9 @@ class Wallet extends Component {
                 <Grid item xs={12}>
                   <Drain />
                 </Grid>
-                {this.renderComponents()}
+                <Grid item xs={12}>
+                  {this.renderComponents()}
+                </Grid>
                 <Grid item xs={12}>
                   <Drain />
                 </Grid>
@@ -69,6 +67,9 @@ class Wallet extends Component {
             </Grid>
           </Grid>
         </BottomDrawer>
+      </Grid>
+      <Grid item xs={12}>
+        <QRCode />
       </Grid>
     </Grid>
   }

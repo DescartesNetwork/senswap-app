@@ -209,7 +209,7 @@ class Manage extends Component {
               <Typography variant="h6">Manage your pool accounts</Typography>
             </Grid>
             <Grid item>
-              <IconButton onClick={this.onClose}>
+              <IconButton onClick={this.onClose} edge="end">
                 <CloseRounded />
               </IconButton>
             </Grid>
@@ -257,9 +257,7 @@ class Manage extends Component {
 
           </Grid>
         </DialogContent>
-        <DialogActions>
-          {/* Nothing */}
-        </DialogActions>
+        <DialogActions /> {/* Safe space */}
       </Dialog>
     </Fragment>
   }

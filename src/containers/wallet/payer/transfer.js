@@ -14,7 +14,7 @@ import { SendRounded } from '@material-ui/icons';
 import styles from './styles';
 
 
-class TokenTransfer extends Component {
+class PayerTransfer extends Component {
   constructor() {
     super();
 
@@ -75,4 +75,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(TokenTransfer)));
+)(withStyles(styles)(PayerTransfer)));

@@ -9,6 +9,7 @@ export default theme => ({
     backgroundPosition: 'center',
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'cover',
-    borderRadius: theme.shape.borderRadius
+    borderRadius: theme.shape.borderRadius,
+    background: 'linear-gradient(45deg, hsla(238, 100%, 71%, 1) 0%, hsla(295, 100%, 84%, 1) 100%)'
   }
 });

@@ -14,8 +14,8 @@ export default theme => ({
     '&:hover': {
       boxShadow: theme.shadows[4],
     },
-    backgroundColor: theme.palette.background.paper + '9',
-    backdropFilter: 'blur(4px)',
-    WebkitBackdropFilter: 'blur(4px)',
+    background: 'linear-gradient(163.28deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
   }
 });

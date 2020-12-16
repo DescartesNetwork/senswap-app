@@ -5,20 +5,27 @@ import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
-import Select from '@material-ui/core/Select';
+import Grid from '@material-ui/core/Grid';
+import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
+import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import styles from './styles';
+import { MenuRounded } from '@material-ui/icons';
+
+import styles from '../styles';
 import sol from 'helpers/sol';
 import { updateToken } from 'modules/wallet.reducer';
 
 
-class List extends Component {
+class TokenMenu extends Component {
   constructor() {
     super();
 
     this.state = {
+      anchorEl: null,
       tokensData: [],
     }
   }
@@ -44,10 +51,13 @@ class List extends Component {
     });
   }
 
-  onSelect = (e) => {
+  onSelect = (token) => {
     const { wallet: { tokens }, updateToken } = this.props;
-    const token = e.target.value;
-    return updateToken(tokens, token);
+    return updateToken(tokens, token).then(re => {
+      return this.onClose();
+    }).catch(er => {
+      return console.error(er);
+    });
   }
 
   renderGroupedTokensData = () => {
@@ -55,33 +65,50 @@ class List extends Component {
     let groupedTokensData = {};
     tokensData.forEach(({ address, token }) => {
       const symbol = token.symbol.join('').replace('-', '');
-      const shortAddress = address.substring(0, 6) + '...';
       if (!groupedTokensData[symbol]) groupedTokensData[symbol] = [];
-      groupedTokensData[symbol].push({ address, shortAddress });
+      groupedTokensData[symbol].push(address);
     });
 
     let render = [];
     for (let symbol in groupedTokensData) {
-      render.push(<ListSubheader>{symbol}</ListSubheader>)
-      groupedTokensData[symbol].forEach(({ address, shortAddress }) => {
-        render.push(<MenuItem value={address}>{shortAddress}</MenuItem>)
+      render.push(<ListSubheader key={symbol}>{symbol}</ListSubheader>)
+      groupedTokensData[symbol].forEach(address => {
+        render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
+          <Typography noWrap>{address}</Typography>
+        </MenuItem>)
       });
     }
 
     return render;
   }
 
-  render() {
-    const { wallet: { token } } = this.props;
+  onOpen = (e) => {
+    return this.setState({ anchorEl: e.target });
+  }
 
-    return <Select
-      variant="outlined"
-      margin="dense"
-      value={token}
-      onChange={this.onSelect}
-    >
-      {this.renderGroupedTokensData()}
-    </Select>
+  onClose = () => {
+    return this.setState({ anchorEl: null });
+  }
+
+  render() {
+    const { anchorEl } = this.state;
+
+    return <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Tooltip title="Token List">
+          <IconButton color="secondary" size="small" onClick={this.onOpen}>
+            <MenuRounded />
+          </IconButton>
+        </Tooltip>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={this.onClose}
+        >
+          {this.renderGroupedTokensData()}
+        </Menu>
+      </Grid>
+    </Grid>
   }
 }
 
@@ -91,10 +118,10 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateToken
+  updateToken,
 }, dispatch);
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(List)));
+)(withStyles(styles)(TokenMenu)));

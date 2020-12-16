@@ -21,7 +21,7 @@ import {
 
 import { BaseCard } from 'components/cards';
 
-import LOGO from 'static/images/logo.svg';
+import SEN_LOGO from 'static/images/sen-logo.svg';
 import styles from './styles';
 import { openWallet } from 'modules/wallet.reducer';
 
@@ -71,7 +71,8 @@ class Header extends Component {
                 <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
                   <Grid item style={{ width: 35 }}>
                     <Image
-                      src={LOGO}
+                      src={SEN_LOGO}
+                      color="#00000000"
                       loading={<CircularProgress size={17} />}
                     />
                   </Grid>
