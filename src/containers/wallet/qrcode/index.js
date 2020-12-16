@@ -40,7 +40,7 @@ class _QRCode extends Component {
     return this.setState({ copied: true }, () => {
       return setTimeout(() => {
         return this.setState({ copied: false });
-      }, 3000);
+      }, 1000);
     });
   }
 
