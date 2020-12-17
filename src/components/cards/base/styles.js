@@ -4,7 +4,7 @@ export default theme => ({
     width: `calc(100% - ${theme.spacing(4)}px)`,
     transition: theme.transitions.create(),
     '&:hover': {
-      boxShadow: theme.shadows[4],
+      boxShadow: theme.shadows[6],
     },
   },
   fluentPaper: {
@@ -12,7 +12,7 @@ export default theme => ({
     width: `calc(100% - ${theme.spacing(4)}px)`,
     transition: theme.transitions.create(),
     '&:hover': {
-      boxShadow: theme.shadows[4],
+      boxShadow: theme.shadows[6],
     },
     background: 'linear-gradient(163.28deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%)',
     backdropFilter: 'blur(20px)',

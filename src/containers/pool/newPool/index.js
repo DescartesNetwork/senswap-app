@@ -15,8 +15,9 @@ import { CheckCircleOutlineRounded } from '@material-ui/icons';
 
 import configs from 'configs';
 import sol from 'helpers/sol';
+import utils from 'helpers/utils';
 import styles from './styles';
-import { updatePool } from 'modules/wallet.reducer';
+import { updateSen } from 'modules/wallet.reducer';
 
 
 class NewPool extends Component {
@@ -26,10 +27,10 @@ class NewPool extends Component {
     this.state = {
       amount: 0,
       price: 0,
-      value: {},
-      pool: '',
-      treasury: '',
-      sen: '',
+      tokenData: {},
+      poolAddress: '',
+      treasuryAddress: '',
+      senAddress: '',
     }
   }
 
@@ -45,8 +46,8 @@ class NewPool extends Component {
 
   fetchData = () => {
     const { wallet: { token } } = this.props;
-    return sol.getTokenAccountData(token).then(value => {
-      return this.setState({ value });
+    return sol.getTokenData(token).then(tokenData => {
+      return this.setState({ tokenData });
     }).catch(er => {
       return console.error(er);
     });
@@ -63,74 +64,50 @@ class NewPool extends Component {
   }
 
   newPool = () => {
-    const { value, amount, price } = this.state;
-    const {
-      wallet: {
-        token: address,
-        secretKey,
-        pools
-      },
-      updatePool
-    } = this.props;
-    if (!value.token || !secretKey || !amount || !price) console.error('Invalid input');
-    const reserve = global.BigInt(amount * 10 ** value.decimals);
-    const stable = global.BigInt(price * amount * 10 ** value.decimals);
+    const { tokenData: { address, initialized, token }, amount, price } = this.state;
+    const { wallet: { secretKey, sens }, updateSen } = this.props;
+    if (!initialized || !secretKey || !amount || !price) return console.error('Invalid input');
+    const reserve = global.BigInt(amount * 10 ** token.decimals);
+    const usd = global.BigInt(price * amount * 10 ** token.decimals);
 
     const srcTokenPublicKey = sol.fromAddress(address);
-    const tokenPublicKey = sol.fromAddress(value.token);
+    const tokenPublicKey = sol.fromAddress(token.address);
     const payer = sol.fromSecretKey(secretKey);
 
-    return sol.newPoolAndTreasuryAccount(
-      reserve, stable,
-      srcTokenPublicKey, tokenPublicKey, payer
-    ).then(({ pool, treasury, sen }) => {
-      this.setState({
-        pool: pool.publicKey.toBase58(),
-        treasury: treasury.publicKey.toBase58(),
-        sen: sen.publicKey.toBase58(),
+    return sol.newPool(reserve, usd, srcTokenPublicKey,
+      tokenPublicKey, payer).then(({ pool, treasury, sen }) => {
+        this.setState({
+          poolAddress: pool.publicKey.toBase58(),
+          treasuryAddress: treasury.publicKey.toBase58(),
+          senAddress: sen.publicKey.toBase58(),
+        });
+        const newSens = [...sens];
+        newSens.push(sen.publicKey.toBase58());
+        return updateSen(newSens);
+      }).catch(er => {
+        return console.error(er);
       });
-      const newPools = [...pools];
-      newPools.push(pool.publicKey.toBase58());
-      return updatePool(newPools);
-    }).catch(er => {
-      return console.error(er);
-    });
   }
 
   renderResult = () => {
-    const { pool, treasury, sen } = this.state;
-    if (!pool || !treasury || !sen) return null;
+    const { poolAddress, treasuryAddress, senAddress } = this.state;
+    if (!poolAddress || !treasuryAddress || !senAddress) return null;
     return <Grid item xs={12}>
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Divider />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="body2">A pool and a treasury account is successfully generated!</Typography>
+          <Typography variant="body2">A pool is successfully generated!</Typography>
         </Grid>
         <Grid item xs={12}>
-          <TextField
-            label="Pool Address"
-            variant="outlined"
-            value={pool}
-            fullWidth
-          />
+          <TextField label="Pool" variant="outlined" value={poolAddress} fullWidth />
         </Grid>
         <Grid item xs={12}>
-          <TextField
-            label="Treasury Address"
-            variant="outlined"
-            value={treasury}
-            fullWidth
-          />
+          <TextField label="Treasury" variant="outlined" value={treasuryAddress} fullWidth />
         </Grid>
         <Grid item xs={12}>
-          <TextField
-            label="Sen Address"
-            variant="outlined"
-            value={sen}
-            fullWidth
-          />
+          <TextField label="Sen" variant="outlined" value={senAddress} fullWidth />
         </Grid>
       </Grid>
     </Grid>
@@ -138,40 +115,31 @@ class NewPool extends Component {
 
   render() {
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
-    const { wallet: { token: address } } = this.props;
-    const { value, amount, price } = this.state;
-    if (!value.token) return null;
-    const token = value.token;
-    const symbol = value.symbol.join('').replace('-', '');
-    const balance = (value.amount / global.BigInt(10 ** value.decimals)).toString();
-    const balanceDecimals = (value.amount % global.BigInt(10 ** value.decimals)).toString();
+    const {
+      amount, price,
+      tokenData: { address, initialized, token, amount: balance }
+    } = this.state;
+    if (!initialized) return null;
+    const symbol = token.symbol.join('').replace('-', '');
+    const balanceFloor = (balance / global.BigInt(10 ** token.decimals)).toString();
+    const balanceDecimals = (balance % global.BigInt(10 ** token.decimals)).toString();
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <Typography>You are the first liquidity provider. Once you are happy with the rate click supply to review.</Typography>
       </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Swap Factory Address"
-          variant="outlined"
-          value={swapFactoryAddress}
-          fullWidth
-        />
+      <Grid item xs={6}>
+        <TextField label="Swap Program" variant="outlined" value={swapFactoryAddress} fullWidth />
       </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Token Factory Address"
-          variant="outlined"
-          value={tokenFactoryAddress}
-          fullWidth
-        />
+      <Grid item xs={6}>
+        <TextField label="Token Program" variant="outlined" value={tokenFactoryAddress} fullWidth />
       </Grid>
       <Grid item xs={12}>
         <TextField
           label={symbol}
           variant="outlined"
           value={address}
-          helperText={token}
+          helperText={`Token: ${token.address}`}
           fullWidth
         />
       </Grid>
@@ -181,7 +149,7 @@ class NewPool extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
-          helperText={Number(balance + '.' + balanceDecimals)}
+          helperText={utils.prettyNumber(Number(balanceFloor + '.' + balanceDecimals))}
           fullWidth
         />
       </Grid>
@@ -216,7 +184,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updatePool,
+  updateSen,
 }, dispatch);
 
 export default withRouter(connect(

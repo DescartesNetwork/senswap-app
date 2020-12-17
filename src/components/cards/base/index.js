@@ -20,7 +20,7 @@ class BaseCard extends Component {
 
     return <Grid container spacing={2} >
       <Grid item xs={12}>
-        <Paper className={compoundClassName} elevation={2}>
+        <Paper className={compoundClassName} elevation={3}>
           <Grid container spacing={2} >
             <Grid item xs={12}>
               {children}

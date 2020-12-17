@@ -8,12 +8,11 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Collapse from '@material-ui/core/Collapse';
+import Tooltip from '@material-ui/core/Tooltip';
 
-import { AccountBalanceRounded, ExpandMoreRounded, ExpandLessRounded } from '@material-ui/icons';
+import { AddRounded } from '@material-ui/icons';
 
-import Manage from './manage';
-import List from './list';
+import Drain from 'components/drain';
 import Info from './info';
 
 import styles from './styles';
@@ -41,38 +40,21 @@ class Pools extends Component {
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-          <Grid item>
-            <IconButton size="small" color="primary">
-              <AccountBalanceRounded />
-            </IconButton>
-          </Grid>
           <Grid item className={classes.stretch}>
-            <Typography variant="h6">Pools</Typography>
+            <Typography variant="h4">Swap Accounts</Typography>
           </Grid>
           <Grid item>
-            <List />
-          </Grid>
-          <Grid item>
-            <Manage />
+            <Tooltip title="Add a new Sen address">
+              <IconButton color="primary">
+                <AddRounded />
+              </IconButton>
+            </Tooltip>
           </Grid>
         </Grid>
       </Grid>
+      <Grid item xs={12} /> {/* Safe space */}
       <Grid item xs={12}>
         <Info />
-      </Grid>
-      <Grid item xs={12}>
-        <Collapse in={visible}>
-          <Typography>Advanced Configuration</Typography>
-        </Collapse>
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container justify="center" spacing={2}>
-          <Grid item>
-            <Button startIcon={visible ? <ExpandLessRounded /> : <ExpandMoreRounded />} onClick={this.onAdvanced}>
-              <Typography>{visible ? 'Less' : 'Advanced'}</Typography>
-            </Button>
-          </Grid>
-        </Grid>
       </Grid>
     </Grid>
   }

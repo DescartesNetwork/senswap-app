@@ -10,16 +10,14 @@ const ADDRESS = storage.get('address');
 const SECRET_KEY = storage.get('secretKey');
 const TOKENS = storage.get('tokens') || [];
 const TOKEN = storage.get('token');
-const POOLS = storage.get('pools') || [];
-const POOL = storage.get('pool');
+const SENS = storage.get('sens') || [];
 const defaultState = {
   visible: false,
   address: ADDRESS,
   secretKey: SECRET_KEY,
   tokens: TOKENS,
   token: TOKEN,
-  pools: POOLS,
-  pool: POOL,
+  sens: SENS,
   qrcode: {
     visible: false,
     message: ''
@@ -109,35 +107,6 @@ export const setWallet = (address, secretKey) => {
 };
 
 /**
- * Set QR Code
- */
-export const SET_QRCODE = 'SET_QRCODE';
-export const SET_QRCODE_OK = 'SET_QRCODE_OK';
-export const SET_QRCODE_FAIL = 'SET_QRCODE_FAIL';
-
-export const setQRCode = (visible = false, message = '') => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_QRCODE });
-
-      const { wallet: { qrcode: {
-        visible: prevVisible,
-        message: prevMessage
-      } } } = getState();
-      if (visible === prevVisible && message === prevMessage) {
-        const er = 'Duplicated input';
-        dispatch({ type: SET_QRCODE_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const data = { qrcode: { visible, message } };
-      dispatch({ type: SET_QRCODE_OK, data });
-      return resolve(data);
-    });
-  };
-};
-
-/**
  * Unset wallet
  */
 export const UNSET_WALLET = 'UNSET_WALLET';
@@ -162,6 +131,35 @@ export const unsetWallet = () => {
 
       const data = { address: null, secretKey: null };
       dispatch({ type: UNSET_WALLET_OK, data });
+      return resolve(data);
+    });
+  };
+};
+
+/**
+ * Set QR Code
+ */
+export const SET_QRCODE = 'SET_QRCODE';
+export const SET_QRCODE_OK = 'SET_QRCODE_OK';
+export const SET_QRCODE_FAIL = 'SET_QRCODE_FAIL';
+
+export const setQRCode = (visible = false, message = '') => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: SET_QRCODE });
+
+      const { wallet: { qrcode: {
+        visible: prevVisible,
+        message: prevMessage
+      } } } = getState();
+      if (visible === prevVisible && message === prevMessage) {
+        const er = 'Duplicated input';
+        dispatch({ type: SET_QRCODE_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const data = { qrcode: { visible, message } };
+      dispatch({ type: SET_QRCODE_OK, data });
       return resolve(data);
     });
   };
@@ -202,34 +200,28 @@ export const updateToken = (tokens, token) => {
 };
 
 /**
- * Update pool
+ * Update sens
  */
-export const UPDATE_POOL = 'UPDATE_POOL';
-export const UPDATE_POOL_OK = 'UPDATE_POOL_OK';
-export const UPDATE_POOL_FAIL = 'UPDATE_POOL_FAIL';
+export const UPDATE_SEN = 'UPDATE_SEN';
+export const UPDATE_SEN_OK = 'UPDATE_SEN_OK';
+export const UPDATE_SEN_FAIL = 'UPDATE_SEN_FAIL';
 
-export const updatePool = (pools, pool) => {
-  return (dispatch, getState) => {
+export const updateSen= (sens) => {
+  return dispatch => {
     return new Promise((resolve, reject) => {
-      dispatch({ type: UPDATE_POOL });
+      dispatch({ type: UPDATE_SEN });
 
-      if (!pools) {
+      if (!sens) {
         const er = 'Invalid input';
-        dispatch({ type: UPDATE_POOL_FAIL, reason: er });
+        dispatch({ type: UPDATE_SEN_FAIL, reason: er });
         return reject(er);
       }
 
-      if (!pool) {
-        const { wallet: { pool: _pool } } = getState();
-        pool = _pool || pools[pools.length - 1];
-      }
-
       // Local storage
-      storage.set('pools', pools);
-      storage.set('pool', pool);
+      storage.set('sens', sens);
 
-      const data = { pools, pool };
-      dispatch({ type: UPDATE_POOL_OK, data });
+      const data = { sens };
+      dispatch({ type: UPDATE_SEN_OK, data });
       return resolve(data);
     });
   };
@@ -252,21 +244,21 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case SET_WALLET_FAIL:
       return { ...state, ...action.data };
-    case SET_QRCODE_OK:
-      return { ...state, ...action.data };
-    case SET_QRCODE_FAIL:
-      return { ...state, ...action.data };
     case UNSET_WALLET_OK:
       return { ...state, ...action.data };
     case UNSET_WALLET_FAIL:
+      return { ...state, ...action.data };
+    case SET_QRCODE_OK:
+      return { ...state, ...action.data };
+    case SET_QRCODE_FAIL:
       return { ...state, ...action.data };
     case UPDATE_TOKEN_OK:
       return { ...state, ...action.data };
     case UPDATE_TOKEN_FAIL:
       return { ...state, ...action.data };
-    case UPDATE_POOL_OK:
+    case UPDATE_SEN_OK:
       return { ...state, ...action.data };
-    case UPDATE_POOL_FAIL:
+    case UPDATE_SEN_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

@@ -36,7 +36,7 @@ class Wallet extends Component {
       <Grid item xs={12}>
         <Drain />
       </Grid>
-      <Grid item xs={12} md={6}>
+      <Grid item xs={12}>
         <Pools />
       </Grid>
     </Grid>
