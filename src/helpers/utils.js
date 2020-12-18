@@ -78,4 +78,17 @@ Utils.isEmail = (email) => {
   return true;
 }
 
+Utils.div = (a, b) => {
+  if (!a) return 0;
+  if (!b) throw new Error('Divided by zero');
+  let floor = Number(a / b);
+  let decimals = 0n;
+  for (let i = 0; i <= 9; i++) {
+    a = (a % b) * 10n;
+    decimals = decimals * 10n + a / b;
+  }
+  decimals = Number(decimals) / (10 ** 9);
+  return floor + decimals;
+}
+
 export default Utils;

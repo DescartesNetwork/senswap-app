@@ -13,8 +13,10 @@ import Button from '@material-ui/core/Button';
 import { AddCircleOutlineRounded } from '@material-ui/icons';
 
 import configs from 'configs';
+import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import styles from './styles';
+import { updateSen } from 'modules/wallet.reducer';
 
 
 class AddLiquidity extends Component {
@@ -22,10 +24,10 @@ class AddLiquidity extends Component {
     super();
 
     this.state = {
-      pool: '',
+      poolAddress: '',
       amount: 0,
-      tokenValue: {},
-      poolValue: {},
+      tokenData: {},
+      poolData: {},
     }
   }
 
@@ -33,7 +35,7 @@ class AddLiquidity extends Component {
     this.fetchData();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     const { wallet: prevWallet } = prevProps;
     const { wallet } = this.props;
     if (!isEqual(wallet, prevWallet)) this.fetchData();
@@ -41,25 +43,24 @@ class AddLiquidity extends Component {
 
   fetchData = () => {
     const { wallet: { token } } = this.props;
-    return sol.getTokenAccountData(token).then(tokenValue => {
-      return this.setState({ tokenValue });
+    return sol.getTokenData(token).then(tokenData => {
+      return this.setState({ tokenData });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   onAmount = (e) => {
-    const amount = e.target.value;
+    const amount = e.target.value || 0;
     return this.setState({ amount });
   }
 
-  onPool = (e) => {
-    const pool = e.target.value;
-    return this.setState({ pool }, () => {
-      if (!pool) return console.error('Invalid pool address');
-      if (pool.length !== 44) return console.error('Invalid address length');
-      return sol.getPoolAccountData(pool).then(poolValue => {
-        return this.setState({ poolValue });
+  onAddress = (e) => {
+    const poolAddress = e.target.value || '';
+    return this.setState({ poolAddress }, () => {
+      if (!poolAddress) return console.error('Invalid sen address');
+      return sol.getPurePoolData(poolAddress).then(poolData => {
+        return this.setState({ poolData });
       }).catch(er => {
         return console.error(er);
       });
@@ -67,14 +68,16 @@ class AddLiquidity extends Component {
   }
 
   addLiquidity = () => {
-    const { amount, pool, poolValue, tokenValue } = this.state;
-    const { wallet: { token, secretKey } } = this.props;
-    if (!poolValue.token || !tokenValue.token || !secretKey || !amount) console.error('Invalid input');
-    const reserve = global.BigInt(amount * 10 ** tokenValue.decimals);
-    const poolPublicKey = sol.fromAddress(pool);
-    const treasuryPublicKey = sol.fromAddress(poolValue.treasury);
-    const srcTokenPublickKey = sol.fromAddress(token);
-    const tokenPublicKey = sol.fromAddress(poolValue.token);
+    const {
+      amount, poolAddress,
+      poolData: { initialized, token, treasury } } = this.state;
+    const { wallet: { token: srcAddress, secretKey, sens }, updateSen } = this.props;
+    if (!initialized || !secretKey || !amount) console.error('Invalid input');
+    const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
+    const poolPublicKey = sol.fromAddress(poolAddress);
+    const treasuryPublicKey = sol.fromAddress(treasury.address);
+    const srcTokenPublickKey = sol.fromAddress(srcAddress);
+    const tokenPublicKey = sol.fromAddress(token.address);
     const payer = sol.fromSecretKey(secretKey);
     return sol.addLiquidity(
       reserve,
@@ -84,7 +87,9 @@ class AddLiquidity extends Component {
       tokenPublicKey,
       payer
     ).then(sen => {
-      return console.log(sen);
+      const newSens = [...sens];
+      newSens.push(sen.publicKey.toBase58());
+      return updateSen(newSens);
     }).catch(er => {
       return console.error(er);
     });
@@ -93,29 +98,32 @@ class AddLiquidity extends Component {
   render() {
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
     const { wallet: { token: address } } = this.props;
-    const { tokenValue, poolValue, amount, pool } = this.state;
-    if (!tokenValue.token) return null;
-    const balance = (tokenValue.amount / global.BigInt(10 ** tokenValue.decimals)).toString();
-    const balanceDecimals = (tokenValue.amount % global.BigInt(10 ** tokenValue.decimals)).toString();
-    const reserve = poolValue.token ? (poolValue.reserve / global.BigInt(10 ** tokenValue.decimals)).toString() : '0';
-    const reserveDecimals = poolValue.token ? (poolValue.reserve % global.BigInt(10 ** tokenValue.decimals)).toString() : '0';
-    const price = poolValue.token ? Number(poolValue.sen) / Number(poolValue.reserve) : 0;
+    const {
+      amount, poolAddress,
+      tokenData: { initialized, amount: tokenAmount, token },
+      poolData: { reserve: poolReserve, sen: poolSen }
+    } = this.state;
+    if (!initialized) return null;
+    const balance = utils.prettyNumber(utils.div(tokenAmount, global.BigInt(10 ** token.decimals)));
+    const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
+    const price = utils.div(poolSen, poolReserve);
+    const symbol = token.symbol.join('').replace('-', '');
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <Typography>The price of token you add will follow the current marginal price of token.</Typography>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <TextField
-          label="Swap Factory Address"
+          label="Swap Program"
           variant="outlined"
           value={swapFactoryAddress}
           fullWidth
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <TextField
-          label="Token Factory Address"
+          label="Token Program"
           variant="outlined"
           value={tokenFactoryAddress}
           fullWidth
@@ -123,10 +131,10 @@ class AddLiquidity extends Component {
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label={tokenValue.symbol.join('').replace('-', '')}
+          label={symbol}
           variant="outlined"
           value={address}
-          helperText={tokenValue.token}
+          helperText={token.token}
           fullWidth
         />
       </Grid>
@@ -134,9 +142,9 @@ class AddLiquidity extends Component {
         <TextField
           label="Pool"
           variant="outlined"
-          value={pool}
-          onChange={this.onPool}
-          helperText={`Reserve: ${Number(reserve + '.' + reserveDecimals)} - Price: ${price}`}
+          value={poolAddress}
+          onChange={this.onAddress}
+          helperText={`Reserve: ${reserve} - Price: ${price}`}
           fullWidth
         />
       </Grid>
@@ -146,7 +154,7 @@ class AddLiquidity extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
-          helperText={Number(balance + '.' + balanceDecimals)}
+          helperText={balance}
           fullWidth
         />
       </Grid>
@@ -171,6 +179,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  updateSen,
 }, dispatch);
 
 export default withRouter(connect(

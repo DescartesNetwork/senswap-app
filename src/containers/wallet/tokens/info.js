@@ -56,12 +56,11 @@ class TokenInfo extends Component {
     const { tokenData: { address, amount, initialized, token } } = this.state;
     if (!initialized) return null;
     const symbol = token.symbol.join('').replace('-', '');
-    const balance = (amount / global.BigInt(10 ** token.decimals)).toString();
-    const balanceDecimals = (amount % global.BigInt(10 ** token.decimals)).toString();
+    const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h4">{utils.prettyNumber(Number(balance + '.' + balanceDecimals))} {symbol}</Typography>
+        <Typography variant="h4">{balance} {symbol}</Typography>
       </Grid>
       <Grid item xs={12} style={{ paddingBottom: 0 }}>
         <Typography variant="body2">Address</Typography>

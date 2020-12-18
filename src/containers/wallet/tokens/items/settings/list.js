@@ -14,6 +14,7 @@ import { RemoveRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import utils from 'helpers/utils';
 import { updateToken } from 'modules/wallet.reducer';
 
 
@@ -63,10 +64,8 @@ class ListTokenAccount extends Component {
       {tokensData.map(({ address, amount, initialized, token }) => {
         if (!initialized) return null;
         const symbol = token.symbol.join('').replace('-', '');
-        const balance = (amount / global.BigInt(10 ** token.decimals)).toString();
-        const balanceDecimals = (amount % global.BigInt(10 ** token.decimals)).toString();
-        const totalSupply = (token.total_supply / global.BigInt(10 ** token.decimals)).toString();
-        const totalSupplyDecimals = (token.total_supply % global.BigInt(10 ** token.decimals)).toString();
+        const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
+        const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
 
         return <Grid key={address} item xs={12}>
           <Grid container spacing={2}>
@@ -94,8 +93,8 @@ class ListTokenAccount extends Component {
                 label="Balance"
                 variant="outlined"
                 color="primary"
-                value={Number(balance + '.' + balanceDecimals)}
-                helperText={`Total supply: ${Number(totalSupply + '.' + totalSupplyDecimals)}`}
+                value={balance}
+                helperText={`Total supply: ${totalSupply}`}
                 fullWidth
               />
             </Grid>

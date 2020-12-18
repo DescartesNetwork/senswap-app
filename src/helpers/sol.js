@@ -95,6 +95,37 @@ SOL.getTokenData = (accountAddress) => {
   });
 }
 
+SOL.getPurePoolData = (poolAddress) => {
+  return new Promise((resolve, reject) => {
+    if (!poolAddress) return reject('Invalid public key');
+    const connection = SOL.createConnection();
+    let result = { address: poolAddress }
+    return connection.getAccountInfo(SOL.fromAddress(poolAddress)).then(({ data: poolData }) => {
+      if (!poolData) return reject(`Cannot find data of ${result.address}`);
+      const poolLayout = new soproxABI.struct(POOL_SCHEMA);
+      poolLayout.fromBuffer(poolData);
+      let treasury = { address: poolLayout.value.treasury };
+      let token = { address: poolLayout.value.token };
+      result = { ...result, ...poolLayout.value, treasury, token };
+      return connection.getAccountInfo(SOL.fromAddress(result.token.address));
+    }).then(({ data: tokenData }) => {
+      if (!tokenData) return reject(`Cannot find data of ${result.token.address}`);
+      const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
+      tokenLayout.fromBuffer(tokenData);
+      result.token = { ...result.token, ...tokenLayout.value };
+      return connection.getAccountInfo(SOL.fromAddress(result.treasury.address));
+    }).then(({ data: treasuryData }) => {
+      if (!treasuryData) return reject(`Cannot find data of ${result.treasury.address}`);
+      const treasuryLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
+      treasuryLayout.fromBuffer(treasuryData);
+      result.treasury = { ...result.treasury, ...treasuryLayout.value };
+      return resolve(result);
+    }).catch(er => {
+      return reject('Cannot read data');
+    })
+  });
+}
+
 SOL.getPoolData = (senAddress) => {
   return new Promise((resolve, reject) => {
     if (!senAddress) return reject('Invalid public key');

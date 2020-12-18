@@ -6,11 +6,14 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import TextField from '@material-ui/core/TextField';
 
-import { AddRounded } from '@material-ui/icons';
+import { AddRounded, CloseRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 import Info from './info';
@@ -24,18 +27,32 @@ class Pools extends Component {
     super();
 
     this.state = {
-      visible: false
+      visible: false,
+      senAddress: '',
     }
   }
 
-  onAdvanced = () => {
-    const { visible } = this.state;
-    return this.setState({ visible: !visible });
+  onOpen = () => {
+    return this.setState({ visible: true });
+  }
+
+  onClose = () => {
+    return this.setState({ visible: false });
+  }
+
+  onAddress = (e) => {
+    const senAddress = e.target.value || '';
+    return this.setState({ senAddress });
+  }
+
+  onAdd = () => {
+    const { senAddress } = this.state;
+    console.log(senAddress);
   }
 
   render() {
     const { classes } = this.props;
-    const { visible } = this.state;
+    const { visible, senAddress } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -45,7 +62,7 @@ class Pools extends Component {
           </Grid>
           <Grid item>
             <Tooltip title="Add a new Sen address">
-              <IconButton color="primary">
+              <IconButton color="primary" onClick={this.onOpen}>
                 <AddRounded />
               </IconButton>
             </Tooltip>
@@ -56,6 +73,39 @@ class Pools extends Component {
       <Grid item xs={12}>
         <Info />
       </Grid>
+      <Dialog open={visible} onClose={this.onClose}>
+        <DialogTitle>
+          <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
+            <Grid item className={classes.stretch}>
+              <Typography variant="h6">Add a sen address</Typography>
+            </Grid>
+            <Grid item>
+              <IconButton onClick={this.onClose} edge="end">
+                <CloseRounded />
+              </IconButton>
+            </Grid>
+          </Grid>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Sen Address"
+                variant="outlined"
+                value={senAddress}
+                onChange={this.onAddress}
+                InputProps={{
+                  endAdornment: <IconButton color="primary" onClick={this.onAdd} edge="end" >
+                    <AddRounded />
+                  </IconButton>
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} /> {/* Safe space */}
+          </Grid>
+        </DialogContent>
+      </Dialog>
     </Grid>
   }
 }

@@ -117,12 +117,11 @@ class NewPool extends Component {
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
     const {
       amount, price,
-      tokenData: { address, initialized, token, amount: balance }
+      tokenData: { address, initialized, token, amount: tokenAmount }
     } = this.state;
     if (!initialized) return null;
     const symbol = token.symbol.join('').replace('-', '');
-    const balanceFloor = (balance / global.BigInt(10 ** token.decimals)).toString();
-    const balanceDecimals = (balance % global.BigInt(10 ** token.decimals)).toString();
+    const balance = utils.prettyNumber(utils.div(tokenAmount, global.BigInt(10 ** token.decimals)));
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -149,7 +148,7 @@ class NewPool extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
-          helperText={utils.prettyNumber(Number(balanceFloor + '.' + balanceDecimals))}
+          helperText={balance}
           fullWidth
         />
       </Grid>

@@ -31,14 +31,14 @@ import styles from './styles';
 function Row(props) {
   const {
     data: {
-      address: _senAddress,
-      sen: balance,
+      address: senAddress,
+      sen: senAmount,
       initialized,
       pool: {
         address: _poolAddress,
         fee_numerator,
         fee_denominator,
-        reserve,
+        reserve: poolReserve,
         sen,
         token,
         treasury
@@ -49,16 +49,12 @@ function Row(props) {
   const classes = makeStyles(styles)();
 
   if (!initialized) return null;
-  const _symbol = token.symbol.join('').replace('-', '');
-  const _totalSupply = utils.prettyNumber(Number((token.total_supply / global.BigInt(10 ** token.decimals)).toString()));
-  const _value = utils.prettyNumber(Number((balance / global.BigInt(10 ** token.decimals)).toString()));
-  const priceFloor = reserve ? Number((sen / reserve).toString()) : 0;
-  const priceDecimals = reserve ? Number((sen % reserve).toString()) : 0;
-  const _price = Number(priceFloor + '.' + priceDecimals);
-  const feeFloor = Number((fee_numerator / fee_denominator).toString());
-  const feeDecimals = Number((fee_numerator % fee_denominator).toString());
-  const _fee = Number(feeFloor + '.' + feeDecimals);
-  const _reserve = utils.prettyNumber(Number((reserve / global.BigInt(10 ** token.decimals)).toString()));
+  const symbol = token.symbol.join('').replace('-', '');
+  const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
+  const balance = utils.prettyNumber(utils.div(senAmount, global.BigInt(10 ** token.decimals)));
+  const price = utils.div(sen, poolReserve);
+  const fee = utils.div(fee_numerator, fee_denominator);
+  const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);
   return <Fragment>
@@ -69,16 +65,16 @@ function Row(props) {
         </IconButton>
       </TableCell>
       <TableCell>
-        <Typography>{_senAddress}</Typography>
+        <Typography>{senAddress}</Typography>
       </TableCell>
       <TableCell>
-        <Typography>{_symbol}</Typography>
+        <Typography>{symbol}</Typography>
       </TableCell>
       <TableCell>
-        <Typography>{_value}</Typography>
+        <Typography>{balance}</Typography>
       </TableCell>
       <TableCell>
-        <Typography>{_price}</Typography>
+        <Typography>{price}</Typography>
       </TableCell>
     </TableRow>
     <Dialog open={visible} onClose={onClose}>
@@ -103,23 +99,23 @@ function Row(props) {
             <TextField label="Pool Address" variant="outlined" value={_poolAddress} fullWidth />
           </Grid>
           <Grid item xs={4}>
-            <TextField label="Fee" variant="outlined" value={_fee} fullWidth />
+            <TextField label="Fee" variant="outlined" value={fee} fullWidth />
           </Grid>
           <Grid item xs={8}>
             <TextField label="Treasury Address" variant="outlined" value={treasury.address} fullWidth />
           </Grid>
           <Grid item xs={4}>
-            <TextField label="Reserve" variant="outlined" value={_reserve} fullWidth />
+            <TextField label="Reserve" variant="outlined" value={reserve} fullWidth />
           </Grid>
           <Grid item xs={12}>
             <Typography variant="body2">Token</Typography>
           </Grid>
           <Grid item xs={12}>
             <TextField
-              label={_symbol}
+              label={symbol}
               variant="outlined"
               value={token.address}
-              helperText={`Total supply: ${_totalSupply} - Decimals: ${token.decimals}`}
+              helperText={`Total supply: ${totalSupply} - Decimals: ${token.decimals}`}
               fullWidth />
           </Grid>
           <Grid item xs={12} /> {/* Safe space */}
