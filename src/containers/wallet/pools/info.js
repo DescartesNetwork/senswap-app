@@ -20,13 +20,14 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 
-import { VisibilityRounded, CloseRounded } from '@material-ui/icons';
+import { VisibilityRounded, CloseRounded, RemoveRounded } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
 
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import styles from './styles';
+import { updateSen } from 'modules/wallet.reducer';
 
 function Row(props) {
   const {
@@ -43,7 +44,8 @@ function Row(props) {
         token,
         treasury
       }
-    }
+    },
+    onRemove
   } = props;
   const [visible, onVisible] = useState(false);
   const classes = makeStyles(styles)();
@@ -75,6 +77,11 @@ function Row(props) {
       </TableCell>
       <TableCell>
         <Typography>{price}</Typography>
+      </TableCell>
+      <TableCell>
+        <IconButton size="small" color="primary" onClick={onRemove}>
+          <RemoveRounded />
+        </IconButton>
       </TableCell>
     </TableRow>
     <Dialog open={visible} onClose={onClose}>
@@ -155,6 +162,12 @@ class Info extends Component {
     });
   }
 
+  onRemove = (address) => {
+    const { wallet: { sens }, updateSen } = this.props;
+    const newSens = sens.filter(senAddress => senAddress !== address);
+    return updateSen(newSens);
+  }
+
   render() {
     const { classes } = this.props;
     const { sensData } = this.state;
@@ -178,10 +191,15 @@ class Info extends Component {
                 <TableCell>
                   <Typography variant="body2">Price</Typography>
                 </TableCell>
+                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>
-              {sensData.map(data => <Row key={data.address} data={data} />)}
+              {sensData.map(data => <Row
+                key={data.address}
+                data={data}
+                onRemove={() => this.onRemove(data.address)}
+              />)}
             </TableBody>
           </Table>
         </TableContainer>
@@ -196,7 +214,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-
+  updateSen,
 }, dispatch);
 
 export default withRouter(connect(

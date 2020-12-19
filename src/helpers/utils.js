@@ -83,7 +83,7 @@ Utils.div = (a, b) => {
   if (!b) throw new Error('Divided by zero');
   let floor = Number(a / b);
   let decimals = 0n;
-  for (let i = 0; i <= 9; i++) {
+  for (let i = 0; i < 9; i++) {
     a = (a % b) * 10n;
     decimals = decimals * 10n + a / b;
   }

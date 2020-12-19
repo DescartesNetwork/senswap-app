@@ -43,6 +43,16 @@ const SEN_SCHEMA = [
   { key: 'initialized', type: 'bool' }
 ];
 
+SOL.isAddress = (address) => {
+  try {
+    const publicKey = new PublicKey(address);
+    if (!publicKey) throw new Error('Invalid public key');
+    return true;
+  } catch (er) {
+    return false;
+  }
+}
+
 SOL.fromSecretKey = (secretKey) => {
   const account = new Account(Buffer.from(secretKey, 'hex'));
   return account;
@@ -356,59 +366,42 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
   });
 }
 
-SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, srcTokenPublickKey, tokenPublicKey, payer) => {
+SOL.addLiquidity = (reserve, senPublicKey, poolPublicKey, treasuryPublicKey, srcTokenPublickKey, tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
 
     const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
     const swapProgramId = SOL.fromAddress(swapFactoryAddress);
-    // Sen
-    const sen = new Account();
-    const senSpace = (new soproxABI.struct(SEN_SCHEMA)).space;
-    return connection.getMinimumBalanceForRentExemption(senSpace).then(lamports => {
-      const transaction = new Transaction();
-      transaction.add(SystemProgram.createAccount({
-        fromPubkey: payer.publicKey,
-        newAccountPubkey: sen.publicKey,
-        lamports,
-        space: senSpace,
-        programId: swapProgramId,
-      }));
-      return sendAndConfirmTransaction(
-        connection, transaction, [payer, sen],
-        { skipPreflight: true, commitment: 'recent' });
-    }).then(re => {
-      const layout = new soproxABI.struct(
-        [
-          { key: 'code', type: 'u8' },
-          { key: 'reserve', type: 'u64' },
-        ],
-        { code: 1, reserve }
-      );
-      const instruction = new TransactionInstruction({
-        keys: [
-          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
-          { pubkey: poolPublicKey, isSigner: false, isWritable: true },
-          { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
-          { pubkey: sen.publicKey, isSigner: true, isWritable: true },
-          { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
-          { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
-          { pubkey: tokenProgramId, isSigner: false, isWritable: false },
-        ],
-        programId: swapProgramId,
-        data: layout.toBuffer()
-      });
-      const transaction = new Transaction();
-      transaction.add(instruction);
-      return sendAndConfirmTransaction(
-        connection, transaction, [payer, sen],
-        { skipPreflight: true, commitment: 'recent', });
-    }).then(re => {
-      return resolve(sen);
-    }).catch(er => {
-      return reject('Cannot add liquidity to the pool');
+    const layout = new soproxABI.struct(
+      [
+        { key: 'code', type: 'u8' },
+        { key: 'reserve', type: 'u64' },
+      ],
+      { code: 1, reserve }
+    );
+    const instruction = new TransactionInstruction({
+      keys: [
+        { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+        { pubkey: poolPublicKey, isSigner: false, isWritable: true },
+        { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
+        { pubkey: senPublicKey, isSigner: false, isWritable: true },
+        { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
+        { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
+        { pubkey: tokenProgramId, isSigner: false, isWritable: false },
+      ],
+      programId: swapProgramId,
+      data: layout.toBuffer()
     });
+    const transaction = new Transaction();
+    transaction.add(instruction);
+    return sendAndConfirmTransaction(
+      connection, transaction, [payer],
+      { skipPreflight: true, commitment: 'recent', }).then(re => {
+        return resolve(re);
+      }).catch(er => {
+        return reject('Cannot add liquidity to the pool');
+      });
   });
 }
 

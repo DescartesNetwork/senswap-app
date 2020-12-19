@@ -15,7 +15,7 @@ import Drain from 'components/drain';
 import { BaseCard, NotiCard } from 'components/cards';
 import NewPool from './newPool';
 import AddLiquidity from './addLiquidity';
-import WithdrawLiquidity from './withdrawLiquidity';
+import RemoveLiquidity from './removeLiquidity';
 
 import styles from './styles';
 
@@ -50,7 +50,7 @@ class Pool extends Component {
                   <BottomNavigation value={pathname} onChange={this.onRoute} className={classes.navigation} showLabels>
                     <BottomNavigationAction label="New Pool" value="/pool/new-pool" icon={<CheckCircleRounded />} />
                     <BottomNavigationAction label="Add Liquidity" value="/pool/add-liquidity" icon={<AddCircleRounded />} />
-                    <BottomNavigationAction label="Withdraw Liquidity" value="/pool/withdraw-liquidity" icon={<RemoveCircleRounded />} />
+                    <BottomNavigationAction label="Remove Liquidity" value="/pool/remove-liquidity" icon={<RemoveCircleRounded />} />
                   </BottomNavigation>
                 </Grid>
                 <Grid item xs={12}>
@@ -61,7 +61,7 @@ class Pool extends Component {
                     <Redirect exact from="/pool" to="/pool/new-pool" />
                     <Route exact path='/pool/new-pool' component={NewPool} />
                     <Route exact path='/pool/add-liquidity' component={AddLiquidity} />
-                    <Route exact path='/pool/withdraw-liquidity' component={WithdrawLiquidity} />
+                    <Route exact path='/pool/remove-liquidity' component={RemoveLiquidity} />
                   </Switch>
                 </Grid>
               </Grid>

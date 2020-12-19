@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 
-import { AddCircleOutlineRounded } from '@material-ui/icons';
+import { RemoveCircleOutlineRounded } from '@material-ui/icons';
 
 import Address from './address';
 import Info from './info';
@@ -20,20 +20,26 @@ import styles from './styles';
 import { updateSen } from 'modules/wallet.reducer';
 
 
-class AddLiquidity extends Component {
+class RemoveLiquidity extends Component {
   constructor() {
     super();
 
     this.state = {
       senAddress: '',
+      dstAddress: '',
       amount: 0,
       senData: {},
     }
   }
 
   onAmount = (e) => {
-    const amount = e.target.value || 0;
+    const amount = e.target.value || '';
     return this.setState({ amount });
+  }
+
+  onDestination = (e) => {
+    const dstAddress = e.target.value || '';
+    return this.setState({ dstAddress });
   }
 
   onAddress = (senAddress) => {
@@ -47,47 +53,23 @@ class AddLiquidity extends Component {
     });
   }
 
-  addLiquidity = () => {
+  removeLiquidity = () => {
     const {
-      amount, senAddress,
-      senData: {
-        initialized, pool: { address: poolAddress, token, treasury }
-      }
+      amount,
+      senData: { initialized, pool: { token } }
     } = this.state;
-    const { wallet: { token: srcAddress, secretKey, sens }, updateSen } = this.props;
-    if (!initialized || !secretKey || !amount) console.error('Invalid input');
-    const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-    const senPublicKey = sol.fromAddress(senAddress);
-    const poolPublicKey = sol.fromAddress(poolAddress);
-    const treasuryPublicKey = sol.fromAddress(treasury.address);
-    const srcTokenPublickKey = sol.fromAddress(srcAddress);
-    const tokenPublicKey = sol.fromAddress(token.address);
-    const payer = sol.fromSecretKey(secretKey);
-    return sol.addLiquidity(
-      reserve,
-      senPublicKey,
-      poolPublicKey,
-      treasuryPublicKey,
-      srcTokenPublickKey,
-      tokenPublicKey,
-      payer
-    ).then(re => {
-      if (sens.includes(senAddress)) return;
-      const newSens = [...sens];
-      newSens.push(senAddress);
-      return updateSen(newSens);
-    }).catch(er => {
-      return console.error(er);
-    });
+    if (!amount || !initialized) return console.error('Invalid input');
+    const sen = global.BigInt(amount) * 10n ** (global.BigInt(token.decimals));
+    console.log(sen);
   }
 
   render() {
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
-    const { amount, senAddress } = this.state;
+    const { amount, dstAddress, senAddress } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
-        <Typography>The price of token you add will follow the current marginal price of token.</Typography>
+        <Typography>You will no longer receive liquidity incentive when you remove all your token out of the pool.</Typography>
       </Grid>
       <Grid item xs={6}>
         <TextField
@@ -113,7 +95,16 @@ class AddLiquidity extends Component {
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label="Amount"
+          label="Destination"
+          variant="outlined"
+          value={dstAddress}
+          onChange={this.onDestination}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextField
+          label="Amount (SEN)"
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
@@ -124,11 +115,11 @@ class AddLiquidity extends Component {
         <Button
           variant="contained"
           color="primary"
-          startIcon={<AddCircleOutlineRounded />}
-          onClick={this.addLiquidity}
+          startIcon={<RemoveCircleOutlineRounded />}
+          onClick={this.removeLiquidity}
           fullWidth
         >
-          <Typography variant="body2">Add</Typography>
+          <Typography variant="body2">Remove</Typography>
         </Button>
       </Grid>
     </Grid>
@@ -147,4 +138,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(AddLiquidity)));
+)(withStyles(styles)(RemoveLiquidity)));
