@@ -275,10 +275,9 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
         connection, transaction, [payer, sen],
         { skipPreflight: true, commitment: 'recent' });
     }).then(re => {
-      const seeds = [Buffer.from('escrowescrowescrowescrowescrowes', 'utf8'), pool.publicKey.toBuffer()];
-      return PublicKey.createProgramAddress(seeds, swapProgramId);
-    }).then(re => {
-      const tokenOwnerPublicKey = re;
+      const seed = [pool.publicKey.toBuffer()];
+      return PublicKey.createProgramAddress(seed, swapProgramId);
+    }).then(tokenOwnerPublicKey => {
       const layout = new soproxABI.struct(
         [
           { key: 'code', type: 'u8' },
@@ -309,7 +308,7 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
     }).then(re => {
       return resolve({ pool, treasury, sen });
     }).catch(er => {
-      console.log(er)
+      console.log(er);
       return reject('Cannot create a pool or a treasury account');
     });
   });
@@ -329,28 +328,33 @@ SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, senPublicKey, src
       ],
       { code: 1, reserve }
     );
-    const instruction = new TransactionInstruction({
-      keys: [
-        { pubkey: payer.publicKey, isSigner: true, isWritable: false },
-        { pubkey: poolPublicKey, isSigner: false, isWritable: true },
-        { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
-        { pubkey: senPublicKey, isSigner: false, isWritable: true },
-        { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
-        { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
-        { pubkey: tokenProgramId, isSigner: false, isWritable: false },
-      ],
-      programId: swapProgramId,
-      data: layout.toBuffer()
-    });
-    const transaction = new Transaction();
-    transaction.add(instruction);
-    return sendAndConfirmTransaction(
-      connection, transaction, [payer],
-      { skipPreflight: true, commitment: 'recent', }).then(re => {
-        return resolve(re);
-      }).catch(er => {
-        return reject('Cannot add liquidity to the pool');
+    const seed = [poolPublicKey.toBuffer()];
+    return PublicKey.createProgramAddress(seed, swapProgramId).then(tokenOwnerPublicKey => {
+      const instruction = new TransactionInstruction({
+        keys: [
+          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+          { pubkey: poolPublicKey, isSigner: false, isWritable: true },
+          { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
+          { pubkey: senPublicKey, isSigner: false, isWritable: true },
+          { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
+          { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenOwnerPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenProgramId, isSigner: false, isWritable: false },
+        ],
+        programId: swapProgramId,
+        data: layout.toBuffer()
       });
+      const transaction = new Transaction();
+      transaction.add(instruction);
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer],
+        { skipPreflight: true, commitment: 'recent', });
+    }).then(re => {
+      return resolve(re);
+    }).catch(er => {
+      console.log(er);
+      return reject('Cannot add liquidity to the pool');
+    });;
   });
 }
 
@@ -368,29 +372,33 @@ SOL.removeLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, dstT
       ],
       { code: 2, sen }
     );
-    const instruction = new TransactionInstruction({
-      keys: [
-        { pubkey: payer.publicKey, isSigner: true, isWritable: false },
-        { pubkey: poolPublicKey, isSigner: false, isWritable: true },
-        { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
-        { pubkey: senPublickey, isSigner: false, isWritable: true },
-        { pubkey: dstTokenPublickKey, isSigner: false, isWritable: true },
-        { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
-        { pubkey: tokenProgramId, isSigner: false, isWritable: false },
-      ],
-      programId: swapProgramId,
-      data: layout.toBuffer()
-    });
-    const transaction = new Transaction();
-    transaction.add(instruction);
-    return sendAndConfirmTransaction(
-      connection, transaction, [payer],
-      { skipPreflight: true, commitment: 'recent', }).then(re => {
-        return resolve(re);
-      }).catch(er => {
-        console.log(er)
-        return reject('Cannot withdraw liquidity to the pool');
+    const seed = [poolPublicKey.toBuffer()];
+    return PublicKey.createProgramAddress(seed, swapProgramId).then(tokenOwnerPublicKey => {
+      const instruction = new TransactionInstruction({
+        keys: [
+          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+          { pubkey: poolPublicKey, isSigner: false, isWritable: true },
+          { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
+          { pubkey: senPublickey, isSigner: false, isWritable: true },
+          { pubkey: dstTokenPublickKey, isSigner: false, isWritable: true },
+          { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenOwnerPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenProgramId, isSigner: false, isWritable: false },
+        ],
+        programId: swapProgramId,
+        data: layout.toBuffer()
       });
+      const transaction = new Transaction();
+      transaction.add(instruction);
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer],
+        { skipPreflight: true, commitment: 'recent', });
+    }).then(re => {
+      return resolve(re);
+    }).catch(er => {
+      console.log(er);
+      return reject('Cannot withdraw liquidity to the pool');
+    })
   });
 }
 

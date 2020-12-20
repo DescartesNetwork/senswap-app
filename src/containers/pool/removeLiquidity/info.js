@@ -66,7 +66,6 @@ class Info extends Component {
     const sen = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
     const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
     const price = utils.div(poolSen, poolReserve);
-    const percentage = utils.div(amount, poolSen) * 100;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -81,28 +80,35 @@ class Info extends Component {
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Your current share (SEN)"
-          variant="outlined"
-          value={sen}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Percentage (%)"
-          variant="outlined"
-          value={percentage}
-          fullWidth
-        />
-      </Grid>
       <Grid item xs={12}>
         <TextField
           label={`${symbol} Pool`}
           variant="outlined"
           value={poolAddress}
-          helperText={`Reserve: ${reserve} - Price: ${price}`}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <TextField
+          label="Your current SEN"
+          variant="outlined"
+          value={sen}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <TextField
+          label="Pool Reserve"
+          variant="outlined"
+          value={reserve}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <TextField
+          label={`${symbol} Price`}
+          variant="outlined"
+          value={price}
           fullWidth
         />
       </Grid>

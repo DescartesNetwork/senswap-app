@@ -32,7 +32,7 @@ class AddLiquidity extends Component {
   }
 
   onAmount = (e) => {
-    const amount = e.target.value || 0;
+    const amount = e.target.value || '';
     return this.setState({ amount });
   }
 
@@ -43,7 +43,7 @@ class AddLiquidity extends Component {
         return this.setState({ senData });
       }).catch(er => {
         return console.error(er);
-      });
+      });;
     });
   }
 
@@ -76,6 +76,12 @@ class AddLiquidity extends Component {
       const newSens = [...sens];
       newSens.push(senAddress);
       return updateSen(newSens);
+    }).then(re => {
+      // Force to reset info
+      const { senAddress } = this.state;
+      return this.setState({ senAddress: '', amount: 0 }, () => {
+        return this.setState({ senAddress });
+      });
     }).catch(er => {
       return console.error(er);
     });

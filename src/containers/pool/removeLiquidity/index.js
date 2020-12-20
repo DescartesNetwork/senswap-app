@@ -76,7 +76,11 @@ class RemoveLiquidity extends Component {
       tokenPublicKey,
       payer
     ).then(re => {
-      return console.log(re);
+      // Force to reset info
+      const { senAddress } = this.state;
+      return this.setState({ senAddress: '', amount: 0 }, () => {
+        return this.setState({ senAddress });
+      });
     }).catch(er => {
       return console.error(er);
     });
