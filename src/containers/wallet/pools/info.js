@@ -69,16 +69,16 @@ function Row(props) {
       <TableCell>
         <Typography>{senAddress}</Typography>
       </TableCell>
-      <TableCell>
+      <TableCell align="right">
         <Typography>{symbol}</Typography>
       </TableCell>
-      <TableCell>
+      <TableCell align="right">
         <Typography>{balance}</Typography>
       </TableCell>
-      <TableCell>
+      <TableCell align="right">
         <Typography>{price}</Typography>
       </TableCell>
-      <TableCell>
+      <TableCell align="right">
         <IconButton size="small" color="primary" onClick={onRemove}>
           <RemoveRounded />
         </IconButton>
@@ -174,7 +174,7 @@ class Info extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <TableContainer component={BaseCard} className={classes.card} >
+        <TableContainer component={BaseCard} className={classes.card}>
           <Table>
             <TableHead>
               <TableRow>
@@ -182,13 +182,13 @@ class Info extends Component {
                 <TableCell>
                   <Typography variant="body2">Sen Address</Typography>
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   <Typography variant="body2">Token</Typography>
                 </TableCell>
-                <TableCell>
-                  <Typography variant="body2">Value</Typography>
+                <TableCell align="right">
+                  <Typography variant="body2">Value (SEN)</Typography>
                 </TableCell>
-                <TableCell>
+                <TableCell align="right">
                   <Typography variant="body2">Price</Typography>
                 </TableCell>
                 <TableCell />

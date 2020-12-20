@@ -15,7 +15,6 @@ import TextField from '@material-ui/core/TextField';
 
 import { AddRounded, CloseRounded } from '@material-ui/icons';
 
-import Drain from 'components/drain';
 import Info from './info';
 
 import styles from './styles';

@@ -174,63 +174,6 @@ SOL.getPoolData = (senAddress) => {
   });
 }
 
-SOL.getTokenAccountData = (address) => {
-  return new Promise((resolve, reject) => {
-    const connection = SOL.createConnection();
-    const accountPublicKey = SOL.fromAddress(address);
-    return connection.getAccountInfo(accountPublicKey).then(({ data: accountData }) => {
-      if (!accountData) return reject(`Cannot find data of ${address}`);
-      const accountLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
-      accountLayout.fromBuffer(accountData);
-      const accountValue = { ...accountLayout.value };
-
-      return connection.getAccountInfo(SOL.fromAddress(accountValue.token)).then(({ data: tokenData }) => {
-        if (!tokenData) return reject(`Cannot find data of ${accountValue.token}`);
-        const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
-        tokenLayout.fromBuffer(tokenData);
-        const tokenValue = { ...tokenLayout.value };
-        return resolve({ ...accountValue, ...tokenValue });
-      }).catch(er => {
-        return reject('Cannot read the token data');
-      });
-    }).catch(er => {
-      return reject('Cannot read the account data');
-    });
-  });
-}
-
-SOL.getPoolAccountData = (address) => {
-  return new Promise((resolve, reject) => {
-    const connection = SOL.createConnection();
-    const poolPublicKey = SOL.fromAddress(address);
-    return connection.getAccountInfo(poolPublicKey).then(({ data: poolData }) => {
-      if (!poolData) return reject(`Cannot find data of ${address}`);
-      const poolLayout = new soproxABI.struct(POOL_SCHEMA);
-      poolLayout.fromBuffer(poolData);
-      const poolValue = { ...poolLayout.value };
-      return resolve({ ...poolValue });
-    }).catch(er => {
-      return reject('Cannot read the pool data');
-    });
-  });
-}
-
-SOL.getSenAccountData = (address) => {
-  return new Promise((resolve, reject) => {
-    const connection = SOL.createConnection();
-    const senPublicKey = SOL.fromAddress(address);
-    return connection.getAccountInfo(senPublicKey).then(({ data: senData }) => {
-      if (!senData) return reject(`Cannot find data of ${address}`);
-      const senLayout = new soproxABI.struct(SEN_SCHEMA);
-      senLayout.fromBuffer(senData);
-      const senValue = { ...senLayout.value };
-      return resolve({ ...senValue });
-    }).catch(er => {
-      return reject('Cannot read the sen data');
-    });
-  });
-}
-
 SOL.newSRC20Account = (tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
@@ -332,6 +275,10 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
         connection, transaction, [payer, sen],
         { skipPreflight: true, commitment: 'recent' });
     }).then(re => {
+      const seeds = [Buffer.from('escrowescrowescrowescrowescrowes', 'utf8'), pool.publicKey.toBuffer()];
+      return PublicKey.createProgramAddress(seeds, swapProgramId);
+    }).then(re => {
+      const tokenOwnerPublicKey = re;
       const layout = new soproxABI.struct(
         [
           { key: 'code', type: 'u8' },
@@ -348,6 +295,7 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
           { pubkey: sen.publicKey, isSigner: true, isWritable: true },
           { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
           { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenOwnerPublicKey, isSigner: false, isWritable: false },
           { pubkey: tokenProgramId, isSigner: false, isWritable: false },
         ],
         programId: swapProgramId,
@@ -361,12 +309,13 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
     }).then(re => {
       return resolve({ pool, treasury, sen });
     }).catch(er => {
+      console.log(er)
       return reject('Cannot create a pool or a treasury account');
     });
   });
 }
 
-SOL.addLiquidity = (reserve, senPublicKey, poolPublicKey, treasuryPublicKey, srcTokenPublickKey, tokenPublicKey, payer) => {
+SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, senPublicKey, srcTokenPublickKey, tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
@@ -405,7 +354,7 @@ SOL.addLiquidity = (reserve, senPublicKey, poolPublicKey, treasuryPublicKey, src
   });
 }
 
-SOL.withdrawLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, dstTokenPublickKey, tokenPublicKey, payer) => {
+SOL.removeLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, dstTokenPublickKey, tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
@@ -437,8 +386,9 @@ SOL.withdrawLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, ds
     return sendAndConfirmTransaction(
       connection, transaction, [payer],
       { skipPreflight: true, commitment: 'recent', }).then(re => {
-        return resolve(sen);
+        return resolve(re);
       }).catch(er => {
+        console.log(er)
         return reject('Cannot withdraw liquidity to the pool');
       });
   });

@@ -65,9 +65,9 @@ class AddLiquidity extends Component {
     const payer = sol.fromSecretKey(secretKey);
     return sol.addLiquidity(
       reserve,
-      senPublicKey,
       poolPublicKey,
       treasuryPublicKey,
+      senPublicKey,
       srcTokenPublickKey,
       tokenPublicKey,
       payer

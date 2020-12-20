@@ -8,8 +8,8 @@ const configs = {}
  */
 configs.development = {
   node: 'http://localhost:8899',
-  tokenFactoryAddress: 'Czhz19nU5LSQeAanqwQsGofasTL7QnxhDmgkDP7QvgQT',
-  swapFactoryAddress: 'EUH3CGJ5SmStUqiFhGfhqHVL8nwUQ7k2j9nnvWyHQXka'
+  tokenFactoryAddress: '6D5sUPSzXsLPtDxBpi8fngu83FPk54CvpinX3zzZovTr',
+  swapFactoryAddress: 'ABqkcS7HPzNgxYsZoBCi66G7kSJBpcmCzwe2rkMwdrkQ'
 }
 
 /**
