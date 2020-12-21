@@ -8,14 +8,10 @@ import isEqual from 'react-fast-compare';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
-
-import { InfoRounded } from '@material-ui/icons';
 
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import styles from './styles';
-import { Typography } from '@material-ui/core';
 
 
 class Info extends Component {
@@ -48,7 +44,6 @@ class Info extends Component {
   }
 
   render() {
-    const { classes } = this.props;
     const { senData: { initialized } } = this.state;
     if (!initialized) return null;
     const {
@@ -68,18 +63,6 @@ class Info extends Component {
     const price = utils.div(poolSen, poolReserve);
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={12}>
-        <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-          <Grid item>
-            <IconButton color="primary" size="small">
-              <InfoRounded />
-            </IconButton>
-          </Grid>
-          <Grid item>
-            <Typography variant="body2">Pool Information</Typography>
-          </Grid>
-        </Grid>
-      </Grid>
       <Grid item xs={12}>
         <TextField
           label={`${symbol} Pool`}

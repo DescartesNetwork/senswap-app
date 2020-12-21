@@ -28,6 +28,13 @@ import { openWallet } from 'modules/wallet.reducer';
 
 class Header extends Component {
 
+  parseRoute = () => {
+    const { location: { pathname } } = this.props;
+    const route = pathname.split('/')[1];
+    console.log(route)
+    return route;
+  }
+
   connectWallet = () => {
     return this.props.openWallet();
   }
@@ -60,6 +67,7 @@ class Header extends Component {
   render() {
     const { classes } = this.props;
     const { ui: { width } } = this.props;
+    const currentRoute = this.parseRoute();
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -88,7 +96,12 @@ class Header extends Component {
                 {/* Governance */}
                 <Grid item>
                   <Tooltip title="Governance">
-                    <IconButton size="small" color="secondary" component={RouterLink} to={'/governance'}>
+                    <IconButton
+                      size="small"
+                      color={currentRoute === 'governance' ? 'primary' : 'secondary'}
+                      component={RouterLink}
+                      to={'/governance'}
+                    >
                       <GavelRounded />
                     </IconButton>
                   </Tooltip>
@@ -96,7 +109,12 @@ class Header extends Component {
                 {/* Liquidity Provider */}
                 <Grid item>
                   <Tooltip title="Liquidity Provider">
-                    <IconButton size="small" color="secondary" component={RouterLink} to={'/pool'}>
+                    <IconButton
+                      size="small"
+                      color={currentRoute === 'pool' ? 'primary' : 'secondary'}
+                      component={RouterLink
+                      } to={'/pool'}
+                    >
                       <LocalGasStationRounded />
                     </IconButton>
                   </Tooltip>
@@ -104,7 +122,12 @@ class Header extends Component {
                 {/* Swap */}
                 <Grid item>
                   <Tooltip title="Swap">
-                    <IconButton size="small" color="secondary" component={RouterLink} to={'/swap'}>
+                    <IconButton
+                      size="small"
+                      color={currentRoute === 'swap' ? 'primary' : 'secondary'}
+                      component={RouterLink}
+                      to={'/swap'}
+                    >
                       <SwapCallsRounded />
                     </IconButton>
                   </Tooltip>

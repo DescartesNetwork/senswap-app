@@ -14,7 +14,6 @@ import { RemoveCircleOutlineRounded } from '@material-ui/icons';
 import Address from './address';
 import Info from './info';
 
-import configs from 'configs';
 import sol from 'helpers/sol';
 import styles from './styles';
 import { updateSen } from 'modules/wallet.reducer';
@@ -87,28 +86,11 @@ class RemoveLiquidity extends Component {
   }
 
   render() {
-    const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
     const { amount, dstAddress, senAddress } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <Typography>You will no longer receive liquidity incentive when you remove all your token out of the pool.</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Swap Program"
-          variant="outlined"
-          value={swapFactoryAddress}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Token Program"
-          variant="outlined"
-          value={tokenFactoryAddress}
-          fullWidth
-        />
       </Grid>
       <Grid item xs={12}>
         <Address onChange={this.onAddress} />

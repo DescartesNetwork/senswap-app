@@ -13,7 +13,6 @@ import Divider from '@material-ui/core/Divider';
 
 import { CheckCircleOutlineRounded } from '@material-ui/icons';
 
-import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import styles from './styles';
@@ -114,31 +113,31 @@ class NewPool extends Component {
   }
 
   render() {
-    const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
     const {
       amount, price,
       tokenData: { address, initialized, token, amount: tokenAmount }
     } = this.state;
     if (!initialized) return null;
     const symbol = token.symbol.join('').replace('-', '');
-    const balance = utils.prettyNumber(utils.div(tokenAmount, global.BigInt(10 ** token.decimals)));
+    const balance = utils.prettyNumber(utils.div(tokenAmount, global.BigInt(10 ** token.decimals))) || null;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <Typography>You are the first liquidity provider. Once you are happy with the rate click supply to review.</Typography>
       </Grid>
-      <Grid item xs={6}>
-        <TextField label="Swap Program" variant="outlined" value={swapFactoryAddress} fullWidth />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField label="Token Program" variant="outlined" value={tokenFactoryAddress} fullWidth />
-      </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={8}>
         <TextField
           label={symbol}
           variant="outlined"
           value={address}
-          helperText={`Token: ${token.address}`}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <TextField
+          label="Balance"
+          variant="outlined"
+          value={balance}
           fullWidth
         />
       </Grid>
@@ -148,7 +147,6 @@ class NewPool extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
-          helperText={balance}
           fullWidth
         />
       </Grid>

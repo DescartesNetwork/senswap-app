@@ -14,7 +14,6 @@ import { AddCircleOutlineRounded } from '@material-ui/icons';
 import Address from './address';
 import Info from './info';
 
-import configs from 'configs';
 import sol from 'helpers/sol';
 import styles from './styles';
 import { updateSen } from 'modules/wallet.reducer';
@@ -55,7 +54,7 @@ class AddLiquidity extends Component {
       }
     } = this.state;
     const { wallet: { token: srcAddress, secretKey, sens }, updateSen } = this.props;
-    if (!initialized || !secretKey || !amount) console.error('Invalid input');
+    if (!initialized || !secretKey || !amount) return console.error('Invalid input');
     const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
     const senPublicKey = sol.fromAddress(senAddress);
     const poolPublicKey = sol.fromAddress(poolAddress);
@@ -88,28 +87,11 @@ class AddLiquidity extends Component {
   }
 
   render() {
-    const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
     const { amount, senAddress } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <Typography>The price of token you add will follow the current marginal price of token.</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Swap Program"
-          variant="outlined"
-          value={swapFactoryAddress}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Token Program"
-          variant="outlined"
-          value={tokenFactoryAddress}
-          fullWidth
-        />
       </Grid>
       <Grid item xs={12}>
         <Address onChange={this.onAddress} />
