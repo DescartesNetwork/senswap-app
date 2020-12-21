@@ -402,4 +402,62 @@ SOL.removeLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, dstT
   });
 }
 
+SOL.swap = (
+  amount,
+  payer,
+  bidPoolPublicKey,
+  bidTreasuryPublicKey,
+  srcTokenPublickKey,
+  bidTokenPublickKey,
+  askPoolPublicKey,
+  askTreasuryPublickKey,
+  dstTokenPublickKey,
+  askTokenPublicKey,
+) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
+
+    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
+    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const layout = new soproxABI.struct(
+      [
+        { key: 'code', type: 'u8' },
+        { key: 'amount', type: 'u64' },
+      ],
+      { code: 3, amount }
+    );
+    const seed = [askPoolPublicKey.toBuffer()];
+    return PublicKey.createProgramAddress(seed, swapProgramId).then(askTokenOwnerPublicKey => {
+      const instruction = new TransactionInstruction({
+        keys: [
+          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+          { pubkey: bidPoolPublicKey, isSigner: false, isWritable: true },
+          { pubkey: bidTreasuryPublicKey, isSigner: false, isWritable: true },
+          { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
+          { pubkey: bidTokenPublickKey, isSigner: false, isWritable: false },
+          { pubkey: askPoolPublicKey, isSigner: false, isWritable: true },
+          { pubkey: askTreasuryPublickKey, isSigner: false, isWritable: true },
+          { pubkey: dstTokenPublickKey, isSigner: false, isWritable: true },
+          { pubkey: askTokenPublicKey, isSigner: false, isWritable: false },
+          { pubkey: askTokenOwnerPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenProgramId, isSigner: false, isWritable: false },
+        ],
+        programId: swapProgramId,
+        data: layout.toBuffer()
+      });
+      const transaction = new Transaction();
+      transaction.add(instruction);
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer],
+        { skipPreflight: true, commitment: 'recent', });
+    }).then(re => {
+      return resolve(re);
+    }).catch(er => {
+      console.log(er);
+      return reject('Cannot swap');
+    })
+  });
+}
+
 export default SOL;

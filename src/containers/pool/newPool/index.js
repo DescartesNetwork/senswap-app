@@ -53,12 +53,12 @@ class NewPool extends Component {
   }
 
   onAmount = (e) => {
-    const amount = e.target.value;
+    const amount = e.target.value || '';
     return this.setState({ amount });
   }
 
   onPrice = (e) => {
-    const price = e.target.value;
+    const price = e.target.value || '';
     return this.setState({ price });
   }
 

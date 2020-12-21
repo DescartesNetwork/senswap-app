@@ -31,7 +31,6 @@ class Header extends Component {
   parseRoute = () => {
     const { location: { pathname } } = this.props;
     const route = pathname.split('/')[1];
-    console.log(route)
     return route;
   }
 
@@ -106,9 +105,9 @@ class Header extends Component {
                     </IconButton>
                   </Tooltip>
                 </Grid>
-                {/* Liquidity Provider */}
+                {/* Pool */}
                 <Grid item>
-                  <Tooltip title="Liquidity Provider">
+                  <Tooltip title="Pool">
                     <IconButton
                       size="small"
                       color={currentRoute === 'pool' ? 'primary' : 'secondary'}
