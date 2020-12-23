@@ -55,7 +55,7 @@ function Row(props) {
   const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
   const balance = utils.prettyNumber(utils.div(senAmount, global.BigInt(10 ** token.decimals)));
   const price = utils.div(sen, poolReserve);
-  const fee = utils.div(fee_numerator, fee_denominator);
+  const fee = utils.div(fee_numerator, fee_denominator)*100;
   const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);
@@ -106,7 +106,7 @@ function Row(props) {
             <TextField label="Pool Address" variant="outlined" value={_poolAddress} fullWidth />
           </Grid>
           <Grid item xs={4}>
-            <TextField label="Fee" variant="outlined" value={fee} fullWidth />
+            <TextField label="Fee %" variant="outlined" value={fee} fullWidth />
           </Grid>
           <Grid item xs={8}>
             <TextField label="Treasury Address" variant="outlined" value={treasury.address} fullWidth />

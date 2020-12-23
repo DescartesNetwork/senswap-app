@@ -48,9 +48,10 @@ class Swap extends Component {
     const { reserve: askReserve, token: askToken } = askPool;
     const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
     const newBidReserve = bidReserve + amount;
-    const newAskReserve = bidReserve * askReserve / newBidReserve;
-    const paidAmount = askReserve - newAskReserve;
-    const askAmount = utils.div(paidAmount, global.BigInt(10 ** askToken.decimals));
+    const newAskReserveNoFee = bidReserve * askReserve / newBidReserve;
+    const paidAmountNoFee = askReserve - newAskReserveNoFee;
+    const paidAmountAfterFee = paidAmountNoFee * (askPool.fee_denominator - askPool.fee_numerator) / askPool.fee_denominator;
+    const askAmount = utils.div(paidAmountAfterFee, global.BigInt(10 ** askToken.decimals));
     return this.setState({ askAmount });
   }
 
