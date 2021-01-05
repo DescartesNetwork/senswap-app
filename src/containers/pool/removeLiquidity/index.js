@@ -16,7 +16,6 @@ import Info from './info';
 
 import sol from 'helpers/sol';
 import styles from './styles';
-import { updateSen } from 'modules/wallet.reducer';
 
 
 class RemoveLiquidity extends Component {
@@ -24,10 +23,10 @@ class RemoveLiquidity extends Component {
     super();
 
     this.state = {
-      senAddress: '',
-      dstAddress: '',
+      lptAccount: '',
+      dstAccount: '',
       amount: 0,
-      senData: {},
+      data: {},
     }
   }
 
@@ -37,15 +36,15 @@ class RemoveLiquidity extends Component {
   }
 
   onDestination = (e) => {
-    const dstAddress = e.target.value || '';
-    return this.setState({ dstAddress });
+    const dstAccount = e.target.value || '';
+    return this.setState({ dstAccount });
   }
 
-  onAddress = (senAddress) => {
-    return this.setState({ senAddress }, () => {
-      if (!sol.isAddress(senAddress)) return;
-      return sol.getPoolData(senAddress).then(senData => {
-        return this.setState({ senData });
+  onAddress = (lptAccount) => {
+    return this.setState({ lptAccount }, () => {
+      if (!sol.isAddress(lptAccount)) return;
+      return sol.getPoolData(lptAccount).then(data => {
+        return this.setState({ data });
       }).catch(er => {
         return console.error(er);
       });
@@ -54,16 +53,16 @@ class RemoveLiquidity extends Component {
 
   removeLiquidity = () => {
     const {
-      amount, dstAddress, senAddress,
-      senData: { initialized, pool: { address: poolAddress, token, treasury } }
+      amount, dstAccount, lptAccount,
+      data: { initialized, pool: { address: poolAddress, token, treasury } }
     } = this.state;
     const { wallet: { secretKey } } = this.props;
     if (!amount || !initialized) return console.error('Invalid input');
     const sen = global.BigInt(amount) * 10n ** (global.BigInt(token.decimals));
-    const senPublicKey = sol.fromAddress(senAddress);
+    const senPublicKey = sol.fromAddress(lptAccount);
     const poolPublicKey = sol.fromAddress(poolAddress);
     const treasuryPublicKey = sol.fromAddress(treasury.address);
-    const dstTokenPublickKey = sol.fromAddress(dstAddress);
+    const dstTokenPublickKey = sol.fromAddress(dstAccount);
     const tokenPublicKey = sol.fromAddress(token.address);
     const payer = sol.fromSecretKey(secretKey);
     return sol.removeLiquidity(
@@ -76,9 +75,8 @@ class RemoveLiquidity extends Component {
       payer
     ).then(re => {
       // Force to reset info
-      const { senAddress } = this.state;
-      return this.setState({ senAddress: '', amount: 0 }, () => {
-        return this.setState({ senAddress });
+      return this.setState({ lptAccount: '', amount: 0 }, () => {
+        return this.setState({ lptAccount });
       });
     }).catch(er => {
       return console.error(er);
@@ -86,7 +84,7 @@ class RemoveLiquidity extends Component {
   }
 
   render() {
-    const { amount, dstAddress, senAddress } = this.state;
+    const { amount, dstAccount, lptAccount } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -96,13 +94,13 @@ class RemoveLiquidity extends Component {
         <Address onChange={this.onAddress} />
       </Grid>
       <Grid item xs={12}>
-        <Info senAddress={senAddress} />
+        <Info lptAccount={lptAccount} />
       </Grid>
       <Grid item xs={12}>
         <TextField
           label="Destination"
           variant="outlined"
-          value={dstAddress}
+          value={dstAccount}
           onChange={this.onDestination}
           fullWidth
         />
@@ -137,7 +135,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateSen,
 }, dispatch);
 
 export default withRouter(connect(

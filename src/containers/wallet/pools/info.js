@@ -27,7 +27,7 @@ import { BaseCard } from 'components/cards';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import styles from './styles';
-import { updateSen } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 
 function Row(props) {
   const {
@@ -51,11 +51,11 @@ function Row(props) {
   const classes = makeStyles(styles)();
 
   if (!initialized) return null;
-  const symbol = token.symbol.join('').replace('-', '');
+  const symbol = sol.toSymbol(token.symbol);
   const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
   const balance = utils.prettyNumber(utils.div(senAmount, global.BigInt(10 ** token.decimals)));
   const price = utils.div(sen, poolReserve);
-  const fee = utils.div(fee_numerator, fee_denominator)*100;
+  const fee = utils.div(fee_numerator, fee_denominator) * 100;
   const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);
@@ -137,7 +137,7 @@ class Info extends Component {
     super();
 
     this.state = {
-      sensData: [],
+      data: [],
     }
   }
 
@@ -152,25 +152,25 @@ class Info extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { sens } } = this.props;
-    return Promise.all(sens.map(senAddress => {
-      return sol.getPoolData(senAddress);
-    })).then(sensData => {
-      return this.setState({ sensData });
+    const { wallet: { user: { lptAccounts } } } = this.props;
+    return Promise.all(lptAccounts.map(lptAccount => {
+      return sol.getPoolData(lptAccount);
+    })).then(data => {
+      return this.setState({ data });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   onRemove = (address) => {
-    const { wallet: { sens }, updateSen } = this.props;
-    const newSens = sens.filter(senAddress => senAddress !== address);
-    return updateSen(newSens);
+    const { wallet: { user }, updateWallet } = this.props;
+    const lptAccounts = user.lptAccounts.filter(lptAccount => lptAccount !== address);
+    return updateWallet({ ...user, lptAccounts });
   }
 
   render() {
     const { classes } = this.props;
-    const { sensData } = this.state;
+    const { data } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -195,7 +195,7 @@ class Info extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {sensData.map(data => <Row
+              {data.map(data => <Row
                 key={data.address}
                 data={data}
                 onRemove={() => this.onRemove(data.address)}
@@ -214,7 +214,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateSen,
+  updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

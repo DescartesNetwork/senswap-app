@@ -19,7 +19,6 @@ import { EmojiObjectsRounded, UnfoldMoreRounded } from '@material-ui/icons';
 
 import sol from 'helpers/sol';
 import styles from './styles';
-import { updateSen } from 'modules/wallet.reducer';
 
 
 class Address extends Component {
@@ -28,8 +27,8 @@ class Address extends Component {
 
     this.state = {
       anchorEl: null,
-      senAddress: '',
-      sensData: [],
+      lptAccount: '',
+      data: [],
     }
   }
 
@@ -44,19 +43,19 @@ class Address extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { sens } } = this.props;
-    return Promise.all(sens.map(senAddress => {
-      return sol.getPoolData(senAddress);
+    const { wallet: { user: { lptAccounts } } } = this.props;
+    return Promise.all(lptAccounts.map(lptAccount => {
+      return sol.getPoolData(lptAccount);
     })).then(re => {
-      return this.setState({ sensData: re });
+      return this.setState({ data: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
-  onAddress = (senAddress) => {
-    return this.setState({ senAddress }, () => {
-      this.props.onChange(senAddress);
+  onAddress = (lptAccount) => {
+    return this.setState({ lptAccount }, () => {
+      this.props.onChange(lptAccount);
       return this.onClose();
     });
   }
@@ -74,9 +73,9 @@ class Address extends Component {
   }
 
   renderGroupedSensData = () => {
-    const { sensData } = this.state;
+    const { data } = this.state;
     const groupedSensData = {};
-    sensData.forEach(({ address, pool: { token } }) => {
+    data.forEach(({ address, pool: { token } }) => {
       const symbol = token.symbol.join('').replace('-', '');
       if (!groupedSensData[symbol]) groupedSensData[symbol] = [];
       return groupedSensData[symbol].push(address);
@@ -108,14 +107,14 @@ class Address extends Component {
   }
 
   render() {
-    const { anchorEl, senAddress } = this.state;
+    const { anchorEl, lptAccount } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <TextField
           label="Sen address"
           variant="outlined"
-          value={senAddress}
+          value={lptAccount}
           onChange={(e) => this.onAddress(e.target.value || '')}
           InputProps={{
             endAdornment: <IconButton color="primary" onClick={this.onOpen} edge="end" >
@@ -142,7 +141,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateSen,
 }, dispatch);
 
 Address.defaultProps = {

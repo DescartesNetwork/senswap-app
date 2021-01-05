@@ -64,7 +64,7 @@ class NewPool extends Component {
 
   newPool = () => {
     const { tokenData: { address, initialized, token }, amount, price } = this.state;
-    const { wallet: { secretKey, sens }, updateSen } = this.props;
+    const { wallet: { secretKey, user }, updateWallet } = this.props;
     if (!initialized || !secretKey || !amount || !price) return console.error('Invalid input');
     const reserve = global.BigInt(amount * 10 ** token.decimals);
     const usd = global.BigInt(price * amount * 10 ** token.decimals);
@@ -73,19 +73,24 @@ class NewPool extends Component {
     const tokenPublicKey = sol.fromAddress(token.address);
     const payer = sol.fromSecretKey(secretKey);
 
-    return sol.newPool(reserve, usd, srcTokenPublicKey,
-      tokenPublicKey, payer).then(({ pool, treasury, sen }) => {
-        this.setState({
-          poolAddress: pool.publicKey.toBase58(),
-          treasuryAddress: treasury.publicKey.toBase58(),
-          senAddress: sen.publicKey.toBase58(),
-        });
-        const newSens = [...sens];
-        newSens.push(sen.publicKey.toBase58());
-        return updateSen(newSens);
-      }).catch(er => {
-        return console.error(er);
+    return sol.newPool(
+      reserve,
+      usd,
+      srcTokenPublicKey,
+      tokenPublicKey,
+      payer
+    ).then(({ pool, treasury, sen }) => {
+      this.setState({
+        poolAddress: pool.publicKey.toBase58(),
+        treasuryAddress: treasury.publicKey.toBase58(),
+        senAddress: sen.publicKey.toBase58(),
       });
+      const lptAccounts = [...user.lptAccounts];
+      lptAccounts.push(sen.publicKey.toBase58());
+      return updateWallet({ ...user, lptAccounts });
+    }).catch(er => {
+      return console.error(er);
+    });
   }
 
   renderResult = () => {
@@ -181,7 +186,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateSen,
+  updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

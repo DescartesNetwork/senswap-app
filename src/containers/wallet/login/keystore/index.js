@@ -52,7 +52,7 @@ class KeyStore extends Component {
       <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
           <Grid item>
-            <Button startIcon={<PublishRounded />}>
+            <Button startIcon={<PublishRounded />} disabled>
               <Typography>Upload keystore</Typography>
             </Button>
           </Grid>
@@ -66,10 +66,12 @@ class KeyStore extends Component {
                   color="primary"
                   onClick={this.onSave}
                   edge="end"
+                  disabled
                 >
                   <PowerRounded />
                 </IconButton>
               }}
+              disabled
               fullWidth
             />
           </Grid>

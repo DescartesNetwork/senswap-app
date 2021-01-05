@@ -53,6 +53,10 @@ SOL.isAddress = (address) => {
   }
 }
 
+SOL.toSymbol = (symbol) => {
+  return symbol.join('').replace('-', '');
+}
+
 SOL.fromSecretKey = (secretKey) => {
   const account = new Account(Buffer.from(secretKey, 'hex'));
   return account;

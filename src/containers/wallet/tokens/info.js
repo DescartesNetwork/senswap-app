@@ -23,7 +23,7 @@ class TokenInfo extends Component {
     super();
 
     this.state = {
-      tokenData: {},
+      data: {},
     }
   }
 
@@ -38,24 +38,24 @@ class TokenInfo extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { token } } = this.props;
-    return sol.getTokenData(token).then(re => {
-      return this.setState({ tokenData: re });
+    const { wallet: { currentTokenAccount } } = this.props;
+    return sol.getTokenData(currentTokenAccount).then(re => {
+      return this.setState({ data: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   onQRCode = () => {
-    const { tokenData: { address } } = this.state;
+    const { data: { address } } = this.state;
     const { setQRCode } = this.props;
     return setQRCode(true, address);
   }
 
   render() {
-    const { tokenData: { address, amount, initialized, token } } = this.state;
+    const { data: { address, amount, initialized, token } } = this.state;
     if (!initialized) return null;
-    const symbol = token.symbol.join('').replace('-', '');
+    const symbol = sol.toSymbol(token.symbol);
     const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
 
     return <Grid container spacing={2}>

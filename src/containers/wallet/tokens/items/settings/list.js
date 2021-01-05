@@ -15,7 +15,7 @@ import { RemoveRounded } from '@material-ui/icons';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
-import { updateToken } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 
 
 class ListTokenAccount extends Component {
@@ -23,7 +23,7 @@ class ListTokenAccount extends Component {
     super();
 
     this.state = {
-      tokensData: []
+      data: []
     }
   }
 
@@ -38,32 +38,32 @@ class ListTokenAccount extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { tokens } } = this.props;
-    return Promise.all(tokens.map(token => {
-      return sol.getTokenData(token);
+    const { wallet: { user: { tokenAccounts } } } = this.props;
+    return Promise.all(tokenAccounts.map(tokenAccount => {
+      return sol.getTokenData(tokenAccount);
     })).then(re => {
-      return this.setState({ tokensData: re });
+      return this.setState({ data: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   removeToken = (address) => {
-    const { wallet: { tokens }, updateToken } = this.props;
-    const newTokens = tokens.filter(token => token !== address);
-    return updateToken(newTokens);
+    const { wallet: { user }, updateWallet } = this.props;
+    const tokenAccounts = user.tokenAccounts.filter(tokenAccount => tokenAccount !== address);
+    return updateWallet({ ...user, tokenAccounts });
   }
 
   render() {
-    const { tokensData } = this.state;
+    const { data } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="body2">Your accounts</Typography>
       </Grid>
-      {tokensData.map(({ address, amount, initialized, token }) => {
+      {data.map(({ address, amount, initialized, token }) => {
         if (!initialized) return null;
-        const symbol = token.symbol.join('').replace('-', '');
+        const symbol = sol.toSymbol(token.symbol);
         const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
         const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
 
@@ -111,7 +111,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateToken,
+  updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

@@ -16,7 +16,7 @@ import Info from './info';
 
 import sol from 'helpers/sol';
 import styles from './styles';
-import { updateSen } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 
 
 class AddLiquidity extends Component {
@@ -24,9 +24,9 @@ class AddLiquidity extends Component {
     super();
 
     this.state = {
-      senAddress: '',
+      lptAccount: '',
       amount: 0,
-      senData: {},
+      data: {},
     }
   }
 
@@ -35,11 +35,11 @@ class AddLiquidity extends Component {
     return this.setState({ amount });
   }
 
-  onAddress = (senAddress) => {
-    return this.setState({ senAddress }, () => {
-      if (!sol.isAddress(senAddress)) return;
-      return sol.getPoolData(senAddress).then(senData => {
-        return this.setState({ senData });
+  onAddress = (lptAccount) => {
+    return this.setState({ lptAccount }, () => {
+      if (!sol.isAddress(lptAccount)) return;
+      return sol.getPoolData(lptAccount).then(data => {
+        return this.setState({ data });
       }).catch(er => {
         return console.error(er);
       });;
@@ -48,18 +48,23 @@ class AddLiquidity extends Component {
 
   addLiquidity = () => {
     const {
-      amount, senAddress,
-      senData: {
+      amount, lptAccount,
+      data: {
         initialized, pool: { address: poolAddress, token, treasury }
       }
     } = this.state;
-    const { wallet: { token: srcAddress, secretKey, sens }, updateSen } = this.props;
+    const {
+      wallet: {
+        currentTokenAccount, secretKey, user
+      },
+      updateWallet
+    } = this.props;
     if (!initialized || !secretKey || !amount) return console.error('Invalid input');
     const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-    const senPublicKey = sol.fromAddress(senAddress);
+    const senPublicKey = sol.fromAddress(lptAccount);
     const poolPublicKey = sol.fromAddress(poolAddress);
     const treasuryPublicKey = sol.fromAddress(treasury.address);
-    const srcTokenPublickKey = sol.fromAddress(srcAddress);
+    const srcTokenPublickKey = sol.fromAddress(currentTokenAccount);
     const tokenPublicKey = sol.fromAddress(token.address);
     const payer = sol.fromSecretKey(secretKey);
     return sol.addLiquidity(
@@ -71,15 +76,14 @@ class AddLiquidity extends Component {
       tokenPublicKey,
       payer
     ).then(re => {
-      if (sens.includes(senAddress)) return;
-      const newSens = [...sens];
-      newSens.push(senAddress);
-      return updateSen(newSens);
+      if (user.lptAccounts.includes(lptAccount)) return;
+      const lptAccounts = [...user.lptAccounts];
+      lptAccounts.push(lptAccount);
+      return updateWallet({ ...user, lptAccounts });
     }).then(re => {
       // Force to reset info
-      const { senAddress } = this.state;
-      return this.setState({ senAddress: '', amount: 0 }, () => {
-        return this.setState({ senAddress });
+      return this.setState({ lptAccount: '', amount: 0 }, () => {
+        return this.setState({ lptAccount });
       });
     }).catch(er => {
       return console.error(er);
@@ -87,7 +91,7 @@ class AddLiquidity extends Component {
   }
 
   render() {
-    const { amount, senAddress } = this.state;
+    const { amount, lptAccount } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -97,7 +101,7 @@ class AddLiquidity extends Component {
         <Address onChange={this.onAddress} />
       </Grid>
       <Grid item xs={12}>
-        <Info senAddress={senAddress} />
+        <Info lptAccount={lptAccount} />
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -129,7 +133,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateSen,
+  updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

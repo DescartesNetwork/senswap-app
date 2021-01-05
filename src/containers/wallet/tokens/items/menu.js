@@ -17,7 +17,7 @@ import { MenuRounded } from '@material-ui/icons';
 
 import styles from '../styles';
 import sol from 'helpers/sol';
-import { updateToken } from 'modules/wallet.reducer';
+import { setMainTokenAccount } from 'modules/wallet.reducer';
 
 
 class TokenMenu extends Component {
@@ -26,7 +26,7 @@ class TokenMenu extends Component {
 
     this.state = {
       anchorEl: null,
-      tokensData: [],
+      data: [],
     }
   }
 
@@ -41,19 +41,19 @@ class TokenMenu extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { tokens } } = this.props;
-    return Promise.all(tokens.map(token => {
-      return sol.getTokenData(token);
+    const { wallet: { user: { tokenAccounts } } } = this.props;
+    return Promise.all(tokenAccounts.map(tokenAccount => {
+      return sol.getTokenData(tokenAccount);
     })).then(re => {
-      return this.setState({ tokensData: re });
+      return this.setState({ data: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
-  onSelect = (token) => {
-    const { wallet: { tokens }, updateToken } = this.props;
-    return updateToken(tokens, token).then(re => {
+  onSelect = (tokenAccount) => {
+    const { wallet: { user: { tokenAccounts } }, setMainTokenAccount } = this.props;
+    return setMainTokenAccount(tokenAccount).then(re => {
       return this.onClose();
     }).catch(er => {
       return console.error(er);
@@ -61,9 +61,9 @@ class TokenMenu extends Component {
   }
 
   renderGroupedTokensData = () => {
-    const { tokensData } = this.state;
+    const { data } = this.state;
     let groupedTokensData = {};
-    tokensData.forEach(({ address, token }) => {
+    data.forEach(({ address, token }) => {
       const symbol = token.symbol.join('').replace('-', '');
       if (!groupedTokensData[symbol]) groupedTokensData[symbol] = [];
       groupedTokensData[symbol].push(address);
@@ -118,7 +118,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateToken,
+  setMainTokenAccount,
 }, dispatch);
 
 export default withRouter(connect(

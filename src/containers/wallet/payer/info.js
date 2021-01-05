@@ -38,7 +38,7 @@ class PayerInfo extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { address } } = this.props;
+    const { wallet: { user: { address } } } = this.props;
     return sol.getBalance(address).then(re => {
       const accountData = { address, amount: re };
       return this.setState({ accountData });

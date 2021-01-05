@@ -18,7 +18,6 @@ import { AddRounded, CloseRounded } from '@material-ui/icons';
 import Info from './info';
 
 import styles from './styles';
-import { updateToken } from 'modules/wallet.reducer';
 
 
 class Pools extends Component {
@@ -115,7 +114,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateToken
 }, dispatch);
 
 export default withRouter(connect(

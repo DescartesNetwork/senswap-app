@@ -19,7 +19,7 @@ class Info extends Component {
     super();
 
     this.state = {
-      senData: {},
+      data: {},
     }
   }
 
@@ -28,26 +28,26 @@ class Info extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { senAddress: prevSenAddress } = prevProps;
-    const { senAddress } = this.props;
-    if (!isEqual(senAddress, prevSenAddress)) this.fetchData();
+    const { lptAccount: prevLptAccount } = prevProps;
+    const { lptAccount } = this.props;
+    if (!isEqual(lptAccount, prevLptAccount)) this.fetchData();
   }
 
   fetchData = () => {
-    const { senAddress } = this.props;
-    if (!sol.isAddress(senAddress)) return;
-    return sol.getPoolData(senAddress).then(re => {
-      return this.setState({ senData: re });
+    const { lptAccount } = this.props;
+    if (!sol.isAddress(lptAccount)) return;
+    return sol.getPoolData(lptAccount).then(re => {
+      return this.setState({ data: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   render() {
-    const { senData: { initialized } } = this.state;
+    const { data: { initialized } } = this.state;
     if (!initialized) return null;
     const {
-      senData: {
+      data: {
         sen: amount,
         pool: {
           address: poolAddress,
@@ -57,7 +57,7 @@ class Info extends Component {
         },
       }
     } = this.state;
-    const symbol = token.symbol.join('').replace('-', '');
+    const symbol = sol.toSymbol(token.symbol);
     const sen = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
     const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
     const price = utils.div(poolSen, poolReserve);
@@ -107,11 +107,11 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 Info.defaultProps = {
-  senAddress: '',
+  lptAccount: '',
 }
 
 Info.propTypes = {
-  senAddress: PropTypes.string,
+  lptAccount: PropTypes.string,
 }
 
 export default withRouter(connect(

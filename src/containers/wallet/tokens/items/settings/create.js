@@ -13,7 +13,7 @@ import { EmojiObjectsRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
-import { updateToken } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 
 
 class CreateTokenAccount extends Component {
@@ -21,33 +21,33 @@ class CreateTokenAccount extends Component {
     super();
 
     this.state = {
-      tokenAddress: '',
+      tokenAccount: '',
     }
   }
 
   onToken = (e) => {
-    const tokenAddress = e.target.value || '';
-    return this.setState({ tokenAddress });
+    const tokenAccount = e.target.value || '';
+    return this.setState({ tokenAccount });
   }
 
   newAccount = () => {
-    const { wallet: { tokens, secretKey }, updateToken } = this.props;
-    const { tokenAddress } = this.state;
-    if (!tokenAddress) return console.error('Invalid input');
+    const { wallet: { user, secretKey }, updateWallet } = this.props;
+    const { tokenAccount } = this.state;
+    if (!tokenAccount) return console.error('Invalid input');
 
     const payer = sol.fromSecretKey(secretKey);
-    const tokenPublicKey = sol.fromAddress(tokenAddress);
-    return sol.newSRC20Account(tokenPublicKey, payer).then(re => {
-      const newTokens = [...tokens];
-      newTokens.push(re.publicKey.toBase58());
-      return updateToken(newTokens);
+    const tokenAccountPublicKey = sol.fromAddress(tokenAccount);
+    return sol.newSRC20Account(tokenAccountPublicKey, payer).then(tokenAccount => {
+      const tokenAccounts = [...user.tokenAccounts];
+      tokenAccounts.push(tokenAccount.publicKey.toBase58());
+      return updateWallet({ ...user, tokenAccounts });
     }).catch(er => {
       return console.log(er);
     });
   }
 
   render() {
-    const { tokenAddress } = this.state;
+    const { tokenAccount } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -59,7 +59,7 @@ class CreateTokenAccount extends Component {
           variant="outlined"
           color="primary"
           onChange={this.onToken}
-          value={tokenAddress}
+          value={tokenAccount}
           InputProps={{
             endAdornment: <IconButton color="primary" onClick={this.newAccount} edge="end" >
               <EmojiObjectsRounded />
@@ -78,7 +78,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateToken,
+  updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

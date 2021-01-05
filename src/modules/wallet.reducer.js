@@ -1,4 +1,6 @@
+import configs from 'configs';
 import storage from 'helpers/storage';
+import api from 'helpers/api';
 
 /**
  * Documents
@@ -6,18 +8,14 @@ import storage from 'helpers/storage';
  */
 
 // Local storage
-const ADDRESS = storage.get('address');
-const SECRET_KEY = storage.get('secretKey');
-const TOKENS = storage.get('tokens') || [];
-const TOKEN = storage.get('token');
-const SENS = storage.get('sens') || [];
 const defaultState = {
   visible: false,
-  address: ADDRESS,
-  secretKey: SECRET_KEY,
-  tokens: TOKENS,
-  token: TOKEN,
-  sens: SENS,
+  user: {
+    address: null,
+    tokenAccounts: [],
+    lptAccounts: [],
+  },
+  currentTokenAccount: null,
   qrcode: {
     visible: false,
     message: ''
@@ -95,16 +93,87 @@ export const setWallet = (address, secretKey) => {
         return reject(er);
       }
 
-      // Local storage
-      storage.set('address', address);
-      storage.set('secretKey', secretKey);
-
-      const data = { address, secretKey };
-      dispatch({ type: SET_WALLET_OK, data });
-      return resolve(data);
+      const { api: { base } } = configs;
+      return api.get(base + '/user', { address }).then(re => {
+        if (!re.data) return api.post(base + '/user', { user: { address } });
+        return Promise.resolve(re);
+      }).then(({ data: user }) => {
+        storage.set('address', address);
+        storage.set('secretKey', secretKey);
+        const data = { user };
+        dispatch({ type: SET_WALLET_OK, data });
+        return resolve(data);
+      }).catch(er => {
+        dispatch({ type: SET_WALLET_FAIL, reason: er.toString() });
+        return reject(er.toString());
+      });
     });
   };
 };
+
+/**
+ * Get wallet
+ */
+export const GET_WALLET = 'GET_WALLET';
+export const GET_WALLET_OK = 'GET_WALLET_OK';
+export const GET_WALLET_FAIL = 'GET_WALLET_FAIL';
+
+export const getWallet = () => {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: GET_WALLET });
+
+      const address = storage.get('address');
+      if (!address) {
+        const er = 'Already disconnected';
+        dispatch({ type: GET_WALLET_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const { api: { base } } = configs;
+      return api.get(base + '/user', { address }).then(({ data: user }) => {
+        const data = { user };
+        dispatch({ type: GET_WALLET_OK, data });
+        return resolve(data);
+      }).catch(er => {
+        dispatch({ type: GET_WALLET_FAIL, reason: er.toString() });
+        return reject(er.toString());
+      });
+    });
+  };
+};
+
+/**
+ * Update wallet
+ */
+export const UPDATE_WALLET = 'UPDATE_WALLET';
+export const UPDATE_WALLET_OK = 'UPDATE_WALLET_OK';
+export const UPDATE_WALLET_FAIL = 'UPDATE_WALLET_FAIL';
+
+export const updateWallet = (user) => {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: UPDATE_WALLET });
+
+      if (!user) {
+        const er = 'Invalid input';
+        dispatch({ type: UPDATE_WALLET_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const { api: { base } } = configs;
+      return api.put(base + '/user', { user }).then(({ data: user }) => {
+        const data = { user };
+        dispatch({ type: UPDATE_WALLET_OK, data });
+        return resolve(data);
+      }).catch(er => {
+        dispatch({ type: UPDATE_WALLET_FAIL, reason: er.toString() });
+        return reject(er.toString());
+      });
+    });
+  };
+};
+
 
 /**
  * Unset wallet
@@ -129,7 +198,7 @@ export const unsetWallet = () => {
       storage.clear('address');
       storage.clear('secretKey');
 
-      const data = { address: null, secretKey: null };
+      const data = { ...defaultState };
       dispatch({ type: UNSET_WALLET_OK, data });
       return resolve(data);
     });
@@ -166,62 +235,26 @@ export const setQRCode = (visible = false, message = '') => {
 };
 
 /**
- * Update token
+ * Set main token account
  */
-export const UPDATE_TOKEN = 'UPDATE_TOKEN';
-export const UPDATE_TOKEN_OK = 'UPDATE_TOKEN_OK';
-export const UPDATE_TOKEN_FAIL = 'UPDATE_TOKEN_FAIL';
+export const SET_MAIN_TOKEN_ACCOUNT = 'SET_MAIN_TOKEN_ACCOUNT';
+export const SET_MAIN_TOKEN_ACCOUNT_OK = 'SET_MAIN_TOKEN_ACCOUNT_OK';
+export const SET_MAIN_TOKEN_ACCOUNT_FAIL = 'SET_MAIN_TOKEN_ACCOUNT_FAIL';
 
-export const updateToken = (tokens, token) => {
+export const setMainTokenAccount = (tokenAccount) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
-      dispatch({ type: UPDATE_TOKEN });
+      dispatch({ type: SET_MAIN_TOKEN_ACCOUNT });
 
-      if (!tokens) {
-        const er = 'Invalid input';
-        dispatch({ type: UPDATE_TOKEN_FAIL, reason: er });
+      const { wallet: { currentTokenAccount } } = getState();
+      if (currentTokenAccount === tokenAccount) {
+        const er = 'The token account is same';
+        dispatch({ type: SET_MAIN_TOKEN_ACCOUNT_FAIL, reason: er });
         return reject(er);
       }
 
-      if (!token) {
-        const { wallet: { token: _token } } = getState();
-        token = _token || tokens[tokens.length - 1];
-      }
-
-      // Local storage
-      storage.set('tokens', tokens);
-      storage.set('token', token);
-
-      const data = { tokens, token };
-      dispatch({ type: UPDATE_TOKEN_OK, data });
-      return resolve(data);
-    });
-  };
-};
-
-/**
- * Update sens
- */
-export const UPDATE_SEN = 'UPDATE_SEN';
-export const UPDATE_SEN_OK = 'UPDATE_SEN_OK';
-export const UPDATE_SEN_FAIL = 'UPDATE_SEN_FAIL';
-
-export const updateSen= (sens) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UPDATE_SEN });
-
-      if (!sens) {
-        const er = 'Invalid input';
-        dispatch({ type: UPDATE_SEN_FAIL, reason: er });
-        return reject(er);
-      }
-
-      // Local storage
-      storage.set('sens', sens);
-
-      const data = { sens };
-      dispatch({ type: UPDATE_SEN_OK, data });
+      const data = { currentTokenAccount: tokenAccount };
+      dispatch({ type: SET_MAIN_TOKEN_ACCOUNT_OK, data });
       return resolve(data);
     });
   };
@@ -244,6 +277,14 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case SET_WALLET_FAIL:
       return { ...state, ...action.data };
+    case GET_WALLET_OK:
+      return { ...state, ...action.data };
+    case GET_WALLET_FAIL:
+      return { ...state, ...action.data };
+    case UPDATE_WALLET_OK:
+      return { ...state, ...action.data };
+    case UPDATE_WALLET_FAIL:
+      return { ...state, ...action.data };
     case UNSET_WALLET_OK:
       return { ...state, ...action.data };
     case UNSET_WALLET_FAIL:
@@ -252,13 +293,9 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case SET_QRCODE_FAIL:
       return { ...state, ...action.data };
-    case UPDATE_TOKEN_OK:
+    case SET_MAIN_TOKEN_ACCOUNT_OK:
       return { ...state, ...action.data };
-    case UPDATE_TOKEN_FAIL:
-      return { ...state, ...action.data };
-    case UPDATE_SEN_OK:
-      return { ...state, ...action.data };
-    case UPDATE_SEN_FAIL:
+    case SET_MAIN_TOKEN_ACCOUNT_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

@@ -18,13 +18,22 @@ import Pools from './pools';
 import QRCode from './qrcode';
 
 import styles from './styles';
-import { closeWallet } from 'modules/wallet.reducer';
+import storage from 'helpers/storage';
+import { setWallet, closeWallet } from 'modules/wallet.reducer';
 
 
 class Wallet extends Component {
 
+  componentDidMount() {
+    const address = storage.get('address');
+    const secretKey = storage.get('secretKey');
+    if (!address || !secretKey) return;
+    const { setWallet } = this.props;
+    return setWallet(address, secretKey);
+  }
+
   renderComponents = () => {
-    const { wallet: { address } } = this.props;
+    const { wallet: { user: { address } } } = this.props;
     if (!address) return <LogIn />
     return <Grid container spacing={2}>
       <Grid item xs={12} md={6}>
@@ -81,6 +90,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setWallet,
   closeWallet,
 }, dispatch);
 
