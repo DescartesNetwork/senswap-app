@@ -191,8 +191,8 @@ export const unsetWallet = () => {
     return new Promise((resolve, reject) => {
       dispatch({ type: UNSET_WALLET });
 
-      const { wallet: { address, secretKey } } = getState();
-      if (!address || !secretKey) {
+      const { wallet: { user: { address } } } = getState();
+      if (!address) {
         const er = 'Already disconnected';
         dispatch({ type: UNSET_WALLET_FAIL, reason: er });
         return reject(er);

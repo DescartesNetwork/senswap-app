@@ -9,8 +9,6 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 
-import { } from '@material-ui/icons';
-
 import Drain from 'components/drain';
 import { BaseCard, NotiCard } from 'components/cards';
 import Bid from './bid';
@@ -19,6 +17,7 @@ import Ask from './ask';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { getSecretKey } from 'modules/wallet.reducer';
 
 
 class Swap extends Component {
@@ -102,38 +101,40 @@ class Swap extends Component {
       bidData: { initialized: bidInitialized, pool: bidPool },
       askData: { initialized: askInitialized, pool: askPool }
     } = this.state;
-    const { wallet: { secretKey } } = this.props;
+    const { getSecretKey } = this.props;
     if (!bidAmount || !srcAddress || !dstAddress || !bidInitialized || !askInitialized)
       return console.error('Invalid input');
-    const { address: bidPoolAddress, token: bidToken, treasury: bidTreasury } = bidPool;
-    const { address: askPoolAddress, token: askToken, treasury: askTreasury } = askPool;
-    const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
-    const payer = sol.fromSecretKey(secretKey);
-    const bidPoolPublicKey = sol.fromAddress(bidPoolAddress);
-    const bidTreasuryPublicKey = sol.fromAddress(bidTreasury.address);
-    const srcTokenPublickKey = sol.fromAddress(srcAddress);
-    const bidTokenPublickKey = sol.fromAddress(bidToken.address);
-    const askPoolPublicKey = sol.fromAddress(askPoolAddress);
-    const askTreasuryPublickKey = sol.fromAddress(askTreasury.address);
-    const dstTokenPublickKey = sol.fromAddress(dstAddress);
-    const askTokenPublicKey = sol.fromAddress(askToken.address);
+    return getSecretKey().then(secretKey => {
+      const { address: bidPoolAddress, token: bidToken, treasury: bidTreasury } = bidPool;
+      const { address: askPoolAddress, token: askToken, treasury: askTreasury } = askPool;
+      const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
+      const payer = sol.fromSecretKey(secretKey);
+      const bidPoolPublicKey = sol.fromAddress(bidPoolAddress);
+      const bidTreasuryPublicKey = sol.fromAddress(bidTreasury.address);
+      const srcTokenPublickKey = sol.fromAddress(srcAddress);
+      const bidTokenPublickKey = sol.fromAddress(bidToken.address);
+      const askPoolPublicKey = sol.fromAddress(askPoolAddress);
+      const askTreasuryPublickKey = sol.fromAddress(askTreasury.address);
+      const dstTokenPublickKey = sol.fromAddress(dstAddress);
+      const askTokenPublicKey = sol.fromAddress(askToken.address);
 
-    return sol.swap(
-      amount,
-      payer,
-      bidPoolPublicKey,
-      bidTreasuryPublicKey,
-      srcTokenPublickKey,
-      bidTokenPublickKey,
-      askPoolPublicKey,
-      askTreasuryPublickKey,
-      dstTokenPublickKey,
-      askTokenPublicKey,
-    ).then(re => {
+      return sol.swap(
+        amount,
+        payer,
+        bidPoolPublicKey,
+        bidTreasuryPublicKey,
+        srcTokenPublickKey,
+        bidTokenPublickKey,
+        askPoolPublicKey,
+        askTreasuryPublickKey,
+        dstTokenPublickKey,
+        askTokenPublicKey,
+      );
+    }).then(re => {
       console.log(re);
     }).catch(er => {
       return console.error(er);
-    })
+    });
   }
 
   render() {
@@ -228,6 +229,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getSecretKey,
 }, dispatch);
 
 export default withRouter(connect(
