@@ -39,7 +39,10 @@ class Header extends Component {
   }
 
   walletConnectionButton = () => {
-    const { ui: { width }, wallet: { address } } = this.props;
+    const {
+      ui: { width },
+      wallet: { user: { address } },
+    } = this.props;
     const icon = address ? <MobileFriendlyRounded size="small" /> : <PhonelinkLockRounded size="small" />;
     const text = address ? 'Connected' : 'Connect Wallet';
 

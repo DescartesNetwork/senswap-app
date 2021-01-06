@@ -53,6 +53,18 @@ SOL.isAddress = (address) => {
   }
 }
 
+SOL.safelyCreateAccount = (programId) => {
+  return new Promise((resolve, reject) => {
+    const account = new Account();
+    const seeds = [account.publicKey.toBuffer()];
+    return PublicKey.createProgramAddress(seeds, programId).then(re => {
+      return resolve(account);
+    }).catch(er => {
+      return SOL.safelyCreateAccount(programId);
+    });
+  });
+};
+
 SOL.toSymbol = (symbol) => {
   return symbol.join('').replace('-', '');
 }
@@ -231,14 +243,17 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
 
     const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
     const swapProgramId = SOL.fromAddress(swapFactoryAddress);
-    const pool = new Account();
-    const treasury = new Account();
-    const sen = new Account();
+    let pool = null;
+    let treasury = new Account();
+    let sen = new Account();
     const poolSpace = (new soproxABI.struct(POOL_SCHEMA)).space;
     const treasurySpace = (new soproxABI.struct(ACCOUNT_SCHEMA)).space;
     const senSpace = (new soproxABI.struct(SEN_SCHEMA)).space;
-    // Create accounts
-    return connection.getMinimumBalanceForRentExemption(poolSpace).then(lamports => {
+    return SOL.safelyCreateAccount(swapProgramId).then(re => {
+      pool = re;
+      // Create accounts
+      return connection.getMinimumBalanceForRentExemption(poolSpace)
+    }).then(lamports => {
       const transaction = new Transaction();
       transaction.add(SystemProgram.createAccount({
         fromPubkey: payer.publicKey,

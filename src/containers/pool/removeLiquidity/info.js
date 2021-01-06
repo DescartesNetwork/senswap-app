@@ -73,7 +73,7 @@ class Info extends Component {
       </Grid>
       <Grid item xs={4}>
         <TextField
-          label="Your current SEN"
+          label="LPT"
           variant="outlined"
           value={sen}
           fullWidth

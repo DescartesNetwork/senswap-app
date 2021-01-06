@@ -36,9 +36,9 @@ class Address extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(wallet, prevWallet)) this.fetchData();
+    const { wallet: { user: prevUser } } = prevProps;
+    const { wallet: { user } } = this.props;
+    if (!isEqual(user, prevUser)) this.fetchData();
   }
 
   fetchData = () => {
@@ -71,7 +71,7 @@ class Address extends Component {
     const { data } = this.state;
     const groupedSensData = {};
     data.forEach(({ address, pool: { token } }) => {
-      const symbol = token.symbol.join('').replace('-', '');
+      const symbol = sol.toSymbol(token.symbol);
       if (!groupedSensData[symbol]) groupedSensData[symbol] = [];
       return groupedSensData[symbol].push(address);
     });
@@ -95,7 +95,7 @@ class Address extends Component {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <TextField
-          label="Sen address"
+          label="LPT account"
           variant="outlined"
           value={lptAccount}
           InputProps={{

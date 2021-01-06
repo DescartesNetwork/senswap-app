@@ -16,7 +16,7 @@ import Info from './info';
 
 import sol from 'helpers/sol';
 import styles from './styles';
-import { updateWallet } from 'modules/wallet.reducer';
+import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 
 class AddLiquidity extends Component {
@@ -53,29 +53,26 @@ class AddLiquidity extends Component {
         initialized, pool: { address: poolAddress, token, treasury }
       }
     } = this.state;
-    const {
-      wallet: {
-        currentTokenAccount, secretKey, user
-      },
-      updateWallet
-    } = this.props;
-    if (!initialized || !secretKey || !amount) return console.error('Invalid input');
-    const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-    const senPublicKey = sol.fromAddress(lptAccount);
-    const poolPublicKey = sol.fromAddress(poolAddress);
-    const treasuryPublicKey = sol.fromAddress(treasury.address);
-    const srcTokenPublickKey = sol.fromAddress(currentTokenAccount);
-    const tokenPublicKey = sol.fromAddress(token.address);
-    const payer = sol.fromSecretKey(secretKey);
-    return sol.addLiquidity(
-      reserve,
-      poolPublicKey,
-      treasuryPublicKey,
-      senPublicKey,
-      srcTokenPublickKey,
-      tokenPublicKey,
-      payer
-    ).then(re => {
+    const { wallet: { currentTokenAccount, user }, updateWallet, getSecretKey } = this.props;
+    if (!initialized || !amount) return console.error('Invalid input');
+    return getSecretKey().then(secretKey => {
+      const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
+      const senPublicKey = sol.fromAddress(lptAccount);
+      const poolPublicKey = sol.fromAddress(poolAddress);
+      const treasuryPublicKey = sol.fromAddress(treasury.address);
+      const srcTokenPublickKey = sol.fromAddress(currentTokenAccount);
+      const tokenPublicKey = sol.fromAddress(token.address);
+      const payer = sol.fromSecretKey(secretKey);
+      return sol.addLiquidity(
+        reserve,
+        poolPublicKey,
+        treasuryPublicKey,
+        senPublicKey,
+        srcTokenPublickKey,
+        tokenPublicKey,
+        payer
+      );
+    }).then(re => {
       if (user.lptAccounts.includes(lptAccount)) return;
       const lptAccounts = [...user.lptAccounts];
       lptAccounts.push(lptAccount);
@@ -133,7 +130,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateWallet,
+  updateWallet, getSecretKey,
 }, dispatch);
 
 export default withRouter(connect(

@@ -20,7 +20,7 @@ class OwnerNotice extends Component {
     super();
 
     this.state = {
-      tokenData: {},
+      data: {},
     }
   }
 
@@ -29,26 +29,25 @@ class OwnerNotice extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(wallet, prevWallet)) this.fetchData();
+    const { wallet: { currentTokenAccount: prevCurrentTokenAccount } } = prevProps;
+    const { wallet: { currentTokenAccount } } = this.props;
+    if (!isEqual(currentTokenAccount, prevCurrentTokenAccount)) this.fetchData();
   }
 
   fetchData = () => {
-    const { wallet: { token } } = this.props;
-    return sol.getTokenData(token).then(re => {
-      return this.setState({ tokenData: re });
+    const { wallet: { currentTokenAccount } } = this.props;
+    return sol.getTokenData(currentTokenAccount).then(re => {
+      return this.setState({ data: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   render() {
-    const { wallet: { address: payerAddress } } = this.props;
-    const { tokenData: { initialized, owner } } = this.state;
+    const { wallet: { user: { address } } } = this.props;
+    const { data: { initialized, owner } } = this.state;
 
-    if (!initialized || owner === payerAddress) return null;
-
+    if (!initialized || owner === address) return null;
     return <Grid item>
       <Tooltip title="The token owner is unmatched to the current main account. This can lead to unexpected errors.">
         <IconButton color="primary" size="small" >
@@ -65,7 +64,6 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-
 }, dispatch);
 
 export default withRouter(connect(

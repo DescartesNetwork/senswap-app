@@ -16,7 +16,7 @@ import Info from './info';
 
 import sol from 'helpers/sol';
 import styles from './styles';
-
+import { getSecretKey } from 'modules/wallet.reducer';
 
 class RemoveLiquidity extends Component {
   constructor() {
@@ -56,24 +56,26 @@ class RemoveLiquidity extends Component {
       amount, dstAccount, lptAccount,
       data: { initialized, pool: { address: poolAddress, token, treasury } }
     } = this.state;
-    const { wallet: { secretKey } } = this.props;
+    const { getSecretKey } = this.props;
     if (!amount || !initialized) return console.error('Invalid input');
-    const sen = global.BigInt(amount) * 10n ** (global.BigInt(token.decimals));
-    const senPublicKey = sol.fromAddress(lptAccount);
-    const poolPublicKey = sol.fromAddress(poolAddress);
-    const treasuryPublicKey = sol.fromAddress(treasury.address);
-    const dstTokenPublickKey = sol.fromAddress(dstAccount);
-    const tokenPublicKey = sol.fromAddress(token.address);
-    const payer = sol.fromSecretKey(secretKey);
-    return sol.removeLiquidity(
-      sen,
-      poolPublicKey,
-      treasuryPublicKey,
-      senPublicKey,
-      dstTokenPublickKey,
-      tokenPublicKey,
-      payer
-    ).then(re => {
+    return getSecretKey().then(secretKey => {
+      const sen = global.BigInt(amount) * 10n ** global.BigInt(token.decimals);
+      const senPublicKey = sol.fromAddress(lptAccount);
+      const poolPublicKey = sol.fromAddress(poolAddress);
+      const treasuryPublicKey = sol.fromAddress(treasury.address);
+      const dstTokenPublickKey = sol.fromAddress(dstAccount);
+      const tokenPublicKey = sol.fromAddress(token.address);
+      const payer = sol.fromSecretKey(secretKey);
+      return sol.removeLiquidity(
+        sen,
+        poolPublicKey,
+        treasuryPublicKey,
+        senPublicKey,
+        dstTokenPublickKey,
+        tokenPublicKey,
+        payer
+      )
+    }).then(re => {
       // Force to reset info
       return this.setState({ lptAccount: '', amount: 0 }, () => {
         return this.setState({ lptAccount });
@@ -107,7 +109,7 @@ class RemoveLiquidity extends Component {
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label="Amount (SEN)"
+          label="Amount"
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
@@ -135,6 +137,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getSecretKey,
 }, dispatch);
 
 export default withRouter(connect(

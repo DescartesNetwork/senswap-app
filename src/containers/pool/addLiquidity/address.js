@@ -17,8 +17,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import { EmojiObjectsRounded, UnfoldMoreRounded } from '@material-ui/icons';
 
-import sol from 'helpers/sol';
 import styles from './styles';
+import sol from 'helpers/sol';
+import { openWallet } from 'modules/wallet.reducer';
 
 
 class Address extends Component {
@@ -37,9 +38,9 @@ class Address extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(wallet, prevWallet)) this.fetchData();
+    const { wallet: { user: prevUser } } = prevProps;
+    const { wallet: { user } } = this.props;
+    if (!isEqual(user, prevUser)) this.fetchData();
   }
 
   fetchData = () => {
@@ -69,14 +70,15 @@ class Address extends Component {
   }
 
   onAdd = () => {
-
+    const { openWallet } = this.props;
+    return openWallet();
   }
 
   renderGroupedSensData = () => {
     const { data } = this.state;
     const groupedSensData = {};
     data.forEach(({ address, pool: { token } }) => {
-      const symbol = token.symbol.join('').replace('-', '');
+      const symbol = sol.toSymbol(token.symbol);
       if (!groupedSensData[symbol]) groupedSensData[symbol] = [];
       return groupedSensData[symbol].push(address);
     });
@@ -90,8 +92,8 @@ class Address extends Component {
         </MenuItem>)
       });
     }
-    render.push(<ListSubheader key="info">Create a new Sen address</ListSubheader>)
-    render.push(<MenuItem key="button" onClick={this.onAdd}>
+    render.push(<ListSubheader key="info">Create a new LPT address</ListSubheader>)
+    render.push(<MenuItem key="button">
       <Button
         variant="contained"
         color="primary"
@@ -112,7 +114,7 @@ class Address extends Component {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <TextField
-          label="Sen address"
+          label="LPT account"
           variant="outlined"
           value={lptAccount}
           onChange={(e) => this.onAddress(e.target.value || '')}
@@ -141,6 +143,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  openWallet,
 }, dispatch);
 
 Address.defaultProps = {

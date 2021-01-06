@@ -35,9 +35,9 @@ class TokenMenu extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(wallet, prevWallet)) this.fetchData();
+    const { wallet: { user: prevUser } } = prevProps;
+    const { wallet: { user } } = this.props;
+    if (!isEqual(user, prevUser)) this.fetchData();
   }
 
   fetchData = () => {
@@ -52,7 +52,7 @@ class TokenMenu extends Component {
   }
 
   onSelect = (tokenAccount) => {
-    const { wallet: { user: { tokenAccounts } }, setMainTokenAccount } = this.props;
+    const { setMainTokenAccount } = this.props;
     return setMainTokenAccount(tokenAccount).then(re => {
       return this.onClose();
     }).catch(er => {

@@ -23,7 +23,8 @@ class PayerInfo extends Component {
     super();
 
     this.state = {
-      accountData: {},
+      address: '',
+      amount: 0,
     }
   }
 
@@ -32,31 +33,28 @@ class PayerInfo extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(wallet, prevWallet)) this.fetchData();
+    const { wallet: { user: prevUser } } = prevProps;
+    const { wallet: { user } } = this.props;
+    if (!isEqual(user, prevUser)) this.fetchData();
   }
 
   fetchData = () => {
     const { wallet: { user: { address } } } = this.props;
     return sol.getBalance(address).then(re => {
-      const accountData = { address, amount: re };
-      return this.setState({ accountData });
+      return this.setState({ address, amount: re });
     }).catch(er => {
       return console.error(er);
     });
   }
 
   onQRCode = () => {
-    const { accountData: { address } } = this.state;
+    const { address } = this.state;
     const { setQRCode } = this.props;
     return setQRCode(true, address);
   }
 
   render() {
-    const { accountData: { address, amount } } = this.state;
-    if (!address) return null;
-
+    const { address, amount } = this.state;
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h4">{utils.prettyNumber(Number(amount))} SOL</Typography>

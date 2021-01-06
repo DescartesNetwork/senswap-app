@@ -65,10 +65,10 @@ class TokenSettings extends Component {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <AddTokenAccount />
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <CreateTokenAccount />
               </Grid>
               <Grid item xs={12} /> {/* Safe space */}

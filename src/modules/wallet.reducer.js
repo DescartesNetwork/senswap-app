@@ -83,7 +83,7 @@ export const SET_WALLET_OK = 'SET_WALLET_OK';
 export const SET_WALLET_FAIL = 'SET_WALLET_FAIL';
 
 export const setWallet = (address, secretKey) => {
-  return dispatch => {
+  return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_WALLET });
 
@@ -101,6 +101,10 @@ export const setWallet = (address, secretKey) => {
         storage.set('address', address);
         storage.set('secretKey', secretKey);
         const data = { user };
+        const { wallet: { currentTokenAccount } } = getState();
+        if (!currentTokenAccount || !user.tokenAccounts.includes(currentTokenAccount)) {
+          data.currentTokenAccount = user.tokenAccounts[0];
+        }
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
@@ -235,6 +239,31 @@ export const setQRCode = (visible = false, message = '') => {
 };
 
 /**
+ * Get secret key
+ */
+export const GET_SECRET_KEY = 'GET_SECRET_KEY';
+export const GET_SECRET_KEY_OK = 'GET_SECRET_KEY_OK';
+export const GET_SECRET_KEY_FAIL = 'GET_SECRET_KEY_FAIL';
+
+export const getSecretKey = () => {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: GET_SECRET_KEY });
+
+      const secretKey = storage.get('secretKey');
+      if (!secretKey) {
+        const er = 'The secret key is empty';
+        dispatch({ type: GET_SECRET_KEY_FAIL, reason: er });
+        return reject(er);
+      }
+
+      dispatch({ type: GET_SECRET_KEY_OK, data: {} });
+      return resolve(secretKey);
+    });
+  };
+};
+
+/**
  * Set main token account
  */
 export const SET_MAIN_TOKEN_ACCOUNT = 'SET_MAIN_TOKEN_ACCOUNT';
@@ -292,6 +321,10 @@ export default (state = defaultState, action) => {
     case SET_QRCODE_OK:
       return { ...state, ...action.data };
     case SET_QRCODE_FAIL:
+      return { ...state, ...action.data };
+    case GET_SECRET_KEY_OK:
+      return { ...state, ...action.data };
+    case GET_SECRET_KEY_FAIL:
       return { ...state, ...action.data };
     case SET_MAIN_TOKEN_ACCOUNT_OK:
       return { ...state, ...action.data };

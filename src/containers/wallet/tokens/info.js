@@ -32,9 +32,9 @@ class TokenInfo extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(wallet, prevWallet)) this.fetchData();
+    const { wallet: { currentTokenAccount: prevCurrentTokenAccount } } = prevProps;
+    const { wallet: { currentTokenAccount } } = this.props;
+    if (!isEqual(currentTokenAccount, prevCurrentTokenAccount)) this.fetchData();
   }
 
   fetchData = () => {

@@ -43,6 +43,8 @@ class AddTokenAccount extends Component {
     if (error) return this.setState({ error });
     if (!tokenAccount) return this.setState({ error: 'Empty token account' });
     const { wallet: { user }, updateWallet, setMainTokenAccount } = this.props;
+    if (user.tokenAccounts.includes(tokenAccount)) return this.setState({ error: 'Token is in list already' });
+    
     const tokenAccounts = [...user.tokenAccounts];
     tokenAccounts.push(tokenAccount);
     return updateWallet({ ...user, tokenAccounts }).then(re => {

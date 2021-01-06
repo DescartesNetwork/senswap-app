@@ -26,7 +26,7 @@ class Pools extends Component {
 
     this.state = {
       visible: false,
-      senAddress: '',
+      lptAccount: '',
     }
   }
 
@@ -39,18 +39,18 @@ class Pools extends Component {
   }
 
   onAddress = (e) => {
-    const senAddress = e.target.value || '';
-    return this.setState({ senAddress });
+    const lptAccount = e.target.value || '';
+    return this.setState({ lptAccount });
   }
 
   onAdd = () => {
-    const { senAddress } = this.state;
-    console.log(senAddress);
+    const { lptAccount } = this.state;
+    console.log(lptAccount);
   }
 
   render() {
     const { classes } = this.props;
-    const { visible, senAddress } = this.state;
+    const { visible, lptAccount } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -75,7 +75,7 @@ class Pools extends Component {
         <DialogTitle>
           <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
             <Grid item className={classes.stretch}>
-              <Typography variant="h6">Add a sen address</Typography>
+              <Typography variant="h6">Add a LPT account</Typography>
             </Grid>
             <Grid item>
               <IconButton onClick={this.onClose} edge="end">
@@ -90,7 +90,7 @@ class Pools extends Component {
               <TextField
                 label="Sen Address"
                 variant="outlined"
-                value={senAddress}
+                value={lptAccount}
                 onChange={this.onAddress}
                 InputProps={{
                   endAdornment: <IconButton color="primary" onClick={this.onAdd} edge="end" >

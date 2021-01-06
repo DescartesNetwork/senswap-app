@@ -146,9 +146,9 @@ class Info extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(wallet, prevWallet)) this.fetchData();
+    const { wallet: { user: prevUser } } = prevProps;
+    const { wallet: { user } } = this.props;
+    if (!isEqual(user, prevUser)) this.fetchData();
   }
 
   fetchData = () => {
@@ -180,13 +180,13 @@ class Info extends Component {
               <TableRow>
                 <TableCell />
                 <TableCell>
-                  <Typography variant="body2">Sen Address</Typography>
+                  <Typography variant="body2">LPT Account</Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="body2">Token</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">Value (SEN)</Typography>
+                  <Typography variant="body2">$</Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="body2">Price</Typography>
