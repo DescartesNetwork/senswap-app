@@ -66,6 +66,7 @@ SOL.safelyCreateAccount = (programId) => {
 };
 
 SOL.toSymbol = (symbol) => {
+  if (!symbol) return '';
   return symbol.join('').replace('-', '');
 }
 
@@ -97,6 +98,23 @@ SOL.getBalance = (address) => {
   })
 }
 
+SOL.getPureTokenData = (tokenAddress) => {
+  return new Promise((resolve, reject) => {
+    if (!tokenAddress) return reject('Invalid address');
+    const connection = SOL.createConnection();
+    return connection.getAccountInfo(SOL.fromAddress(tokenAddress)).then(({ data }) => {
+      if (!data) return reject(`Cannot find data of ${tokenAddress}`);
+      const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
+      tokenLayout.fromBuffer(data);
+      const result = { address: tokenAddress, ...tokenLayout.value };
+      return resolve(result);
+    }).catch(er => {
+      console.error(er);
+      return reject('Cannot read data');
+    });
+  });
+}
+
 SOL.getTokenData = (accountAddress) => {
   return new Promise((resolve, reject) => {
     if (!accountAddress) return reject('Invalid public key');
@@ -116,6 +134,7 @@ SOL.getTokenData = (accountAddress) => {
       result.token = { ...result.token, ...tokenLayout.value };
       return resolve(result);
     }).catch(er => {
+      console.error(er);
       return reject('Cannot read data');
     });
   });
@@ -147,6 +166,7 @@ SOL.getPurePoolData = (poolAddress) => {
       result.treasury = { ...result.treasury, ...treasuryLayout.value };
       return resolve(result);
     }).catch(er => {
+      console.error(er);
       return reject('Cannot read data');
     })
   });
@@ -185,6 +205,7 @@ SOL.getPoolData = (senAddress) => {
       result.pool.treasury = { ...result.pool.treasury, ...treasuryLayout.value };
       return resolve(result);
     }).catch(er => {
+      console.error(er);
       return reject('Cannot read data');
     })
   });

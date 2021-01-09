@@ -62,7 +62,7 @@ class Issuer extends Component {
     if (decimals < 1 || decimals > 9) error = 'Invalid decimals';
     if (symbol.length !== 4) error = 'Invalid symbol';
     if (supply < 1 || supply > 1000000000000) error = 'Invalid supply';
-    if (error) return this.setState({ error, ...EMPTY });
+    if (error) return this.setState({ ...EMPTY, error });
 
     return getSecretKey().then(secretKey => {
       const payer = sol.fromSecretKey(secretKey);
@@ -74,7 +74,7 @@ class Issuer extends Component {
       );
     }).then(({ token, receiver, txId }) => {
       this.setState({
-        error: '',
+        ...EMPTY,
         tokenAddress: token.publicKey.toBase58(),
         tokenAccount: receiver.publicKey.toBase58(),
         txId
@@ -83,7 +83,7 @@ class Issuer extends Component {
       tokenAccounts.push(receiver.publicKey.toBase58());
       return updateWallet({ ...user, tokenAccounts });
     }).catch(er => {
-      return this.setState({ error: er, ...EMPTY });
+      return this.setState({ ...EMPTY, error: er });
     });
   }
 

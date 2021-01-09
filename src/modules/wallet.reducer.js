@@ -2,12 +2,11 @@ import configs from 'configs';
 import storage from 'helpers/storage';
 import api from 'helpers/api';
 
+
 /**
  * Documents
  * @default defaultData
  */
-
-// Local storage
 const defaultState = {
   visible: false,
   user: {
