@@ -155,7 +155,7 @@ export const UPDATE_WALLET_OK = 'UPDATE_WALLET_OK';
 export const UPDATE_WALLET_FAIL = 'UPDATE_WALLET_FAIL';
 
 export const updateWallet = (user) => {
-  return dispatch => {
+  return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: UPDATE_WALLET });
 
@@ -168,6 +168,10 @@ export const updateWallet = (user) => {
       const { api: { base } } = configs;
       return api.put(base + '/user', { user }).then(({ data: user }) => {
         const data = { user };
+        const { wallet: { currentTokenAccount } } = getState();
+        if (!currentTokenAccount || !user.tokenAccounts.includes(currentTokenAccount)) {
+          data.currentTokenAccount = user.tokenAccounts[0];
+        }
         dispatch({ type: UPDATE_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {

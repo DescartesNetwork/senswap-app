@@ -12,11 +12,17 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Fab from '@material-ui/core/Fab';
+import Popover from '@material-ui/core/Popover';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Image from 'material-ui-image';
 
 import {
   SwapCallsRounded, LocalGasStationRounded, PhonelinkLockRounded,
-  GavelRounded, MobileFriendlyRounded,
+  WidgetsRounded, MobileFriendlyRounded, ColorizeRounded,
+  BeenhereRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -27,6 +33,13 @@ import { openWallet } from 'modules/wallet.reducer';
 
 
 class Header extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      anchorEl: null,
+    }
+  }
 
   parseRoute = () => {
     const { location: { pathname } } = this.props;
@@ -66,9 +79,18 @@ class Header extends Component {
     </Grid>
   }
 
+  onOpenOthers = (e) => {
+    return this.setState({ anchorEl: e.target });
+  }
+
+  onCloseOthers = () => {
+    return this.setState({ anchorEl: null });
+  }
+
   render() {
     const { classes } = this.props;
     const { ui: { width } } = this.props;
+    const { anchorEl } = this.state;
     const currentRoute = this.parseRoute();
 
     return <Grid container justify="center" spacing={2}>
@@ -95,18 +117,40 @@ class Header extends Component {
             {/* Menu */}
             <Grid item className={classes.stretch}>
               <Grid container alignItems="center" justify="flex-end" spacing={width >= 960 ? 5 : 2}>
-                {/* Governance */}
+                {/* Others */}
                 <Grid item>
-                  <Tooltip title="Governance">
+                  <Tooltip title="Others">
                     <IconButton
+                      color={currentRoute !== 'pool' && currentRoute !== 'swap' ? 'primary' : 'secondary'}
                       size="small"
-                      color={currentRoute === 'governance' ? 'primary' : 'secondary'}
-                      component={RouterLink}
-                      to={'/governance'}
+                      onClick={this.onOpenOthers}
                     >
-                      <GavelRounded />
+                      <WidgetsRounded />
                     </IconButton>
                   </Tooltip>
+                  <Popover
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={this.onCloseOthers}
+                    onClick={this.onCloseOthers}
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                  >
+                    <List>
+                      <ListItem button component={RouterLink} to={'/faucet'}>
+                        <ListItemIcon>
+                          <ColorizeRounded color="secondary" />
+                        </ListItemIcon>
+                        <ListItemText primary="SenFaucet" />
+                      </ListItem>
+                      <ListItem button component={RouterLink} to={'/issuer'}>
+                        <ListItemIcon>
+                          <BeenhereRounded color="secondary" />
+                        </ListItemIcon>
+                        <ListItemText primary="SenIssuer" />
+                      </ListItem>
+                    </List>
+                  </Popover>
                 </Grid>
                 {/* Pool */}
                 <Grid item>

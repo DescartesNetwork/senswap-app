@@ -190,6 +190,75 @@ SOL.getPoolData = (senAddress) => {
   });
 }
 
+SOL.newToken = (symbol, totalSupply, decimals, payer) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const { sol: { tokenFactoryAddress } } = configs;
+    const programId = SOL.fromAddress(tokenFactoryAddress);
+    const receiver = new Account();
+    const token = new Account();
+    const receiverSpace = (new soproxABI.struct(ACCOUNT_SCHEMA)).space;
+    const tokenSpace = (new soproxABI.struct(TOKEN_SCHEMA)).space;
+    return connection.getMinimumBalanceForRentExemption(receiverSpace).then(lamports => {
+      const transaction = new Transaction();
+      transaction.add(SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        newAccountPubkey: receiver.publicKey,
+        lamports,
+        space: receiverSpace,
+        programId,
+      }));
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, receiver],
+        { skipPreflight: true, commitment: 'recent' });
+    }).then(re => {
+      return connection.getMinimumBalanceForRentExemption(tokenSpace);
+    }).then(lamports => {
+      const transaction = new Transaction();
+      transaction.add(SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        newAccountPubkey: token.publicKey,
+        lamports,
+        space: tokenSpace,
+        programId,
+      }));
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, token],
+        { skipPreflight: true, commitment: 'recent' });
+    }).then(re => {
+      const layout = new soproxABI.struct(
+        [
+          { key: 'code', type: 'u8' },
+          { key: 'symbol', type: '[char;4]' },
+          { key: 'totalSupply', type: 'u64' },
+          { key: 'decimals', type: 'u8' },
+        ],
+        { code: 0, symbol, totalSupply, decimals });
+      const instruction = new TransactionInstruction({
+        keys: [
+          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+          { pubkey: token.publicKey, isSigner: true, isWritable: true },
+          { pubkey: receiver.publicKey, isSigner: true, isWritable: true },
+        ],
+        programId,
+        data: layout.toBuffer()
+      });
+      const transaction = new Transaction();
+      transaction.add(instruction);
+      return sendAndConfirmTransaction(
+        connection,
+        transaction,
+        [payer, token, receiver],
+        { skipPreflight: true, commitment: 'recent', });
+    }).then(txId => {
+      return resolve({ token, receiver, txId });
+    }).catch(er => {
+      console.error(er);
+      return reject('Cannot deploy a new token');
+    });
+  });
+}
+
 SOL.newSRC20Account = (tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
@@ -231,6 +300,7 @@ SOL.newSRC20Account = (tokenPublicKey, payer) => {
     }).then(re => {
       return resolve(account);
     }).catch(er => {
+      console.error(er);
       return reject('Cannot create a SRC20 account');
     });
   });

@@ -18,6 +18,8 @@ import NotFound from 'containers/404';
 import Home from 'containers/home';
 import Swap from 'containers/swap';
 import Pool from 'containers/pool';
+import Faucet from 'containers/faucet';
+import Issuer from 'containers/issuer';
 
 // CSS
 import theme from 'static/styles/theme';
@@ -43,8 +45,10 @@ class App extends Component {
           <Switch>
             <Redirect exact from="/" to="/home" />
             <Route exact path='/home' component={Home} />
-            <Route path='/swap' component={Swap} />
+            <Route exact path='/swap' component={Swap} />
             <Route path='/pool' component={Pool} />
+            <Route exact path='/faucet' component={Faucet} />
+            <Route exact path='/issuer' component={Issuer} />
             <Route exact path='*' component={NotFound} />
           </Switch>
         </Grid>
