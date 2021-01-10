@@ -22,7 +22,7 @@ import Image from 'material-ui-image';
 import {
   SwapCallsRounded, LocalGasStationRounded, PhonelinkLockRounded,
   WidgetsRounded, MobileFriendlyRounded, ColorizeRounded,
-  BeenhereRounded,
+  AccountBalanceRounded,VerifiedUserRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -171,9 +171,15 @@ class Header extends Component {
                       </ListItem>
                       <ListItem button component={RouterLink} to={'/issuer'}>
                         <ListItemIcon>
-                          <BeenhereRounded color="secondary" />
+                          <AccountBalanceRounded color="secondary" />
                         </ListItemIcon>
                         <ListItemText primary="SenIssuer" />
+                      </ListItem>
+                      <ListItem button component={RouterLink} to={'/audit'}>
+                        <ListItemIcon>
+                          <VerifiedUserRounded color="secondary" />
+                        </ListItemIcon>
+                        <ListItemText primary="SenAudit" />
                       </ListItem>
                     </List>
                   </Popover>

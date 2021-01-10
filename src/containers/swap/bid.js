@@ -95,7 +95,7 @@ class Bid extends Component {
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
-          label="Bid Address"
+          label="Bid Pool"
           variant="outlined"
           value={lptAccount}
           onChange={(e) => this.onAddress(e.target.value || '')}

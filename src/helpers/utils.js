@@ -1,4 +1,5 @@
 import dateformat from 'dateformat';
+import axios from 'axios';
 
 const Utils = {}
 
@@ -89,6 +90,20 @@ Utils.div = (a, b) => {
   }
   decimals = Number(decimals) / (10 ** 9);
   return floor + decimals;
+}
+
+Utils.imgFromCGK = (cgk) => {
+  return new Promise((resolve, reject) => {
+    return axios({
+      method: 'get',
+      url: cgk,
+    }).then(({ data: { image: { large } } }) => {
+      if (!large) return reject('No image');
+      return resolve(large);
+    }).catch(er => {
+      return reject(er);
+    });
+  });
 }
 
 export default Utils;

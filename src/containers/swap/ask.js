@@ -18,6 +18,8 @@ import { UnfoldMoreRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import utils from 'helpers/utils';
+import { getPools, getPool } from 'modules/pool.reducer';
 
 
 class Ask extends Component {
@@ -43,10 +45,29 @@ class Ask extends Component {
 
   fetchData = () => {
     const { wallet: { user: { lptAccounts } } } = this.props;
+    const { pool: { limit, page }, getPools, getPool } = this.props;
+    let data = [];
     return Promise.all(lptAccounts.map(lptAccount => {
       return sol.getPoolData(lptAccount);
     })).then(re => {
-      return this.setState({ data: re });
+      data = re.map(({ pool }) => pool);
+      const condition = { '$or': re.map(({ pool }) => ({ address: pool.address })) }
+      return getPools(condition, limit, page + 1);
+    }).then(poolIds => {
+      return Promise.all(poolIds.map(({ _id }) => {
+        return getPool(_id);
+      }));
+    }).then(re => {
+      return Promise.all(re.map(({ cgk }) => {
+        return utils.imgFromCGK(cgk);
+      }));
+    }).then(icons => {
+      data = data.map((pool, i) => {
+        pool.icon = icons[i];
+        return pool;
+      });
+      console.log(data)
+      return this.setState({ data });
     }).catch(er => {
       return console.error(er);
     });
@@ -70,7 +91,7 @@ class Ask extends Component {
   renderGroupedLPTsData = () => {
     const { data } = this.state;
     const groupedLPTsData = {};
-    data.forEach(({ address, pool: { token } }) => {
+    data.forEach(({ address, token }) => {
       const symbol = sol.toSymbol(token.symbol);
       if (!groupedLPTsData[symbol]) groupedLPTsData[symbol] = [];
       return groupedLPTsData[symbol].push(address);
@@ -95,7 +116,7 @@ class Ask extends Component {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <TextField
-          label="Ask Address"
+          label="Ask Pool"
           variant="outlined"
           value={lptAccount}
           onChange={(e) => this.onAddress(e.target.value || '')}
@@ -124,9 +145,11 @@ class Ask extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  pool: state.pool,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getPools, getPool,
 }, dispatch);
 
 Ask.defaultProps = {
