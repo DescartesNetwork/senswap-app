@@ -33,14 +33,14 @@ function Row(props) {
   const {
     data: {
       address: lptAddress,
-      lpt: lptAmount,
+      lpt,
       initialized,
       pool: {
         address: _poolAddress,
         fee_numerator,
         fee_denominator,
         reserve: poolReserve,
-        lpt,
+        lpt: poolLPT,
         token,
         treasury
       }
@@ -53,8 +53,8 @@ function Row(props) {
   if (!initialized) return null;
   const symbol = sol.toSymbol(token.symbol);
   const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
-  const balance = utils.prettyNumber(utils.div(lptAmount, global.BigInt(10 ** token.decimals)));
-  const price = utils.div(lpt, poolReserve);
+  const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals)));
+  const price = utils.div(poolLPT, poolReserve);
   const fee = utils.div(fee_numerator, fee_denominator) * 100;
   const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
   const onOpen = () => onVisible(true);
@@ -73,10 +73,10 @@ function Row(props) {
         <Typography>{symbol}</Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{balance}</Typography>
+        <Typography>{price}</Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{price}</Typography>
+        <Typography>{lptAmount}</Typography>
       </TableCell>
       <TableCell align="right">
         <IconButton size="small" color="primary" onClick={onRemove}>
@@ -186,10 +186,10 @@ class Info extends Component {
                   <Typography variant="body2">Token</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">$</Typography>
+                  <Typography variant="body2">Price</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">Price</Typography>
+                  <Typography variant="body2">LPT</Typography>
                 </TableCell>
                 <TableCell />
               </TableRow>

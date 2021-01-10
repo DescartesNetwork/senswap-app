@@ -570,4 +570,42 @@ SOL.swap = (
   });
 }
 
+SOL.transfer = (amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const { sol: { tokenFactoryAddress } } = configs;
+    const programId = SOL.fromAddress(tokenFactoryAddress);
+
+    const layout = new soproxABI.struct(
+      [
+        { key: 'code', type: 'u8' },
+        { key: 'amount', type: 'u64' }
+      ],
+      { code: 3, amount });
+    const instruction = new TransactionInstruction({
+      keys: [
+        { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+        { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
+        { pubkey: srcPublicKey, isSigner: false, isWritable: true },
+        { pubkey: dstPublicKey, isSigner: false, isWritable: true },
+      ],
+      programId,
+      data: layout.toBuffer()
+    });
+    const transaction = new Transaction();
+    transaction.add(instruction);
+    return sendAndConfirmTransaction(
+      connection, transaction, [payer],
+      {
+        skipPreflight: true,
+        commitment: 'recent'
+      }).then(txId => {
+        return resolve(txId);
+      }).catch(er => {
+        console.error(er);
+        return reject('Cannot transfer token');
+      });
+  });
+}
+
 export default SOL;

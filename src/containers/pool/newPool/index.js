@@ -81,13 +81,19 @@ class NewPool extends Component {
         payer
       );
     }).then(({ pool, treasury, lpt }) => {
-      this.setState({
-        poolAddress: pool.publicKey.toBase58(),
-        treasuryAddress: treasury.publicKey.toBase58(),
-        lptAddress: lpt.publicKey.toBase58(),
+      return new Promise((resolve, reject) => {
+        return this.setState({
+          poolAddress: pool.publicKey.toBase58(),
+          treasuryAddress: treasury.publicKey.toBase58(),
+          lptAddress: lpt.publicKey.toBase58(),
+        }, () => {
+          return resolve({ pool, treasury, lpt });
+        });
       });
+    }).then(re => {
+      const { lptAddress } = this.state;
       const lptAccounts = [...user.lptAccounts];
-      lptAccounts.push(lpt.publicKey.toBase58());
+      lptAccounts.push(lptAddress);
       return updateWallet({ ...user, lptAccounts });
     }).catch(er => {
       return console.error(er);
@@ -103,7 +109,7 @@ class NewPool extends Component {
           <Divider />
         </Grid>
         <Grid item xs={12}>
-          <Typography variant="body2">A pool is successfully generated!</Typography>
+          <Typography variant="body2">A pool is successfully generated! Click to your wallet to see details.</Typography>
         </Grid>
         <Grid item xs={12}>
           <TextField label="Pool" variant="outlined" value={poolAddress} fullWidth />

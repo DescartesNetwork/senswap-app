@@ -109,7 +109,7 @@ class RemoveLiquidity extends Component {
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label="Amount"
+          label="LPT Amount"
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
