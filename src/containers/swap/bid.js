@@ -13,11 +13,14 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
+import Avatar from '@material-ui/core/Avatar';
 
 import { UnfoldMoreRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import utils from 'helpers/utils';
+import { getPools, getPool } from 'modules/pool.reducer';
 
 
 class Bid extends Component {
@@ -26,7 +29,7 @@ class Bid extends Component {
 
     this.state = {
       anchorEl: null,
-      lptAccount: '',
+      index: 0,
       data: [],
     }
   }
@@ -42,19 +45,44 @@ class Bid extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { lptAccounts } } } = this.props;
-    return Promise.all(lptAccounts.map(lptAccount => {
-      return sol.getPoolData(lptAccount);
+    const { wallet: { user: { tokenAccounts } } } = this.props;
+    const { pool: { limit, page }, getPools, getPool } = this.props;
+    let data = [];
+    return Promise.all(tokenAccounts.map(tokenAccount => {
+      return sol.getTokenData(tokenAccount);
     })).then(re => {
-      return this.setState({ data: re });
+      const condition = { '$or': re.map(({ token }) => ({ token: token.address })) }
+      return getPools(condition, limit, page + 1);
+    }).then(poolIds => {
+      return Promise.all(poolIds.map(({ _id }) => {
+        return getPool(_id);
+      }));
+    }).then(re => {
+      data = re;
+      return Promise.all(data.map(({ cgk }) => {
+        return utils.imgFromCGK(cgk);
+      }));
+    }).then(icons => {
+      data = data.map((pool, i) => {
+        pool.icon = icons[i];
+        return pool;
+      });
+      return Promise.all(data.map(({ address }) => {
+        return sol.getPurePoolData(address);
+      }));
+    }).then(re => {
+      data = data.map((each, i) => ({ ...each, ...re[i] }));
+      return this.setState({ data });
     }).catch(er => {
       return console.error(er);
     });
   }
 
-  onAddress = (lptAccount) => {
-    return this.setState({ lptAccount }, () => {
-      this.props.onChange(lptAccount);
+  onIndex = (index) => {
+    return this.setState({ index, poolAddress: '' }, () => {
+      const { data } = this.state;
+      const { address } = data[index];
+      this.props.onChange(address);
       return this.onClose();
     });
   }
@@ -67,39 +95,20 @@ class Bid extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderGroupedLPTsData = () => {
-    const { data } = this.state;
-    const groupedLPTsData = {};
-    data.forEach(({ address, pool: { token } }) => {
-      const symbol = sol.toSymbol(token.symbol);
-      if (!groupedLPTsData[symbol]) groupedLPTsData[symbol] = [];
-      return groupedLPTsData[symbol].push(address);
-    });
-
-    const render = [];
-    for (let symbol in groupedLPTsData) {
-      render.push(<ListSubheader key={symbol}>{symbol}</ListSubheader>)
-      groupedLPTsData[symbol].forEach(address => {
-        return render.push(<MenuItem key={address} onClick={() => this.onAddress(address)}>
-          <Typography noWrap>{address}</Typography>
-        </MenuItem>)
-      });
-    }
-
-    return render;
-  }
-
   render() {
-    const { anchorEl, lptAccount } = this.state;
+    const { classes } = this.props;
+    const { anchorEl, index, data } = this.state;
+
+    const poolSymbol = sol.toSymbol(data[index] && data[index].token && data[index].token.symbol);
+    const poolIcon = data[index] && data[index].icon;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
-          label="Bid Pool"
           variant="outlined"
-          value={lptAccount}
-          onChange={(e) => this.onAddress(e.target.value || '')}
+          value={poolSymbol}
           InputProps={{
+            startAdornment: <Avatar src={poolIcon} className={classes.iconWithMarginLeft} />,
             endAdornment: <IconButton color="primary" onClick={this.onOpen} edge="end" >
               <UnfoldMoreRounded />
             </IconButton>
@@ -111,7 +120,23 @@ class Bid extends Component {
           open={Boolean(anchorEl)}
           onClose={this.onClose}
         >
-          {this.renderGroupedLPTsData()}
+          <ListSubheader>Recommended pools</ListSubheader>
+          {
+            data.map((pool, index) => {
+              const { address, icon, email, token: { symbol } } = pool;
+              return <MenuItem key={address} onClick={() => this.onIndex(index)}>
+                <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+                  <Grid item>
+                    <Avatar src={icon} className={classes.icon} />
+                  </Grid>
+                  <Grid item className={classes.stretch}>
+                    <Typography>{sol.toSymbol(symbol)}</Typography>
+                    <Typography className={classes.owner}>Created by {email}</Typography>
+                  </Grid>
+                </Grid>
+              </MenuItem>
+            })
+          }
         </Menu>
       </Grid>
     </Grid>
@@ -121,9 +146,11 @@ class Bid extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  pool: state.pool,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getPools, getPool,
 }, dispatch);
 
 Bid.defaultProps = {

@@ -168,7 +168,7 @@ SOL.getPurePoolData = (poolAddress) => {
     }).catch(er => {
       console.error(er);
       return reject('Cannot read data');
-    })
+    });
   });
 }
 
