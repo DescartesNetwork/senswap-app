@@ -59,18 +59,18 @@ class RemoveLiquidity extends Component {
     const { getSecretKey } = this.props;
     if (!amount || !initialized) return console.error('Invalid input');
     return getSecretKey().then(secretKey => {
-      const sen = global.BigInt(amount) * 10n ** global.BigInt(token.decimals);
-      const senPublicKey = sol.fromAddress(lptAccount);
+      const lpt = global.BigInt(amount) * 10n ** global.BigInt(token.decimals);
+      const lptPublicKey = sol.fromAddress(lptAccount);
       const poolPublicKey = sol.fromAddress(poolAddress);
       const treasuryPublicKey = sol.fromAddress(treasury.address);
       const dstTokenPublickKey = sol.fromAddress(dstAccount);
       const tokenPublicKey = sol.fromAddress(token.address);
       const payer = sol.fromSecretKey(secretKey);
       return sol.removeLiquidity(
-        sen,
+        lpt,
         poolPublicKey,
         treasuryPublicKey,
-        senPublicKey,
+        lptPublicKey,
         dstTokenPublickKey,
         tokenPublicKey,
         payer

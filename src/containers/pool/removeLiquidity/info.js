@@ -48,19 +48,19 @@ class Info extends Component {
     if (!initialized) return null;
     const {
       data: {
-        sen: amount,
+        lpt: amount,
         pool: {
           address: poolAddress,
           reserve: poolReserve,
-          sen: poolSen,
+          lpt: poolLPT,
           token
         },
       }
     } = this.state;
     const symbol = sol.toSymbol(token.symbol);
-    const sen = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
+    const lpt = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
     const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
-    const price = utils.div(poolSen, poolReserve);
+    const price = utils.div(poolLPT, poolReserve);
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -75,7 +75,7 @@ class Info extends Component {
         <TextField
           label="LPT"
           variant="outlined"
-          value={sen}
+          value={lpt}
           fullWidth
         />
       </Grid>

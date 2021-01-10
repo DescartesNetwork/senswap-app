@@ -20,7 +20,6 @@ import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import configs from 'configs';
 import sol from 'helpers/sol';
 import { getSecretKey, updateWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdrop } from 'modules/faucet.reducer';
@@ -30,6 +29,8 @@ const EMPTY = {
   error: '',
   txId: ''
 }
+const SHARE_TEXT = 'luv%20this%20tool%20%E2%9D%A4%EF%B8%8F%20guys';
+const SHARE_URL = 'https%3A%2F%2Fsenswap.io';
 
 class Faucet extends Component {
   constructor() {
@@ -126,12 +127,12 @@ class Faucet extends Component {
                       />
                     </Grid>
                     <Grid item>
-                      <IconButton color="secondary">
+                      <IconButton color="secondary" target="_blank" href={`https://www.facebook.com/sharer/sharer.php?u=${SHARE_URL}`}>
                         <Facebook />
                       </IconButton>
                     </Grid>
                     <Grid item>
-                      <IconButton color="secondary">
+                      <IconButton color="secondary" target="_blank" href={`https://twitter.com/intent/tweet?text=${SHARE_TEXT}&url=${SHARE_URL}`}>
                         <Twitter />
                       </IconButton>
                     </Grid>

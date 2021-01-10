@@ -59,7 +59,7 @@ class Pools extends Component {
             <Typography variant="h4">Swap Accounts</Typography>
           </Grid>
           <Grid item>
-            <Tooltip title="Add a new Sen address">
+            <Tooltip title="Add a new LPT address">
               <IconButton color="primary" onClick={this.onOpen}>
                 <AddRounded />
               </IconButton>
@@ -88,7 +88,7 @@ class Pools extends Component {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
-                label="Sen Address"
+                label="LPT Address"
                 variant="outlined"
                 value={lptAccount}
                 onChange={this.onAddress}

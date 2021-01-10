@@ -31,15 +31,15 @@ const POOL_SCHEMA = [
   { key: 'token', type: 'pub' },
   { key: 'treasury', type: 'pub' },
   { key: 'reserve', type: 'u64' },
-  { key: 'sen', type: 'u64' },
+  { key: 'lpt', type: 'u64' },
   { key: 'fee_numerator', type: 'u64' },
   { key: 'fee_denominator', type: 'u64' },
   { key: 'initialized', type: 'bool' }
 ];
-const SEN_SCHEMA = [
+const LPT_SCHEMA = [
   { key: 'owner', type: 'pub' },
   { key: 'pool', type: 'pub' },
-  { key: 'sen', type: 'u64' },
+  { key: 'lpt', type: 'u64' },
   { key: 'initialized', type: 'bool' }
 ];
 
@@ -172,17 +172,17 @@ SOL.getPurePoolData = (poolAddress) => {
   });
 }
 
-SOL.getPoolData = (senAddress) => {
+SOL.getPoolData = (lptAddress) => {
   return new Promise((resolve, reject) => {
-    if (!senAddress) return reject('Invalid public key');
+    if (!lptAddress) return reject('Invalid public key');
     const connection = SOL.createConnection();
-    let result = { address: senAddress }
-    return connection.getAccountInfo(SOL.fromAddress(senAddress)).then(({ data: senData }) => {
-      if (!senData) return reject(`Cannot find data of ${result.address}`);
-      const senLayout = new soproxABI.struct(SEN_SCHEMA);
-      senLayout.fromBuffer(senData);
-      let pool = { address: senLayout.value.pool };
-      result = { ...result, ...senLayout.value, pool };
+    let result = { address: lptAddress }
+    return connection.getAccountInfo(SOL.fromAddress(lptAddress)).then(({ data: lptData }) => {
+      if (!lptData) return reject(`Cannot find data of ${result.address}`);
+      const lptLayout = new soproxABI.struct(LPT_SCHEMA);
+      lptLayout.fromBuffer(lptData);
+      let pool = { address: lptLayout.value.pool };
+      result = { ...result, ...lptLayout.value, pool };
       return connection.getAccountInfo(SOL.fromAddress(result.pool.address));
     }).then(({ data: poolData }) => {
       if (!poolData) return reject(`Cannot find data of ${result.pool.address}`);
@@ -336,10 +336,10 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
     const swapProgramId = SOL.fromAddress(swapFactoryAddress);
     let pool = null;
     let treasury = new Account();
-    let sen = new Account();
+    let lpt = new Account();
     const poolSpace = (new soproxABI.struct(POOL_SCHEMA)).space;
     const treasurySpace = (new soproxABI.struct(ACCOUNT_SCHEMA)).space;
-    const senSpace = (new soproxABI.struct(SEN_SCHEMA)).space;
+    const lptSpace = (new soproxABI.struct(LPT_SCHEMA)).space;
     return SOL.safelyCreateAccount(swapProgramId).then(re => {
       pool = re;
       // Create accounts
@@ -371,18 +371,18 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
         connection, transaction, [payer, treasury],
         { skipPreflight: true, commitment: 'recent' });
     }).then(re => {
-      return connection.getMinimumBalanceForRentExemption(senSpace);
+      return connection.getMinimumBalanceForRentExemption(lptSpace);
     }).then(lamports => {
       const transaction = new Transaction();
       transaction.add(SystemProgram.createAccount({
         fromPubkey: payer.publicKey,
-        newAccountPubkey: sen.publicKey,
+        newAccountPubkey: lpt.publicKey,
         lamports,
-        space: senSpace,
+        space: lptSpace,
         programId: swapProgramId,
       }));
       return sendAndConfirmTransaction(
-        connection, transaction, [payer, sen],
+        connection, transaction, [payer, lpt],
         { skipPreflight: true, commitment: 'recent' });
     }).then(re => {
       const seed = [pool.publicKey.toBuffer()];
@@ -392,16 +392,16 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
         [
           { key: 'code', type: 'u8' },
           { key: 'reserve', type: 'u64' },
-          { key: 'sen', type: 'u64' },
+          { key: 'lpt', type: 'u64' },
         ],
-        { code: 0, reserve, sen: stable }
+        { code: 0, reserve, lpt: stable }
       );
       const instruction = new TransactionInstruction({
         keys: [
           { pubkey: payer.publicKey, isSigner: true, isWritable: false },
           { pubkey: pool.publicKey, isSigner: true, isWritable: true },
           { pubkey: treasury.publicKey, isSigner: true, isWritable: true },
-          { pubkey: sen.publicKey, isSigner: true, isWritable: true },
+          { pubkey: lpt.publicKey, isSigner: true, isWritable: true },
           { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
           { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
           { pubkey: tokenOwnerPublicKey, isSigner: false, isWritable: false },
@@ -413,10 +413,10 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
       const transaction = new Transaction();
       transaction.add(instruction);
       return sendAndConfirmTransaction(
-        connection, transaction, [payer, pool, treasury, sen],
+        connection, transaction, [payer, pool, treasury, lpt],
         { skipPreflight: true, commitment: 'recent', });
     }).then(re => {
-      return resolve({ pool, treasury, sen });
+      return resolve({ pool, treasury, lpt });
     }).catch(er => {
       console.log(er);
       return reject('Cannot create a pool or a treasury account');
@@ -424,7 +424,7 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
   });
 }
 
-SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, senPublicKey, srcTokenPublickKey, tokenPublicKey, payer) => {
+SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, lptPublicKey, srcTokenPublickKey, tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
@@ -445,7 +445,7 @@ SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, senPublicKey, src
           { pubkey: payer.publicKey, isSigner: true, isWritable: false },
           { pubkey: poolPublicKey, isSigner: false, isWritable: true },
           { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
-          { pubkey: senPublicKey, isSigner: false, isWritable: true },
+          { pubkey: lptPublicKey, isSigner: false, isWritable: true },
           { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
           { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
           { pubkey: tokenOwnerPublicKey, isSigner: false, isWritable: false },
@@ -468,7 +468,7 @@ SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, senPublicKey, src
   });
 }
 
-SOL.removeLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, dstTokenPublickKey, tokenPublicKey, payer) => {
+SOL.removeLiquidity = (lpt, poolPublicKey, treasuryPublicKey, lptPublickey, dstTokenPublickKey, tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
@@ -478,9 +478,9 @@ SOL.removeLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, dstT
     const layout = new soproxABI.struct(
       [
         { key: 'code', type: 'u8' },
-        { key: 'sen', type: 'u64' },
+        { key: 'lpt', type: 'u64' },
       ],
-      { code: 2, sen }
+      { code: 2, lpt }
     );
     const seed = [poolPublicKey.toBuffer()];
     return PublicKey.createProgramAddress(seed, swapProgramId).then(tokenOwnerPublicKey => {
@@ -489,7 +489,7 @@ SOL.removeLiquidity = (sen, poolPublicKey, treasuryPublicKey, senPublickey, dstT
           { pubkey: payer.publicKey, isSigner: true, isWritable: false },
           { pubkey: poolPublicKey, isSigner: false, isWritable: true },
           { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
-          { pubkey: senPublickey, isSigner: false, isWritable: true },
+          { pubkey: lptPublickey, isSigner: false, isWritable: true },
           { pubkey: dstTokenPublickKey, isSigner: false, isWritable: true },
           { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
           { pubkey: tokenOwnerPublicKey, isSigner: false, isWritable: false },

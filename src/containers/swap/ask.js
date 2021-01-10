@@ -67,19 +67,19 @@ class Ask extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderGroupedSensData = () => {
+  renderGroupedLPTsData = () => {
     const { data } = this.state;
-    const groupedSensData = {};
+    const groupedLPTsData = {};
     data.forEach(({ address, pool: { token } }) => {
       const symbol = sol.toSymbol(token.symbol);
-      if (!groupedSensData[symbol]) groupedSensData[symbol] = [];
-      return groupedSensData[symbol].push(address);
+      if (!groupedLPTsData[symbol]) groupedLPTsData[symbol] = [];
+      return groupedLPTsData[symbol].push(address);
     });
 
     const render = [];
-    for (let symbol in groupedSensData) {
+    for (let symbol in groupedLPTsData) {
       render.push(<ListSubheader key={symbol}>{symbol}</ListSubheader>)
-      groupedSensData[symbol].forEach(address => {
+      groupedLPTsData[symbol].forEach(address => {
         return render.push(<MenuItem key={address} onClick={() => this.onAddress(address)}>
           <Typography noWrap>{address}</Typography>
         </MenuItem>)
@@ -111,7 +111,7 @@ class Ask extends Component {
           open={Boolean(anchorEl)}
           onClose={this.onClose}
         >
-          {this.renderGroupedSensData()}
+          {this.renderGroupedLPTsData()}
         </Menu>
       </Grid>
       <Grid item xs={12}>

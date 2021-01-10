@@ -32,15 +32,15 @@ import { updateWallet } from 'modules/wallet.reducer';
 function Row(props) {
   const {
     data: {
-      address: senAddress,
-      sen: senAmount,
+      address: lptAddress,
+      lpt: lptAmount,
       initialized,
       pool: {
         address: _poolAddress,
         fee_numerator,
         fee_denominator,
         reserve: poolReserve,
-        sen,
+        lpt,
         token,
         treasury
       }
@@ -53,8 +53,8 @@ function Row(props) {
   if (!initialized) return null;
   const symbol = sol.toSymbol(token.symbol);
   const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
-  const balance = utils.prettyNumber(utils.div(senAmount, global.BigInt(10 ** token.decimals)));
-  const price = utils.div(sen, poolReserve);
+  const balance = utils.prettyNumber(utils.div(lptAmount, global.BigInt(10 ** token.decimals)));
+  const price = utils.div(lpt, poolReserve);
   const fee = utils.div(fee_numerator, fee_denominator) * 100;
   const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
   const onOpen = () => onVisible(true);
@@ -67,7 +67,7 @@ function Row(props) {
         </IconButton>
       </TableCell>
       <TableCell>
-        <Typography>{senAddress}</Typography>
+        <Typography>{lptAddress}</Typography>
       </TableCell>
       <TableCell align="right">
         <Typography>{symbol}</Typography>

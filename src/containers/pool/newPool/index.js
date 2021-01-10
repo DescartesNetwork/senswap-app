@@ -80,14 +80,14 @@ class NewPool extends Component {
         tokenPublicKey,
         payer
       );
-    }).then(({ pool, treasury, sen }) => {
+    }).then(({ pool, treasury, lpt }) => {
       this.setState({
         poolAddress: pool.publicKey.toBase58(),
         treasuryAddress: treasury.publicKey.toBase58(),
-        lptAddress: sen.publicKey.toBase58(),
+        lptAddress: lpt.publicKey.toBase58(),
       });
       const lptAccounts = [...user.lptAccounts];
-      lptAccounts.push(sen.publicKey.toBase58());
+      lptAccounts.push(lpt.publicKey.toBase58());
       return updateWallet({ ...user, lptAccounts });
     }).catch(er => {
       return console.error(er);
@@ -112,7 +112,7 @@ class NewPool extends Component {
           <TextField label="Treasury" variant="outlined" value={treasuryAddress} fullWidth />
         </Grid>
         <Grid item xs={12}>
-          <TextField label="Sen" variant="outlined" value={lptAddress} fullWidth />
+          <TextField label="LPT" variant="outlined" value={lptAddress} fullWidth />
         </Grid>
       </Grid>
     </Grid>

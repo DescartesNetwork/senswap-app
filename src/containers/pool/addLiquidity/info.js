@@ -49,12 +49,12 @@ class Info extends Component {
     const {
       address: poolAddress,
       reserve: poolReserve,
-      sen: poolSen,
+      lpt: poolLPT,
       token,
     } = pool || {};
     const symbol = sol.toSymbol(token.symbol);
     const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
-    const price = utils.div(poolSen, poolReserve);
+    const price = utils.div(poolLPT, poolReserve);
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>

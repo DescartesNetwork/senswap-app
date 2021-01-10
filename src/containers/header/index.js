@@ -117,6 +117,32 @@ class Header extends Component {
             {/* Menu */}
             <Grid item className={classes.stretch}>
               <Grid container alignItems="center" justify="flex-end" spacing={width >= 960 ? 5 : 2}>
+                {/* Pool */}
+                <Grid item>
+                  <Tooltip title="Pool">
+                    <IconButton
+                      size="small"
+                      color={currentRoute === 'pool' ? 'primary' : 'secondary'}
+                      component={RouterLink
+                      } to={'/pool'}
+                    >
+                      <LocalGasStationRounded />
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
+                {/* Swap */}
+                <Grid item>
+                  <Tooltip title="Swap">
+                    <IconButton
+                      size="small"
+                      color={currentRoute === 'swap' ? 'primary' : 'secondary'}
+                      component={RouterLink}
+                      to={'/swap'}
+                    >
+                      <SwapCallsRounded />
+                    </IconButton>
+                  </Tooltip>
+                </Grid>
                 {/* Others */}
                 <Grid item>
                   <Tooltip title="Others">
@@ -151,32 +177,6 @@ class Header extends Component {
                       </ListItem>
                     </List>
                   </Popover>
-                </Grid>
-                {/* Pool */}
-                <Grid item>
-                  <Tooltip title="Pool">
-                    <IconButton
-                      size="small"
-                      color={currentRoute === 'pool' ? 'primary' : 'secondary'}
-                      component={RouterLink
-                      } to={'/pool'}
-                    >
-                      <LocalGasStationRounded />
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-                {/* Swap */}
-                <Grid item>
-                  <Tooltip title="Swap">
-                    <IconButton
-                      size="small"
-                      color={currentRoute === 'swap' ? 'primary' : 'secondary'}
-                      component={RouterLink}
-                      to={'/swap'}
-                    >
-                      <SwapCallsRounded />
-                    </IconButton>
-                  </Tooltip>
                 </Grid>
                 {/* Connect wallet */}
                 {this.walletConnectionButton()}

@@ -57,7 +57,7 @@ class AddLiquidity extends Component {
     if (!initialized || !amount) return console.error('Invalid input');
     return getSecretKey().then(secretKey => {
       const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-      const senPublicKey = sol.fromAddress(lptAccount);
+      const lptPublicKey = sol.fromAddress(lptAccount);
       const poolPublicKey = sol.fromAddress(poolAddress);
       const treasuryPublicKey = sol.fromAddress(treasury.address);
       const srcTokenPublickKey = sol.fromAddress(currentTokenAccount);
@@ -67,7 +67,7 @@ class AddLiquidity extends Component {
         reserve,
         poolPublicKey,
         treasuryPublicKey,
-        senPublicKey,
+        lptPublicKey,
         srcTokenPublickKey,
         tokenPublicKey,
         payer
