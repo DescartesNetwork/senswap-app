@@ -98,10 +98,10 @@ Utils.imgFromCGK = (cgk) => {
       method: 'get',
       url: cgk,
     }).then(({ data: { image: { large } } }) => {
-      if (!large) return reject('No image');
+      if (!large) return resolve(null);
       return resolve(large);
     }).catch(er => {
-      return reject(er);
+      return resolve(null);
     });
   });
 }

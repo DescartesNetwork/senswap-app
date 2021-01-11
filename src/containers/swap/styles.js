@@ -20,5 +20,16 @@ export default theme => ({
   },
   owner: {
     fontSize: 9
+  },
+  verified: {
+    backgroundColor: theme.palette.info.main
+  },
+  unverified: {
+    backgroundColor: theme.palette.error.main
+  },
+  tools: {
+    outline: 'none !important',
+    width: `calc(100% - ${theme.spacing(2)}px)`,
+    margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
   }
 });

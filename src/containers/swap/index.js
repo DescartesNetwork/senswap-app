@@ -11,8 +11,7 @@ import Button from '@material-ui/core/Button';
 
 import Drain from 'components/drain';
 import { BaseCard, NotiCard } from 'components/cards';
-import Bid from './bid';
-import Ask from './ask';
+import TokenSelection from './tokenSelection';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -164,19 +163,10 @@ class Swap extends Component {
                 <Grid item xs={12}>
                   <Typography variant="h6">From</Typography>
                 </Grid>
-                <Grid item xs={12}>
-                  <Bid onChange={this.onBidAddress} />
+                <Grid item xs={6}>
+                  <TokenSelection onChange={this.onBidAddress} />
                 </Grid>
-                <Grid item xs={8}>
-                  <TextField
-                    label="Source Address"
-                    variant="outlined"
-                    value={srcAddress}
-                    onChange={this.onSourceAddress}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={6}>
                   <TextField
                     label="Bid Amount"
                     variant="outlined"
@@ -186,26 +176,35 @@ class Swap extends Component {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="h6">To</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Ask onChange={this.onAskAddress} />
-                </Grid>
-                <Grid item xs={8}>
                   <TextField
-                    label="Destination Address"
+                    label="Source Address"
                     variant="outlined"
-                    value={dstAddress}
-                    onChange={this.onDestinationAddress}
+                    value={srcAddress}
+                    onChange={this.onSourceAddress}
                     fullWidth
                   />
                 </Grid>
-                <Grid item xs={4}>
+                <Grid item xs={12}>
+                  <Typography variant="h6">To</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <TokenSelection onChange={this.onAskAddress} />
+                </Grid>
+                <Grid item xs={6}>
                   <TextField
                     label="Ask Amount"
                     variant="outlined"
                     value={askAmount}
                     disabled={!askAmount}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Destination Address"
+                    variant="outlined"
+                    value={dstAddress}
+                    onChange={this.onDestinationAddress}
                     fullWidth
                   />
                 </Grid>

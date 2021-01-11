@@ -7,9 +7,6 @@ import api from 'helpers/api';
  * @default defaultData
  */
 const defaultState = {
-  limit: 5,
-  page: -1,
-  pools: []
 }
 
 /**
@@ -50,7 +47,7 @@ export const getPools = (condition, limit, page) => {
 
       const { api: { base } } = configs;
       return api.get(base + '/pools', { condition, limit, page }).then(({ data }) => {
-        dispatch({ type: GET_POOLS_OK, data });
+        dispatch({ type: GET_POOLS_OK, data: {} });
         return resolve(data);
       }).catch(er => {
         dispatch({ type: GET_POOLS_FAIL, reason: er.toString() });
