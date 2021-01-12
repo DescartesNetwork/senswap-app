@@ -13,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
 
@@ -34,21 +35,24 @@ class TokenSelection extends Component {
       index: 0,
       recommended: {
         pools: [],
-        limit: 5,
+        limit: 3,
         page: -1
       },
-      other: {
+      new: {
         pools: [],
-        limit: 5,
+        limit: 3,
         page: -1
       },
-      search: ''
+      search: '',
+      searched: {
+        pools: [],
+      },
     }
   }
 
   componentDidMount() {
     this.fetchRecommededPools();
-    this.fetchOtherPools();
+    this.fetchNewPools();
   }
 
   componentDidUpdate(prevProps) {
@@ -60,7 +64,7 @@ class TokenSelection extends Component {
     }
   }
 
-  fetchPools = (type, limit, page) => {
+  fetchPools = (typeOrCondition, limit, page) => {
     return new Promise((resolve, reject) => {
       const { wallet: { user: { tokenAccounts } } } = this.props;
       const { getPools, getPool } = this.props;
@@ -70,7 +74,9 @@ class TokenSelection extends Component {
       })).then(tokens => {
         const recommendedCondition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
         const otherCondition = { '$and': tokens.map(({ token: { address } }) => ({ token: { '$ne': address } })) }
-        const condition = type === 'recommended' ? recommendedCondition : otherCondition;
+        let condition = typeOrCondition;
+        if (typeOrCondition === 'recommended') condition = recommendedCondition;
+        if (typeOrCondition === 'new') condition = otherCondition;
         return getPools(condition, limit, page);
       }).then(poolIds => {
         return Promise.all(poolIds.map(({ _id }) => {
@@ -108,11 +114,11 @@ class TokenSelection extends Component {
     });
   }
 
-  fetchOtherPools = () => {
-    const { other: { limit, page } } = this.state;
-    return this.fetchPools('other', limit, page + 1).then(pools => {
+  fetchNewPools = () => {
+    const { new: { limit, page } } = this.state;
+    return this.fetchPools('new', limit, page + 1).then(pools => {
       if (!pools.length) return console.log('Empty tokens');
-      return this.setState({ other: { pools, limit, page: page + 1 } });
+      return this.setState({ new: { pools, limit, page: page + 1 } });
     }).catch(er => {
       return console.error(er);
     });
@@ -128,10 +134,18 @@ class TokenSelection extends Component {
   }
 
   onSearch = (e) => {
-    const symbol = e.target.value || '';
-    if (symbol.length > 4) return;
-    const search = symbol.toUpperCase();
-    return this.setState({ search });
+    const search = e.target.value || '';
+    if (search.length > 4) return;
+    return this.setState({ search }, () => {
+      const { search: value } = this.state;
+      if (value.length < 2) return this.setState({ searched: { pools: [] } });
+      const condition = { symbol: { '$regex': value, '$options': 'gi' } }
+      return this.fetchPools(condition, 50, 0).then(pools => {
+        return this.setState({ searched: { pools } });
+      }).catch(er => {
+        return this.setState({ searched: { pools: [] } });
+      });
+    });
   }
 
   onOpen = (e) => {
@@ -168,13 +182,60 @@ class TokenSelection extends Component {
     </Grid>
   }
 
+  renderRecommendedPools = () => {
+    const { recommended: { pools }, search } = this.state;
+    if (!pools.length || search) return null;
+    return <MenuList>
+      <ListSubheader>Recommended pools</ListSubheader>
+      {
+        pools.map((pool, index) => {
+          const { address, email, verified, token: { symbol, icon } } = pool;
+          return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
+            {this.renderToken(symbol, icon, email, verified)}
+          </MenuItem>
+        })
+      }
+    </MenuList>
+  }
+
+  renderNewPools = () => {
+    const { new: { pools }, search } = this.state;
+    if (!pools.length || search) return null;
+    return <MenuList>
+      <ListSubheader>New pools</ListSubheader>
+      {
+        pools.map((pool, index) => {
+          const { address, email, verified, token: { symbol, icon } } = pool;
+          return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
+            {this.renderToken(symbol, icon, email, verified)}
+          </MenuItem>
+        })
+      }
+    </MenuList>
+  }
+
+  renderSearchedPools = () => {
+    const { search, searched: { pools } } = this.state;
+    if (!pools.length) {
+      if (!search) return null;
+      return <ListSubheader>No result</ListSubheader>
+    }
+    return <MenuList>
+      <ListSubheader>Search</ListSubheader>
+      {
+        pools.map((pool, index) => {
+          const { address, email, verified, token: { symbol, icon } } = pool;
+          return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
+            {this.renderToken(symbol, icon, email, verified)}
+          </MenuItem>
+        })
+      }
+    </MenuList>
+  }
+
   render() {
     const { classes } = this.props;
-    const {
-      anchorEl, index, type, search,
-      recommended: { pools: recommendedPools },
-      other: { pools: otherPools }
-    } = this.state;
+    const { anchorEl, index, type, search } = this.state;
     const { [type]: { pools } } = this.state;
 
     const verified = pools[index] && pools[index].verified;
@@ -227,30 +288,9 @@ class TokenSelection extends Component {
               />
             </Grid>
           </Grid>
-          <ListSubheader>Recommended pools</ListSubheader>
-          {!recommendedPools.length ? <MenuItem>
-            <Typography>😱 Opps, it's empty now!</Typography>
-          </MenuItem> : null}
-          {
-            recommendedPools.map((pool, index) => {
-              const { address, email, verified, token: { symbol, icon } } = pool;
-              return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
-                {this.renderToken(symbol, icon, email, verified)}
-              </MenuItem>
-            })
-          }
-          <ListSubheader>Other pools</ListSubheader>
-          {!otherPools.length ? <MenuItem>
-            <Typography>😱 Opps, it's empty now!</Typography>
-          </MenuItem> : null}
-          {
-            otherPools.map((pool, index) => {
-              const { address, email, verified, token: { symbol, icon } } = pool;
-              return <MenuItem key={address} onClick={() => this.onSelect('other', index)}>
-                {this.renderToken(symbol, icon, email, verified)}
-              </MenuItem>
-            })
-          }
+          {this.renderSearchedPools()}
+          {this.renderRecommendedPools()}
+          {this.renderNewPools()}
         </Menu>
       </Grid>
     </Grid>

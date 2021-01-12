@@ -63,11 +63,11 @@ SOL.safelyCreateAccount = (programId) => {
       return SOL.safelyCreateAccount(programId);
     });
   });
-};
+}
 
 SOL.toSymbol = (symbol) => {
   if (!symbol) return '';
-  return symbol.join('').replace('-', '');
+  return symbol.join('').replace(/\u0000/g, '').replace(/-/g, '');
 }
 
 SOL.fromSecretKey = (secretKey) => {
