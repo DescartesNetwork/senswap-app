@@ -12,6 +12,7 @@ import Button from '@material-ui/core/Button';
 import Drain from 'components/drain';
 import { BaseCard, NotiCard } from 'components/cards';
 import TokenSelection from './tokenSelection';
+import AccountSelection from './accountSelection';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -70,8 +71,8 @@ class Swap extends Component {
     return this.setState({ bidAddress: address }, () => {
       const { bidAddress } = this.state;
       if (!sol.isAddress(bidAddress)) return;
-      return sol.getPurePoolData(bidAddress).then(re => {
-        return this.setState({ bidData: re }, this.estimateAmount);
+      return sol.getPurePoolData(bidAddress).then(bidData => {
+        return this.setState({ bidData }, this.estimateAmount);
       }).catch(er => {
         console.log(er);
         return this.setState({ askAmount: 0 });
@@ -79,8 +80,7 @@ class Swap extends Component {
     });
   }
 
-  onSourceAddress = (e) => {
-    const srcAddress = e.target.value || '';
+  onSourceAddress = (srcAddress) => {
     return this.setState({ srcAddress });
   }
 
@@ -88,8 +88,8 @@ class Swap extends Component {
     return this.setState({ askAddress: address }, () => {
       const { askAddress } = this.state;
       if (!sol.isAddress(askAddress)) return;
-      return sol.getPurePoolData(askAddress).then(re => {
-        return this.setState({ askData: re }, this.estimateAmount);
+      return sol.getPurePoolData(askAddress).then(askData => {
+        return this.setState({ askData }, this.estimateAmount);
       }).catch(er => {
         console.log(er);
         return this.setState({ askAmount: 0 });
@@ -97,8 +97,7 @@ class Swap extends Component {
     });
   }
 
-  onDestinationAddress = (e) => {
-    const dstAddress = e.target.value || '';
+  onDestinationAddress = (dstAddress) => {
     return this.setState({ dstAddress });
   }
 
@@ -143,7 +142,7 @@ class Swap extends Component {
   }
 
   render() {
-    const { srcAddress, dstAddress, bidAmount, askAmount } = this.state;
+    const { bidAmount, askAmount } = this.state;
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
         <Grid container spacing={2} justify="center">
@@ -176,13 +175,7 @@ class Swap extends Component {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField
-                    label="Source Address"
-                    variant="outlined"
-                    value={srcAddress}
-                    onChange={this.onSourceAddress}
-                    fullWidth
-                  />
+                  <AccountSelection label="Source Address" onChange={this.onSourceAddress} />
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="h6">To</Typography>
@@ -200,13 +193,7 @@ class Swap extends Component {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField
-                    label="Destination Address"
-                    variant="outlined"
-                    value={dstAddress}
-                    onChange={this.onDestinationAddress}
-                    fullWidth
-                  />
+                  <AccountSelection label="Destination Address" onChange={this.onDestinationAddress} />
                 </Grid>
                 <Grid item xs={12}>
                   <Button

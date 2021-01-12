@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -6,26 +7,27 @@ import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
+import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { MenuRounded } from '@material-ui/icons';
+import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
 
-import styles from '../styles';
+import styles from './styles';
 import sol from 'helpers/sol';
-import { setMainTokenAccount } from 'modules/wallet.reducer';
 
 
-class TokenMenu extends Component {
+class AccountSelection extends Component {
   constructor() {
     super();
 
     this.state = {
       anchorEl: null,
+      address: '',
       data: [],
     }
   }
@@ -51,13 +53,25 @@ class TokenMenu extends Component {
     });
   }
 
-  onSelect = (tokenAccount) => {
-    const { setMainTokenAccount } = this.props;
-    return setMainTokenAccount(tokenAccount).then(re => {
-      return this.onClose();
-    }).catch(er => {
-      return console.error(er);
+  onOpen = (e) => {
+    return this.setState({ anchorEl: e.target });
+  }
+
+  onClose = () => {
+    return this.setState({ anchorEl: null });
+  }
+
+  onAddress = (e) => {
+    const address = e.target.value || '';
+    return this.setState({ address }, () => {
+      this.onClose();
+      return this.props.onChange(address);
     });
+  }
+
+  onSelect = (address) => {
+    const pseudoEvent = { target: { value: address } }
+    return this.onAddress(pseudoEvent);
   }
 
   renderGroupedTokensData = () => {
@@ -82,30 +96,41 @@ class TokenMenu extends Component {
     return render;
   }
 
-  onOpen = (e) => {
-    return this.setState({ anchorEl: e.target });
-  }
-
-  onClose = () => {
-    return this.setState({ anchorEl: null });
-  }
-
   render() {
-    const { anchorEl } = this.state;
+    const { label } = this.props;
+    const { anchorEl, address } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Tooltip title="Token List">
-          <IconButton color="secondary" size="small" onClick={this.onOpen}>
-            <MenuRounded />
-          </IconButton>
-        </Tooltip>
+        <TextField
+          label={label}
+          variant="outlined"
+          value={address}
+          onChange={this.onAddress}
+          InputProps={{
+            endAdornment: <IconButton color="primary" onClick={this.onOpen} edge="end">
+              <UnfoldMoreRounded />
+            </IconButton>
+          }}
+          fullWidth
+        />
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={this.onClose}
         >
           {this.renderGroupedTokensData()}
+          <ListSubheader>If you don't have accounts</ListSubheader>
+          <MenuItem>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<EmojiObjectsRounded />}
+              fullWidth
+            >
+              <Typography>Create a new account</Typography>
+            </Button>
+          </MenuItem>
         </Menu>
       </Grid>
     </Grid>
@@ -118,10 +143,19 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setMainTokenAccount,
 }, dispatch);
+
+AccountSelection.defaultProps = {
+  label: 'Address',
+  onChange: () => { },
+}
+
+AccountSelection.propTypes = {
+  label: PropTypes.string,
+  onChange: PropTypes.func,
+}
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(TokenMenu)));
+)(withStyles(styles)(AccountSelection)));

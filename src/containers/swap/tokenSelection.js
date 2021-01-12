@@ -60,7 +60,7 @@ class TokenSelection extends Component {
     const { wallet: { user } } = this.props;
     if (!isEqual(user, prevUser)) {
       this.fetchRecommededPools();
-      this.fetchOtherPools();
+      this.fetchNewPools();
     }
   }
 
@@ -73,10 +73,10 @@ class TokenSelection extends Component {
         return sol.getTokenData(tokenAccount);
       })).then(tokens => {
         const recommendedCondition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
-        const otherCondition = { '$and': tokens.map(({ token: { address } }) => ({ token: { '$ne': address } })) }
+        const newCondition = { '$and': tokens.map(({ token: { address } }) => ({ token: { '$ne': address } })) }
         let condition = typeOrCondition;
         if (typeOrCondition === 'recommended') condition = recommendedCondition;
-        if (typeOrCondition === 'new') condition = otherCondition;
+        if (typeOrCondition === 'new') condition = newCondition;
         return getPools(condition, limit, page);
       }).then(poolIds => {
         return Promise.all(poolIds.map(({ _id }) => {
@@ -108,7 +108,9 @@ class TokenSelection extends Component {
     const { recommended: { limit, page } } = this.state;
     return this.fetchPools('recommended', limit, page + 1).then(pools => {
       if (!pools.length) return console.log('Empty tokens');
-      return this.setState({ recommended: { pools, limit, page: page + 1 } });
+      return this.setState({ recommended: { pools, limit, page: page + 1 } },()=>{
+        return this.onSelect('recommended', 0);
+      });
     }).catch(er => {
       return console.error(er);
     });
