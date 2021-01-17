@@ -42,24 +42,37 @@ class Swap extends Component {
       bidData: {
         initialized: bidInitialized,
         reserve: bidReserve,
+        lpt: bidLPT,
         token: bidToken,
       },
       askData: {
         initialized: askInitialized,
         reserve: askReserve,
+        lpt: askLPT,
         token: askToken,
         fee_numerator: askFeeNumerator,
         fee_denominator: askFeeDenominator,
       }
     } = this.state;
     if (!bidAmount || !bidInitialized || !askInitialized) return this.setState({ askAmount: 0 });
-    const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
-    const newBidReserve = bidReserve + amount;
-    const newAskReserveNoFee = bidReserve * askReserve / newBidReserve;
-    const paidAmountNoFee = askReserve - newAskReserveNoFee;
-    const paidAmountAfterFee = paidAmountNoFee * (askFeeDenominator - askFeeNumerator) / askFeeDenominator;
-    const askAmount = utils.div(paidAmountAfterFee, global.BigInt(10 ** askToken.decimals));
-    return this.setState({ askAmount });
+    const _bidAmount = parseInt(bidAmount) || 0;
+    const _bidReserve = utils.div(bidReserve, global.BigInt(10 ** bidToken.decimals));
+    const _newBidReserve = _bidReserve + _bidAmount;
+    const _bidLPT = utils.div(bidLPT, global.BigInt(10 ** bidToken.decimals));
+    const _askReserve = utils.div(askReserve, global.BigInt(10 ** askToken.decimals));
+    const _askLPT = utils.div(askLPT, global.BigInt(10 ** askToken.decimals));
+
+    const alpha = _bidReserve / _newBidReserve;
+    const reversedAlpha = 1 / alpha;
+    const lambda = _bidLPT / _askLPT;
+    const b = (reversedAlpha - alpha) * lambda;
+    const sqrtDelta = Math.sqrt(b ** 2 + 4);
+    const beta = (sqrtDelta - b) / 2;
+
+    const newAskReserveWithoutFee = _askReserve * beta;
+    const paidAmountWithoutFee = _askReserve - newAskReserveWithoutFee;
+    const paidAmountWithFee = paidAmountWithoutFee * utils.div(askFeeDenominator - askFeeNumerator, askFeeDenominator);
+    return this.setState({ askAmount: paidAmountWithFee });
   }
 
   onAmount = (e) => {
