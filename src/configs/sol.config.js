@@ -7,18 +7,18 @@ const configs = {}
  * Development configurations
  */
 configs.development = {
-  node: 'http://localhost:8899',
-  tokenFactoryAddress: 'BcfSEsgAp5cfTS18CQTWibq63KJoR2Rkd6ENXu5AyaWU',
-  swapFactoryAddress: '8cuydwpLrxZy57Ehq6cr7nMzDQmcwHwjsakjT2gAsous',
+  node: 'https://devnet.solana.com',
+  tokenFactoryAddress: 'JCbHuGZyQiC9abPpEHfs6W8evgumEYthpqqBsgDRewa8',
+  swapFactoryAddress: '23Y2WwZY149zE7tcXrQA46Zfj3zvkkibHn3xCZ4qJBgi',
 }
 
 /**
  * Staging configurations
  */
 configs.staging = {
-  node: '',
-  tokenFactoryAddress: '',
-  swapFactoryAddress: '',
+  node: 'https://devnet.solana.com',
+  tokenFactoryAddress: 'JCbHuGZyQiC9abPpEHfs6W8evgumEYthpqqBsgDRewa8',
+  swapFactoryAddress: '23Y2WwZY149zE7tcXrQA46Zfj3zvkkibHn3xCZ4qJBgi',
 }
 
 /**
