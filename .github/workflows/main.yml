@@ -27,8 +27,8 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATEKEY }}
           script: |
-            docker stop app
-            docker rm app
-            docker pull tuphanson/senswap-app
-            docker run -d --name app tuphanson/senswap-app
-            docker image prune -a -f
+            sudo docker stop app
+            sudo docker rm app
+            sudo docker pull tuphanson/senswap-app
+            sudo docker run -d --name app tuphanson/senswap-app
+            sudo docker image prune -a -f
