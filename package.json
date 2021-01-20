@@ -32,7 +32,7 @@
     "swiper": "^6.3.0"
   },
   "scripts": {
-    "start": "REACT_APP_ENV=development react-scripts start",
+    "start": "HTTPS=true REACT_APP_ENV=development react-scripts start",
     "stag": "REACT_APP_ENV=staging react-scripts build",
     "prod": "REACT_APP_ENV=production react-scripts build",
     "publish": "sh ./build-docker.sh",
