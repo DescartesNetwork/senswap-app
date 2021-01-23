@@ -7,4 +7,5 @@ RUN npm install
 COPY . .
 RUN npm run prod
 
+EXPOSE 80
 CMD [ "npm", "run", "serve" ]
