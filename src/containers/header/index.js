@@ -99,7 +99,7 @@ class Header extends Component {
           <Grid container spacing={2} className={classes.noWrap} alignItems="center">
             {/* Logo */}
             <Grid item className={classes.logo}>
-              <Link color="textPrimary" underline="none" component={RouterLink} to={'/home'}>
+              <Link color="textPrimary" underline="none" component={RouterLink} to={'/swap'}>
                 <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
                   <Grid item style={{ width: 35 }}>
                     <Image
@@ -116,7 +116,7 @@ class Header extends Component {
             </Grid>
             {/* Menu */}
             <Grid item className={classes.stretch}>
-              <Grid container alignItems="center" justify="flex-end" spacing={width >= 960 ? 5 : 2}>
+              <Grid container alignItems="center" justify="flex-end" spacing={width >= 600 ? 5 : 2}>
                 {/* Pool */}
                 <Grid item>
                   <Tooltip title="Pool">

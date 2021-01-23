@@ -33,5 +33,8 @@ export default theme => ({
     outline: 'none !important',
     width: `calc(100% - ${theme.spacing(2)}px)`,
     margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
+  },
+  badgeIcon: {
+    fontSize: '1rem'
   }
 });

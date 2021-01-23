@@ -108,7 +108,7 @@ class AccountSelection extends Component {
           value={address}
           onChange={this.onAddress}
           InputProps={{
-            endAdornment: <IconButton color="primary" onClick={this.onOpen} edge="end">
+            endAdornment: <IconButton onClick={this.onOpen} edge="end">
               <UnfoldMoreRounded />
             </IconButton>
           }}

@@ -166,7 +166,7 @@ class TokenSelection extends Component {
     return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
       <Grid item>
         <Badge
-          badgeContent={!verified ? <HelpOutlineRounded fontSize="small" /> : <CheckCircleOutlineRounded fontSize="small" />}
+          badgeContent={!verified ? <HelpOutlineRounded className={classes.badgeIcon} /> : <CheckCircleOutlineRounded className={classes.badgeIcon} />}
           overlap="circle"
           color="primary"
           classes={{ colorPrimary: !verified ? classes.unverified : classes.verified }}
@@ -266,7 +266,7 @@ class TokenSelection extends Component {
                 <HelpOutlineRounded />
               </Avatar>
             </Badge>,
-            endAdornment: <IconButton color="primary" onClick={this.onOpen} edge="end">
+            endAdornment: <IconButton onClick={this.onOpen} edge="end">
               <UnfoldMoreRounded />
             </IconButton>
           }}
@@ -280,7 +280,6 @@ class TokenSelection extends Component {
           <Grid container spacing={2} className={classes.tools}>
             <Grid item xs={12}>
               <TextField
-                color="secondary"
                 placeholder="Symbol"
                 value={search}
                 onChange={this.onSearch}

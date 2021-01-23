@@ -16,8 +16,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import { UnfoldMoreRounded } from '@material-ui/icons';
 
-import sol from 'helpers/sol';
 import styles from './styles';
+import sol from 'helpers/sol';
 
 
 class Address extends Component {
@@ -78,11 +78,11 @@ class Address extends Component {
 
     const render = [];
     for (let symbol in groupedLPTsData) {
-      render.push(<ListSubheader key={symbol}>{symbol}</ListSubheader>)
+      render.push(<ListSubheader key={symbol}>{symbol} Pool</ListSubheader>);
       groupedLPTsData[symbol].forEach(address => {
         return render.push(<MenuItem key={address} onClick={() => this.onAddress(address)}>
           <Typography noWrap>{address}</Typography>
-        </MenuItem>)
+        </MenuItem>);
       });
     }
 
@@ -99,7 +99,7 @@ class Address extends Component {
           variant="outlined"
           value={lptAccount}
           InputProps={{
-            endAdornment: <IconButton color="primary" onClick={this.onOpen} edge="end" >
+            endAdornment: <IconButton onClick={this.onOpen} edge="end" >
               <UnfoldMoreRounded />
             </IconButton>
           }}

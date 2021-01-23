@@ -15,7 +15,6 @@ import UiUx from 'containers/uiux';
 import Wallet from 'containers/wallet';
 // Pages
 import NotFound from 'containers/404';
-import Home from 'containers/home';
 import Swap from 'containers/swap';
 import Pool from 'containers/pool';
 import Faucet from 'containers/faucet';
@@ -44,8 +43,7 @@ class App extends Component {
         {/* Pages */}
         <Grid item xs={12}>
           <Switch>
-            <Redirect exact from="/" to="/home" />
-            <Route exact path='/home' component={Home} />
+            <Redirect exact from="/" to="/swap" />
             <Route exact path='/swap' component={Swap} />
             <Route path='/pool' component={Pool} />
             <Route exact path='/faucet' component={Faucet} />

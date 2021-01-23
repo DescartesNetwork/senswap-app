@@ -159,13 +159,6 @@ class Swap extends Component {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
         <Grid container spacing={2} justify="center">
-          <Grid item xs={12} md={6}>
-            <NotiCard
-              title="Notification"
-              description="Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
-              source="#"
-            />
-          </Grid>
           <Grid item xs={12}>
             <Drain small />
           </Grid>
