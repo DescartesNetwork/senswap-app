@@ -36,7 +36,7 @@ class Pool extends Component {
           <Grid item xs={12} md={6}>
             <NotiCard
               title="Liquidity provider incentive"
-              description="Liquidity providers earn a 0.3% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
+              description="Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
               source=""
             />
           </Grid>
