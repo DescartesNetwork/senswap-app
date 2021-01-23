@@ -26,7 +26,7 @@ class Wallet extends Component {
 
   render() {
     const { classes } = this.props;
-    const { ui: { width } } = this.props;
+    const { ui: { width }, wallet: { user: { address } } } = this.props;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -34,7 +34,7 @@ class Wallet extends Component {
           <Grid item className={classes.stretch}>
             <Typography variant={width < 600 ? 'h4' : 'h2'}>SenWallet</Typography>
           </Grid>
-          <Grid item>
+          {address ? <Grid item>
             <Button
               variant="contained"
               color="primary"
@@ -44,7 +44,7 @@ class Wallet extends Component {
             >
               <Typography>Disconnect</Typography>
             </Button>
-          </Grid>
+          </Grid> : null}
         </Grid>
       </Grid>
     </Grid>

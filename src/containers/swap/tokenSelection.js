@@ -17,7 +17,10 @@ import MenuList from '@material-ui/core/MenuList';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
 
-import { UnfoldMoreRounded, HelpOutlineRounded, SearchRounded } from '@material-ui/icons';
+import {
+  CheckCircleOutlineRounded,
+  UnfoldMoreRounded, HelpOutlineRounded, SearchRounded
+} from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -108,7 +111,7 @@ class TokenSelection extends Component {
     const { recommended: { limit, page } } = this.state;
     return this.fetchPools('recommended', limit, page + 1).then(pools => {
       if (!pools.length) return console.log('Empty tokens');
-      return this.setState({ recommended: { pools, limit, page: page + 1 } },()=>{
+      return this.setState({ recommended: { pools, limit, page: page + 1 } }, () => {
         return this.onSelect('recommended', 0);
       });
     }).catch(er => {
@@ -163,7 +166,7 @@ class TokenSelection extends Component {
     return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
       <Grid item>
         <Badge
-          badgeContent={!verified ? '?' : '✓'}
+          badgeContent={!verified ? <HelpOutlineRounded fontSize="small" /> : <CheckCircleOutlineRounded fontSize="small" />}
           overlap="circle"
           color="primary"
           classes={{ colorPrimary: !verified ? classes.unverified : classes.verified }}

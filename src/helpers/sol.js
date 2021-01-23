@@ -53,6 +53,11 @@ SOL.isAddress = (address) => {
   }
 }
 
+SOL.createAccount = () => {
+  const account = new Account();
+  return account;
+}
+
 SOL.safelyCreateAccount = (programId) => {
   return new Promise((resolve, reject) => {
     const account = new Account();

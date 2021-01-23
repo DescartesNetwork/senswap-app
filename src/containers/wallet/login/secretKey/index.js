@@ -8,8 +8,9 @@ import { Grid } from '@material-ui/core';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
+import Button from '@material-ui/core/Button';
 
-import { VpnKeyRounded, PowerRounded } from '@material-ui/icons';
+import { VpnKeyRounded, PowerRounded, HelpRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -39,6 +40,12 @@ class SecretKey extends Component {
     return setWallet(address, secretKey);
   }
 
+  gen = () => {
+    const account = sol.createAccount();
+    const secretKey = Buffer.from(account.secretKey).toString('hex');
+    return this.setState({ secretKey });
+  }
+
   render() {
     const { classes } = this.props;
     const { secretKey } = this.state;
@@ -57,7 +64,7 @@ class SecretKey extends Component {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Typography>Let Google help apps determine location. This means sending anonymous location data to Google, even when no apps are running.</Typography>
+        <Typography>Connect wallet using your Secret key. If you don't have one, you could create a secret key. However, make sure that you copy and securely save the secret key down. We do not store your secrets due to security and privacy.</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -76,6 +83,19 @@ class SecretKey extends Component {
           }}
           fullWidth
         />
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container spacing={2} justify="flex-end">
+          <Grid item>
+            <Button
+              onClick={this.gen}
+              startIcon={<HelpRounded />}
+              fullWidth
+            >
+              <Typography>Not have secret key yet?</Typography>
+            </Button>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   }

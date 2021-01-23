@@ -22,9 +22,11 @@ export default theme => ({
     fontSize: 9
   },
   verified: {
+    padding: 0,
     backgroundColor: theme.palette.info.main
   },
   unverified: {
+    padding: 0,
     backgroundColor: theme.palette.error.main
   },
   tools: {
