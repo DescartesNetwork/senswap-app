@@ -36,7 +36,7 @@
     "stag": "REACT_APP_ENV=staging react-scripts build",
     "prod": "REACT_APP_ENV=production react-scripts build",
     "publish": "sh ./build-docker.sh",
-    "serve": "serve -s build -l 3000",
+    "serve": "serve -s build -l 80",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
