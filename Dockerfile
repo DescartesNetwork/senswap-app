@@ -5,7 +5,7 @@ WORKDIR /home/senswap-app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run prod
+RUN npm run stag
 
 EXPOSE 80
 CMD [ "npm", "run", "serve" ]
