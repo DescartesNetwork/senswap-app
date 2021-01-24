@@ -14,7 +14,7 @@ configs.development = {
  * Staging configurations
  */
 configs.staging = {
-  base: 'ec2-18-216-74-17.us-east-2.compute.amazonaws.com',
+  base: 'https://testnet-api.senswap.com',
 }
 
 /**
