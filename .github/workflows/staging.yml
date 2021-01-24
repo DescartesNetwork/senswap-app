@@ -2,9 +2,9 @@ name: Automatic Deployment
 
 on:
   push:
-    branches: [master]
+    branches: [staging]
   pull_request:
-    branches: [master]
+    branches: [staging]
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
         run: echo Start deploying SenSwap APP
       - name: Build Dockerfile
         run: |
-          sed -i 's/__ENV__/prod/g' Dockerfile
+          sed -i 's/__ENV__/stag/g' Dockerfile
           cat Dockerfile
       - name: Build docker
         uses: docker/build-push-action@v1
