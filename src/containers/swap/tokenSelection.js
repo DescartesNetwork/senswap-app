@@ -16,6 +16,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import {
   CheckCircleOutlineRounded,
@@ -166,7 +167,13 @@ class TokenSelection extends Component {
     return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
       <Grid item>
         <Badge
-          badgeContent={!verified ? <HelpOutlineRounded className={classes.badgeIcon} /> : <CheckCircleOutlineRounded className={classes.badgeIcon} />}
+          badgeContent={
+            !verified ? <Tooltip title="This pool is NOT verified by SenSwap">
+              <HelpOutlineRounded className={classes.badgeIcon} />
+            </Tooltip> : <Tooltip title="This pool is verified by SenSwap">
+                <CheckCircleOutlineRounded className={classes.badgeIcon} />
+              </Tooltip>
+          }
           overlap="circle"
           color="primary"
           classes={{ colorPrimary: !verified ? classes.unverified : classes.verified }}

@@ -35,31 +35,60 @@ export const getWhiteList = () => {
   }
 }
 
-
 /**
- * Airdrop
+ * Airdrop lamports
  */
-export const AIRDROP = 'AIRDROP';
-export const AIRDROP_OK = 'AIRDROP_OK';
-export const AIRDROP_FAIL = 'AIRDROP_FAIL';
+export const AIRDROP_LAMPORTS = 'AIRDROP_LAMPORTS';
+export const AIRDROP_LAMPORTS_OK = 'AIRDROP_LAMPORTS_OK';
+export const AIRDROP_LAMPORTS_FAIL = 'AIRDROP_LAMPORTS_FAIL';
 
-export const airdrop = (dstAddress, tokenAddress) => {
+export const airdropLamports = (dstAddress) => {
   return dispatch => {
     return new Promise((resolve, reject) => {
-      dispatch({ type: AIRDROP });
+      dispatch({ type: AIRDROP_LAMPORTS });
 
-      if (!dstAddress || !tokenAddress) {
+      if (!dstAddress) {
         const er = 'Invalid input';
-        dispatch({ type: AIRDROP_FAIL, reason: er });
+        dispatch({ type: AIRDROP_LAMPORTS_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.post(base + '/faucet', { dstAddress, tokenAddress }).then(({ data }) => {
-        dispatch({ type: AIRDROP_OK, data });
+      return api.post(base + '/faucet/lamports', { dstAddress }).then(({ data }) => {
+        dispatch({ type: AIRDROP_LAMPORTS_OK, data });
         return resolve(data);
       }).catch(er => {
-        dispatch({ type: AIRDROP_FAIL, reason: er.toString() });
+        dispatch({ type: AIRDROP_LAMPORTS_FAIL, reason: er.toString() });
+        return reject(er.toString());
+      });
+    });
+  }
+}
+
+/**
+ * Airdrop tokens
+ */
+export const AIRDROP_TOKENS = 'AIRDROP_TOKENS';
+export const AIRDROP_TOKENS_OK = 'AIRDROP_TOKENS_OK';
+export const AIRDROP_TOKENS_FAIL = 'AIRDROP_TOKENS_FAIL';
+
+export const airdropTokens = (dstAddress, tokenAddress) => {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: AIRDROP_TOKENS });
+
+      if (!dstAddress || !tokenAddress) {
+        const er = 'Invalid input';
+        dispatch({ type: AIRDROP_TOKENS_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const { api: { base } } = configs;
+      return api.post(base + '/faucet/tokens', { dstAddress, tokenAddress }).then(({ data }) => {
+        dispatch({ type: AIRDROP_TOKENS_OK, data });
+        return resolve(data);
+      }).catch(er => {
+        dispatch({ type: AIRDROP_TOKENS_FAIL, reason: er.toString() });
         return reject(er.toString());
       });
     });
@@ -75,9 +104,13 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case GET_WHITELIST_FAIL:
       return { ...state, ...action.data };
-    case AIRDROP_OK:
+    case AIRDROP_LAMPORTS_OK:
       return { ...state, ...action.data };
-    case AIRDROP_FAIL:
+    case AIRDROP_LAMPORTS_FAIL:
+      return { ...state, ...action.data };
+    case AIRDROP_TOKENS_OK:
+      return { ...state, ...action.data };
+    case AIRDROP_TOKENS_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

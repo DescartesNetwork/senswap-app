@@ -19,6 +19,7 @@ import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import { openWallet } from 'modules/wallet.reducer';
 
 
 class AccountSelection extends Component {
@@ -97,7 +98,7 @@ class AccountSelection extends Component {
   }
 
   render() {
-    const { label } = this.props;
+    const { openWallet, label } = this.props;
     const { anchorEl, address } = this.state;
 
     return <Grid container spacing={2}>
@@ -126,6 +127,7 @@ class AccountSelection extends Component {
               variant="contained"
               color="primary"
               startIcon={<EmojiObjectsRounded />}
+              onClick={openWallet}
               fullWidth
             >
               <Typography>Create a new account</Typography>
@@ -143,6 +145,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  openWallet,
 }, dispatch);
 
 AccountSelection.defaultProps = {

@@ -13,6 +13,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { Facebook, Twitter, FlightTakeoffRounded } from '@material-ui/icons';
 
@@ -22,10 +23,11 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { getSecretKey, updateWallet } from 'modules/wallet.reducer';
-import { getWhiteList, airdrop } from 'modules/faucet.reducer';
+import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
 
 
 const EMPTY = {
+  loading: false,
   error: '',
   txId: ''
 }
@@ -38,6 +40,7 @@ class Faucet extends Component {
 
     this.state = {
       data: {},
+      loading: false,
       link: '',
       tokenAddress: '',
       ...EMPTY
@@ -71,31 +74,38 @@ class Faucet extends Component {
   }
 
   onAirdrop = () => {
-    const { wallet: { user }, getSecretKey, updateWallet, airdrop } = this.props;
+    const {
+      wallet: { user },
+      getSecretKey, updateWallet, airdropLamports, airdropTokens,
+    } = this.props;
     const { tokenAddress, link } = this.state;
     if (!tokenAddress) return this.setState({ ...EMPTY, error: 'Invalid token' });
     if (!link) return this.setState({ ...EMPTY, error: 'Please parse the share link' });
 
-    return getSecretKey().then(secretKey => {
-      const payer = sol.fromSecretKey(secretKey);
-      const token = sol.fromAddress(tokenAddress);
-      return sol.newSRC20Account(token, payer);
-    }).then(tokenAccount => {
-      const dstAddress = tokenAccount.publicKey.toBase58();
-      return airdrop(dstAddress, tokenAddress);
-    }).then(({ dstAddress, txId }) => {
-      this.setState({ ...EMPTY, txId });
-      const tokenAccounts = [...user.tokenAccounts];
-      tokenAccounts.push(dstAddress);
-      return updateWallet({ ...user, tokenAccounts });
-    }).catch(er => {
-      return this.setState({ ...EMPTY, error: er });
+    return this.setState({ ...EMPTY, loading: true }, () => {
+      return airdropLamports(user.address).then(re => {
+        return getSecretKey();
+      }).then(secretKey => {
+        const payer = sol.fromSecretKey(secretKey);
+        const token = sol.fromAddress(tokenAddress);
+        return sol.newSRC20Account(token, payer);
+      }).then(tokenAccount => {
+        const dstAddress = tokenAccount.publicKey.toBase58();
+        return airdropTokens(dstAddress, tokenAddress);
+      }).then(({ dstAddress, txId }) => {
+        this.setState({ ...EMPTY, txId });
+        const tokenAccounts = [...user.tokenAccounts];
+        tokenAccounts.push(dstAddress);
+        return updateWallet({ ...user, tokenAccounts });
+      }).catch(er => {
+        return this.setState({ ...EMPTY, error: er });
+      });
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { tokenAddress, data, link, error, txId } = this.state;
+    const { tokenAddress, data, link, error, txId, loading } = this.state;
     const { faucet: { tokens } } = this.props;
     const symbol = sol.toSymbol(data.symbol);
 
@@ -160,8 +170,9 @@ class Faucet extends Component {
                       <Button
                         variant="contained"
                         color="primary"
-                        endIcon={<FlightTakeoffRounded />}
+                        endIcon={loading ? <CircularProgress size={20} /> : <FlightTakeoffRounded />}
                         onClick={this.onAirdrop}
+                        disabled={loading}
                       >
                         <Typography>OK</Typography>
                       </Button>
@@ -185,7 +196,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   getSecretKey, updateWallet,
-  getWhiteList, airdrop,
+  getWhiteList, airdropLamports, airdropTokens,
 }, dispatch);
 
 export default withRouter(connect(
