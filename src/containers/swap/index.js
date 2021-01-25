@@ -8,23 +8,33 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import CircularProgress from '@material-ui/core/CircularProgress';
+
+import { PublicRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
-import { BaseCard, NotiCard } from 'components/cards';
+import { BaseCard } from 'components/cards';
 import TokenSelection from './tokenSelection';
 import AccountSelection from './accountSelection';
 
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import configs from 'configs';
 import { getSecretKey } from 'modules/wallet.reducer';
 
+const EMPTY = {
+  loading: false,
+  txId: '2P1RzY2h27FMkvqhqoGxtDghLAopgQSKDPQ269dGmxnCbRmknFKg4chA8nuFpvGcB8J9sMbLYUmNbvUehcpHQSkJ',
+}
 
 class Swap extends Component {
   constructor() {
     super();
 
     this.state = {
+      ...EMPTY,
       srcAddress: '',
       dstAddress: '',
       bidAmount: 0,
@@ -123,39 +133,44 @@ class Swap extends Component {
     const { getSecretKey } = this.props;
     if (!bidAmount || !srcAddress || !dstAddress || !bidInitialized || !askInitialized)
       return console.error('Invalid input');
-    return getSecretKey().then(secretKey => {
-      const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
-      const payer = sol.fromSecretKey(secretKey);
-      const bidPoolPublicKey = sol.fromAddress(bidPoolAddress);
-      const bidTreasuryPublicKey = sol.fromAddress(bidTreasury.address);
-      const srcTokenPublickKey = sol.fromAddress(srcAddress);
-      const bidTokenPublickKey = sol.fromAddress(bidToken.address);
-      const askPoolPublicKey = sol.fromAddress(askPoolAddress);
-      const askTreasuryPublickKey = sol.fromAddress(askTreasury.address);
-      const dstTokenPublickKey = sol.fromAddress(dstAddress);
-      const askTokenPublicKey = sol.fromAddress(askToken.address);
+    return this.setState({ ...EMPTY, loading: true }, () => {
+      return getSecretKey().then(secretKey => {
+        const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
+        const payer = sol.fromSecretKey(secretKey);
+        const bidPoolPublicKey = sol.fromAddress(bidPoolAddress);
+        const bidTreasuryPublicKey = sol.fromAddress(bidTreasury.address);
+        const srcTokenPublickKey = sol.fromAddress(srcAddress);
+        const bidTokenPublickKey = sol.fromAddress(bidToken.address);
+        const askPoolPublicKey = sol.fromAddress(askPoolAddress);
+        const askTreasuryPublickKey = sol.fromAddress(askTreasury.address);
+        const dstTokenPublickKey = sol.fromAddress(dstAddress);
+        const askTokenPublicKey = sol.fromAddress(askToken.address);
 
-      return sol.swap(
-        amount,
-        payer,
-        bidPoolPublicKey,
-        bidTreasuryPublicKey,
-        srcTokenPublickKey,
-        bidTokenPublickKey,
-        askPoolPublicKey,
-        askTreasuryPublickKey,
-        dstTokenPublickKey,
-        askTokenPublicKey,
-      );
-    }).then(re => {
-      console.log(re);
-    }).catch(er => {
-      return console.error(er);
+        return sol.swap(
+          amount,
+          payer,
+          bidPoolPublicKey,
+          bidTreasuryPublicKey,
+          srcTokenPublickKey,
+          bidTokenPublickKey,
+          askPoolPublicKey,
+          askTreasuryPublickKey,
+          dstTokenPublickKey,
+          askTokenPublicKey,
+        );
+      }).then(txId => {
+        return this.setState({ ...EMPTY, txId });
+      }).catch(er => {
+        console.error(er);
+        return this.setState({ ...EMPTY });
+      });
     });
   }
 
   render() {
-    const { bidAmount, askAmount } = this.state;
+    const { classes } = this.props;
+    const { bidAmount, askAmount, loading, txId } = this.state;
+
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
         <Grid container spacing={2} justify="center">
@@ -201,12 +216,26 @@ class Swap extends Component {
                 <Grid item xs={12}>
                   <AccountSelection label="Destination Address" onChange={this.onDestinationAddress} />
                 </Grid>
+                {txId ? <Grid item xs={12}>
+                  <Grid container spacing={2} className={classes.noWrap} alignItems="center">
+                    <Grid item>
+                      <IconButton color="primary" href={configs.sol.explorer(txId)} target="_blank">
+                        <PublicRounded />
+                      </IconButton>
+                    </Grid>
+                    <Grid item className={classes.stretch}>
+                      <Typography>Your swap has done! You can click to the icon to view the transaction.</Typography>
+                    </Grid>
+                  </Grid>
+                </Grid> : null}
                 <Grid item xs={12}>
                   <Button
                     variant="contained"
                     color="primary"
                     size="large"
                     onClick={this.onSwap}
+                    endIcon={loading ? <CircularProgress size={20} /> : null}
+                    disabled={loading}
                     fullWidth
                   >
                     <Typography variant="body2">Swap</Typography>
