@@ -77,7 +77,7 @@ class TokenSelection extends Component {
         return sol.getTokenData(tokenAccount);
       })).then(tokens => {
         const recommendedCondition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
-        const newCondition = { '$and': tokens.map(({ token: { address } }) => ({ token: { '$ne': address } })) }
+        const newCondition = !tokens.length ? {} : { '$and': tokens.map(({ token: { address } }) => ({ token: { '$ne': address } })) }
         let condition = typeOrCondition;
         if (typeOrCondition === 'recommended') condition = recommendedCondition;
         if (typeOrCondition === 'new') condition = newCondition;
