@@ -11,7 +11,7 @@ configs.development = {
   tokenFactoryAddress: 'JCbHuGZyQiC9abPpEHfs6W8evgumEYthpqqBsgDRewa8',
   swapFactoryAddress: '23Y2WwZY149zE7tcXrQA46Zfj3zvkkibHn3xCZ4qJBgi',
   explorer: (txId) => {
-    return `https://explorer.solana.com/tx/${txId}?cluster=testnet`
+    return `https://explorer.solana.com/tx/${txId}?cluster=devnet`
   }
 }
 
@@ -23,7 +23,7 @@ configs.staging = {
   tokenFactoryAddress: 'JCbHuGZyQiC9abPpEHfs6W8evgumEYthpqqBsgDRewa8',
   swapFactoryAddress: '23Y2WwZY149zE7tcXrQA46Zfj3zvkkibHn3xCZ4qJBgi',
   explorer: (txId) => {
-    return `https://explorer.solana.com/tx/${txId}?cluster=testnet`
+    return `https://explorer.solana.com/tx/${txId}?cluster=devnet`
   }
 }
 
