@@ -26,7 +26,7 @@ import { getSecretKey } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
-  txId: '2P1RzY2h27FMkvqhqoGxtDghLAopgQSKDPQ269dGmxnCbRmknFKg4chA8nuFpvGcB8J9sMbLYUmNbvUehcpHQSkJ',
+  txId: '',
 }
 
 class Swap extends Component {
