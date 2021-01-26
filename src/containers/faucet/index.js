@@ -112,7 +112,7 @@ class Faucet extends Component {
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
         <Grid container justify="center" spacing={2}>
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={6}>
             <BaseCard>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

@@ -36,5 +36,5 @@ export default theme => ({
   },
   badgeIcon: {
     fontSize: '1rem'
-  }
+  },
 });

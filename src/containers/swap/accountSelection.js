@@ -38,17 +38,33 @@ class AccountSelection extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser } } = prevProps;
-    const { wallet: { user } } = this.props;
+    const { wallet: { user: prevUser }, poolAddress: prevPoolAddress } = prevProps;
+    const { wallet: { user }, poolAddress } = this.props;
     if (!isEqual(user, prevUser)) this.fetchData();
+    if (!isEqual(poolAddress, prevPoolAddress)) this.fetchData();
   }
 
   fetchData = () => {
-    const { wallet: { user: { tokenAccounts } } } = this.props;
+    const { wallet: { user: { tokenAccounts } }, poolAddress } = this.props;
+    let data = [];
     return Promise.all(tokenAccounts.map(tokenAccount => {
       return sol.getTokenData(tokenAccount);
-    })).then(data => {
-      return this.setState({ data });
+    })).then(re => {
+      data = re;
+      if (!poolAddress) return Promise.resolve();
+      return sol.getPurePoolData(poolAddress);
+    }).then(re => {
+      return this.setState({ data }, () => {
+        if (!re) return this.onAddress({ target: { value: null } });
+        const { token: { address: refTokenAddress } } = re;
+        const { data } = this.state;
+        for (let value of data) {
+          const { address, token: { address: tokenAddress } } = value;
+          if (tokenAddress === refTokenAddress)
+            return this.onAddress({ target: { value: address } });
+        }
+        return this.onAddress({ target: { value: null } });
+      });
     }).catch(er => {
       return console.error(er);
     });
@@ -150,11 +166,13 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 AccountSelection.defaultProps = {
   label: 'Address',
+  poolAddress: '',
   onChange: () => { },
 }
 
 AccountSelection.propTypes = {
   label: PropTypes.string,
+  poolAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
 

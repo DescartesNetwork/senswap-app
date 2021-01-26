@@ -10,10 +10,17 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Collapse from '@material-ui/core/Collapse';
+import Grow from '@material-ui/core/Grow';
+import Switch from '@material-ui/core/Switch';
+import Tooltip from '@material-ui/core/Tooltip';
+import Popover from '@material-ui/core/Popover';
 
-import { PublicRounded } from '@material-ui/icons';
+import {
+  HelpOutlineRounded, PublicRounded, SettingsRounded,
+  CloseRounded,
+} from '@material-ui/icons';
 
-import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 import TokenSelection from './tokenSelection';
 import AccountSelection from './accountSelection';
@@ -22,11 +29,12 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import configs from 'configs';
-import { getSecretKey } from 'modules/wallet.reducer';
+import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
   txId: '',
+  anchorEl: null,
 }
 
 class Swap extends Component {
@@ -35,6 +43,7 @@ class Swap extends Component {
 
     this.state = {
       ...EMPTY,
+      advance: false,
       srcAddress: '',
       dstAddress: '',
       bidAmount: 0,
@@ -44,6 +53,23 @@ class Swap extends Component {
       bidData: {},
       askData: {},
     }
+  }
+
+  onOpen = (e) => {
+    return this.setState({ anchorEl: e.target });
+  }
+
+  onClose = () => {
+    return this.setState({ anchorEl: null });
+  }
+
+  onAdvance = (e) => {
+    const advance = e.target.checked || false;
+    return this.setState({ advance });
+  }
+
+  onClear = () => {
+    return this.setState({ txId: '' });
   }
 
   estimateAmount = () => {
@@ -85,7 +111,7 @@ class Swap extends Component {
     return this.setState({ askAmount: paidAmountWithFee });
   }
 
-  onAmount = (e) => {
+  onBidAmount = (e) => {
     const bidAmount = e.target.value || '';
     return this.setState({ bidAmount }, this.estimateAmount);
   }
@@ -124,17 +150,43 @@ class Swap extends Component {
     return this.setState({ dstAddress });
   }
 
+  onAutogenDestinationAddress = (tokenAddress, secretKey) => {
+    return new Promise((resolve, reject) => {
+      if (!tokenAddress || !secretKey) return reject('Invalid input');
+      const { dstAddress } = this.state;
+      if (dstAddress) return resolve(dstAddress);
+
+      let newAddress = null;
+      const { wallet: { user }, updateWallet } = this.props;
+      const payer = sol.fromSecretKey(secretKey);
+      const tokenPublicKey = sol.fromAddress(tokenAddress);
+      return sol.newSRC20Account(tokenPublicKey, payer).then(tokenAccount => {
+        const tokenAccounts = [...user.tokenAccounts];
+        newAddress = tokenAccount.publicKey.toBase58();
+        tokenAccounts.push(newAddress);
+        return updateWallet({ ...user, tokenAccounts });
+      }).then(re => {
+        return resolve(newAddress);
+      }).catch(er => {
+        return reject(er);
+      });
+    });
+  }
+
   onSwap = () => {
     const {
-      bidAmount, srcAddress, dstAddress,
+      bidAmount, srcAddress,
       bidData: { initialized: bidInitialized, address: bidPoolAddress, token: bidToken, treasury: bidTreasury },
       askData: { initialized: askInitialized, address: askPoolAddress, token: askToken, treasury: askTreasury }
     } = this.state;
     const { getSecretKey } = this.props;
-    if (!bidAmount || !srcAddress || !dstAddress || !bidInitialized || !askInitialized)
-      return console.error('Invalid input');
+    if (!bidAmount || !srcAddress || !bidInitialized || !askInitialized) return console.error('Invalid input');
+    let secretKey = null;
     return this.setState({ ...EMPTY, loading: true }, () => {
-      return getSecretKey().then(secretKey => {
+      return getSecretKey().then(re => {
+        secretKey = re;
+        return this.onAutogenDestinationAddress(askToken.address, secretKey);
+      }).then(dstAddress => {
         const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
         const payer = sol.fromSecretKey(secretKey);
         const bidPoolPublicKey = sol.fromAddress(bidPoolAddress);
@@ -169,17 +221,64 @@ class Swap extends Component {
 
   render() {
     const { classes } = this.props;
-    const { bidAmount, askAmount, loading, txId } = this.state;
+    const {
+      bidAmount, askAmount, bidAddress, askAddress,
+      txId, loading, advance, anchorEl } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
         <Grid container spacing={2} justify="center">
-          <Grid item xs={12}>
-            <Drain small />
-          </Grid>
           <Grid item xs={12} md={6}>
             <BaseCard>
               <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+                    <Grid item className={classes.stretch}>
+                      <Typography variant="h4">Swap</Typography>
+                    </Grid>
+                    <Grid item>
+                      <IconButton onClick={this.onOpen}>
+                        <SettingsRounded />
+                      </IconButton>
+                      <Popover
+                        anchorEl={anchorEl}
+                        open={Boolean(anchorEl)}
+                        onClose={this.onClose}
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                      >
+                        <BaseCard>
+                          <Grid container spacing={2}>
+                            <Grid item xs={12}>
+                              <Typography variant="body2">Interface Settings</Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                              <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+                                <Grid item>
+                                  <Typography>Expert mode</Typography>
+                                </Grid>
+                                <Grid item className={classes.stretch}>
+                                  <Tooltip title="The token account will be selected, or generated automatically by default. By enabling expert mode, you can controll it by hands.">
+                                    <IconButton size="small">
+                                      <HelpOutlineRounded fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                </Grid>
+                                <Grid item>
+                                  <Switch
+                                    color="primary"
+                                    checked={advance}
+                                    onChange={this.onAdvance}
+                                  />
+                                </Grid>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </BaseCard>
+                      </Popover>
+                    </Grid>
+                  </Grid>
+                </Grid>
                 <Grid item xs={12}>
                   <Typography variant="h6">From</Typography>
                 </Grid>
@@ -191,12 +290,18 @@ class Swap extends Component {
                     label="Bid Amount"
                     variant="outlined"
                     value={bidAmount}
-                    onChange={this.onAmount}
+                    onChange={this.onBidAmount}
                     fullWidth
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <AccountSelection label="Source Address" onChange={this.onSourceAddress} />
+                  <Collapse in={advance}>
+                    <AccountSelection
+                      label="Source Address"
+                      poolAddress={bidAddress}
+                      onChange={this.onSourceAddress}
+                    />
+                  </Collapse>
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="h6">To</Typography>
@@ -214,20 +319,14 @@ class Swap extends Component {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <AccountSelection label="Destination Address" onChange={this.onDestinationAddress} />
+                  <Collapse in={advance}>
+                    <AccountSelection
+                      poolAddress={askAddress}
+                      label="Destination Address"
+                      onChange={this.onDestinationAddress}
+                    />
+                  </Collapse>
                 </Grid>
-                {txId ? <Grid item xs={12}>
-                  <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-                    <Grid item>
-                      <IconButton color="primary" href={configs.sol.explorer(txId)} target="_blank">
-                        <PublicRounded />
-                      </IconButton>
-                    </Grid>
-                    <Grid item className={classes.stretch}>
-                      <Typography>Your swap has done! You can click to the icon to view the transaction.</Typography>
-                    </Grid>
-                  </Grid>
-                </Grid> : null}
                 <Grid item xs={12}>
                   <Button
                     variant="contained"
@@ -246,7 +345,47 @@ class Swap extends Component {
           </Grid>
         </Grid>
       </Grid>
-    </Grid>
+      <Grid item xs={11} md={10}>
+        <Grid container spacing={2} justify="center">
+          <Grow in={Boolean(txId)}>
+            <Grid item xs={12} md={6}>
+              <BaseCard>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Grid container spacing={2} className={classes.noWrap} alignItems="center">
+                      <Grid item className={classes.stretch}>
+                        <Typography variant="h6">Success</Typography>
+                      </Grid>
+                      <IconButton onClick={this.onClear}>
+                        <CloseRounded />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Grid container spacing={2} className={classes.noWrap} alignItems="center">
+                      <Grid item className={classes.stretch}>
+                        <Typography>Your swap has done! Click the button to view the transaction.</Typography>
+                      </Grid>
+                      <Grid item>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          href={configs.sol.explorer(txId)}
+                          target="_blank"
+                          startIcon={<PublicRounded />}
+                        >
+                          <Typography noWrap>Explore</Typography>
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </BaseCard>
+            </Grid>
+          </Grow>
+        </Grid>
+      </Grid>
+    </Grid >
   }
 }
 
@@ -256,7 +395,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getSecretKey,
+  updateWallet, getSecretKey,
 }, dispatch);
 
 export default withRouter(connect(
