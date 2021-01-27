@@ -2,53 +2,60 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import Divider from '@material-ui/core/Divider';
+import Tooltip from '@material-ui/core/Tooltip';
 
-import { CheckCircleOutlineRounded } from '@material-ui/icons';
+import {
+  PowerRounded, CheckCircleOutlineRounded, HelpOutlineRounded,
+} from '@material-ui/icons';
+
+import AccountSelection from './accountSelection';
 
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
-import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
+import { openWallet, updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
+
+const EMPTY = {
+  address: '',
+  amount: 0,
+  price: 0,
+  data: {},
+}
 
 class NewPool extends Component {
   constructor() {
     super();
 
     this.state = {
-      amount: 0,
-      price: 0,
-      data: {},
+      ...EMPTY,
       poolAddress: '',
       treasuryAddress: '',
       lptAddress: '',
     }
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { wallet: { currentTokenAccount: prevCurrentAccountToken } } = prevProps;
-    const { wallet: { currentTokenAccount } } = this.props;
-    if (!isEqual(currentTokenAccount, prevCurrentAccountToken)) this.fetchData();
-  }
-
   fetchData = () => {
-    const { wallet: { currentTokenAccount } } = this.props;
-    return sol.getTokenData(currentTokenAccount).then(re => {
+    const { address } = this.state;
+    if (!address) return this.setState({ ...EMPTY });
+    return sol.getTokenData(address).then(re => {
       return this.setState({ data: re });
     }).catch(er => {
       return console.error(er);
+    });
+  }
+
+  onAddress = (address) => {
+    return this.setState({ address }, () => {
+      return this.fetchData();
     });
   }
 
@@ -125,35 +132,44 @@ class NewPool extends Component {
   }
 
   render() {
+    const { classes } = this.props;
+    const { openWallet } = this.props;
     const {
       amount, price,
-      data: { address, initialized, token, amount: tokenAmount }
+      data: { initialized, token, amount: tokenAmount }
     } = this.state;
-    if (!initialized) return null;
-    const symbol = sol.toSymbol(token.symbol);
-    const balance = utils.prettyNumber(utils.div(tokenAmount, global.BigInt(10 ** token.decimals))) || '0';
+    const balance = initialized ? utils.prettyNumber(utils.div(tokenAmount, global.BigInt(10 ** token.decimals))) : '0';
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
-        <Typography>You are the first liquidity provider. Once you are happy with the rate click supply to review.</Typography>
+        <Typography variant="h6">Your token info</Typography>
       </Grid>
-      <Grid item xs={8}>
-        <TextField
-          label={symbol}
-          variant="outlined"
-          value={address}
-          fullWidth
-        />
+      <Grid item xs={12}>
+        <AccountSelection onChange={this.onAddress} />
       </Grid>
-      <Grid item xs={4}>
+      {initialized ? <Grid item xs={12}>
         <TextField
           label="Balance"
           variant="outlined"
           value={balance}
           fullWidth
         />
+      </Grid> : null}
+      <Grid item xs={12}>
+        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+          <Grid item>
+            <Typography variant="h6">Pool info</Typography>
+          </Grid>
+          <Grid item>
+            <Tooltip title="You are the first liquidity provider. Once you are happy with the rate click the button to create a new pool.">
+              <IconButton size="small">
+                <HelpOutlineRounded fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Grid>
+        </Grid>
       </Grid>
-      <Grid item xs={6}>
+      {initialized ? <Grid item xs={6}>
         <TextField
           label="Initial amount"
           variant="outlined"
@@ -161,8 +177,8 @@ class NewPool extends Component {
           onChange={this.onAmount}
           fullWidth
         />
-      </Grid>
-      <Grid item xs={6}>
+      </Grid> : null}
+      {initialized ? <Grid item xs={6}>
         <TextField
           label="Initial price"
           variant="outlined"
@@ -170,8 +186,8 @@ class NewPool extends Component {
           onChange={this.onPrice}
           fullWidth
         />
-      </Grid>
-      <Grid item xs={12}>
+      </Grid> : null}
+      {initialized ? <Grid item xs={12}>
         <Button
           variant="contained"
           color="primary"
@@ -181,7 +197,19 @@ class NewPool extends Component {
         >
           <Typography variant="body2">Create</Typography>
         </Button>
-      </Grid>
+      </Grid> : <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PowerRounded />}
+              onClick={openWallet}
+              fullWidth
+            >
+              <Typography>Connect/Open wallet</Typography>
+            </Button>
+          </Grid>
+        </Grid>}
       {this.renderResult()}
     </Grid>
   }
@@ -193,7 +221,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateWallet, getSecretKey,
+  openWallet, updateWallet, getSecretKey,
 }, dispatch);
 
 export default withRouter(connect(
