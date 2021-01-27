@@ -233,7 +233,7 @@ class AddLiquidity extends Component {
         <TextField
           label="$ Price"
           variant="outlined"
-          value={utils.div(lpt, reserve)}
+          value={utils.prettyNumber(utils.div(lpt, reserve))}
           fullWidth
         />
       </Grid> : null}
