@@ -22,7 +22,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          repository: tuphanson/senswap-app-mainnet
+          repository: tuphanson/senswap-app-testnet
           tags: latest
       - name: Run docker
         uses: appleboy/ssh-action@master
@@ -33,6 +33,6 @@ jobs:
           script: |
             sudo docker stop app
             sudo docker rm app
-            sudo docker pull tuphanson/senswap-app-mainnet
-            sudo docker run -d -p 80:80 --name app tuphanson/senswap-app-mainnet
+            sudo docker pull tuphanson/senswap-app-testnet
+            sudo docker run -d -p 80:80 --name app tuphanson/senswap-app-testnet
             sudo docker image prune -a -f
