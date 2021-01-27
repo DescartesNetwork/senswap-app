@@ -155,7 +155,7 @@ class NewPool extends Component {
           fullWidth
         />
       </Grid> : null}
-      <Grid item xs={12}>
+      {initialized ? <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
           <Grid item>
             <Typography variant="h6">Pool info</Typography>
@@ -168,7 +168,7 @@ class NewPool extends Component {
             </Tooltip>
           </Grid>
         </Grid>
-      </Grid>
+      </Grid> : null}
       {initialized ? <Grid item xs={6}>
         <TextField
           label="Initial amount"
