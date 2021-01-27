@@ -73,7 +73,7 @@ class NewPool extends Component {
     const { data: { address, initialized, token }, amount, price } = this.state;
     const { wallet: { user }, updateWallet, getSecretKey } = this.props;
     if (!initialized || !amount || !price) return console.error('Invalid input');
-
+    
     return getSecretKey().then(secretKey => {
       const reserve = global.BigInt(amount * 10 ** token.decimals);
       const usd = global.BigInt(price * amount * 10 ** token.decimals);
@@ -157,7 +157,7 @@ class NewPool extends Component {
       </Grid> : null}
       {initialized ? <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-          <Grid item>
+          <Grid item className={classes.stretch}>
             <Typography variant="h6">Pool info</Typography>
           </Grid>
           <Grid item>

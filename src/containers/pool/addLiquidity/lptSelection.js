@@ -22,13 +22,13 @@ import sol from 'helpers/sol';
 import { openWallet } from 'modules/wallet.reducer';
 
 
-class Address extends Component {
+class LPTSelection extends Component {
   constructor() {
     super();
 
     this.state = {
       anchorEl: null,
-      lptAccount: '',
+      address: '',
       data: [],
     }
   }
@@ -38,26 +38,28 @@ class Address extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser } } = prevProps;
-    const { wallet: { user } } = this.props;
-    if (!isEqual(user, prevUser)) this.fetchData();
+    const { wallet: { user: prevUser }, poolAddress: prevPoolAddress } = prevProps;
+    const { wallet: { user }, poolAddress } = this.props;
+    if (!isEqual(user, prevUser) || !isEqual(poolAddress, prevPoolAddress)) this.fetchData();
   }
 
   fetchData = () => {
-    const { wallet: { user: { lptAccounts } } } = this.props;
+    const { wallet: { user: { lptAccounts } }, poolAddress } = this.props;
     return Promise.all(lptAccounts.map(lptAccount => {
       return sol.getPoolData(lptAccount);
     })).then(re => {
-      return this.setState({ data: re });
+      return this.setState({ data: re }, () => {
+        if (!poolAddress) return this.onAddress({ target: { value: null } });
+        const { data } = this.state;
+        for (let value of data) {
+          const { address, pool: { address: refPoolAddress } } = value;
+          if (poolAddress === refPoolAddress)
+            return this.onAddress({ target: { value: address } });
+        }
+        return this.onAddress({ target: { value: null } });
+      });
     }).catch(er => {
       return console.error(er);
-    });
-  }
-
-  onAddress = (lptAccount) => {
-    return this.setState({ lptAccount }, () => {
-      this.props.onChange(lptAccount);
-      return this.onClose();
     });
   }
 
@@ -69,12 +71,21 @@ class Address extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  onAdd = () => {
-    const { openWallet } = this.props;
-    return openWallet();
+  onAddress = (e) => {
+    const address = e.target.value || '';
+    return this.setState({ address }, () => {
+      this.onClose();
+      return this.props.onChange(address);
+    });
+  }
+
+  onSelect = (address) => {
+    const pseudoEvent = { target: { value: address } }
+    return this.onAddress(pseudoEvent);
   }
 
   renderGroupedLPTsData = () => {
+    const { openWallet } = this.props;
     const { data } = this.state;
     const groupedLPTsData = {};
     data.forEach(({ address, pool: { token } }) => {
@@ -87,7 +98,7 @@ class Address extends Component {
     for (let symbol in groupedLPTsData) {
       render.push(<ListSubheader key={symbol}>{symbol} Pool</ListSubheader>)
       groupedLPTsData[symbol].forEach(address => {
-        return render.push(<MenuItem key={address} onClick={() => this.onAddress(address)}>
+        return render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
           <Typography noWrap>{address}</Typography>
         </MenuItem>)
       });
@@ -98,7 +109,7 @@ class Address extends Component {
         variant="contained"
         color="primary"
         startIcon={<EmojiObjectsRounded />}
-        onClick={this.onAdd}
+        onClick={openWallet}
         fullWidth
       >
         <Typography>Create</Typography>
@@ -109,15 +120,15 @@ class Address extends Component {
   }
 
   render() {
-    const { anchorEl, lptAccount } = this.state;
+    const { anchorEl, address } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
         <TextField
           label="LPT account"
           variant="outlined"
-          value={lptAccount}
-          onChange={(e) => this.onAddress(e.target.value || '')}
+          value={address}
+          onChange={this.onAddress}
           InputProps={{
             endAdornment: <IconButton onClick={this.onOpen} edge="end" >
               <UnfoldMoreRounded />
@@ -146,15 +157,17 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   openWallet,
 }, dispatch);
 
-Address.defaultProps = {
+LPTSelection.defaultProps = {
+  poolAddress: '',
   onChange: () => { },
 }
 
-Address.propTypes = {
+LPTSelection.propTypes = {
+  poolAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(Address)));
+)(withStyles(styles)(LPTSelection)));

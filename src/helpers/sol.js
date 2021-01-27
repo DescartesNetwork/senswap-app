@@ -332,6 +332,34 @@ SOL.newSRC20Account = (tokenPublicKey, payer) => {
   });
 }
 
+SOL.newLPTAccount = (payer) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const { sol: { swapFactoryAddress } } = configs;
+    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    let lpt = new Account();
+    const lptSpace = (new soproxABI.struct(LPT_SCHEMA)).space;
+    return connection.getMinimumBalanceForRentExemption(lptSpace).then(lamports => {
+      const transaction = new Transaction();
+      transaction.add(SystemProgram.createAccount({
+        fromPubkey: payer.publicKey,
+        newAccountPubkey: lpt.publicKey,
+        lamports,
+        space: lptSpace,
+        programId: swapProgramId,
+      }));
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, lpt],
+        { skipPreflight: true, commitment: 'recent' });
+    }).then(re => {
+      return resolve(lpt);
+    }).catch(er => {
+      console.error(er);
+      return reject('Cannot create an LPT account');
+    });
+  });
+}
+
 SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
@@ -426,6 +454,50 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
       console.log(er);
       return reject('Cannot create a pool or a treasury account');
     });
+  });
+}
+
+SOL.addLiquidityWithNewLPTAccount = (reserve, poolPublicKey, treasuryPublicKey, lptAccount, srcTokenPublickKey, tokenPublicKey, payer) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
+
+    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
+    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const layout = new soproxABI.struct(
+      [
+        { key: 'code', type: 'u8' },
+        { key: 'reserve', type: 'u64' },
+      ],
+      { code: 1, reserve }
+    );
+    const seed = [poolPublicKey.toBuffer()];
+    return PublicKey.createProgramAddress(seed, swapProgramId).then(tokenOwnerPublicKey => {
+      const instruction = new TransactionInstruction({
+        keys: [
+          { pubkey: payer.publicKey, isSigner: true, isWritable: false },
+          { pubkey: poolPublicKey, isSigner: false, isWritable: true },
+          { pubkey: treasuryPublicKey, isSigner: false, isWritable: true },
+          { pubkey: lptAccount.publicKey, isSigner: true, isWritable: true },
+          { pubkey: srcTokenPublickKey, isSigner: false, isWritable: true },
+          { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenOwnerPublicKey, isSigner: false, isWritable: false },
+          { pubkey: tokenProgramId, isSigner: false, isWritable: false },
+        ],
+        programId: swapProgramId,
+        data: layout.toBuffer()
+      });
+      const transaction = new Transaction();
+      transaction.add(instruction);
+      return sendAndConfirmTransaction(
+        connection, transaction, [payer, lptAccount],
+        { skipPreflight: true, commitment: 'recent', });
+    }).then(re => {
+      return resolve(re);
+    }).catch(er => {
+      console.log(er);
+      return reject('Cannot add liquidity to the pool');
+    });;
   });
 }
 

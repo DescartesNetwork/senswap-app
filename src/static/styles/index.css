@@ -9,6 +9,6 @@ body {
   font-family: "Barlow";
 }
 
-[contenteditable] {
-  outline: 0;
+*:focus {
+  outline: none !important;
 }

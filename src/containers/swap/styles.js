@@ -14,10 +14,6 @@ export default theme => ({
     height: theme.spacing(4),
     marginRight: theme.spacing(2),
   },
-  add: {
-    width: `calc(100% - ${theme.spacing(4)}px)`,
-    margin: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
-  },
   owner: {
     fontSize: 9
   },
@@ -30,7 +26,6 @@ export default theme => ({
     backgroundColor: theme.palette.error.main
   },
   tools: {
-    outline: 'none !important',
     width: `calc(100% - ${theme.spacing(2)}px)`,
     margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
   },
