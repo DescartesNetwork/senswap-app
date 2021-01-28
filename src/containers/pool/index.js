@@ -5,11 +5,8 @@ import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Divider from '@material-ui/core/Divider';
-import BottomNavigation from '@material-ui/core/BottomNavigation';
-import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
-
-import { CheckCircleRounded, AddCircleRounded, RemoveCircleRounded } from '@material-ui/icons';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 
 import Drain from 'components/drain';
 import { BaseCard, NotiCard } from 'components/cards';
@@ -47,14 +44,37 @@ class Pool extends Component {
             <BaseCard >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <BottomNavigation value={pathname} onChange={this.onRoute} className={classes.navigation} showLabels>
-                    <BottomNavigationAction label="New Pool" value="/pool/new-pool" icon={<CheckCircleRounded />} />
-                    <BottomNavigationAction label="Add Liquidity" value="/pool/add-liquidity" icon={<AddCircleRounded />} />
-                    <BottomNavigationAction label="Remove Liquidity" value="/pool/remove-liquidity" icon={<RemoveCircleRounded />} />
-                  </BottomNavigation>
-                </Grid>
-                <Grid item xs={12}>
-                  <Divider />
+                  <Tabs
+                    value={pathname}
+                    onChange={this.onRoute}
+                    className={classes.navigation}
+                    variant="fullWidth"
+                  >
+                    <Tab
+                      classes={{
+                        root: classes.tab,
+                        selected: classes.selectedTab,
+                      }}
+                      label="New Pool"
+                      value="/pool/new-pool"
+                    />
+                    <Tab
+                      classes={{
+                        root: classes.tab,
+                        selected: classes.selectedTab,
+                      }}
+                      label="Add Liquidity"
+                      value="/pool/add-liquidity"
+                    />
+                    <Tab
+                      classes={{
+                        root: classes.tab,
+                        selected: classes.selectedTab,
+                      }}
+                      label="Remove Liquidity"
+                      value="/pool/remove-liquidity"
+                    />
+                  </Tabs>
                 </Grid>
                 <Grid item xs={12}>
                   <Switch>

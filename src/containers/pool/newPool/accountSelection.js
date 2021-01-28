@@ -19,6 +19,7 @@ import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import utils from 'helpers/utils';
 import { openWallet } from 'modules/wallet.reducer';
 
 
@@ -71,11 +72,19 @@ class AccountSelection extends Component {
     const address = e.target.value || '';
     const { data } = this.state;
     let symbol = 'Address';
+    let balance = '0';
     for (let account of data) {
-      const { address: refAddress, token: { symbol: refSymbol } } = account;
-      if (address === refAddress) symbol = sol.toSymbol(refSymbol);
+      const {
+        address: refAddress,
+        amount: refAmount,
+        token: { symbol: refSymbol, decimals }
+      } = account;
+      if (address === refAddress) {
+        symbol = sol.toSymbol(refSymbol);
+        balance = utils.prettyNumber(utils.div(refAmount, global.BigInt(10 ** decimals)));
+      }
     }
-    return this.setState({ address, symbol }, () => {
+    return this.setState({ address, symbol, balance }, () => {
       this.onClose();
       return this.props.onChange(address);
     });
@@ -110,7 +119,7 @@ class AccountSelection extends Component {
 
   render() {
     const { openWallet } = this.props;
-    const { anchorEl, address, symbol } = this.state;
+    const { anchorEl, address, symbol, balance } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -124,6 +133,7 @@ class AccountSelection extends Component {
               <UnfoldMoreRounded />
             </IconButton>
           }}
+          helperText={`Balance: ${balance}`}
           fullWidth
         />
         <Menu

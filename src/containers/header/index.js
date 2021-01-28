@@ -22,10 +22,8 @@ import Image from 'material-ui-image';
 import {
   SwapCallsRounded, LocalGasStationRounded, PhonelinkLockRounded,
   WidgetsRounded, MobileFriendlyRounded, ColorizeRounded,
-  AccountBalanceRounded,VerifiedUserRounded,
+  AccountBalanceRounded, VerifiedUserRounded,
 } from '@material-ui/icons';
-
-import { BaseCard } from 'components/cards';
 
 import SEN_LOGO from 'static/images/sen-logo.svg';
 import styles from './styles';
@@ -94,102 +92,100 @@ class Header extends Component {
     const currentRoute = this.parseRoute();
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} md={10}>
-        <BaseCard>
-          <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-            {/* Logo */}
-            <Grid item className={classes.logo}>
-              <Link color="textPrimary" underline="none" component={RouterLink} to={'/swap'}>
-                <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
-                  <Grid item style={{ width: 35 }}>
-                    <Image
-                      src={SEN_LOGO}
-                      color="#00000000"
-                      loading={<CircularProgress size={17} />}
-                    />
-                  </Grid>
-                  <Grid item>
-                    <Typography variant="body2" noWrap>SenSwap</Typography>
-                  </Grid>
+      <Grid item xs={11}>
+        <Grid container spacing={2} className={classes.noWrap} alignItems="center">
+          {/* Logo */}
+          <Grid item className={classes.logo}>
+            <Link color="textPrimary" underline="none" component={RouterLink} to={'/swap'}>
+              <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+                <Grid item style={{ width: 40 }}>
+                  <Image
+                    src={SEN_LOGO}
+                    color="#00000000"
+                    loading={<CircularProgress size={17} />}
+                  />
                 </Grid>
-              </Link>
-            </Grid>
-            {/* Menu */}
-            <Grid item className={classes.stretch}>
-              <Grid container alignItems="center" justify="flex-end" spacing={width >= 600 ? 5 : 2}>
-                {/* Pool */}
                 <Grid item>
-                  <Tooltip title="Pool">
-                    <IconButton
-                      size="small"
-                      color={currentRoute === 'pool' ? 'primary' : 'secondary'}
-                      component={RouterLink
-                      } to={'/pool'}
-                    >
-                      <LocalGasStationRounded />
-                    </IconButton>
-                  </Tooltip>
+                  <Typography variant="h5" noWrap>SenSwap</Typography>
                 </Grid>
-                {/* Swap */}
-                <Grid item>
-                  <Tooltip title="Swap">
-                    <IconButton
-                      size="small"
-                      color={currentRoute === 'swap' ? 'primary' : 'secondary'}
-                      component={RouterLink}
-                      to={'/swap'}
-                    >
-                      <SwapCallsRounded />
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-                {/* Others */}
-                <Grid item>
-                  <Tooltip title="Others">
-                    <IconButton
-                      color={currentRoute !== 'pool' && currentRoute !== 'swap' ? 'primary' : 'secondary'}
-                      size="small"
-                      onClick={this.onOpenOthers}
-                    >
-                      <WidgetsRounded />
-                    </IconButton>
-                  </Tooltip>
-                  <Popover
-                    anchorEl={anchorEl}
-                    open={Boolean(anchorEl)}
-                    onClose={this.onCloseOthers}
-                    onClick={this.onCloseOthers}
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                    transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-                  >
-                    <List>
-                      <ListItem button component={RouterLink} to={'/faucet'}>
-                        <ListItemIcon>
-                          <ColorizeRounded color="secondary" />
-                        </ListItemIcon>
-                        <ListItemText primary="SenFaucet" />
-                      </ListItem>
-                      <ListItem button component={RouterLink} to={'/issuer'}>
-                        <ListItemIcon>
-                          <AccountBalanceRounded color="secondary" />
-                        </ListItemIcon>
-                        <ListItemText primary="SenIssuer" />
-                      </ListItem>
-                      <ListItem button component={RouterLink} to={'/audit'}>
-                        <ListItemIcon>
-                          <VerifiedUserRounded color="secondary" />
-                        </ListItemIcon>
-                        <ListItemText primary="SenAudit" />
-                      </ListItem>
-                    </List>
-                  </Popover>
-                </Grid>
-                {/* Connect wallet */}
-                {this.walletConnectionButton()}
               </Grid>
+            </Link>
+          </Grid>
+          {/* Menu */}
+          <Grid item className={classes.stretch}>
+            <Grid container alignItems="center" justify="flex-end" spacing={width >= 600 ? 5 : 2}>
+              {/* Pool */}
+              <Grid item>
+                <Tooltip title="Pool">
+                  <IconButton
+                    size="small"
+                    color={currentRoute === 'pool' ? 'primary' : 'secondary'}
+                    component={RouterLink
+                    } to={'/pool'}
+                  >
+                    <LocalGasStationRounded />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+              {/* Swap */}
+              <Grid item>
+                <Tooltip title="Swap">
+                  <IconButton
+                    size="small"
+                    color={currentRoute === 'swap' ? 'primary' : 'secondary'}
+                    component={RouterLink}
+                    to={'/swap'}
+                  >
+                    <SwapCallsRounded />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+              {/* Others */}
+              <Grid item>
+                <Tooltip title="Others">
+                  <IconButton
+                    color={currentRoute !== 'pool' && currentRoute !== 'swap' ? 'primary' : 'secondary'}
+                    size="small"
+                    onClick={this.onOpenOthers}
+                  >
+                    <WidgetsRounded />
+                  </IconButton>
+                </Tooltip>
+                <Popover
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={this.onCloseOthers}
+                  onClick={this.onCloseOthers}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                  transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                >
+                  <List>
+                    <ListItem button component={RouterLink} to={'/faucet'}>
+                      <ListItemIcon>
+                        <ColorizeRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="SenFaucet" />
+                    </ListItem>
+                    <ListItem button component={RouterLink} to={'/issuer'}>
+                      <ListItemIcon>
+                        <AccountBalanceRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="SenIssuer" />
+                    </ListItem>
+                    <ListItem button component={RouterLink} to={'/audit'}>
+                      <ListItemIcon>
+                        <VerifiedUserRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="SenAudit" />
+                    </ListItem>
+                  </List>
+                </Popover>
+              </Grid>
+              {/* Connect wallet */}
+              {this.walletConnectionButton()}
             </Grid>
           </Grid>
-        </BaseCard>
+        </Grid>
       </Grid>
     </Grid>
   }

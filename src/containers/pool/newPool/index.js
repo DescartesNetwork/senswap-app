@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { withRouter } from 'react-router-dom';
+import { Link as RouterLink, withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -9,26 +9,28 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Divider from '@material-ui/core/Divider';
 import Tooltip from '@material-ui/core/Tooltip';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
-  PowerRounded, CheckCircleOutlineRounded, HelpOutlineRounded,
+  CheckCircleOutlineRounded, HelpOutlineRounded, VerifiedUserRounded,
+  PublicRounded, ArrowForwardRounded,
 } from '@material-ui/icons';
 
 import AccountSelection from './accountSelection';
 
 import styles from './styles';
+import configs from 'configs';
 import sol from 'helpers/sol';
-import utils from 'helpers/utils';
-import { openWallet, updateWallet, getSecretKey } from 'modules/wallet.reducer';
+import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
-  address: '',
+  txId: '',
+  poolAddress: '',
+  loading: false,
   amount: 0,
   price: 0,
-  data: {},
 }
 
 class NewPool extends Component {
@@ -37,9 +39,8 @@ class NewPool extends Component {
 
     this.state = {
       ...EMPTY,
-      poolAddress: '',
-      treasuryAddress: '',
-      lptAddress: '',
+      address: '',
+      data: {},
     }
   }
 
@@ -51,6 +52,10 @@ class NewPool extends Component {
     }).catch(er => {
       return console.error(er);
     });
+  }
+
+  onClear = () => {
+    return this.setState({ ...EMPTY });
   }
 
   onAddress = (address) => {
@@ -73,72 +78,46 @@ class NewPool extends Component {
     const { data: { address, initialized, token }, amount, price } = this.state;
     const { wallet: { user }, updateWallet, getSecretKey } = this.props;
     if (!initialized || !amount || !price) return console.error('Invalid input');
-    
-    return getSecretKey().then(secretKey => {
-      const reserve = global.BigInt(amount * 10 ** token.decimals);
-      const usd = global.BigInt(price * amount * 10 ** token.decimals);
-      const srcTokenPublicKey = sol.fromAddress(address);
-      const tokenPublicKey = sol.fromAddress(token.address);
-      const payer = sol.fromSecretKey(secretKey);
-      return sol.newPool(
-        reserve,
-        usd,
-        srcTokenPublicKey,
-        tokenPublicKey,
-        payer
-      );
-    }).then(({ pool, treasury, lpt }) => {
-      return new Promise((resolve, reject) => {
-        return this.setState({
-          poolAddress: pool.publicKey.toBase58(),
-          treasuryAddress: treasury.publicKey.toBase58(),
-          lptAddress: lpt.publicKey.toBase58(),
-        }, () => {
-          return resolve({ pool, treasury, lpt });
-        });
-      });
-    }).then(re => {
-      const { lptAddress } = this.state;
-      const lptAccounts = [...user.lptAccounts];
-      lptAccounts.push(lptAddress);
-      return updateWallet({ ...user, lptAccounts });
-    }).catch(er => {
-      return console.error(er);
-    });
-  }
 
-  renderResult = () => {
-    const { poolAddress, treasuryAddress, lptAddress } = this.state;
-    if (!poolAddress || !treasuryAddress || !lptAddress) return null;
-    return <Grid item xs={12}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Divider />
-        </Grid>
-        <Grid item xs={12}>
-          <Typography variant="body2">A pool is successfully generated! Click to your wallet to see details.</Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField label="Pool" variant="outlined" value={poolAddress} fullWidth />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField label="Treasury" variant="outlined" value={treasuryAddress} fullWidth />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField label="LPT" variant="outlined" value={lptAddress} fullWidth />
-        </Grid>
-      </Grid>
-    </Grid>
+    let poolAddress = '';
+    let txId = '';
+    return this.setState({ loading: true }, () => {
+      return getSecretKey().then(secretKey => {
+        const reserve = global.BigInt(amount * 10 ** token.decimals);
+        const usd = global.BigInt(price * amount * 10 ** token.decimals);
+        const srcTokenPublicKey = sol.fromAddress(address);
+        const tokenPublicKey = sol.fromAddress(token.address);
+        const payer = sol.fromSecretKey(secretKey);
+        return sol.newPool(
+          reserve,
+          usd,
+          srcTokenPublicKey,
+          tokenPublicKey,
+          payer
+        );
+      }).then(({ pool, lpt, txId: refTxId }) => {
+        txId = refTxId;
+        poolAddress = pool.publicKey.toBase58();
+        const lptAddress = lpt.publicKey.toBase58();
+        const lptAccounts = [...user.lptAccounts];
+        lptAccounts.push(lptAddress);
+        return updateWallet({ ...user, lptAccounts });
+      }).then(re => {
+        return this.setState({ ...EMPTY, txId, poolAddress });
+      }).catch(er => {
+        console.error(er);
+        return this.setState({ ...EMPTY });
+      });
+    });
   }
 
   render() {
     const { classes } = this.props;
-    const { openWallet } = this.props;
     const {
       amount, price,
-      data: { initialized, token, amount: tokenAmount }
+      loading, txId, poolAddress,
+      data: { initialized }
     } = this.state;
-    const balance = initialized ? utils.prettyNumber(utils.div(tokenAmount, global.BigInt(10 ** token.decimals))) : '0';
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -147,15 +126,7 @@ class NewPool extends Component {
       <Grid item xs={12}>
         <AccountSelection onChange={this.onAddress} />
       </Grid>
-      {initialized ? <Grid item xs={12}>
-        <TextField
-          label="Balance"
-          variant="outlined"
-          value={balance}
-          fullWidth
-        />
-      </Grid> : null}
-      {initialized ? <Grid item xs={12}>
+      <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
             <Typography variant="h6">Pool info</Typography>
@@ -168,49 +139,79 @@ class NewPool extends Component {
             </Tooltip>
           </Grid>
         </Grid>
-      </Grid> : null}
-      {initialized ? <Grid item xs={6}>
+      </Grid>
+      <Grid item xs={6}>
         <TextField
           label="Initial amount"
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
+          disabled={!initialized}
           fullWidth
         />
-      </Grid> : null}
-      {initialized ? <Grid item xs={6}>
+      </Grid>
+      <Grid item xs={6}>
         <TextField
           label="Initial price"
           variant="outlined"
           value={price}
           onChange={this.onPrice}
+          disabled={!initialized}
           fullWidth
         />
-      </Grid> : null}
-      {initialized ? <Grid item xs={12}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<CheckCircleOutlineRounded />}
-          onClick={this.newPool}
-          fullWidth
-        >
-          <Typography variant="body2">Create</Typography>
-        </Button>
-      </Grid> : <Grid container spacing={2}>
+      </Grid>
+      {txId ? <Grid item xs={12}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
+            <Typography variant="body2">Done! However, your pool is still unknown by people. You can click the audit button for SenSwap verification that will advertise your pools on SenSwap platform.</Typography>
+          </Grid>
+          <Grid item xs={4}>
             <Button
               variant="contained"
               color="primary"
-              startIcon={<PowerRounded />}
-              onClick={openWallet}
+              component={RouterLink}
+              to={`/audit/${poolAddress}`}
+              startIcon={<VerifiedUserRounded />}
               fullWidth
             >
-              <Typography>Connect/Open wallet</Typography>
+              <Typography>Audit</Typography>
             </Button>
           </Grid>
+          <Grid item xs={4}>
+            <Button
+              variant="contained"
+              color="secondary"
+              href={configs.sol.explorer(txId)}
+              target="_blank"
+              startIcon={<PublicRounded />}
+              fullWidth
+            >
+              <Typography>Explore</Typography>
+            </Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              color="secondary"
+              onClick={this.onClear}
+              endIcon={<ArrowForwardRounded />}
+              fullWidth
+            >
+              <Typography>Skip</Typography>
+            </Button>
+          </Grid>
+        </Grid>
+      </Grid> : <Grid item xs={12}>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={loading ? <CircularProgress size={17} /> : <CheckCircleOutlineRounded />}
+            onClick={this.newPool}
+            disabled={loading || !initialized}
+            fullWidth
+          >
+            <Typography variant="body2">Create</Typography>
+          </Button>
         </Grid>}
-      {this.renderResult()}
     </Grid>
   }
 }
@@ -221,7 +222,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  openWallet, updateWallet, getSecretKey,
+  updateWallet, getSecretKey,
 }, dispatch);
 
 export default withRouter(connect(

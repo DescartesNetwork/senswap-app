@@ -173,7 +173,7 @@ class Add extends Component {
                       edge="end"
                       disabled={loading}
                     >
-                      {loading ? <CircularProgress size={20} /> : <AddRounded />}
+                      {loading ? <CircularProgress size={17} /> : <AddRounded />}
                     </IconButton>
                   }}
                   fullWidth

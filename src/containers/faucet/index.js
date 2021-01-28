@@ -170,7 +170,7 @@ class Faucet extends Component {
                       <Button
                         variant="contained"
                         color="primary"
-                        endIcon={loading ? <CircularProgress size={20} /> : <FlightTakeoffRounded />}
+                        endIcon={loading ? <CircularProgress size={17} /> : <FlightTakeoffRounded />}
                         onClick={this.onAirdrop}
                         disabled={loading}
                       >

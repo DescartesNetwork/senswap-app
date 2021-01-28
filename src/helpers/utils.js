@@ -15,9 +15,9 @@ Utils.prettyNumber = (num, type = 'long') => {
   if (typeof num !== 'number') return null;
   if (num > 1e19) return null;
   if (num < -1e19) return null;
-  if (Math.abs(num) < 1000) return num;
 
   if (type === 'short') {
+    if (Math.abs(num) < 1000) return num;
     num = Math.abs(num);
     let size = Math.floor(num).toString().length;
     let exponent = size % 3 === 0 ? size - 3 : size - (size % 3);
@@ -41,8 +41,8 @@ Utils.prettyNumber = (num, type = 'long') => {
       if (i > 1 && i % 3 === 0) return a + ',';
       return a;
     }).reverse().join('');
-    if (!fraction)
-      return separateNumber;
+    if (!fraction) return separateNumber;
+    if (fraction.length > 6) fraction = fraction.substring(0, 6);
     return separateNumber + '.' + fraction;
   }
 }

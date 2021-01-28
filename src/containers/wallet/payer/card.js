@@ -54,7 +54,7 @@ class PayerCard extends Component {
                   <Image
                     src={SOL_LOGO}
                     color="#00000000"
-                    loading={<CircularProgress size={20} />}
+                    loading={<CircularProgress size={17} />}
                   />
                 </Grid>
               </Grid>

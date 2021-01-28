@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -29,6 +30,22 @@ class Audit extends Component {
       error: '',
       ok: false,
     }
+  }
+
+  componentDidMount() {
+    this.parseParams();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { match: prevMatch } = prevProps;
+    const { match } = this.props;
+    if (!isEqual(match, prevMatch)) this.parseParams();
+  }
+
+  parseParams = () => {
+    const { match: { params: { poolAddress } } } = this.props;
+    const pseudoValue = { target: { value: poolAddress } }
+    return this.onPool(pseudoValue);
   }
 
   onPool = (e) => {

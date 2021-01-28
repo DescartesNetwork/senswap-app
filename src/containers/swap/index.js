@@ -238,7 +238,7 @@ class Swap extends Component {
                     </Grid>
                     <Grid item>
                       <IconButton onClick={this.onOpen}>
-                        <SettingsRounded />
+                        <SettingsRounded color="secondary" fontSize="small" />
                       </IconButton>
                       <Popover
                         anchorEl={anchorEl}
@@ -333,7 +333,7 @@ class Swap extends Component {
                     color="primary"
                     size="large"
                     onClick={this.onSwap}
-                    endIcon={loading ? <CircularProgress size={20} /> : null}
+                    endIcon={loading ? <CircularProgress size={17} /> : null}
                     disabled={loading}
                     fullWidth
                   >

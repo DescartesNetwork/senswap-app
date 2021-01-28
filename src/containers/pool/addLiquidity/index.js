@@ -72,7 +72,7 @@ class AddLiquidity extends Component {
   }
 
   onClear = () => {
-    return this.setState({ txId: '' });
+    return this.setState({ ...EMPTY });
   }
 
   onPoolAddress = (address) => {
@@ -122,7 +122,7 @@ class AddLiquidity extends Component {
     let secretKey = null;
     let lptAddressOrAccount = null;
     let txId = null;
-    return this.setState({ ...EMPTY, loading: true }, () => {
+    return this.setState({ loading: true }, () => {
       return getSecretKey().then(re => {
         secretKey = re;
         return this.onAutogenLPTAddress(secretKey);
@@ -177,7 +177,7 @@ class AddLiquidity extends Component {
           </Grid>
           <Grid item>
             <IconButton onClick={this.onOpen}>
-              <SettingsRounded />
+              <SettingsRounded color="secondary" fontSize="small" />
             </IconButton>
             <Popover
               anchorEl={anchorEl}
@@ -218,24 +218,25 @@ class AddLiquidity extends Component {
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={6}>
         <TokenSelection onChange={this.onPoolAddress} />
       </Grid>
-      {initialized ? <Grid item xs={6}>
+      <Grid item xs={6}>
         <TextField
-          label="Reserve"
+          label="Additive amount"
           variant="outlined"
-          value={utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** token.decimals)))}
+          value={amount}
+          onChange={this.onAmount}
           fullWidth
         />
+      </Grid>
+      {initialized ? <Grid item xs={6}>
+        <Typography variant="h5" align="center" fullWidth>{utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** token.decimals)))}</Typography>
+        <Typography variant="body2" align="center" fullWidth>Reserve</Typography>
       </Grid> : null}
       {initialized ? <Grid item xs={6}>
-        <TextField
-          label="$ Price"
-          variant="outlined"
-          value={utils.prettyNumber(utils.div(lpt, reserve))}
-          fullWidth
-        />
+        <Typography variant="h5" align="center">$ {utils.prettyNumber(utils.div(lpt, reserve))}</Typography>
+        <Typography variant="body2" align="center">Price</Typography>
       </Grid> : null}
       <Grid item xs={12}>
         <Collapse in={advance}>
@@ -253,19 +254,10 @@ class AddLiquidity extends Component {
           </Grid>
         </Collapse>
       </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Additive amount"
-          variant="outlined"
-          value={amount}
-          onChange={this.onAmount}
-          fullWidth
-        />
-      </Grid>
       {txId ? <Grid item xs={12}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography>Done! Click the button to view the transaction.</Typography>
+            <Typography variant="body2">Done! Click the button to view the transaction.</Typography>
           </Grid>
           <Grid item xs={8}>
             <Button
@@ -294,9 +286,9 @@ class AddLiquidity extends Component {
           <Button
             variant="contained"
             color="primary"
-            startIcon={loading ? <CircularProgress size={20} /> : <AddCircleOutlineRounded />}
+            startIcon={loading ? <CircularProgress size={17} /> : <AddCircleOutlineRounded />}
             onClick={this.addLiquidity}
-            disabled={loading}
+            disabled={loading || !initialized}
             fullWidth
           >
             <Typography variant="body2">Add</Typography>

@@ -59,14 +59,19 @@ SOL.createAccount = () => {
 }
 
 SOL.safelyCreateAccount = (programId) => {
-  return new Promise((resolve, reject) => {
+  const safelyCreateAccountCallback = (_programId, cb) => {
     const account = new Account();
     const seeds = [account.publicKey.toBuffer()];
-    return PublicKey.createProgramAddress(seeds, programId).then(re => {
-      return resolve(account);
+    return PublicKey.createProgramAddress(seeds, _programId).then(re => {
+      return cb(account);
     }).catch(er => {
-      return SOL.safelyCreateAccount(programId);
+      return safelyCreateAccountCallback(_programId, cb);
     });
+  }
+  return new Promise((resolve, reject) => {
+    safelyCreateAccountCallback(programId, account => {
+      return resolve(account);
+    })
   });
 }
 
@@ -448,8 +453,8 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
       return sendAndConfirmTransaction(
         connection, transaction, [payer, pool, treasury, lpt],
         { skipPreflight: true, commitment: 'recent', });
-    }).then(re => {
-      return resolve({ pool, treasury, lpt });
+    }).then(txId => {
+      return resolve({ pool, treasury, lpt, txId });
     }).catch(er => {
       console.log(er);
       return reject('Cannot create a pool or a treasury account');
