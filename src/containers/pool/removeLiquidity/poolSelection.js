@@ -28,7 +28,7 @@ import utils from 'helpers/utils';
 import { getPools, getPool } from 'modules/pool.reducer';
 
 
-class TokenSelection extends Component {
+class PoolSelection extends Component {
   constructor() {
     super();
 
@@ -51,26 +51,32 @@ class TokenSelection extends Component {
 
   fetchPools = () => {
     const {
-      wallet: { user: { tokenAccounts } },
+      wallet: { user: { lptAccounts } },
       getPools, getPool,
     } = this.props;
     let pools = [];
-    return Promise.all(tokenAccounts.map(tokenAccount => {
-      return sol.getTokenData(tokenAccount);
-    })).then(tokens => {
-      const condition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
-      return getPools(condition, 1000, 0);
-    }).then(poolIds => {
-      return Promise.all(poolIds.map(({ _id }) => {
+    return Promise.all(lptAccounts.map(lptAccount => {
+      return sol.getPoolData(lptAccount);
+    })).then(data => {
+      pools = data.map(({ pool }) => pool);
+      return Promise.all(pools.map(({ address }) => {
+        const condition = { address }
+        return getPools(condition, 1, 0);
+      }));
+    }).then(data => {
+      const poolIds = data.filter(poolId => Boolean(poolId.length));
+      return Promise.all(poolIds.map(([{ _id }]) => {
         return getPool(_id);
       }));
     }).then(data => {
-      pools = data;
-      return Promise.all(pools.map(({ address }) => {
-        return sol.getPurePoolData(address);
-      }));
-    }).then(data => {
-      pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
+      pools = pools.map(pool => {
+        const { address: refAddress } = pool;
+        for (let each of data) {
+          const { address } = each;
+          if (address === refAddress) return { ...each, ...pool }
+        }
+        return { ...pool }
+      });
       return Promise.all(pools.map(({ cgk }) => {
         return utils.imgFromCGK(cgk);
       }));
@@ -208,15 +214,15 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   getPools, getPool,
 }, dispatch);
 
-TokenSelection.defaultProps = {
+PoolSelection.defaultProps = {
   onChange: () => { },
 }
 
-TokenSelection.propTypes = {
+PoolSelection.propTypes = {
   onChange: PropTypes.func,
 }
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(TokenSelection)));
+)(withStyles(styles)(PoolSelection)));

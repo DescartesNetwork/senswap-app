@@ -6,7 +6,7 @@ export default theme => ({
     flex: '1 1 auto',
   },
   tab: {
-    minHeight: theme.spacing(8),
+    minHeight: theme.spacing(7),
     minWidth: 'initial',
   },
   selectedTab: {

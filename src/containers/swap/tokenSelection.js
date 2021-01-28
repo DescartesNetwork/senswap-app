@@ -189,7 +189,7 @@ class TokenSelection extends Component {
       </Grid>
       <Grid item className={classes.stretch}>
         <Typography>{sol.toSymbol(symbol)}</Typography>
-        <Typography className={classes.owner}>Created by {email}</Typography>
+        <Typography className={classes.owner}>Created by {email || 'Unknown'}</Typography>
       </Grid>
     </Grid>
   }

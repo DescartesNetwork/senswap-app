@@ -75,10 +75,9 @@ class AddLiquidity extends Component {
     return this.setState({ ...EMPTY });
   }
 
-  onPoolAddress = (address) => {
-    return this.setState({ poolAddress: address }, () => {
-      const { poolAddress } = this.state;
-      if (!sol.isAddress(poolAddress)) return;
+  onPoolAddress = (poolAddress) => {
+    return this.setState({ poolAddress }, () => {
+      if (!sol.isAddress(poolAddress)) return console.error('Invalid address');
       return sol.getPurePoolData(poolAddress).then(data => {
         return this.setState({ data });
       }).catch(er => {
@@ -231,8 +230,8 @@ class AddLiquidity extends Component {
         />
       </Grid>
       {initialized ? <Grid item xs={6}>
-        <Typography variant="h5" align="center" fullWidth>{utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** token.decimals)))}</Typography>
-        <Typography variant="body2" align="center" fullWidth>Reserve</Typography>
+        <Typography variant="h5" align="center">{utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** token.decimals)))}</Typography>
+        <Typography variant="body2" align="center">Reserve</Typography>
       </Grid> : null}
       {initialized ? <Grid item xs={6}>
         <Typography variant="h5" align="center">$ {utils.prettyNumber(utils.div(lpt, reserve))}</Typography>

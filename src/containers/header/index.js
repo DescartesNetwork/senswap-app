@@ -106,7 +106,7 @@ class Header extends Component {
                   />
                 </Grid>
                 <Grid item>
-                  <Typography variant="h5" noWrap>SenSwap</Typography>
+                  <Typography variant="h6" noWrap>SenSwap</Typography>
                 </Grid>
               </Grid>
             </Link>
