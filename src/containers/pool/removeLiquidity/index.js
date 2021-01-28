@@ -29,7 +29,7 @@ import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
-import { getSecretKey } from 'modules/wallet.reducer';
+import { getSecretKey, updateWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -94,15 +94,42 @@ class RemoveLiquidity extends Component {
     return this.setState({ dstAddress });
   }
 
+  onAutogenDestinationAddress = (tokenAddress, secretKey) => {
+    return new Promise((resolve, reject) => {
+      if (!tokenAddress || !secretKey) return reject('Invalid input');
+      const { dstAddress } = this.state;
+      if (dstAddress) return resolve(dstAddress);
+
+      let newAddress = null;
+      const { wallet: { user }, updateWallet } = this.props;
+      const payer = sol.fromSecretKey(secretKey);
+      const tokenPublicKey = sol.fromAddress(tokenAddress);
+      return sol.newSRC20Account(tokenPublicKey, payer).then(tokenAccount => {
+        const tokenAccounts = [...user.tokenAccounts];
+        newAddress = tokenAccount.publicKey.toBase58();
+        tokenAccounts.push(newAddress);
+        return updateWallet({ ...user, tokenAccounts });
+      }).then(re => {
+        return resolve(newAddress);
+      }).catch(er => {
+        return reject(er);
+      });
+    });
+  }
+
   removeLiquidity = () => {
     const {
-      amount, poolAddress, dstAddress, lptAddress,
+      amount, poolAddress, lptAddress,
       data: { initialized, token, treasury }
     } = this.state;
     const { getSecretKey } = this.props;
     if (!amount || !initialized) return console.error('Invalid input');
+    let secretKey = null;
     return this.setState({ loading: true }, () => {
-      return getSecretKey().then(secretKey => {
+      return getSecretKey().then(re => {
+        secretKey = re;
+        return this.onAutogenDestinationAddress(token.address, secretKey);
+      }).then(dstAddress => {
         const lpt = global.BigInt(amount) * 10n ** global.BigInt(token.decimals);
         const lptPublicKey = sol.fromAddress(lptAddress);
         const poolPublicKey = sol.fromAddress(poolAddress);
@@ -271,7 +298,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getSecretKey,
+  getSecretKey, updateWallet,
 }, dispatch);
 
 export default withRouter(connect(
