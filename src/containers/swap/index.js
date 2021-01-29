@@ -122,8 +122,7 @@ class Swap extends Component {
       return sol.getPurePoolData(bidAddress).then(bidData => {
         return this.setState({ bidData }, this.estimateAmount);
       }).catch(er => {
-        console.log(er);
-        return this.setState({ askAmount: 0 });
+        return console.log(er);
       });
     });
   }
@@ -139,8 +138,7 @@ class Swap extends Component {
       return sol.getPurePoolData(askAddress).then(askData => {
         return this.setState({ askData }, this.estimateAmount);
       }).catch(er => {
-        console.log(er);
-        return this.setState({ askAmount: 0 });
+        return console.log(er);
       });
     });
   }
@@ -222,7 +220,15 @@ class Swap extends Component {
     const { classes } = this.props;
     const {
       bidAmount, askAmount, bidAddress, askAddress,
-      bidData: { initialized: bidInitialized }, askData: { initialized: askInitialized },
+      bidData: {
+        initialized: bidInitialized,
+        reserve: bidReserve,
+        lpt: bidLPT,
+      },
+      askData: {
+        initialized: askInitialized,
+        reserve: askReserve,
+        lpt: askLPT, },
       txId, loading, advance, anchorEl } = this.state;
 
     return <Grid container justify="center" spacing={2}>
@@ -280,7 +286,14 @@ class Swap extends Component {
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="h6">From</Typography>
+                  <Grid container spacing={2} className={classes.noWrap} alignItems="center">
+                    <Grid item className={classes.stretch}>
+                      <Typography variant="h6">From</Typography>
+                    </Grid>
+                    <Grid item>
+                      <Typography className={classes.price}>Price: ${utils.prettyNumber(utils.div(bidLPT, bidReserve))}</Typography>
+                    </Grid>
+                  </Grid>
                 </Grid>
                 <Grid item xs={6}>
                   <TokenSelection onChange={this.onBidAddress} />
@@ -304,7 +317,14 @@ class Swap extends Component {
                   </Collapse>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography variant="h6">To</Typography>
+                  <Grid container spacing={2} className={classes.noWrap} alignItems="center">
+                    <Grid item className={classes.stretch}>
+                      <Typography variant="h6">To</Typography>
+                    </Grid>
+                    <Grid item>
+                      <Typography className={classes.price}>Price: ${utils.prettyNumber(utils.div(askLPT, askReserve))}</Typography>
+                    </Grid>
+                  </Grid>
                 </Grid>
                 <Grid item xs={6}>
                   <TokenSelection onChange={this.onAskAddress} />
@@ -327,6 +347,14 @@ class Swap extends Component {
                     />
                   </Collapse>
                 </Grid>
+                {bidInitialized && askInitialized ? <Grid item xs={6}>
+                  <Typography variant="h5" align="center">0.25%</Typography>
+                  <Typography variant="body2" align="center">Fee</Typography>
+                </Grid> : null}
+                {bidInitialized && askInitialized ? <Grid item xs={6}>
+                  <Typography variant="h5" align="center">{utils.prettyNumber(utils.div(bidLPT, bidReserve) / utils.div(askLPT, askReserve))}</Typography>
+                  <Typography variant="body2" align="center">Rate</Typography>
+                </Grid> : null}
                 {txId ? <Grid item xs={12}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>

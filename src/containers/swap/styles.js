@@ -32,4 +32,8 @@ export default theme => ({
   badgeIcon: {
     fontSize: '1rem'
   },
+  price: {
+    fontSize: 10,
+    color: theme.palette.text.secondary
+  }
 });
