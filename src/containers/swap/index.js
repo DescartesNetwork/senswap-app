@@ -11,14 +11,13 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Collapse from '@material-ui/core/Collapse';
-import Grow from '@material-ui/core/Grow';
 import Switch from '@material-ui/core/Switch';
 import Tooltip from '@material-ui/core/Tooltip';
 import Popover from '@material-ui/core/Popover';
 
 import {
   HelpOutlineRounded, PublicRounded, SettingsRounded,
-  CloseRounded,
+  ArrowForwardRounded, SwapHorizRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -182,7 +181,7 @@ class Swap extends Component {
     const { getSecretKey } = this.props;
     if (!bidAmount || !srcAddress || !bidInitialized || !askInitialized) return console.error('Invalid input');
     let secretKey = null;
-    return this.setState({ ...EMPTY, loading: true }, () => {
+    return this.setState({ loading: true }, () => {
       return getSecretKey().then(re => {
         secretKey = re;
         return this.onAutogenDestinationAddress(askToken.address, secretKey);
@@ -223,6 +222,7 @@ class Swap extends Component {
     const { classes } = this.props;
     const {
       bidAmount, askAmount, bidAddress, askAddress,
+      bidData: { initialized: bidInitialized }, askData: { initialized: askInitialized },
       txId, loading, advance, anchorEl } = this.state;
 
     return <Grid container justify="center" spacing={2}>
@@ -327,62 +327,50 @@ class Swap extends Component {
                     />
                   </Collapse>
                 </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    onClick={this.onSwap}
-                    endIcon={loading ? <CircularProgress size={17} /> : null}
-                    disabled={loading}
-                    fullWidth
-                  >
-                    <Typography variant="body2">Swap</Typography>
-                  </Button>
-                </Grid>
+                {txId ? <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography variant="body2">Done! Click the button to view the transaction.</Typography>
+                    </Grid>
+                    <Grid item xs={8}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        href={configs.sol.explorer(txId)}
+                        target="_blank"
+                        startIcon={<PublicRounded />}
+                        fullWidth
+                      >
+                        <Typography>Explore</Typography>
+                      </Button>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Button
+                        color="secondary"
+                        onClick={this.onClear}
+                        endIcon={<ArrowForwardRounded />}
+                        fullWidth
+                      >
+                        <Typography>Skip</Typography>
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Grid> : <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="large"
+                      onClick={this.onSwap}
+                      startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
+                      disabled={loading || !bidInitialized || !askInitialized}
+                      fullWidth
+                    >
+                      <Typography variant="body2">Swap</Typography>
+                    </Button>
+                  </Grid>}
               </Grid>
             </BaseCard>
           </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={11} md={10}>
-        <Grid container spacing={2} justify="center">
-          <Grow in={Boolean(txId)}>
-            <Grid item xs={12} md={6}>
-              <BaseCard>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-                      <Grid item className={classes.stretch}>
-                        <Typography variant="h6">Success</Typography>
-                      </Grid>
-                      <IconButton onClick={this.onClear}>
-                        <CloseRounded />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-                      <Grid item className={classes.stretch}>
-                        <Typography>Your swap has done! Click the button to view the transaction.</Typography>
-                      </Grid>
-                      <Grid item>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          href={configs.sol.explorer(txId)}
-                          target="_blank"
-                          startIcon={<PublicRounded />}
-                        >
-                          <Typography noWrap>Explore</Typography>
-                        </Button>
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </BaseCard>
-            </Grid>
-          </Grow>
         </Grid>
       </Grid>
     </Grid >
