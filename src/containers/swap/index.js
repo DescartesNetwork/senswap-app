@@ -387,7 +387,6 @@ class Swap extends Component {
                     <Button
                       variant="contained"
                       color="primary"
-                      size="large"
                       onClick={this.onSwap}
                       startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
                       disabled={loading || !bidInitialized || !askInitialized}

@@ -50,15 +50,17 @@ class Issuer extends Component {
   }
 
   onDecimals = (e) => {
-    const decimals = parseInt(e.target.value) || '';
+    const decimals = e.target.value || '';
     return this.setState({ decimals, ...EMPTY });
   }
 
   onCreate = () => {
-    const { symbol, supply, decimals } = this.state;
+    const { symbol, supply: refSupply, decimals: refDecimals } = this.state;
     const { wallet: { user }, getSecretKey, updateWallet } = this.props;
 
     let error = '';
+    const decimals = parseInt(refDecimals) || 0;
+    const supply = parseInt(refSupply) || 0;
     if (decimals < 1 || decimals > 9) error = 'Invalid decimals';
     if (symbol.length !== 4) error = 'Invalid symbol';
     if (supply < 1 || supply > 1000000000000) error = 'Invalid supply';
