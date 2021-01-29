@@ -45,7 +45,7 @@ class CreateTokenAccount extends Component {
     }).then(re => {
       return this.setState({ tokenAddress: '' });
     }).catch(er => {
-      return console.log(er);
+      return console.error(er);
     });
   }
 

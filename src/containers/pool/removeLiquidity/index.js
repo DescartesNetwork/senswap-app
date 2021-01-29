@@ -130,7 +130,7 @@ class RemoveLiquidity extends Component {
         secretKey = re;
         return this.onAutogenDestinationAddress(token.address, secretKey);
       }).then(dstAddress => {
-        const lpt = global.BigInt(amount) * 10n ** global.BigInt(token.decimals);
+        const lpt = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
         const lptPublicKey = sol.fromAddress(lptAddress);
         const poolPublicKey = sol.fromAddress(poolAddress);
         const treasuryPublicKey = sol.fromAddress(treasury.address);

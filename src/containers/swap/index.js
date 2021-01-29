@@ -122,7 +122,7 @@ class Swap extends Component {
       return sol.getPurePoolData(bidAddress).then(bidData => {
         return this.setState({ bidData }, this.estimateAmount);
       }).catch(er => {
-        return console.log(er);
+        return console.error(er);
       });
     });
   }
@@ -138,7 +138,7 @@ class Swap extends Component {
       return sol.getPurePoolData(askAddress).then(askData => {
         return this.setState({ askData }, this.estimateAmount);
       }).catch(er => {
-        return console.log(er);
+        return console.error(er);
       });
     });
   }

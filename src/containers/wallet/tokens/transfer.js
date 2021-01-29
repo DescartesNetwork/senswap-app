@@ -46,12 +46,12 @@ class TokenTransfer extends Component {
     if (!isFloat) {
       let amount = parseInt(strAmount);
       if (!amount) return 0n;
-      return global.BigInt(amount) * 10n ** global.BigInt(decimals);
+      return global.BigInt(amount) * global.BigInt(10 ** decimals);
     }
     else {
       let [strIntegers, strFloats] = strAmount.split('.');
       if (!parseInt(strIntegers) || !parseInt(strFloats)) return 0n;
-      let bigIntIntegers = global.BigInt(strIntegers) * 10n ** global.BigInt(decimals);
+      let bigIntIntegers = global.BigInt(strIntegers) * global.BigInt(10 ** decimals);
       while (strFloats.length < decimals) strFloats = strFloats + '0';
       let bigIntFloats = global.BigInt(strFloats.substring(0, decimals));
       return bigIntIntegers + bigIntFloats;

@@ -55,25 +55,22 @@ class Issuer extends Component {
   }
 
   onCreate = () => {
-    const { symbol, supply: refSupply, decimals: refDecimals } = this.state;
+    const { symbol: refSymbol, supply: refSupply, decimals: refDecimals } = this.state;
     const { wallet: { user }, getSecretKey, updateWallet } = this.props;
 
     let error = '';
     const decimals = parseInt(refDecimals) || 0;
     const supply = parseInt(refSupply) || 0;
     if (decimals < 1 || decimals > 9) error = 'Invalid decimals';
-    if (symbol.length !== 4) error = 'Invalid symbol';
+    if (refSymbol.length !== 4) error = 'Invalid symbol';
     if (supply < 1 || supply > 1000000000000) error = 'Invalid supply';
     if (error) return this.setState({ ...EMPTY, error });
 
+    const symbol = refSymbol.split('');
+    const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     return getSecretKey().then(secretKey => {
       const payer = sol.fromSecretKey(secretKey);
-      return sol.newToken(
-        symbol.split(''),
-        global.BigInt(supply) * 10n ** global.BigInt(decimals),
-        decimals,
-        payer
-      );
+      return sol.newToken(symbol, totalSupply, decimals, payer);
     }).then(({ token, receiver, txId }) => {
       this.setState({
         ...EMPTY,
@@ -85,7 +82,7 @@ class Issuer extends Component {
       tokenAccounts.push(receiver.publicKey.toBase58());
       return updateWallet({ ...user, tokenAccounts });
     }).catch(er => {
-      return this.setState({ ...EMPTY, error: er });
+      return this.setState({ ...EMPTY, error: er.toString() });
     });
   }
 

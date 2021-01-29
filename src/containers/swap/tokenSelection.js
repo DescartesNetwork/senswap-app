@@ -111,7 +111,7 @@ class TokenSelection extends Component {
   fetchRecommededPools = () => {
     const { recommended: { limit, page } } = this.state;
     return this.fetchPools('recommended', limit, page + 1).then(pools => {
-      if (!pools.length) return console.log('Empty tokens');
+      if (!pools.length) return console.error('Empty tokens');
       return this.setState({ recommended: { pools, limit, page: page + 1 } }, () => {
         return this.onSelect('recommended', 0);
       });
@@ -123,7 +123,7 @@ class TokenSelection extends Component {
   fetchNewPools = () => {
     const { new: { limit, page } } = this.state;
     return this.fetchPools('new', limit, page + 1).then(pools => {
-      if (!pools.length) return console.log('Empty tokens');
+      if (!pools.length) return console.error('Empty tokens');
       return this.setState({ new: { pools, limit, page: page + 1 } });
     }).catch(er => {
       return console.error(er);

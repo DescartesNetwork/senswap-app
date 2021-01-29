@@ -456,7 +456,7 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
     }).then(txId => {
       return resolve({ pool, treasury, lpt, txId });
     }).catch(er => {
-      console.log(er);
+      console.error(er);
       return reject('Cannot create a pool or a treasury account');
     });
   });
@@ -500,7 +500,7 @@ SOL.addLiquidityWithNewLPTAccount = (reserve, poolPublicKey, treasuryPublicKey, 
     }).then(re => {
       return resolve(re);
     }).catch(er => {
-      console.log(er);
+      console.error(er);
       return reject('Cannot add liquidity to the pool');
     });;
   });
@@ -544,7 +544,7 @@ SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, lptPublicKey, src
     }).then(re => {
       return resolve(re);
     }).catch(er => {
-      console.log(er);
+      console.error(er);
       return reject('Cannot add liquidity to the pool');
     });;
   });
@@ -588,7 +588,7 @@ SOL.removeLiquidity = (lpt, poolPublicKey, treasuryPublicKey, lptPublickey, dstT
     }).then(re => {
       return resolve(re);
     }).catch(er => {
-      console.log(er);
+      console.error(er);
       return reject('Cannot withdraw liquidity to the pool');
     })
   });
@@ -646,7 +646,7 @@ SOL.swap = (
     }).then(re => {
       return resolve(re);
     }).catch(er => {
-      console.log(er);
+      console.error(er);
       return reject('Cannot swap');
     })
   });
