@@ -11,7 +11,6 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import Avatar from '@material-ui/core/Avatar';
@@ -141,7 +140,6 @@ class TokenSelection extends Component {
     const { pools } = this.state;
     if (!pools.length) return null;
     return <MenuList>
-      <ListSubheader>Available pools</ListSubheader>
       {
         pools.map((pool, index) => {
           const { address, email, verified, token: { symbol, icon } } = pool;

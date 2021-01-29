@@ -1,1 +1,4 @@
-export default theme => ({});
+export default theme => {
+  console.log(theme);
+  return {};
+};

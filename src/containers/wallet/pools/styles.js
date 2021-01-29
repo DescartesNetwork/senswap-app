@@ -15,6 +15,5 @@ export default theme => ({
     '&:hover': {
       boxShadow: theme.shadows[6],
     },
-    // background: 'linear-gradient(45deg, hsla(33, 100%, 53%, 1) 0%, hsla(58, 100%, 68%, 1) 100%)'
   },
 });

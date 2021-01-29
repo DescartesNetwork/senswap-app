@@ -111,8 +111,8 @@ export const setWallet = (address, secretKey) => {
         return reject(er.toString());
       });
     });
-  };
-};
+  }
+}
 
 /**
  * Get wallet
@@ -143,8 +143,8 @@ export const getWallet = () => {
         return reject(er.toString());
       });
     });
-  };
-};
+  }
+}
 
 /**
  * Update wallet

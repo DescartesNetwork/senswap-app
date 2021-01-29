@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -12,15 +13,16 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
+import Avatar from '@material-ui/core/Avatar';
 
-import { MenuRounded } from '@material-ui/icons';
+import { UnfoldMoreRounded } from '@material-ui/icons';
 
-import styles from '../styles';
+import styles from './styles';
+import utils from 'helpers/utils';
 import sol from 'helpers/sol';
-import { setMainTokenAccount } from 'modules/wallet.reducer';
 
 
-class TokenMenu extends Component {
+class AccountSelection extends Component {
   constructor() {
     super();
 
@@ -42,25 +44,46 @@ class TokenMenu extends Component {
 
   fetchData = () => {
     const { wallet: { user: { tokenAccounts } } } = this.props;
+    console.log(tokenAccounts)
     return Promise.all(tokenAccounts.map(tokenAccount => {
+      console.log(tokenAccount)
       return sol.getTokenData(tokenAccount);
     })).then(data => {
-      return this.setState({ data });
+      return this.setState({ data }, () => {
+        console.log(data)
+        return this.onSelect(tokenAccounts[0].address);
+      });
     }).catch(er => {
       return console.error(er);
     });
   }
 
-  onSelect = (tokenAccount) => {
-    const { setMainTokenAccount } = this.props;
-    return setMainTokenAccount(tokenAccount).then(re => {
-      return this.onClose();
-    }).catch(er => {
-      return console.error(er);
-    });
+  onSelect = (accountAddress) => {
+    console.log(accountAddress)
+    const { onChange } = this.props;
+    const { data } = this.state;
+
+    const icon = utils.randEmoji(accountAddress);
+    let accountData = {}
+    for (let each of data) {
+      const { address } = each;
+      if (address === accountAddress) accountData = each;
+    }
+    onChange({ ...accountData, icon });
+    return this.onClose();
+  }
+
+  getBalance = (accountAddress) => {
+    const { data } = this.state;
+    for (let each of data) {
+      const { address, amount, token: { decimals } } = each;
+      if (address === accountAddress)
+        return utils.prettyNumber(utils.div(amount, global.BigInt(10 ** decimals)));
+    }
   }
 
   renderGroupedTokensData = () => {
+    const { classes } = this.props;
     const { data } = this.state;
     let groupedTokensData = {};
     data.forEach(({ address, token }) => {
@@ -74,8 +97,18 @@ class TokenMenu extends Component {
       render.push(<ListSubheader key={symbol}>{symbol}</ListSubheader>)
       groupedTokensData[symbol].forEach(address => {
         render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
-          <Typography noWrap>{address}</Typography>
-        </MenuItem>)
+          <Grid container spacing={1} className={classes.noWrap} alignItems="center">
+            <Grid item>
+              <Avatar className={classes.icon}>
+                <Typography variant="h5">{utils.randEmoji(address)}</Typography>
+              </Avatar>
+            </Grid>
+            <Grid item className={classes.stretch}>
+              <Typography className={classes.address}>{address}</Typography>
+              <Typography variant="body2">{this.getBalance(address)}</Typography>
+            </Grid>
+          </Grid>
+        </MenuItem>);
       });
     }
 
@@ -92,12 +125,13 @@ class TokenMenu extends Component {
 
   render() {
     const { anchorEl } = this.state;
+    const { icon, size } = this.props;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Tooltip title="Token List">
-          <IconButton color="secondary" size="small" onClick={this.onOpen}>
-            <MenuRounded />
+          <IconButton color="secondary" size={size} onClick={this.onOpen}>
+            {icon}
           </IconButton>
         </Tooltip>
         <Menu
@@ -117,11 +151,24 @@ const mapStateToProps = state => ({
   wallet: state.wallet,
 });
 
+AccountSelection.defaultProps = {
+  icon: <UnfoldMoreRounded />,
+  size: 'small',
+  tokenAddress: '',
+  onChange: () => { },
+}
+
+AccountSelection.propTypes = {
+  icon: PropTypes.object,
+  size: PropTypes.string,
+  tokenAddress: PropTypes.string,
+  onChange: PropTypes.func,
+}
+
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setMainTokenAccount,
 }, dispatch);
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(TokenMenu)));
+)(withStyles(styles)(AccountSelection)));

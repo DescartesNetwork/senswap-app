@@ -1,5 +1,9 @@
 import dateformat from 'dateformat';
 import axios from 'axios';
+import seedrandom from 'seedrandom';
+import emoji from './emoji.json';
+
+const TOTAL_EMOJI = emoji.length;
 
 const Utils = {}
 
@@ -7,6 +11,10 @@ Utils.scrollTop = () => {
   let root = document.getElementById("root");
   if (!root) return;
   root.scrollIntoView();
+}
+
+Utils.randEmoji = (seed) => {
+  return emoji[Math.floor(seedrandom(seed)() * TOTAL_EMOJI)];
 }
 
 Utils.prettyNumber = (num, type = 'long') => {
