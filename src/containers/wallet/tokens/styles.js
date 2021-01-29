@@ -13,7 +13,6 @@ export default theme => ({
     paddingRight: theme.spacing(1),
     paddingTop: theme.spacing(1) / 2,
     paddingBottom: theme.spacing(1) / 2,
-    background: 'linear-gradient(163.28deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%)',
-    backdropFilter: 'blur(20px)'
+    width: `calc(100% - ${theme.spacing(2)}px)`
   }
 });

@@ -7,10 +7,11 @@ import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
-import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
 
 import { SendRounded } from '@material-ui/icons';
+
+import { BaseCard } from 'components/cards';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -32,7 +33,6 @@ class TokenTransfer extends Component {
     const receiverAddress = e.target.value || '';
     return this.setState({ receiverAddress, error: '' });
   }
-
 
   onAmount = (e) => {
     const amount = e.target.value || '';
@@ -81,7 +81,7 @@ class TokenTransfer extends Component {
       const srcPublicKey = sol.fromAddress(currentTokenAccount);
       const dstPublicKey = sol.fromAddress(receiverAddress);
       const payer = sol.fromSecretKey(secretKey);
-      return sol.transfer(amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer);
+      return sol.transferTokens(amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer);
     }).then(re => {
       return this.setState({ error: '' });
     }).catch(er => {
@@ -94,25 +94,18 @@ class TokenTransfer extends Component {
     const { receiverAddress, amount, error } = this.state;
 
     return <Grid container spacing={2}>
-      <Grid item xs={6} sm={7} md={8}>
-        <Paper elevation={0} className={classes.paper}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
+      <Grid item xs={12}>
+        <BaseCard variant="fluent" className={classes.paper}>
+          <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+            <Grid item className={classes.stretch}>
               <InputBase
                 placeholder='Receiver'
                 onChange={this.onAddress}
                 value={receiverAddress}
-                onKeyPress={e => e.key === 'Enter' ? this.onTransfer : null}
                 fullWidth
               />
             </Grid>
-          </Grid>
-        </Paper>
-      </Grid>
-      <Grid item xs={6} sm={5} md={4}>
-        <Paper elevation={0} className={classes.paper}>
-          <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-            <Grid item className={classes.stretch}>
+            <Grid item xs={3}>
               <InputBase
                 placeholder='Amount'
                 onChange={this.onAmount}
@@ -128,7 +121,7 @@ class TokenTransfer extends Component {
               </IconButton>
             </Grid>
           </Grid>
-        </Paper>
+        </BaseCard>
       </Grid>
       {error ? <Grid item xs={12}>
         <Typography color="error">{error}</Typography>

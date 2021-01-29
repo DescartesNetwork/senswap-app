@@ -69,9 +69,9 @@ SOL.safelyCreateAccount = (programId) => {
     });
   }
   return new Promise((resolve, reject) => {
-    safelyCreateAccountCallback(programId, account => {
+    return safelyCreateAccountCallback(programId, account => {
       return resolve(account);
-    })
+    });
   });
 }
 
@@ -652,7 +652,31 @@ SOL.swap = (
   });
 }
 
-SOL.transfer = (amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer) => {
+SOL.transferLamports = (lamports, dstPublicKey, payer) => {
+  return new Promise((resolve, reject) => {
+    const connection = SOL.createConnection();
+    const instruction = SystemProgram.transfer({
+      fromPubkey: payer.publicKey,
+      toPubkey: dstPublicKey,
+      lamports
+    });
+    const transaction = new Transaction();
+    transaction.add(instruction);
+    return sendAndConfirmTransaction(
+      connection, transaction, [payer],
+      {
+        skipPreflight: true,
+        commitment: 'recent'
+      }).then(txId => {
+        return resolve(txId);
+      }).catch(er => {
+        console.error(er);
+        return reject('Cannot transfer lamports');
+      });
+  });
+}
+
+SOL.transferTokens = (amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress } } = configs;

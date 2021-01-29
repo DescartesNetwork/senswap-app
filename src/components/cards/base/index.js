@@ -18,15 +18,11 @@ class BaseCard extends Component {
     const { children, variant, className } = this.props;
     const compoundClassName = `${variant === 'material' ? classes.materialPaper : classes.fluentPaper} ${className}`
 
-    return <Grid container spacing={2} >
+    return <Paper className={compoundClassName} elevation={3}>
       <Grid item xs={12}>
-        <Paper className={compoundClassName} elevation={3}>
-          <Grid item xs={12}>
-            {children}
-          </Grid>
-        </Paper>
+        {children}
       </Grid>
-    </Grid >
+    </Paper>
   }
 }
 

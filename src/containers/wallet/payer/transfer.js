@@ -6,10 +6,11 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
-import Paper from '@material-ui/core/Paper';
 import InputBase from '@material-ui/core/InputBase';
 
 import { SendRounded } from '@material-ui/icons';
+
+import { BaseCard } from 'components/cards';
 
 import styles from './styles';
 
@@ -19,13 +20,18 @@ class PayerTransfer extends Component {
     super();
 
     this.state = {
-      receiverAddress: '',
+      address: '',
     }
   }
 
-  onReceiverAddress = (e) => {
-    const receiverAddress = e.target.value;
-    return this.setState({ receiverAddress });
+  onAddress = (e) => {
+    const address = e.target.value || '';
+    return this.setState({ address });
+  }
+
+  onAmount = (e) => {
+    const amount = e.target.value || '';
+    return this.setState({ amount });
   }
 
   onTransfer = () => {
@@ -34,18 +40,25 @@ class PayerTransfer extends Component {
 
   render() {
     const { classes } = this.props;
-    const { receiverAddress } = this.state;
+    const { address, amount } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Paper elevation={0} className={classes.paper}>
+        <BaseCard variant="fluent" className={classes.paper}>
           <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
             <Grid item className={classes.stretch}>
               <InputBase
                 placeholder='Receiver'
-                onChange={this.onReceiverAddress}
-                value={receiverAddress}
-                onKeyPress={e => e.key === 'Enter' ? this.onTransfer : null}
+                onChange={this.onAddress}
+                value={address}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={3}>
+              <InputBase
+                placeholder='Amount'
+                onChange={this.onAmount}
+                value={amount}
                 fullWidth
               />
             </Grid>
@@ -58,7 +71,7 @@ class PayerTransfer extends Component {
               </IconButton>
             </Grid>
           </Grid>
-        </Paper>
+        </BaseCard>
       </Grid>
     </Grid>
   }

@@ -19,10 +19,9 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
+import Paper from '@material-ui/core/Paper';
 
 import { VisibilityRounded, CloseRounded, RemoveRounded } from '@material-ui/icons';
-
-import { BaseCard } from 'components/cards';
 
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
@@ -174,7 +173,7 @@ class Info extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <TableContainer component={BaseCard} className={classes.card}>
+        <TableContainer component={Paper} className={classes.card} elevation={3}>
           <Table>
             <TableHead>
               <TableRow>
