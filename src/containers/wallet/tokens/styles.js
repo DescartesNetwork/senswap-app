@@ -11,5 +11,10 @@ export default theme => ({
   paper: {
     padding: `${theme.spacing(1) / 2}px ${theme.spacing(1)}px`,
     width: `calc(100% - ${theme.spacing(2)}px)`
+  },
+  icon: {
+    width: theme.spacing(3),
+    height: theme.spacing(3),
+    background: 'linear-gradient(45deg, hsla(33, 100%, 53%, 1) 0%, hsla(58, 100%, 68%, 1) 100%)'
   }
 });

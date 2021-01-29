@@ -7,10 +7,13 @@ import isEqual from 'react-fast-compare';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
+import InputBase from '@material-ui/core/InputBase';
+import Avatar from '@material-ui/core/Avatar';
 
-import { WallpaperRounded } from '@material-ui/icons';
+import { } from '@material-ui/icons';
+
+import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
@@ -54,29 +57,26 @@ class PayerInfo extends Component {
   }
 
   render() {
+    const { classes } = this.props;
     const { address, amount } = this.state;
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h4">{utils.prettyNumber(Number(amount))} SOL</Typography>
       </Grid>
-      <Grid item xs={12} style={{ paddingBottom: 0 }}>
-        <Typography variant="body2">Address</Typography>
-      </Grid>
-      <Grid item xs={12} style={{ paddingTop: 0 }}>
-        <Grid container alignItems="center" spacing={2}>
-          <Grid item xs={9}>
-            <Typography noWrap>{address}</Typography>
+      <Grid item xs={12}>
+        <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+          <Grid item>
+            <Tooltip title="QR Code">
+              <Avatar className={classes.icon} onClick={this.onQRCode}>
+                <Typography>{utils.randEmoji(address)}</Typography>
+              </Avatar>
+            </Tooltip>
           </Grid>
-          <Grid item xs={3}>
-            <Grid container justify="flex-end" spacing={2}>
-              <Grid item>
-                <Tooltip title="QR Code">
-                  <IconButton color="secondary" onClick={this.onQRCode} >
-                    <WallpaperRounded fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-            </Grid>
+          <Grid item className={classes.stretch}>
+            <InputBase placeholder='Receiver' value={address} fullWidth readOnly />
+          </Grid>
+          <Grid item>
+            <AccountSelection onChange={this.onData} />
           </Grid>
         </Grid>
       </Grid>

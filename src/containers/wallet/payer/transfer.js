@@ -80,6 +80,9 @@ class PayerTransfer extends Component {
     const { address, amount, error, loading, txId } = this.state;
 
     return <Grid container spacing={2}>
+      <Grid item xs={12} style={{ paddingBottom: 0 }}>
+        <Typography variant="body2">Send coin</Typography>
+      </Grid>
       <Grid item xs={12}>
         <BaseCard variant="fluent" className={classes.paper}>
           <Grid container spacing={2} alignItems="center" className={classes.noWrap}>

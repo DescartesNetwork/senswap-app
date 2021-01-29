@@ -44,14 +44,11 @@ class AccountSelection extends Component {
 
   fetchData = () => {
     const { wallet: { user: { tokenAccounts } } } = this.props;
-    console.log(tokenAccounts)
     return Promise.all(tokenAccounts.map(tokenAccount => {
-      console.log(tokenAccount)
       return sol.getTokenData(tokenAccount);
     })).then(data => {
       return this.setState({ data }, () => {
-        console.log(data)
-        return this.onSelect(tokenAccounts[0].address);
+        return this.onSelect(tokenAccounts[0]);
       });
     }).catch(er => {
       return console.error(er);
@@ -59,7 +56,6 @@ class AccountSelection extends Component {
   }
 
   onSelect = (accountAddress) => {
-    console.log(accountAddress)
     const { onChange } = this.props;
     const { data } = this.state;
 

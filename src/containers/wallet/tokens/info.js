@@ -5,14 +5,13 @@ import { withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
+import Tooltip from '@material-ui/core/Tooltip';
 import InputBase from '@material-ui/core/InputBase';
+import Avatar from '@material-ui/core/Avatar';
 
-import { WallpaperRounded } from '@material-ui/icons';
+import { } from '@material-ui/icons';
 
-import { BaseCard } from 'components/cards';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
@@ -43,35 +42,29 @@ class TokenInfo extends Component {
   render() {
     const { classes } = this.props;
     const { data: { address, amount, initialized, token } } = this.state;
-    if (!initialized) return null;
-    const symbol = sol.toSymbol(token.symbol);
-    const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
+    const symbol = initialized ? sol.toSymbol(token.symbol) : 'UNKOWN';
+    const balance = initialized ? utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals))) : 0;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h4">{balance} {symbol}</Typography>
       </Grid>
-      <Grid item xs={12} style={{ paddingBottom: 0 }}>
-        <Typography variant="body2">Address</Typography>
-      </Grid>
       <Grid item xs={12}>
-        <BaseCard variant="fluent" className={classes.paper}>
-          <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
-            <Grid item>
-              <Tooltip title="QR Code">
-                <IconButton color="secondary" onClick={this.onQRCode} size="small" >
-                  <WallpaperRounded fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Grid>
-            <Grid item className={classes.stretch}>
-              <InputBase placeholder='Receiver' value={address} fullWidth />
-            </Grid>
-            <Grid item>
-              <AccountSelection onChange={this.onData} />
-            </Grid>
+        <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+          <Grid item>
+            <Tooltip title="QR Code">
+              <Avatar className={classes.icon} onClick={this.onQRCode}>
+                <Typography>{utils.randEmoji(address)}</Typography>
+              </Avatar>
+            </Tooltip>
           </Grid>
-        </BaseCard>
+          <Grid item className={classes.stretch}>
+            <InputBase placeholder='Receiver' value={address} fullWidth readOnly />
+          </Grid>
+          <Grid item>
+            <AccountSelection onChange={this.onData} />
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   }

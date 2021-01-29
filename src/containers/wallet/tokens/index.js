@@ -18,8 +18,7 @@ import { BaseCard } from 'components/cards';
 import Drain from 'components/drain';
 import TokenInfo from './info';
 import TokenTransfer from './transfer';
-import OwnerNotice from './items/notice';
-import TokenSettings from './items/settings';
+import TokenSettings from './settings';
 
 import styles from './styles';
 import SEN_LOGO from 'static/images/sen-logo.svg';
@@ -68,10 +67,10 @@ class Tokens extends Component {
               <TokenInfo />
             </Grid>
             <Grid item xs={12}>
-              <TokenTransfer />
+              <Drain small/>
             </Grid>
             <Grid item xs={12}>
-              <Drain small />
+              <TokenTransfer />
             </Grid>
             <Grid item xs={12}>
               <Collapse in={advance}>
@@ -80,7 +79,6 @@ class Tokens extends Component {
             </Grid>
             <Grid item xs={12}>
               <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-                <OwnerNotice />
                 <Grid item className={classes.stretch}>
                   <TokenSettings />
                 </Grid>

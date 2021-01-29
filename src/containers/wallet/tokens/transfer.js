@@ -108,6 +108,9 @@ class TokenTransfer extends Component {
     const { address, amount, loading, txId, error } = this.state;
 
     return <Grid container spacing={2}>
+      <Grid item xs={12} style={{ paddingBottom: 0 }}>
+        <Typography variant="body2">Send token</Typography>
+      </Grid>
       <Grid item xs={12}>
         <BaseCard variant="fluent" className={classes.paper}>
           <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
