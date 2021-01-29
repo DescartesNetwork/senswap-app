@@ -11,10 +11,6 @@ import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import Avatar from '@material-ui/core/Avatar';
 
-import { } from '@material-ui/icons';
-
-import AccountSelection from 'containers/wallet/components/accountSelection';
-
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import styles from './styles';
@@ -74,9 +70,6 @@ class PayerInfo extends Component {
           </Grid>
           <Grid item className={classes.stretch}>
             <InputBase placeholder='Receiver' value={address} fullWidth readOnly />
-          </Grid>
-          <Grid item>
-            <AccountSelection onChange={this.onData} />
           </Grid>
         </Grid>
       </Grid>

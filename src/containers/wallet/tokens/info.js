@@ -10,8 +10,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import InputBase from '@material-ui/core/InputBase';
 import Avatar from '@material-ui/core/Avatar';
 
-import { } from '@material-ui/icons';
-
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
