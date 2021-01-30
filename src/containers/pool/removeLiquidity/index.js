@@ -22,8 +22,8 @@ import {
 
 import { BaseCard } from 'components/cards';
 import PoolSelection from './poolSelection';
-import LPTSelection from './lptSelection';
-import AccountSelection from './accountSelection';
+import LPTSelection from 'containers/wallet/components/lptSelection';
+import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
 import configs from 'configs';
@@ -45,10 +45,9 @@ class RemoveLiquidity extends Component {
     this.state = {
       ...EMPTY,
       poolAddress: '',
-      lptAddress: '',
-      dstAddress: '',
+      dstData: {},
+      lptData: {},
       amount: 0,
-      data: {},
       advance: false,
     }
   }
@@ -76,28 +75,21 @@ class RemoveLiquidity extends Component {
   }
 
   onPoolAddress = (poolAddress) => {
-    return this.setState({ poolAddress }, () => {
-      if (!sol.isAddress(poolAddress)) return console.error('Invalid address');
-      return sol.getPurePoolData(poolAddress).then(data => {
-        return this.setState({ data });
-      }).catch(er => {
-        return console.error(er);
-      });
-    });
+    return this.setState({ poolAddress });
   }
 
-  onLPTAddress = (lptAddress) => {
-    return this.setState({ lptAddress });
+  onLPTData = (lptData) => {
+    return this.setState({ lptData });
   }
 
-  onDestinationAddress = (dstAddress) => {
-    return this.setState({ dstAddress });
+  onDestinationData = (dstData) => {
+    return this.setState({ dstData });
   }
 
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
     return new Promise((resolve, reject) => {
       if (!tokenAddress || !secretKey) return reject('Invalid input');
-      const { dstAddress } = this.state;
+      const { dstData: { address: dstAddress } } = this.state;
       if (dstAddress) return resolve(dstAddress);
 
       let newAddress = null;
@@ -119,8 +111,12 @@ class RemoveLiquidity extends Component {
 
   removeLiquidity = () => {
     const {
-      amount, poolAddress, lptAddress,
-      data: { initialized, token, treasury }
+      amount, poolAddress,
+      lptData: {
+        initialized,
+        address: lptAddress,
+        pool: { token, treasury }
+      },
     } = this.state;
     const { getSecretKey } = this.props;
     if (!amount || !initialized) return console.error('Invalid input');
@@ -160,8 +156,9 @@ class RemoveLiquidity extends Component {
     const {
       anchorEl, advance, loading, txId,
       amount, poolAddress,
-      data: { initialized, reserve, lpt, token }
+      lptData: { initialized, lpt, pool }
     } = this.state;
+    const { token } = initialized ? pool : {};
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -221,28 +218,32 @@ class RemoveLiquidity extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
+          helperText={`Your LPT: ${initialized ? utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals))) : 0}`}
           fullWidth
         />
       </Grid>
-      {initialized ? <Grid item xs={6}>
-        <Typography variant="h5" align="center">{utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** token.decimals)))}</Typography>
+      <Grid item xs={6}>
+        <Typography variant="h5" align="center">
+          {initialized ? utils.prettyNumber(utils.div(pool.reserve, global.BigInt(10 ** token.decimals))) : 0}
+        </Typography>
         <Typography variant="body2" align="center">Reserve</Typography>
-      </Grid> : null}
-      {initialized ? <Grid item xs={6}>
-        <Typography variant="h5" align="center">{utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals)))}</Typography>
-        <Typography variant="body2" align="center">Total LPT</Typography>
-      </Grid> : null}
+      </Grid>
+      <Grid item xs={6}>
+        <Typography variant="h5" align="center">
+          {initialized ? utils.prettyNumber(utils.div(pool.lpt, global.BigInt(10 ** token.decimals))) : 0}</Typography>
+        <Typography variant="body2" align="center">In-pool LPT</Typography>
+      </Grid>
       <Grid item xs={12}>
         <Collapse in={advance}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <LPTSelection onChange={this.onLPTAddress} poolAddress={poolAddress} />
+              <LPTSelection onChange={this.onLPTData} poolAddress={poolAddress} />
             </Grid>
             <Grid item xs={12}>
               <AccountSelection
                 label="Destination Address"
                 poolAddress={poolAddress}
-                onChange={this.onDestinationAddress}
+                onChange={this.onDestinationData}
               />
             </Grid>
           </Grid>

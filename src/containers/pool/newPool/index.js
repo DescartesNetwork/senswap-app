@@ -17,7 +17,7 @@ import {
   PublicRounded, ArrowForwardRounded,
 } from '@material-ui/icons';
 
-import AccountSelection from './accountSelection';
+import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
 import configs from 'configs';
@@ -39,29 +39,16 @@ class NewPool extends Component {
 
     this.state = {
       ...EMPTY,
-      address: '',
-      data: {},
+      accountData: {},
     }
-  }
-
-  fetchData = () => {
-    const { address } = this.state;
-    if (!address) return this.setState({ ...EMPTY });
-    return sol.getTokenData(address).then(re => {
-      return this.setState({ data: re });
-    }).catch(er => {
-      return console.error(er);
-    });
   }
 
   onClear = () => {
     return this.setState({ ...EMPTY });
   }
 
-  onAddress = (address) => {
-    return this.setState({ address }, () => {
-      return this.fetchData();
-    });
+  onData = (accountData) => {
+    return this.setState({ accountData });
   }
 
   onAmount = (e) => {
@@ -75,7 +62,7 @@ class NewPool extends Component {
   }
 
   newPool = () => {
-    const { data: { address, initialized, token }, amount, price } = this.state;
+    const { accountData: { address, initialized, token }, amount, price } = this.state;
     const { wallet: { user }, updateWallet, getSecretKey } = this.props;
     if (!initialized || !amount || !price) return console.error('Invalid input');
 
@@ -116,7 +103,7 @@ class NewPool extends Component {
     const {
       amount, price,
       loading, txId, poolAddress,
-      data: { initialized }
+      accountData: { initialized }
     } = this.state;
 
     return <Grid container justify="center" spacing={2}>
@@ -124,7 +111,7 @@ class NewPool extends Component {
         <Typography variant="h6">Your token info</Typography>
       </Grid>
       <Grid item xs={12}>
-        <AccountSelection onChange={this.onAddress} />
+        <AccountSelection onChange={this.onData} />
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>

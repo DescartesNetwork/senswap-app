@@ -50,7 +50,7 @@ class AccountSelection extends Component {
     });
   }
 
-  onData = (data = []) => {
+  onData = (data = {}) => {
     const { onChange } = this.props;
     return this.setState({ data }, () => {
       return onChange(data);
@@ -69,7 +69,7 @@ class AccountSelection extends Component {
           variant="outlined"
           value={accountAddress || ''}
           InputProps={{
-            startAdornment: <Avatar className={classes.iconWithMarginLeft}>
+            startAdornment: <Avatar className={classes.accountIcon}>
               <Typography variant="h5">{utils.randEmoji(accountAddress)}</Typography>
             </Avatar>,
             endAdornment: <AccountList

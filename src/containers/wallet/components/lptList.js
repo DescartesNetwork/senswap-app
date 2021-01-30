@@ -24,7 +24,7 @@ import sol from 'helpers/sol';
 import { openWallet } from 'modules/wallet.reducer';
 
 
-class AccountList extends Component {
+class LPTList extends Component {
   constructor() {
     super();
 
@@ -39,22 +39,22 @@ class AccountList extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser }, tokenAddress: prevTokenAddress } = prevProps;
-    const { wallet: { user }, tokenAddress } = this.props;
-    if (!isEqual(user, prevUser) || !isEqual(tokenAddress, prevTokenAddress)) this.fetchData();
+    const { wallet: { user: prevUser }, poolAddress: prevPoolAddress } = prevProps;
+    const { wallet: { user }, poolAddress } = this.props;
+    if (!isEqual(user, prevUser) || !isEqual(poolAddress, prevPoolAddress)) this.fetchData();
   }
 
   fetchData = () => {
     const {
-      wallet: { user: { tokenAccounts } },
-      tokenAddress, onChange
+      wallet: { user: { lptAccounts } },
+      poolAddress, onChange
     } = this.props;
-    return Promise.all(tokenAccounts.map(tokenAccount => {
-      return sol.getTokenData(tokenAccount);
+    return Promise.all(lptAccounts.map(lptAccount => {
+      return sol.getPoolData(lptAccount);
     })).then(data => {
-      if (tokenAddress && data) data = data.filter(each => {
-        const { token: { address } } = each;
-        return address === tokenAddress;
+      if (poolAddress && data) data = data.filter(each => {
+        const { pool: { address } } = each;
+        return address === poolAddress;
       });
       if (!data || !data.length) return onChange();
       return this.setState({ data }, () => {
@@ -67,26 +67,26 @@ class AccountList extends Component {
     });
   }
 
-  onSelect = (accountAddress) => {
+  onSelect = (lptAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
 
-    const icon = utils.randEmoji(accountAddress);
-    let accountData = {}
+    const icon = utils.randEmoji(lptAddress);
+    let lptData = {}
     for (let each of data) {
       const { address } = each;
-      if (address === accountAddress) accountData = each;
+      if (address === lptAddress) lptData = each;
     }
-    onChange({ ...accountData, icon });
+    onChange({ ...lptData, icon });
     return this.onClose();
   }
 
-  getBalance = (accountAddress) => {
+  getLPT = (lptAddress) => {
     const { data } = this.state;
     for (let each of data) {
-      const { address, amount, token: { decimals } } = each;
-      if (address === accountAddress)
-        return utils.prettyNumber(utils.div(amount, global.BigInt(10 ** decimals)));
+      const { address, lpt, pool: { token: { decimals } } } = each;
+      if (address === lptAddress)
+        return utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** decimals)));
     }
   }
 
@@ -94,28 +94,28 @@ class AccountList extends Component {
     const { classes } = this.props;
     const { data } = this.state;
     let groupedTokensData = {};
-    data.forEach(({ address, token }) => {
+    data.forEach(({ address: lptAddress, pool: { token } }) => {
       const symbol = sol.toSymbol(token.symbol);
       const tokenAddress = token.address.substring(0, 6);
       const key = `${symbol} - ${tokenAddress}`;
       if (!groupedTokensData[key]) groupedTokensData[key] = [];
-      groupedTokensData[key].push(address);
+      groupedTokensData[key].push(lptAddress);
     });
 
     let render = [];
     for (let key in groupedTokensData) {
       render.push(<ListSubheader key={key}>{key}</ListSubheader>)
-      groupedTokensData[key].forEach(address => {
-        render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
+      groupedTokensData[key].forEach(lptAddress => {
+        render.push(<MenuItem key={lptAddress} onClick={() => this.onSelect(lptAddress)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
             <Grid item>
-              <Avatar className={classes.accountIcon}>
-                <Typography variant="h5">{utils.randEmoji(address)}</Typography>
+              <Avatar className={classes.lptIcon}>
+                <Typography variant="h5">{utils.randEmoji(lptAddress)}</Typography>
               </Avatar>
             </Grid>
             <Grid item className={classes.stretch}>
-              <Typography className={classes.address}>{address}</Typography>
-              <Typography variant="body2">{this.getBalance(address)}</Typography>
+              <Typography className={classes.address}>{lptAddress}</Typography>
+              <Typography variant="body2">{this.getLPT(lptAddress)}</Typography>
             </Grid>
           </Grid>
         </MenuItem>);
@@ -171,19 +171,19 @@ const mapStateToProps = state => ({
   wallet: state.wallet,
 });
 
-AccountList.defaultProps = {
+LPTList.defaultProps = {
   icon: <UnfoldMoreRounded />,
   size: 'small',
   edge: false,
-  tokenAddress: '',
+  poolAddress: '',
   onChange: () => { },
 }
 
-AccountList.propTypes = {
+LPTList.propTypes = {
   icon: PropTypes.object,
   size: PropTypes.string,
   edge: PropTypes.string,
-  tokenAddress: PropTypes.string,
+  poolAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
 
@@ -194,4 +194,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(AccountList)));
+)(withStyles(styles)(LPTList)));
