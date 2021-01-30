@@ -22,7 +22,7 @@ import {
 
 import { BaseCard } from 'components/cards';
 import TokenSelection from './tokenSelection';
-import AccountSelection from './accountSelection';
+import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -43,12 +43,10 @@ class Swap extends Component {
     this.state = {
       ...EMPTY,
       advance: false,
-      srcAddress: '',
-      dstAddress: '',
+      srcData: {},
+      dstData: {},
       bidAmount: 0,
       askAmount: 0,
-      bidAddress: '',
-      askAddress: '',
       bidData: {},
       askData: {},
     }
@@ -115,42 +113,36 @@ class Swap extends Component {
     return this.setState({ bidAmount }, this.estimateAmount);
   }
 
-  onBidAddress = (address) => {
-    return this.setState({ bidAddress: address }, () => {
-      const { bidAddress } = this.state;
-      if (!sol.isAddress(bidAddress)) return;
-      return sol.getPurePoolData(bidAddress).then(bidData => {
-        return this.setState({ bidData }, this.estimateAmount);
-      }).catch(er => {
-        return console.error(er);
-      });
+  onBidAddress = (bidAddress) => {
+    if (!sol.isAddress(bidAddress)) return;
+    return sol.getPurePoolData(bidAddress).then(bidData => {
+      return this.setState({ bidData }, this.estimateAmount);
+    }).catch(er => {
+      return console.error(er);
     });
   }
 
-  onSourceAddress = (srcAddress) => {
-    return this.setState({ srcAddress });
+  onSourceData = (srcData) => {
+    return this.setState({ srcData });
   }
 
-  onAskAddress = (address) => {
-    return this.setState({ askAddress: address }, () => {
-      const { askAddress } = this.state;
-      if (!sol.isAddress(askAddress)) return;
-      return sol.getPurePoolData(askAddress).then(askData => {
-        return this.setState({ askData }, this.estimateAmount);
-      }).catch(er => {
-        return console.error(er);
-      });
+  onAskAddress = (askAddress) => {
+    if (!sol.isAddress(askAddress)) return;
+    return sol.getPurePoolData(askAddress).then(askData => {
+      return this.setState({ askData }, this.estimateAmount);
+    }).catch(er => {
+      return console.error(er);
     });
   }
 
-  onDestinationAddress = (dstAddress) => {
-    return this.setState({ dstAddress });
+  onDestinationData = (dstData) => {
+    return this.setState({ dstData });
   }
 
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
     return new Promise((resolve, reject) => {
       if (!tokenAddress || !secretKey) return reject('Invalid input');
-      const { dstAddress } = this.state;
+      const { dstData: { address: dstAddress } } = this.state;
       if (dstAddress) return resolve(dstAddress);
 
       let newAddress = null;
@@ -172,9 +164,9 @@ class Swap extends Component {
 
   onSwap = () => {
     const {
-      bidAmount, srcAddress,
-      bidData: { initialized: bidInitialized, address: bidPoolAddress, token: bidToken, treasury: bidTreasury },
-      askData: { initialized: askInitialized, address: askPoolAddress, token: askToken, treasury: askTreasury }
+      bidAmount, srcData: { address: srcAddress },
+      bidData: { initialized: bidInitialized, address: bidAddress, token: bidToken, treasury: bidTreasury },
+      askData: { initialized: askInitialized, address: askAddress, token: askToken, treasury: askTreasury }
     } = this.state;
     const { getSecretKey } = this.props;
     if (!bidAmount || !srcAddress || !bidInitialized || !askInitialized) return console.error('Invalid input');
@@ -186,11 +178,11 @@ class Swap extends Component {
       }).then(dstAddress => {
         const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
         const payer = sol.fromSecretKey(secretKey);
-        const bidPoolPublicKey = sol.fromAddress(bidPoolAddress);
+        const bidPoolPublicKey = sol.fromAddress(bidAddress);
         const bidTreasuryPublicKey = sol.fromAddress(bidTreasury.address);
         const srcTokenPublickKey = sol.fromAddress(srcAddress);
         const bidTokenPublickKey = sol.fromAddress(bidToken.address);
-        const askPoolPublicKey = sol.fromAddress(askPoolAddress);
+        const askPoolPublicKey = sol.fromAddress(askAddress);
         const askTreasuryPublickKey = sol.fromAddress(askTreasury.address);
         const dstTokenPublickKey = sol.fromAddress(dstAddress);
         const askTokenPublicKey = sol.fromAddress(askToken.address);
@@ -219,17 +211,20 @@ class Swap extends Component {
   render() {
     const { classes } = this.props;
     const {
-      bidAmount, askAmount, bidAddress, askAddress,
+      bidAmount, askAmount,
       bidData: {
         initialized: bidInitialized,
+        address: bidAddress,
         reserve: bidReserve,
         lpt: bidLPT,
       },
       askData: {
         initialized: askInitialized,
+        address: askAddress,
         reserve: askReserve,
         lpt: askLPT, },
-      txId, loading, advance, anchorEl } = this.state;
+      txId, loading, advance, anchorEl
+    } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -312,7 +307,7 @@ class Swap extends Component {
                     <AccountSelection
                       label="Source Address"
                       poolAddress={bidAddress}
-                      onChange={this.onSourceAddress}
+                      onChange={this.onSourceData}
                     />
                   </Collapse>
                 </Grid>
@@ -343,7 +338,7 @@ class Swap extends Component {
                     <AccountSelection
                       poolAddress={askAddress}
                       label="Destination Address"
-                      onChange={this.onDestinationAddress}
+                      onChange={this.onDestinationData}
                     />
                   </Collapse>
                 </Grid>

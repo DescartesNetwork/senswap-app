@@ -8,7 +8,7 @@ import api from 'helpers/api';
  * @default defaultData
  */
 const defaultState = {
-  visible: true,
+  visible: false,
   user: {
     address: null,
     tokenAccounts: [],

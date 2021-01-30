@@ -10,7 +10,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import InputBase from '@material-ui/core/InputBase';
 import Avatar from '@material-ui/core/Avatar';
 
-import AccountSelection from 'containers/wallet/components/accountSelection';
+import AccountList from 'containers/wallet/components/accountList';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -60,7 +60,7 @@ class TokenInfo extends Component {
             <InputBase placeholder='Receiver' value={address} fullWidth readOnly />
           </Grid>
           <Grid item>
-            <AccountSelection onChange={this.onData} />
+            <AccountList onChange={this.onData} />
           </Grid>
         </Grid>
       </Grid>
