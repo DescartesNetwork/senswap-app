@@ -45,7 +45,10 @@ class AccountList extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { tokenAccounts } }, tokenAddress } = this.props;
+    const {
+      wallet: { user: { tokenAccounts } },
+      tokenAddress, onChange
+    } = this.props;
     return Promise.all(tokenAccounts.map(tokenAccount => {
       return sol.getTokenData(tokenAccount);
     })).then(data => {
@@ -53,13 +56,14 @@ class AccountList extends Component {
         const { token: { address } } = each;
         return address === tokenAddress;
       });
-      if (!data || !data.length) return this.props.onChange();
+      if (!data || !data.length) return onChange();
       return this.setState({ data }, () => {
         const { address } = data[0];
         return this.onSelect(address);
       });
     }).catch(er => {
-      return console.error(er);
+      console.error(er);
+      return onChange();
     });
   }
 
@@ -92,14 +96,16 @@ class AccountList extends Component {
     let groupedTokensData = {};
     data.forEach(({ address, token }) => {
       const symbol = sol.toSymbol(token.symbol);
-      if (!groupedTokensData[symbol]) groupedTokensData[symbol] = [];
-      groupedTokensData[symbol].push(address);
+      const tokenAddress = token.address.substring(0, 6);
+      const key = `${symbol} - ${tokenAddress}`;
+      if (!groupedTokensData[key]) groupedTokensData[key] = [];
+      groupedTokensData[key].push(address);
     });
 
     let render = [];
-    for (let symbol in groupedTokensData) {
-      render.push(<ListSubheader key={symbol}>{symbol}</ListSubheader>)
-      groupedTokensData[symbol].forEach(address => {
+    for (let key in groupedTokensData) {
+      render.push(<ListSubheader key={key}>{key}</ListSubheader>)
+      groupedTokensData[key].forEach(address => {
         render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
             <Grid item>

@@ -50,7 +50,7 @@ class AccountSelection extends Component {
     });
   }
 
-  onData = (data = {}) => {
+  onData = (data = []) => {
     const { onChange } = this.props;
     return this.setState({ data }, () => {
       return onChange(data);

@@ -212,6 +212,11 @@ class Swap extends Component {
     const { classes } = this.props;
     const {
       bidAmount, askAmount,
+      srcData: {
+        initialized: srcInitialized,
+        amount: srcAmount,
+        token: srcToken
+      },
       bidData: {
         initialized: bidInitialized,
         address: bidAddress,
@@ -297,6 +302,7 @@ class Swap extends Component {
                   <TextField
                     label="Bid Amount"
                     variant="outlined"
+                    helperText={`Balance: ${srcInitialized ? utils.prettyNumber(utils.div(srcAmount, global.BigInt(10 ** srcToken.decimals))) : 0}`}
                     value={bidAmount}
                     onChange={this.onBidAmount}
                     fullWidth
