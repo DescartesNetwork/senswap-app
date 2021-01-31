@@ -9,8 +9,15 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
+import Switch from '@material-ui/core/Switch';
+import Tooltip from '@material-ui/core/Tooltip';
+import Collapse from '@material-ui/core/Collapse';
+import Chip from '@material-ui/core/Chip';
 
-import { VpnKeyRounded, PowerRounded, HelpRounded } from '@material-ui/icons';
+import {
+  VpnKeyRounded, PowerRounded, HelpRounded,
+  ErrorRounded,
+} from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -22,8 +29,14 @@ class SecretKey extends Component {
     super();
 
     this.state = {
-      secretKey: ''
+      secretKey: '',
+      advance: false,
     }
+  }
+
+  onAdvance = (e) => {
+    const advance = e.target.checked || false;
+    return this.setState({ advance });
   }
 
   onSecretKey = (e) => {
@@ -40,7 +53,7 @@ class SecretKey extends Component {
     return setWallet(address, secretKey);
   }
 
-  gen = () => {
+  onGen = () => {
     const account = sol.createAccount();
     const secretKey = Buffer.from(account.secretKey).toString('hex');
     return this.setState({ secretKey });
@@ -48,7 +61,7 @@ class SecretKey extends Component {
 
   render() {
     const { classes } = this.props;
-    const { secretKey } = this.state;
+    const { secretKey, advance } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -58,44 +71,53 @@ class SecretKey extends Component {
               <VpnKeyRounded />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid item className={classes.stretch}>
             <Typography variant="h6">Secret Key</Typography>
           </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12}>
-        <Typography>Connect wallet using your Secret key. If you don't have one, you could create a secret key. However, make sure that you copy and securely save the secret key down. We do not store your secrets due to security and privacy.</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Secret Key"
-          variant="outlined"
-          onChange={this.onSecretKey}
-          value={secretKey}
-          InputProps={{
-            endAdornment: <IconButton
-              color="primary"
-              onClick={this.onSave}
-              edge="end"
-            >
-              <PowerRounded />
-            </IconButton>
-          }}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container spacing={2} justify="flex-end">
           <Grid item>
-            <Button
-              onClick={this.gen}
-              startIcon={<HelpRounded />}
-              fullWidth
-            >
-              <Typography>Not have secret key yet?</Typography>
-            </Button>
+            <Tooltip title="Caution! This format is not recommended due to a lack of cryptographical protection. By switching the button, you agree that you will use this function at your own risk.">
+              <Chip
+                icon={<ErrorRounded className={classes.warning} />}
+                label="Caution!"
+                clickable
+                onDelete={this.onAdvance}
+                deleteIcon={<Switch color="primary" size="small" checked={advance} />}
+              />
+            </Tooltip>
           </Grid>
         </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Collapse in={advance}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography>The secret key is a raw form of your wallet. It's very unsecure and not recommended to use.</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Secret Key"
+                variant="outlined"
+                onChange={this.onSecretKey}
+                value={secretKey}
+                InputProps={{
+                  endAdornment: <IconButton color="primary" onClick={this.onSave} edge="end" >
+                    <PowerRounded />
+                  </IconButton>
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Grid container spacing={2} justify="flex-end">
+                <Grid item>
+                  <Button onClick={this.onGen} startIcon={<HelpRounded />} fullWidth>
+                    <Typography>Not have secret key yet?</Typography>
+                  </Button>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Collapse>
       </Grid>
     </Grid>
   }

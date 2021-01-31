@@ -182,7 +182,7 @@ LPTList.defaultProps = {
 LPTList.propTypes = {
   icon: PropTypes.object,
   size: PropTypes.string,
-  edge: PropTypes.string,
+  edge: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   poolAddress: PropTypes.string,
   onChange: PropTypes.func,
 }

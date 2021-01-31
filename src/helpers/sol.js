@@ -43,6 +43,8 @@ const LPT_SCHEMA = [
   { key: 'initialized', type: 'bool' }
 ];
 
+SOL.FEE = 0.000005;
+
 SOL.isAddress = (address) => {
   try {
     const publicKey = new PublicKey(address);

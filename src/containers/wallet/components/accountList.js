@@ -182,7 +182,7 @@ AccountList.defaultProps = {
 AccountList.propTypes = {
   icon: PropTypes.object,
   size: PropTypes.string,
-  edge: PropTypes.string,
+  edge: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   tokenAddress: PropTypes.string,
   onChange: PropTypes.func,
 }

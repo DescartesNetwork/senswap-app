@@ -18,13 +18,13 @@ class LogIn extends Component {
   render() {
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <SecretKey />
-      </Grid>
-      <Grid item xs={12}>
-        <Drain />
-      </Grid>
-      <Grid item xs={12}>
         <Keystore />
+      </Grid>
+      <Grid item xs={12}>
+        <Drain small />
+      </Grid>
+      <Grid item xs={12}>
+        <SecretKey />
       </Grid>
     </Grid>
   }

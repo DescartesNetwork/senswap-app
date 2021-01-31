@@ -12,8 +12,9 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import Alert from '@material-ui/lab/Alert';
 import Link from '@material-ui/core/Link';
 import Collapse from '@material-ui/core/Collapse';
+import Tooltip from '@material-ui/core/Tooltip';
 
-import { SendRounded, CloseRounded } from '@material-ui/icons';
+import { SendRounded, CloseRounded, EcoRounded } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
 
@@ -48,6 +49,10 @@ class TokenTransfer extends Component {
   onAmount = (e) => {
     const amount = e.target.value || '';
     return this.setState({ amount, error: '' });
+  }
+
+  onMax = () => {
+
   }
 
   onClear = () => {
@@ -107,26 +112,42 @@ class TokenTransfer extends Component {
     const { classes } = this.props;
     const { address, amount, loading, txId, error } = this.state;
 
-    return <Grid container spacing={2}>
-      <Grid item xs={12} style={{ paddingBottom: 0 }}>
+    return <Grid container spacing={1}>
+      <Grid item xs={12}>
         <Typography variant="body2">Send token</Typography>
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={4}>
         <BaseCard variant="fluent" className={classes.paper}>
-          <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+          <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+            <Grid item className={classes.stretch}>
+              <InputBase
+                placeholder='Amount'
+                onChange={this.onAmount}
+                value={amount}
+              />
+            </Grid>
+            <Grid item>
+              <Tooltip title="Maximum amount">
+                <IconButton
+                  color="secondary"
+                  size="small"
+                  onClick={this.onMax}>
+                  <EcoRounded />
+                </IconButton>
+              </Tooltip>
+            </Grid>
+          </Grid>
+        </BaseCard>
+      </Grid>
+      <Grid item xs={8}>
+        <BaseCard variant="fluent" className={classes.paper}>
+          <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
             <Grid item className={classes.stretch}>
               <InputBase
                 placeholder='Receiver'
                 onChange={this.onAddress}
                 value={address}
                 fullWidth
-              />
-            </Grid>
-            <Grid item xs={3}>
-              <InputBase
-                placeholder='Amount'
-                onChange={this.onAmount}
-                value={amount}
               />
             </Grid>
             <Grid item>
