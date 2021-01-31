@@ -75,15 +75,20 @@ class SecretKey extends Component {
             <Typography variant="h6">Secret Key</Typography>
           </Grid>
           <Grid item>
-            <Tooltip title="Caution! This format is not recommended due to a lack of cryptographical protection. By switching the button, you agree that you will use this function at your own risk.">
-              <Chip
-                icon={<ErrorRounded className={classes.warning} />}
-                label="Caution!"
-                clickable
-                onDelete={this.onAdvance}
-                deleteIcon={<Switch color="primary" size="small" checked={advance} />}
-              />
-            </Tooltip>
+            <Grid container spacing={0} alignItems="center" className={classes.noWrap}>
+              <Grid item>
+                <Tooltip title="Caution! This format is not recommended due to a lack of cryptographical protection. By switching the button, you agree that you will use this function at your own risk.">
+                  <Chip
+                    icon={<ErrorRounded className={classes.warning} />}
+                    label="Caution!"
+                    clickable
+                  />
+                </Tooltip>
+              </Grid>
+              <Grid item>
+                <Switch color="primary" checked={advance} onClick={this.onAdvance} />
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>
