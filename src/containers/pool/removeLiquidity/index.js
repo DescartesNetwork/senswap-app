@@ -29,6 +29,7 @@ import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { getSecretKey, updateWallet } from 'modules/wallet.reducer';
 
 
@@ -118,8 +119,9 @@ class RemoveLiquidity extends Component {
         pool: { token, treasury }
       },
     } = this.state;
-    const { getSecretKey } = this.props;
-    if (!amount || !initialized) return console.error('Invalid input');
+    const { setError, getSecretKey } = this.props;
+    if (!initialized) return setError('Please wait for data loaded');
+    if (!amount) return setError('Invalid amount');
     let secretKey = null;
     return this.setState({ loading: true }, () => {
       return getSecretKey().then(re => {
@@ -145,8 +147,9 @@ class RemoveLiquidity extends Component {
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        console.error(er);
-        return this.setState({ ...EMPTY });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
@@ -299,6 +302,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   getSecretKey, updateWallet,
 }, dispatch);
 

@@ -29,6 +29,7 @@ import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 
@@ -102,13 +103,14 @@ class AddLiquidity extends Component {
   }
 
   addLiquidity = () => {
-    const { getSecretKey } = this.props;
+    const { setError, getSecretKey } = this.props;
     const {
       amount,
       poolData: { initialized, address: poolAddress, token, treasury },
       srcData: { address: srcAddress },
     } = this.state;
-    if (!initialized || !amount) return console.error('Invalid input');
+    if (!initialized) return setError('Please wait for data loaded');
+    if (!amount) return setError('Invalid amount');
 
     let secretKey = null;
     let lptAddressOrAccount = null;
@@ -140,14 +142,15 @@ class AddLiquidity extends Component {
         txId = re;
         const { wallet: { user }, updateWallet } = this.props;
         const lptAccounts = [...user.lptAccounts];
-        const lptAddress = typeof lptAddressOrAccount === 'string' ? lptAddressOrAccount : lptAddressOrAccount.publicKey.toBase58()
+        const lptAddress = typeof lptAddressOrAccount === 'string' ? lptAddressOrAccount : lptAddressOrAccount.publicKey.toBase58();
         lptAccounts.push(lptAddress);
         return updateWallet({ ...user, lptAccounts });
       }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        console.error(er);
-        return this.setState({ ...EMPTY });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
@@ -299,6 +302,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet, getSecretKey,
 }, dispatch);
 

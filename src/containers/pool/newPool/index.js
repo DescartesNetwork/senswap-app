@@ -22,6 +22,7 @@ import AccountSelection from 'containers/wallet/components/accountSelection';
 import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 
@@ -63,8 +64,10 @@ class NewPool extends Component {
 
   newPool = () => {
     const { accountData: { address, initialized, token }, amount, price } = this.state;
-    const { wallet: { user }, updateWallet, getSecretKey } = this.props;
-    if (!initialized || !amount || !price) return console.error('Invalid input');
+    const { wallet: { user }, setError, updateWallet, getSecretKey } = this.props;
+    if (!initialized) return setError('Please wait for data loaded');
+    if (!amount) return setError('Invalid amount');
+    if (!price) return setError('Invalid price');
 
     let poolAddress = '';
     let txId = '';
@@ -92,8 +95,9 @@ class NewPool extends Component {
       }).then(re => {
         return this.setState({ ...EMPTY, txId, poolAddress });
       }).catch(er => {
-        console.error(er);
-        return this.setState({ ...EMPTY });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
@@ -209,6 +213,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet, getSecretKey,
 }, dispatch);
 
