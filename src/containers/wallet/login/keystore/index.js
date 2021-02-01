@@ -23,6 +23,7 @@ import {
 
 import styles from './styles';
 import crypto from 'helpers/crypto';
+import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 
 
@@ -74,30 +75,32 @@ class KeyStore extends Component {
 
   onSave = () => {
     const { password, keystore } = this.state;
-    const { setWallet } = this.props;
-    if (!password || !keystore) return console.error('Invalid input');
+    const { setError, setWallet } = this.props;
+    if (!keystore) return setError('Please upload your keystore');
+    if (!password) return setError('Please enter your password to unlock your wallet');
     return crypto.fromSolFlareKeystore(keystore, password).then(account => {
       const address = account.publicKey.toBase58();
       const secretKey = Buffer.from(account.secretKey).toString('hex');
       return setWallet(address, secretKey);
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
   onGen = () => {
     const { newPassword } = this.state;
-    if (!newPassword) return console.error('Invalid input');
+    const { setError } = this.props;
+    if (!newPassword) return setError('Invalid input');
     return crypto.createKeystore(null, newPassword).then(newKeystore => {
       return this.setState({ newKeystore });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
   onDownload = () => {
     const { newKeystore } = this.state;
-    if (!newKeystore.publicKey) return console.error('Invalid input');
+    if (!newKeystore.publicKey) return setError('Cannot download now');
     return fileDownload(
       JSON.stringify(newKeystore),
       `senwallet-keystore-${newKeystore.publicKey}.json`
@@ -130,7 +133,7 @@ class KeyStore extends Component {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Typography>This keystore format is compatible with <Link href="https://solflare.com" target="_blank">SolFlare</Link> keystore.</Typography>
+        <Typography>This keystore format is compatible with <Link href="https://solflare.com" target="_blank" rel="noopener">SolFlare</Link> keystore.</Typography>
       </Grid>
       <Grid item xs={12} md={6}>
         <TextField
@@ -255,7 +258,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setWallet
+  setError,
+  setWallet,
 }, dispatch);
 
 export default withRouter(connect(

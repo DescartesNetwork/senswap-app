@@ -21,6 +21,7 @@ import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
 import styles from './styles';
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
 
 
@@ -49,6 +50,8 @@ class AccountList extends Component {
       wallet: { user: { tokenAccounts } },
       tokenAddress, onChange
     } = this.props;
+    if (!tokenAccounts.length) return onChange();
+
     return Promise.all(tokenAccounts.map(tokenAccount => {
       return sol.getTokenData(tokenAccount);
     })).then(data => {
@@ -62,8 +65,7 @@ class AccountList extends Component {
         return this.onSelect(address);
       });
     }).catch(er => {
-      console.error(er);
-      return onChange();
+      return setError(er);
     });
   }
 
@@ -81,7 +83,7 @@ class AccountList extends Component {
     return this.onClose();
   }
 
-  getBalance = (accountAddress) => {
+  parseBalance = (accountAddress) => {
     const { data } = this.state;
     for (let each of data) {
       const { address, amount, token: { decimals } } = each;
@@ -115,7 +117,7 @@ class AccountList extends Component {
             </Grid>
             <Grid item className={classes.stretch}>
               <Typography className={classes.address}>{address}</Typography>
-              <Typography variant="body2">{this.getBalance(address)}</Typography>
+              <Typography variant="body2">{this.parseBalance(address)}</Typography>
             </Grid>
           </Grid>
         </MenuItem>);
@@ -188,6 +190,7 @@ AccountList.propTypes = {
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   openWallet,
 }, dispatch);
 

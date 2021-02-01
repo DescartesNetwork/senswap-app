@@ -14,6 +14,7 @@ import Avatar from '@material-ui/core/Avatar';
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import styles from './styles';
+import { setError } from 'modules/ui.reducer';
 import { setQRCode } from 'modules/wallet.reducer';
 
 
@@ -38,11 +39,11 @@ class PayerInfo extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { address } } } = this.props;
+    const { wallet: { user: { address } }, setError } = this.props;
     return sol.getBalance(address).then(re => {
       return this.setState({ address, amount: re });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -69,7 +70,12 @@ class PayerInfo extends Component {
             </Tooltip>
           </Grid>
           <Grid item className={classes.stretch}>
-            <InputBase placeholder='Receiver' value={address} fullWidth readOnly />
+            <InputBase
+              placeholder='Receiver'
+              value={address || ''}
+              fullWidth
+              readOnly
+            />
           </Grid>
         </Grid>
       </Grid>
@@ -83,6 +89,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   setQRCode,
 }, dispatch);
 

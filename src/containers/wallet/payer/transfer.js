@@ -23,6 +23,7 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { getSecretKey } from 'modules/wallet.reducer';
 
 
@@ -58,20 +59,21 @@ class PayerTransfer extends Component {
   }
 
   onMax = () => {
-    const { wallet: { user: { address } } } = this.props;
+    const { wallet: { user: { address } }, setError } = this.props;
     return sol.getBalance(address).then(balance => {
       return this.setState({ amount: balance - sol.FEE });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
   onTransfer = () => {
     const { address, amount } = this.state;
-    const { getSecretKey } = this.props;
+    const { setError, getSecretKey } = this.props;
     const lamports = parseFloat(amount) * LAMPORTS_PER_SOL;
-    if (!sol.isAddress(address)) return this.setState({ ...EMPTY, error: 'Invalid receiver address' });
-    if (!lamports || lamports < 0) return this.setState({ ...EMPTY, error: 'Invalid amount' });
+    if (!sol.isAddress(address)) return setError('Invalid receiver address');
+    if (!lamports || lamports < 0) return setError('Invalid amount');
+
     return this.setState({ loading: true }, () => {
       return getSecretKey().then(secretKey => {
         const dstPublicKey = sol.fromAddress(address);
@@ -80,14 +82,16 @@ class PayerTransfer extends Component {
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        return this.setState({ ...EMPTY, error: er.toString() });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { address, amount, error, loading, txId } = this.state;
+    const { address, amount, loading, txId } = this.state;
 
     return <Grid container spacing={1}>
       <Grid item xs={12}>
@@ -145,15 +149,7 @@ class PayerTransfer extends Component {
             severity="success"
             action={<IconButton onClick={this.onClear} size="small"><CloseRounded /></IconButton>}
           >
-            <Typography>Success - <Link color="inherit" href={configs.sol.explorer(txId)} target="_blank">check it out!</Link></Typography>
-          </Alert>
-        </Collapse>
-        <Collapse in={Boolean(error)}>
-          <Alert
-            severity="error"
-            action={<IconButton onClick={this.onClear} size="small"><CloseRounded /></IconButton>}
-          >
-            <Typography>Error - {error}</Typography>
+            <Typography>Success - <Link color="inherit" href={configs.sol.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography>
           </Alert>
         </Collapse>
       </Grid>
@@ -167,6 +163,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   getSecretKey,
 }, dispatch);
 

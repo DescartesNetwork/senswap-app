@@ -19,6 +19,7 @@ import { AddRounded, CloseRounded } from '@material-ui/icons';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 
 
@@ -62,14 +63,14 @@ class Add extends Component {
 
   onAdd = () => {
     const { lptAccount } = this.state;
-    const { wallet: { user }, updateWallet } = this.props;
-    if (user.lptAccounts.includes(lptAccount)) return;
+    const { wallet: { user }, setError, updateWallet } = this.props;
+    if (user.lptAccounts.includes(lptAccount)) return setError('The LPT account is already added');
     const lptAccounts = [...user.lptAccounts];
     lptAccounts.push(lptAccount);
     return updateWallet({ ...user, lptAccounts }).then(re => {
       return this.onClose();
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -197,6 +198,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet,
 }, dispatch);
 

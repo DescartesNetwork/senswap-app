@@ -174,6 +174,7 @@ class NewPool extends Component {
               color="secondary"
               href={configs.sol.explorer(txId)}
               target="_blank"
+              rel="noopener"
               startIcon={<PublicRounded />}
               fullWidth
             >

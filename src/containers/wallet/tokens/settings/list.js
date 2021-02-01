@@ -15,6 +15,7 @@ import { RemoveRounded } from '@material-ui/icons';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 
 
@@ -38,20 +39,24 @@ class ListTokenAccount extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { tokenAccounts } } } = this.props;
+    const { wallet: { user: { tokenAccounts } }, setError } = this.props;
     return Promise.all(tokenAccounts.map(tokenAccount => {
       return sol.getTokenData(tokenAccount);
     })).then(re => {
       return this.setState({ data: re });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
   removeToken = (address) => {
-    const { wallet: { user }, updateWallet } = this.props;
+    const { wallet: { user }, setError, updateWallet } = this.props;
     const tokenAccounts = user.tokenAccounts.filter(tokenAccount => tokenAccount !== address);
-    return updateWallet({ ...user, tokenAccounts });
+    return updateWallet({ ...user, tokenAccounts }).then(re => {
+      // Nothing
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   render() {
@@ -111,6 +116,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet,
 }, dispatch);
 

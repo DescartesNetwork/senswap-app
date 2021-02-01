@@ -21,6 +21,7 @@ import {
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 
 
@@ -45,11 +46,12 @@ class SecretKey extends Component {
   }
 
   onSave = () => {
-    const { setWallet } = this.props;
+    const { setError, setWallet } = this.props;
     const { secretKey } = this.state;
-    if (!secretKey) return console.error('Invalid secret key');
+    if (!secretKey) return setError('The secret key cannot be empty');
     const account = sol.fromSecretKey(secretKey);
-    const address = account.publicKey.toBase58()
+    if (!account) return setError('The secret key is incorrect');
+    const address = account.publicKey.toBase58();
     return setWallet(address, secretKey);
   }
 
@@ -134,7 +136,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setWallet
+  setError,
+  setWallet,
 }, dispatch);
 
 export default withRouter(connect(

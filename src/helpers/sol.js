@@ -83,8 +83,12 @@ SOL.toSymbol = (symbol) => {
 }
 
 SOL.fromSecretKey = (secretKey) => {
-  const account = new Account(Buffer.from(secretKey, 'hex'));
-  return account;
+  try {
+    const account = new Account(Buffer.from(secretKey, 'hex'));
+    return account;
+  } catch (er) {
+    return null;
+  }
 }
 
 SOL.fromAddress = (address) => {
@@ -122,7 +126,7 @@ SOL.getPureTokenData = (tokenAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read data');
+      return reject('Cannot read on-chain data');
     });
   });
 }
@@ -147,7 +151,7 @@ SOL.getTokenData = (accountAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read data');
+      return reject('Cannot read on-chain data');
     });
   });
 }
@@ -179,7 +183,7 @@ SOL.getPurePoolData = (poolAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read data');
+      return reject('Cannot read on-chain data');
     });
   });
 }
@@ -218,7 +222,7 @@ SOL.getPoolData = (lptAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read data');
+      return reject('Cannot read on-chain data');
     })
   });
 }

@@ -13,6 +13,7 @@ import { EmojiObjectsRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 
@@ -31,13 +32,17 @@ class CreateTokenAccount extends Component {
   }
 
   newAccount = () => {
+    const {
+      wallet: { user },
+      setError,
+      updateWallet, getSecretKey
+    } = this.props;
     const { tokenAddress } = this.state;
-    if (!tokenAddress) return console.error('Invalid input');
-    const { wallet: { user }, updateWallet, getSecretKey } = this.props;
+    if (!tokenAddress) return setError('The token address cannot be empty');
     return getSecretKey().then(secretKey => {
       const payer = sol.fromSecretKey(secretKey);
       const tokenPublicKey = sol.fromAddress(tokenAddress);
-      return sol.newSRC20Account(tokenPublicKey, payer)
+      return sol.newSRC20Account(tokenPublicKey, payer);
     }).then(tokenAccount => {
       const tokenAccounts = [...user.tokenAccounts];
       tokenAccounts.push(tokenAccount.publicKey.toBase58());
@@ -45,7 +50,7 @@ class CreateTokenAccount extends Component {
     }).then(re => {
       return this.setState({ tokenAddress: '' });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -81,6 +86,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet, getSecretKey,
 }, dispatch);
 

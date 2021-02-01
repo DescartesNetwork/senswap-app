@@ -21,6 +21,7 @@ import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
 import styles from './styles';
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
 
 
@@ -49,6 +50,8 @@ class LPTList extends Component {
       wallet: { user: { lptAccounts } },
       poolAddress, onChange
     } = this.props;
+    if (!lptAccounts.length) return onChange();
+
     return Promise.all(lptAccounts.map(lptAccount => {
       return sol.getPoolData(lptAccount);
     })).then(data => {
@@ -62,8 +65,7 @@ class LPTList extends Component {
         return this.onSelect(address);
       });
     }).catch(er => {
-      console.error(er);
-      return onChange();
+      return setError(er);
     });
   }
 
@@ -81,7 +83,7 @@ class LPTList extends Component {
     return this.onClose();
   }
 
-  getLPT = (lptAddress) => {
+  parseLPT = (lptAddress) => {
     const { data } = this.state;
     for (let each of data) {
       const { address, lpt, pool: { token: { decimals } } } = each;
@@ -115,7 +117,7 @@ class LPTList extends Component {
             </Grid>
             <Grid item className={classes.stretch}>
               <Typography className={classes.address}>{lptAddress}</Typography>
-              <Typography variant="body2">{this.getLPT(lptAddress)}</Typography>
+              <Typography variant="body2">{this.parseLPT(lptAddress)}</Typography>
             </Grid>
           </Grid>
         </MenuItem>);
@@ -188,6 +190,7 @@ LPTList.propTypes = {
 }
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   openWallet,
 }, dispatch);
 

@@ -19,7 +19,7 @@ import styles from './styles';
 
 class Pool extends Component {
 
-  onRoute = (e, route) => {
+  onRoute = (_, route) => {
     return this.props.history.push(route);
   }
 

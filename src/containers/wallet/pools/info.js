@@ -26,6 +26,7 @@ import { VisibilityRounded, CloseRounded, RemoveRounded } from '@material-ui/ico
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import styles from './styles';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 
 function Row(props) {
@@ -151,13 +152,15 @@ class Info extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { lptAccounts } } } = this.props;
+    const { wallet: { user: { lptAccounts } }, setError } = this.props;
+    if (!lptAccounts.length) return;
+    
     return Promise.all(lptAccounts.map(lptAccount => {
       return sol.getPoolData(lptAccount);
     })).then(data => {
       return this.setState({ data });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -213,6 +216,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet,
 }, dispatch);
 

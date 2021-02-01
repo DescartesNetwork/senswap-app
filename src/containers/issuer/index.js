@@ -8,6 +8,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import Link from '@material-ui/core/Link';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { FlightTakeoffRounded } from '@material-ui/icons';
 
@@ -17,12 +19,13 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 const EMPTY = {
-  error: '',
+  loading: false,
   tokenAddress: '',
-  tokenAccount: '',
+  accountAddress: '',
   txId: ''
 }
 
@@ -31,10 +34,10 @@ class Issuer extends Component {
     super();
 
     this.state = {
+      ...EMPTY,
       symbol: '',
       supply: 5000000000,
       decimals: 9,
-      ...EMPTY
     }
   }
 
@@ -56,40 +59,43 @@ class Issuer extends Component {
 
   onCreate = () => {
     const { symbol: refSymbol, supply: refSupply, decimals: refDecimals } = this.state;
-    const { wallet: { user }, getSecretKey, updateWallet } = this.props;
+    const { wallet: { user }, setError, getSecretKey, updateWallet } = this.props;
 
-    let error = '';
     const decimals = parseInt(refDecimals) || 0;
     const supply = parseInt(refSupply) || 0;
-    if (decimals < 1 || decimals > 9) error = 'Invalid decimals';
-    if (refSymbol.length !== 4) error = 'Invalid symbol';
-    if (supply < 1 || supply > 1000000000000) error = 'Invalid supply';
-    if (error) return this.setState({ ...EMPTY, error });
+    if (decimals < 1 || decimals > 9) return setError('Decimals must be an integer that greater than 0, and less then 10');
+    if (refSymbol.length !== 4) return setError('Symbol must include 4 characters');
+    if (supply < 1 || supply > 1000000000000) return setError('Total supply must be grearer than0, and less than or equal to 1000000000000');
 
     const symbol = refSymbol.split('');
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
-    return getSecretKey().then(secretKey => {
-      const payer = sol.fromSecretKey(secretKey);
-      return sol.newToken(symbol, totalSupply, decimals, payer);
-    }).then(({ token, receiver, txId }) => {
-      this.setState({
-        ...EMPTY,
-        tokenAddress: token.publicKey.toBase58(),
-        tokenAccount: receiver.publicKey.toBase58(),
-        txId
+    return this.setState({ loading: true }, () => {
+      return getSecretKey().then(secretKey => {
+        const payer = sol.fromSecretKey(secretKey);
+        return sol.newToken(symbol, totalSupply, decimals, payer);
+      }).then(({ token, receiver, txId }) => {
+        return this.setState({
+          ...EMPTY,
+          tokenAddress: token.publicKey.toBase58(),
+          accountAddress: receiver.publicKey.toBase58(),
+          txId
+        }, () => {
+          const tokenAccounts = [...user.tokenAccounts];
+          tokenAccounts.push(receiver.publicKey.toBase58());
+          return updateWallet({ ...user, tokenAccounts });
+        });
+      }).catch(er => {
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
-      const tokenAccounts = [...user.tokenAccounts];
-      tokenAccounts.push(receiver.publicKey.toBase58());
-      return updateWallet({ ...user, tokenAccounts });
-    }).catch(er => {
-      return this.setState({ ...EMPTY, error: er.toString() });
     });
   }
 
   render() {
     const { classes } = this.props;
     const { sol: { tokenFactoryAddress } } = configs;
-    const { symbol, supply, decimals, error, tokenAddress, tokenAccount, txId } = this.state;
+    const { loading, symbol, supply, decimals, txId } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -103,11 +109,12 @@ class Issuer extends Component {
                 <Grid item xs={12}>
                   <Drain small />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <TextField
                     label="Token Fcatory"
                     variant="outlined"
                     value={tokenFactoryAddress}
+                    inputProps={{ readOnly: true }}
                     fullWidth
                   />
                 </Grid>
@@ -122,6 +129,16 @@ class Issuer extends Component {
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
+                    label="Total supply"
+                    variant="outlined"
+                    helperText="Do not include decimals."
+                    value={supply}
+                    onChange={this.onSupply}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
                     label="Symbol"
                     variant="outlined"
                     helperText="The symbol must include 4 characters. You can use - to replace empty characters."
@@ -130,28 +147,18 @@ class Issuer extends Component {
                     fullWidth
                   />
                 </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Total supply"
-                    variant="outlined"
-                    helperText="Without decimals"
-                    value={supply}
-                    onChange={this.onSupply}
-                    fullWidth
-                  />
-                </Grid>
                 <Grid item xs={12}>
                   <Grid container className={classes.noWrap} spacing={2}>
                     <Grid item className={classes.stretch}>
-                      {error ? <Typography color="error">{error}</Typography> : null}
-                      {tokenAddress && tokenAccount && txId ? <Typography>A new token and an account was added into your wallet!</Typography> : null}
+                      {txId ? <Typography>Success - <Link href={configs.sol.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography> : null}
                     </Grid>
                     <Grid item>
                       <Button
                         variant="contained"
                         color="primary"
                         onClick={this.onCreate}
-                        endIcon={<FlightTakeoffRounded />}
+                        endIcon={loading ? <CircularProgress size={17} /> : <FlightTakeoffRounded />}
+                        disabled={loading}
                       >
                         <Typography>New</Typography>
                       </Button>
@@ -173,6 +180,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet, getSecretKey,
 }, dispatch);
 

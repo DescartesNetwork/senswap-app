@@ -21,13 +21,14 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
+import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { getSecretKey } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
   loading: false,
   txId: '',
-  error: '',
 }
 
 class TokenTransfer extends Component {
@@ -43,16 +44,22 @@ class TokenTransfer extends Component {
 
   onAddress = (e) => {
     const address = e.target.value || '';
-    return this.setState({ address, error: '' });
+    return this.setState({ address });
   }
 
   onAmount = (e) => {
     const amount = e.target.value || '';
-    return this.setState({ amount, error: '' });
+    return this.setState({ amount });
   }
 
   onMax = () => {
-
+    const { wallet: { currentTokenAccount }, setError } = this.props;
+    return sol.getTokenData(currentTokenAccount).then(data => {
+      const { amount, token } = data;
+      return this.setState({ amount: utils.div(amount, global.BigInt(10 ** token.decimals)).toString() });
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onClear = () => {
@@ -79,7 +86,11 @@ class TokenTransfer extends Component {
   }
 
   onTransfer = () => {
-    const { wallet: { currentTokenAccount }, getSecretKey } = this.props;
+    const { wallet: { currentTokenAccount }, setError, getSecretKey } = this.props;
+    const { address } = this.state;
+    if (!sol.isAddress(currentTokenAccount)) return setError('Invalid sender address');
+    if (!sol.isAddress(address)) return setError('Invalid receiver address');
+
     let decimals = null;
     let tokenAddress = null;
     return this.setState({ loading: true }, () => {
@@ -89,12 +100,9 @@ class TokenTransfer extends Component {
         decimals = _decimals;
         return getSecretKey();
       }).then(secretKey => {
-        const { address } = this.state;
-        if (!sol.isAddress(tokenAddress)) return this.setState({ ...EMPTY, error: 'Invalid token address' });
-        if (!sol.isAddress(currentTokenAccount)) return this.setState({ ...EMPTY, error: 'Invalid sender address' });
-        if (!sol.isAddress(address)) return this.setState({ ...EMPTY, error: 'Invalid receiver address' });
         const amount = this.safelyParseAmount(decimals);
-        if (!amount) return this.setState({ ...EMPTY, error: 'Invalid amount' });
+        if (!amount) throw new Error('Invalid amount');
+        if (!sol.isAddress(tokenAddress)) throw new Error('Invalid token address');
         const tokenPublicKey = sol.fromAddress(tokenAddress);
         const srcPublicKey = sol.fromAddress(currentTokenAccount);
         const dstPublicKey = sol.fromAddress(address);
@@ -103,14 +111,16 @@ class TokenTransfer extends Component {
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        return this.setState({ ...EMPTY, error: er.toString() });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { address, amount, loading, txId, error } = this.state;
+    const { address, amount, loading, txId } = this.state;
 
     return <Grid container spacing={1}>
       <Grid item xs={12}>
@@ -167,15 +177,7 @@ class TokenTransfer extends Component {
             severity="success"
             action={<IconButton onClick={this.onClear} size="small"><CloseRounded /></IconButton>}
           >
-            <Typography>Success - <Link color="inherit" href={configs.sol.explorer(txId)} target="_blank">check it out!</Link></Typography>
-          </Alert>
-        </Collapse>
-        <Collapse in={Boolean(error)}>
-          <Alert
-            severity="error"
-            action={<IconButton onClick={this.onClear} size="small"><CloseRounded /></IconButton>}
-          >
-            <Typography>Error - {error}</Typography>
+            <Typography>Success - <Link color="inherit" href={configs.sol.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography>
           </Alert>
         </Collapse>
       </Grid>
@@ -189,6 +191,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   getSecretKey,
 }, dispatch);
 

@@ -28,6 +28,7 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import configs from 'configs';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
 
 const EMPTY = {
@@ -114,11 +115,12 @@ class Swap extends Component {
   }
 
   onBidAddress = (bidAddress) => {
-    if (!sol.isAddress(bidAddress)) return;
+    const { setError } = this.props;
+    if (!sol.isAddress(bidAddress)) return setError('Invalid bid address');
     return sol.getPurePoolData(bidAddress).then(bidData => {
       return this.setState({ bidData }, this.estimateAmount);
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -127,11 +129,12 @@ class Swap extends Component {
   }
 
   onAskAddress = (askAddress) => {
-    if (!sol.isAddress(askAddress)) return;
+    const { setError } = this.props;
+    if (!sol.isAddress(askAddress)) return setError('Invalid ask address');
     return sol.getPurePoolData(askAddress).then(askData => {
       return this.setState({ askData }, this.estimateAmount);
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -163,13 +166,17 @@ class Swap extends Component {
   }
 
   onSwap = () => {
+    const { setError, getSecretKey } = this.props;
     const {
       bidAmount, srcData: { address: srcAddress },
       bidData: { initialized: bidInitialized, address: bidAddress, token: bidToken, treasury: bidTreasury },
       askData: { initialized: askInitialized, address: askAddress, token: askToken, treasury: askTreasury }
     } = this.state;
-    const { getSecretKey } = this.props;
-    if (!bidAmount || !srcAddress || !bidInitialized || !askInitialized) return console.error('Invalid input');
+
+    if (!bidInitialized || !askInitialized) return setError('Please wait for data loaded');
+    if (!bidAmount) return setError('Invalid bid amount');
+    if (!sol.isAddress(srcAddress)) return setError('Invalid source address');
+
     let secretKey = null;
     return this.setState({ loading: true }, () => {
       return getSecretKey().then(re => {
@@ -202,8 +209,9 @@ class Swap extends Component {
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        console.error(er);
-        return this.setState({ ...EMPTY });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
@@ -367,6 +375,7 @@ class Swap extends Component {
                         color="secondary"
                         href={configs.sol.explorer(txId)}
                         target="_blank"
+                        rel="noopener"
                         startIcon={<PublicRounded />}
                         fullWidth
                       >
@@ -411,6 +420,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   updateWallet, getSecretKey,
 }, dispatch);
 

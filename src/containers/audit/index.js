@@ -16,6 +16,8 @@ import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
+import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { addPool } from 'modules/pool.reducer';
 
 
@@ -27,7 +29,6 @@ class Audit extends Component {
       poolAddress: '',
       email: '',
       cgk: '',
-      error: '',
       ok: false,
     }
   }
@@ -50,34 +51,38 @@ class Audit extends Component {
 
   onPool = (e) => {
     const poolAddress = e.target.value || '';
-    return this.setState({ poolAddress, error: '' });
+    return this.setState({ poolAddress });
   }
 
   onEmail = (e) => {
     const email = e.target.value || '';
-    return this.setState({ email, error: '' });
+    return this.setState({ email });
   }
 
   onCGK = (e) => {
     const cgk = e.target.value || '';
-    return this.setState({ cgk, error: '' });
+    return this.setState({ cgk });
   }
 
   onSubmit = () => {
     const { poolAddress, email, cgk } = this.state;
-    const { addPool } = this.props;
-    if (!poolAddress || !email || !cgk) return this.setState({ error: 'Invalid input' });
+    const { setError, addPool } = this.props;
+    if (!sol.isAddress(poolAddress)) return setError('The pool address is invalid');
+    if (!email) return setError('The email is empty');
+    if (!cgk) return setError('The CoinGecko link is empty');
     const pool = { address: poolAddress, email, cgk }
     return addPool(pool).then(re => {
-      return this.setState({ error: '', ok: true });
+      return this.setState({ ok: true });
     }).catch(er => {
-      return this.setState({ error: er.toString(), ok: false });
+      return this.setState({ ok: false }, () => {
+        return setError(er);
+      });
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { poolAddress, email, cgk, error, ok } = this.state;
+    const { poolAddress, email, cgk, ok } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -121,9 +126,6 @@ class Audit extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container justify="flex-end" className={classes.noWrap} spacing={2}>
-                    <Grid item className={classes.stretch}>
-                      {error ? <Typography color="error">{error}</Typography> : null}
-                    </Grid>
                     <Grid item>
                       <Button
                         variant="contained"
@@ -152,6 +154,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   addPool,
 }, dispatch);
 

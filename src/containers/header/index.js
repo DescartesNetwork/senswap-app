@@ -17,12 +17,13 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Divider from '@material-ui/core/Divider';
 import Image from 'material-ui-image';
 
 import {
   SwapCallsRounded, LocalGasStationRounded, PhonelinkLockRounded,
   WidgetsRounded, MobileFriendlyRounded, ColorizeRounded,
-  AccountBalanceRounded, VerifiedUserRounded,
+  AccountBalanceRounded, VerifiedUserRounded, DescriptionRounded,
 } from '@material-ui/icons';
 
 import SEN_LOGO from 'static/images/sen-logo.svg';
@@ -177,6 +178,13 @@ class Header extends Component {
                         <VerifiedUserRounded color="secondary" />
                       </ListItemIcon>
                       <ListItemText primary="SenAudit" />
+                    </ListItem>
+                    <Divider />
+                    <ListItem button component={RouterLink} to={'/whitepaper'} disabled>
+                      <ListItemIcon>
+                        <DescriptionRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="Whitepaper" />
                     </ListItem>
                   </List>
                 </Popover>

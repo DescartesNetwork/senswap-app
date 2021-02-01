@@ -57,7 +57,12 @@ class TokenInfo extends Component {
             </Tooltip>
           </Grid>
           <Grid item className={classes.stretch}>
-            <InputBase placeholder='Receiver' value={address} fullWidth readOnly />
+            <InputBase
+              placeholder='Receiver'
+              value={address || ''}
+              fullWidth
+              readOnly
+            />
           </Grid>
           <Grid item>
             <AccountList onChange={this.onData} />

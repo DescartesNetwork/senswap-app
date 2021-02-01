@@ -19,6 +19,7 @@ import QRCode from './qrcode';
 
 import styles from './styles';
 import storage from 'helpers/storage';
+import { setError } from 'modules/ui.reducer';
 import { setWallet, closeWallet } from 'modules/wallet.reducer';
 
 
@@ -28,8 +29,12 @@ class Wallet extends Component {
     const address = storage.get('address');
     const secretKey = storage.get('secretKey');
     if (!address || !secretKey) return;
-    const { setWallet } = this.props;
-    return setWallet(address, secretKey);
+    const { setError, setWallet } = this.props;
+    return setWallet(address, secretKey).then(re => {
+      // Nothing
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   renderComponents = () => {
@@ -90,8 +95,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setWallet,
-  closeWallet,
+  setError,
+  setWallet, closeWallet,
 }, dispatch);
 
 export default withRouter(connect(

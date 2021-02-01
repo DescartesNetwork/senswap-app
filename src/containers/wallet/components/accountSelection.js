@@ -16,6 +16,7 @@ import AccountList from 'containers/wallet/components/accountList';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 
 
 class AccountSelection extends Component {
@@ -46,7 +47,7 @@ class AccountSelection extends Component {
       const { token: { address: tokenAddress } } = re;
       return this.setState({ tokenAddress });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -92,6 +93,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
 }, dispatch);
 
 AccountSelection.defaultProps = {

@@ -26,6 +26,7 @@ import {
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 
 
@@ -73,6 +74,8 @@ class TokenSelection extends Component {
       const { wallet: { user: { tokenAccounts } } } = this.props;
       const { getPools, getPool } = this.props;
       let pools = [];
+      if (!tokenAccounts.length) return resolve(pools);
+
       return Promise.all(tokenAccounts.map(tokenAccount => {
         return sol.getTokenData(tokenAccount);
       })).then(tokens => {
@@ -109,24 +112,26 @@ class TokenSelection extends Component {
   }
 
   fetchRecommededPools = () => {
+    const { setError } = this.props;
     const { recommended: { limit, page } } = this.state;
     return this.fetchPools('recommended', limit, page + 1).then(pools => {
-      if (!pools.length) return console.error('Empty tokens');
+      if (!pools.length) return;
       return this.setState({ recommended: { pools, limit, page: page + 1 } }, () => {
         return this.onSelect('recommended', 0);
       });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
   fetchNewPools = () => {
+    const { setError } = this.props;
     const { new: { limit, page } } = this.state;
     return this.fetchPools('new', limit, page + 1).then(pools => {
-      if (!pools.length) return console.error('Empty tokens');
+      if (!pools.length) return;
       return this.setState({ new: { pools, limit, page: page + 1 } });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 

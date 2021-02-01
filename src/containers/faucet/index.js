@@ -14,6 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Link from '@material-ui/core/Link';
 
 import { Facebook, Twitter, FlightTakeoffRounded } from '@material-ui/icons';
 
@@ -22,13 +23,13 @@ import { BaseCard } from 'components/cards';
 
 import styles from './styles';
 import sol from 'helpers/sol';
-import { getSecretKey, updateWallet } from 'modules/wallet.reducer';
+import { setError } from 'modules/ui.reducer';
+import { getSecretKey, updateWallet, openWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
 
 
 const EMPTY = {
   loading: false,
-  error: '',
   txId: ''
 }
 const SHARE_TEXT = 'luv%20this%20tool%20%E2%9D%A4%EF%B8%8F%20guys';
@@ -39,21 +40,20 @@ class Faucet extends Component {
     super();
 
     this.state = {
+      ...EMPTY,
       data: {},
-      loading: false,
       link: '',
       tokenAddress: '',
-      ...EMPTY
     }
   }
 
   componentDidMount() {
-    const { getWhiteList } = this.props;
+    const { setError, getWhiteList } = this.props;
     return getWhiteList().then(({ tokens }) => {
       const pseudoEvent = { target: { value: tokens[0] } };
       return this.onSelect(pseudoEvent);
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -64,11 +64,14 @@ class Faucet extends Component {
 
   onSelect = (e) => {
     const tokenAddress = e.target.value || '';
+    const { setError } = this.props;
     return this.setState({ tokenAddress }, () => {
       if (tokenAddress) return sol.getPureTokenData(tokenAddress).then(data => {
         return this.setState({ ...EMPTY, data });
       }).catch(er => {
-        return this.setState({ ...EMPTY, error: er });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
@@ -76,13 +79,15 @@ class Faucet extends Component {
   onAirdrop = () => {
     const {
       wallet: { user },
-      getSecretKey, updateWallet, airdropLamports, airdropTokens,
+      setError,
+      getSecretKey, updateWallet,
+      airdropLamports, airdropTokens,
     } = this.props;
     const { tokenAddress, link } = this.state;
-    if (!tokenAddress) return this.setState({ ...EMPTY, error: 'Invalid token' });
-    if (!link) return this.setState({ ...EMPTY, error: 'Please parse the share link' });
+    if (!sol.isAddress(tokenAddress)) return setError('Invalid token');
+    if (!link) return setError('Please parse the share link into the box');
 
-    return this.setState({ ...EMPTY, loading: true }, () => {
+    return this.setState({ loading: true }, () => {
       return airdropLamports(user.address).then(re => {
         return getSecretKey();
       }).then(secretKey => {
@@ -93,20 +98,23 @@ class Faucet extends Component {
         const dstAddress = tokenAccount.publicKey.toBase58();
         return airdropTokens(dstAddress, tokenAddress);
       }).then(({ dstAddress, txId }) => {
-        this.setState({ ...EMPTY, txId });
-        const tokenAccounts = [...user.tokenAccounts];
-        tokenAccounts.push(dstAddress);
-        return updateWallet({ ...user, tokenAccounts });
+        return this.setState({ ...EMPTY, txId }, () => {
+          const tokenAccounts = [...user.tokenAccounts];
+          tokenAccounts.push(dstAddress);
+          return updateWallet({ ...user, tokenAccounts });
+        });
       }).catch(er => {
-        return this.setState({ ...EMPTY, error: er });
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { tokenAddress, data, link, error, txId, loading } = this.state;
-    const { faucet: { tokens } } = this.props;
+    const { tokenAddress, data, link, txId, loading } = this.state;
+    const { faucet: { tokens }, openWallet } = this.props;
     const symbol = sol.toSymbol(data.symbol);
 
     return <Grid container justify="center" spacing={2}>
@@ -137,12 +145,12 @@ class Faucet extends Component {
                       />
                     </Grid>
                     <Grid item>
-                      <IconButton color="secondary" target="_blank" href={`https://www.facebook.com/sharer/sharer.php?u=${SHARE_URL}`}>
+                      <IconButton color="secondary" href={`https://www.facebook.com/sharer/sharer.php?u=${SHARE_URL}`} target="_blank" rel="noopener">
                         <Facebook />
                       </IconButton>
                     </Grid>
                     <Grid item>
-                      <IconButton color="secondary" target="_blank" href={`https://twitter.com/intent/tweet?text=${SHARE_TEXT}&url=${SHARE_URL}`}>
+                      <IconButton color="secondary" href={`https://twitter.com/intent/tweet?text=${SHARE_TEXT}&url=${SHARE_URL}`} target="_blank" rel="noopener">
                         <Twitter />
                       </IconButton>
                     </Grid>
@@ -163,8 +171,7 @@ class Faucet extends Component {
                 <Grid item xs={12}>
                   <Grid container className={classes.noWrap} spacing={2}>
                     <Grid item className={classes.stretch}>
-                      {error ? <Typography color="error">{error}</Typography> : null}
-                      {txId ? <Typography>A new account was added into your wallet!</Typography> : null}
+                      {txId ? <Typography>Success - <Link component="button" variant="body1" onClick={openWallet}>check it out!</Link></Typography> : null}
                     </Grid>
                     <Grid item>
                       <Button
@@ -195,7 +202,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getSecretKey, updateWallet,
+  setError,
+  getSecretKey, updateWallet, openWallet,
   getWhiteList, airdropLamports, airdropTokens,
 }, dispatch);
 

@@ -13,6 +13,7 @@ import { AddRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import { setError } from 'modules/ui.reducer';
 import { updateWallet, setMainTokenAccount } from 'modules/wallet.reducer';
 
 
@@ -22,37 +23,42 @@ class AddTokenAccount extends Component {
 
     this.state = {
       tokenAccount: '',
-      error: '',
       data: {},
     }
   }
 
   onTokenAccount = (e) => {
+    const { setError } = this.props;
     const tokenAccount = e.target.value || '';
-    return this.setState({ tokenAccount, error: '' }, () => {
+    return this.setState({ tokenAccount }, () => {
       return sol.getTokenData(tokenAccount).then(re => {
-        return this.setState({ data: re, error: '' });
+        return this.setState({ data: re });
       }).catch(er => {
-        return this.setState({ data: {}, error: er });
+        return this.setState({ data: {} }, () => {
+          return setError(er);
+        });
       });
     });
   }
 
   addToken = () => {
-    const { tokenAccount, error } = this.state;
-    if (error) return this.setState({ error });
-    if (!tokenAccount) return this.setState({ error: 'Empty token account' });
-    const { wallet: { user }, updateWallet, setMainTokenAccount } = this.props;
-    if (user.tokenAccounts.includes(tokenAccount)) return this.setState({ error: 'Token is in list already' });
-    
+    const {
+      wallet: { user },
+      setError,
+      updateWallet, setMainTokenAccount
+    } = this.props;
+    const { tokenAccount } = this.state;
+    if (!tokenAccount) return setError('Token account cannot be empty');
+    if (user.tokenAccounts.includes(tokenAccount)) return setError('Token is in list already');
+
     const tokenAccounts = [...user.tokenAccounts];
     tokenAccounts.push(tokenAccount);
     return updateWallet({ ...user, tokenAccounts }).then(re => {
       return setMainTokenAccount(tokenAccount);
     }).then(re => {
-      return this.setState({ data: {}, error: '', tokenAccount: '' });
+      return this.setState({ data: {}, tokenAccount: '' });
     }).catch(er => {
-      return this.setState({ error: er });
+      return setError(er);
     });
   }
 
@@ -102,7 +108,7 @@ class AddTokenAccount extends Component {
 
   render() {
     const { classes } = this.props;
-    const { tokenAccount, error } = this.state;
+    const { tokenAccount } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -117,8 +123,6 @@ class AddTokenAccount extends Component {
               color="primary"
               onChange={this.onTokenAccount}
               value={tokenAccount}
-              error={Boolean(error)}
-              helperText={error}
               InputProps={{
                 endAdornment:
                   <IconButton color="primary" onClick={this.addToken} edge="end" >
@@ -143,8 +147,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  updateWallet,
-  setMainTokenAccount,
+  setError,
+  updateWallet, setMainTokenAccount,
 }, dispatch);
 
 export default withRouter(connect(

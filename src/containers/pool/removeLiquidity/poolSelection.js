@@ -24,6 +24,7 @@ import {
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 
 
@@ -51,8 +52,11 @@ class PoolSelection extends Component {
   fetchPools = () => {
     const {
       wallet: { user: { lptAccounts } },
+      setError,
       getPools, getPool,
     } = this.props;
+    if (!lptAccounts.length) return;
+
     let pools = [];
     return Promise.all(lptAccounts.map(lptAccount => {
       return sol.getPoolData(lptAccount);
@@ -85,7 +89,7 @@ class PoolSelection extends Component {
         return this.onSelect(0);
       });
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
@@ -143,14 +147,12 @@ class PoolSelection extends Component {
     const { pools } = this.state;
     if (!pools.length) return null;
     return <MenuList>
-      {
-        pools.map((pool, index) => {
-          const { address, email, verified, token: { symbol, icon } } = pool;
-          return <MenuItem key={address} onClick={() => this.onSelect(index)}>
-            {this.renderToken(symbol, icon, email, verified)}
-          </MenuItem>
-        })
-      }
+      {pools.map((pool, index) => {
+        const { address, email, verified, token: { symbol, icon } } = pool;
+        return <MenuItem key={address} onClick={() => this.onSelect(index)}>
+          {this.renderToken(symbol, icon, email, verified)}
+        </MenuItem>
+      })}
     </MenuList>
   }
 
@@ -167,6 +169,7 @@ class PoolSelection extends Component {
         <TextField
           variant="outlined"
           value={sol.toSymbol(symbol)}
+          onClick={this.onOpen}
           InputProps={{
             startAdornment: <Badge
               variant="dot"
@@ -183,7 +186,8 @@ class PoolSelection extends Component {
             </Badge>,
             endAdornment: <IconButton onClick={this.onOpen} edge="end">
               <UnfoldMoreRounded />
-            </IconButton>
+            </IconButton>,
+            readOnly: true,
           }}
           fullWidth
         />
@@ -206,6 +210,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   getPools, getPool,
 }, dispatch);
 
