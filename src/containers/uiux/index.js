@@ -63,7 +63,7 @@ class UiUx extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Dialog open={visible} onClose={unsetError}>
+        <Dialog open={visible} onClose={unsetError} maxWidth="xs">
           <DialogTitle>
             <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
               <Grid item className={classes.stretch}>
