@@ -89,7 +89,7 @@ class AddLiquidity extends Component {
 
   onAutogenLPTAddress = (secretKey) => {
     return new Promise((resolve, reject) => {
-      if (!secretKey) return reject('Invalid input');
+      if (!secretKey) return reject('Cannot unlock accouunt');
       const { lptData: { address: lptAddress } } = this.state;
       if (lptAddress) return resolve(lptAddress);
 

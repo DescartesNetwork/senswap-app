@@ -89,7 +89,8 @@ class RemoveLiquidity extends Component {
 
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
     return new Promise((resolve, reject) => {
-      if (!tokenAddress || !secretKey) return reject('Invalid input');
+      if (!secretKey) return reject('Cannot unlock account');
+      if (!tokenAddress) return reject('Unknown token');
       const { dstData: { address: dstAddress } } = this.state;
       if (dstAddress) return resolve(dstAddress);
 
