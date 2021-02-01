@@ -126,7 +126,7 @@ SOL.getPureTokenData = (tokenAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read on-chain data');
+      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
     });
   });
 }
@@ -151,7 +151,7 @@ SOL.getTokenData = (accountAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read on-chain data');
+      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
     });
   });
 }
@@ -183,7 +183,7 @@ SOL.getPurePoolData = (poolAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read on-chain data');
+      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
     });
   });
 }
@@ -222,7 +222,7 @@ SOL.getPoolData = (lptAddress) => {
       return resolve(result);
     }).catch(er => {
       console.error(er);
-      return reject('Cannot read on-chain data');
+      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
     })
   });
 }
