@@ -27,7 +27,7 @@ import utils from 'helpers/utils';
 import { getPools, getPool } from 'modules/pool.reducer';
 
 
-class TokenSelection extends Component {
+class PoolSelection extends Component {
   constructor() {
     super();
 
@@ -90,9 +90,8 @@ class TokenSelection extends Component {
     return this.setState({ index }, () => {
       const { pools } = this.state;
       if (!pools.length) return;
-      const { address } = pools[index];
       this.onClose();
-      return this.props.onChange(address);
+      return this.props.onChange(pools[index]);
     });
   }
 
@@ -206,15 +205,15 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   getPools, getPool,
 }, dispatch);
 
-TokenSelection.defaultProps = {
+PoolSelection.defaultProps = {
   onChange: () => { },
 }
 
-TokenSelection.propTypes = {
+PoolSelection.propTypes = {
   onChange: PropTypes.func,
 }
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(TokenSelection)));
+)(withStyles(styles)(PoolSelection)));

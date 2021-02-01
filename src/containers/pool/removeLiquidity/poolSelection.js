@@ -58,13 +58,10 @@ class PoolSelection extends Component {
       return sol.getPoolData(lptAccount);
     })).then(data => {
       pools = data.map(({ pool }) => pool);
-      return Promise.all(pools.map(({ address }) => {
-        const condition = { address }
-        return getPools(condition, 1, 0);
-      }));
-    }).then(data => {
-      const poolIds = data.filter(poolId => Boolean(poolId.length));
-      return Promise.all(poolIds.map(([{ _id }]) => {
+      const condition = { '$or': pools.map(({ address }) => ({ address })) }
+      return getPools(condition, 1000, 0);
+    }).then(poolIds => {
+      return Promise.all(poolIds.map(({ _id }) => {
         return getPool(_id);
       }));
     }).then(data => {

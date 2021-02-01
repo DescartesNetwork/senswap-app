@@ -23,7 +23,7 @@ import {
 import { BaseCard } from 'components/cards';
 import LPTSelection from 'containers/wallet/components/lptSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
-import TokenSelection from './tokenSelection';
+import PoolSelection from './poolSelection';
 
 import styles from './styles';
 import configs from 'configs';
@@ -44,7 +44,7 @@ class AddLiquidity extends Component {
 
     this.state = {
       ...EMPTY,
-      poolAddress: '',
+      poolData: {},
       srcData: {},
       lptData: {},
       amount: 0,
@@ -74,8 +74,8 @@ class AddLiquidity extends Component {
     return this.setState({ ...EMPTY });
   }
 
-  onPoolAddress = (poolAddress = '') => {
-    return this.setState({ poolAddress });
+  onPoolData = (poolData = {}) => {
+    return this.setState({ poolData });
   }
 
   onSourceData = (srcData = {}) => {
@@ -104,13 +104,12 @@ class AddLiquidity extends Component {
   addLiquidity = () => {
     const { getSecretKey } = this.props;
     const {
-      amount, poolAddress,
+      amount,
+      poolData: { initialized, address: poolAddress, token, treasury },
       srcData: { address: srcAddress },
-      lptData: { initialized, pool }
     } = this.state;
     if (!initialized || !amount) return console.error('Invalid input');
 
-    const { token, treasury } = pool;
     let secretKey = null;
     let lptAddressOrAccount = null;
     let txId = null;
@@ -157,10 +156,9 @@ class AddLiquidity extends Component {
     const { classes } = this.props;
     const {
       anchorEl, advance, loading, txId,
-      amount, poolAddress,
-      lptData: { initialized, pool }
+      amount,
+      poolData: { initialized, address: poolAddress, lpt, reserve, token },
     } = this.state;
-    const { lpt, reserve, token } = initialized ? pool : {};
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -212,7 +210,7 @@ class AddLiquidity extends Component {
         </Grid>
       </Grid>
       <Grid item xs={6}>
-        <TokenSelection onChange={this.onPoolAddress} />
+        <PoolSelection onChange={this.onPoolData} />
       </Grid>
       <Grid item xs={6}>
         <TextField
