@@ -61,7 +61,7 @@ class UiUx extends Component {
     const { classes } = this.props;
     const { ui: { error, visible }, unsetError } = this.props;
 
-    return <Grid container xs={12}>
+    return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Dialog open={visible} onClose={unsetError}>
           <DialogTitle>
