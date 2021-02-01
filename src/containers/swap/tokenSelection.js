@@ -320,6 +320,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   getPools, getPool,
 }, dispatch);
 
