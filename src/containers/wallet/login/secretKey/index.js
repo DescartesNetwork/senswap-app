@@ -32,6 +32,7 @@ class SecretKey extends Component {
 
     this.state = {
       secretKey: '',
+      password: '',
       advance: false,
     }
   }
@@ -46,11 +47,16 @@ class SecretKey extends Component {
     return this.setState({ secretKey });
   }
 
+  onPassword = (e) => {
+    const password = e.target.value || '';
+    return this.setState({ password });
+  }
+
   onSave = () => {
     const { setError, setWallet } = this.props;
-    const { secretKey } = this.state;
+    const { secretKey, password } = this.state;
     if (!secretKey) return setError('The secret key cannot be empty');
-    return crypto.createKeystore(secretKey, '123').then(keystore => {
+    return crypto.createKeystore(secretKey, password).then(keystore => {
       const address = keystore.publicKey;
       if (!address) return setError('The secret key is incorrect');
       return setWallet(address, keystore);
@@ -67,7 +73,7 @@ class SecretKey extends Component {
 
   render() {
     const { classes } = this.props;
-    const { secretKey, advance } = this.state;
+    const { secretKey, password, advance } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -102,19 +108,34 @@ class SecretKey extends Component {
         <Collapse in={advance}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography>The secret key is a raw form of your wallet. It's very unsecure and not recommended to use.</Typography>
+              <Typography>The secret key is a raw form of your wallet, then it's very unsecure and not recommended to use. To enhance security, SenWallet will provide you an extra protection.</Typography>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} md={6}>
               <TextField
                 label="Secret Key"
                 variant="outlined"
                 onChange={this.onSecretKey}
                 value={secretKey}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                label="Password"
+                type="password"
+                variant="outlined"
+                value={password}
+                onChange={this.onPassword}
                 InputProps={{
-                  endAdornment: <IconButton color="primary" onClick={this.onSave} edge="end" >
+                  endAdornment: <IconButton
+                    color="primary"
+                    onClick={this.onSave}
+                    edge="end"
+                  >
                     <PowerRounded />
                   </IconButton>
                 }}
+                helperText="You have to input a password to encrypt your secret key. If the software needs to sign a transaction, or related work afterwards, you will be required to input this password to unlock your wallet"
                 fullWidth
               />
             </Grid>

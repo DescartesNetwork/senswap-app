@@ -68,9 +68,9 @@ class KeyStore extends Component {
     return this.setState({ newPassword });
   }
 
-  onShowPassword = () => {
-    const { showPassword } = this.state;
-    return this.setState({ showPassword: !showPassword });
+  onVisiblePassword = () => {
+    const { visiblePassword } = this.state;
+    return this.setState({ visiblePassword: !visiblePassword });
   }
 
   onSave = () => {
@@ -116,7 +116,7 @@ class KeyStore extends Component {
 
   render() {
     const { classes } = this.props;
-    const { password, newPassword, newKeystore, filename, visible, showPassword } = this.state;
+    const { password, newPassword, newKeystore, filename, visible, visiblePassword } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -160,7 +160,7 @@ class KeyStore extends Component {
       <Grid item xs={12} md={6}>
         <TextField
           label="Password"
-          type={'password'}
+          type="password"
           variant="outlined"
           value={password}
           onChange={this.onPassword}
@@ -205,13 +205,13 @@ class KeyStore extends Component {
               <Grid item xs={12}>
                 <TextField
                   label="Password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={visiblePassword ? 'text' : 'password'}
                   variant="outlined"
                   value={newPassword}
                   onChange={this.onNewPassword}
                   InputProps={{
-                    endAdornment: <IconButton onClick={this.onShowPassword} edge="end">
-                      {showPassword ? <VisibilityRounded /> : <VisibilityOffRounded />}
+                    endAdornment: <IconButton onClick={this.onVisiblePassword} edge="end">
+                      {visiblePassword ? <VisibilityRounded /> : <VisibilityOffRounded />}
                     </IconButton>
                   }}
                   fullWidth

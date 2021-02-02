@@ -13,7 +13,6 @@ import Avatar from '@material-ui/core/Avatar';
 import LPTList from 'containers/wallet/components/lptList';
 
 import styles from './styles';
-import utils from 'helpers/utils';
 
 
 class LPTSelection extends Component {
@@ -35,7 +34,7 @@ class LPTSelection extends Component {
   render() {
     const { classes } = this.props;
     const { poolAddress } = this.props;
-    const { data: { address: lptAddress } } = this.state;
+    const { data: { address: lptAddress, icon } } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -46,7 +45,7 @@ class LPTSelection extends Component {
           onChange={this.onAddress}
           InputProps={{
             startAdornment: <Avatar className={classes.lptIcon}>
-              <Typography variant="h5">{utils.randEmoji(lptAddress)}</Typography>
+              <Typography variant="h5">{icon}</Typography>
             </Avatar>,
             endAdornment: <LPTList
               poolAddress={poolAddress}

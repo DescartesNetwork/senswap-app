@@ -15,7 +15,6 @@ import AccountList from 'containers/wallet/components/accountList';
 
 import styles from './styles';
 import sol from 'helpers/sol';
-import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 
 
