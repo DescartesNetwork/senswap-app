@@ -26,7 +26,6 @@ import AccountSelection from 'containers/wallet/components/accountSelection';
 import PoolSelection from './poolSelection';
 
 import styles from './styles';
-import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
