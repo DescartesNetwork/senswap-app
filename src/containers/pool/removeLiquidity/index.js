@@ -26,7 +26,6 @@ import LPTSelection from 'containers/wallet/components/lptSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
-import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
@@ -262,7 +261,7 @@ class RemoveLiquidity extends Component {
             <Button
               variant="contained"
               color="secondary"
-              href={configs.sol.explorer(txId)}
+              href={utils.explorer(txId)}
               target="_blank"
               rel="noopener"
               startIcon={<PublicRounded />}

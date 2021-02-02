@@ -20,7 +20,7 @@ import {
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
-import configs from 'configs';
+import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
@@ -172,7 +172,7 @@ class NewPool extends Component {
             <Button
               variant="contained"
               color="secondary"
-              href={configs.sol.explorer(txId)}
+              href={utils.explorer(txId)}
               target="_blank"
               rel="noopener"
               startIcon={<PublicRounded />}

@@ -6,11 +6,10 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
 import InputBase from '@material-ui/core/InputBase';
-import Avatar from '@material-ui/core/Avatar';
 
 import AccountList from 'containers/wallet/components/accountList';
+import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -50,11 +49,7 @@ class TokenInfo extends Component {
       <Grid item xs={12}>
         <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
           <Grid item>
-            <Tooltip title="QR Code">
-              <Avatar className={classes.icon} onClick={this.onQRCode}>
-                <Typography>{utils.randEmoji(address)}</Typography>
-              </Avatar>
-            </Tooltip>
+            <AccountAvatar title="QR Code" address={address} onClick={this.onQRCode} />
           </Grid>
           <Grid item className={classes.stretch}>
             <InputBase

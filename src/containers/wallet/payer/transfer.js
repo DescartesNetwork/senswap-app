@@ -21,7 +21,7 @@ import { SendRounded, CloseRounded, EcoRounded } from '@material-ui/icons';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import configs from 'configs';
+import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
@@ -149,7 +149,7 @@ class PayerTransfer extends Component {
             severity="success"
             action={<IconButton onClick={this.onClear} size="small"><CloseRounded /></IconButton>}
           >
-            <Typography>Success - <Link color="inherit" href={configs.sol.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography>
+            <Typography>Success - <Link color="inherit" href={utils.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography>
           </Alert>
         </Collapse>
       </Grid>

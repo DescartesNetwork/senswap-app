@@ -8,10 +8,9 @@ import isEqual from 'react-fast-compare';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-import Avatar from '@material-ui/core/Avatar';
 
-import AccountList from 'containers/wallet/components/accountList';
+import AccountList from './accountList';
+import AccountAvatar from './accountAvatar';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -58,9 +57,9 @@ class AccountSelection extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    // const { classes } = this.props;
     const { label } = this.props;
-    const { data: { address: accountAddress, icon }, tokenAddress } = this.state;
+    const { data: { address: accountAddress }, tokenAddress } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -69,9 +68,7 @@ class AccountSelection extends Component {
           variant="outlined"
           value={accountAddress || ''}
           InputProps={{
-            startAdornment: <Avatar className={classes.accountIcon}>
-              <Typography variant="h5">{icon}</Typography>
-            </Avatar>,
+            startAdornment: <AccountAvatar address={accountAddress} />,
             endAdornment: <AccountList
               tokenAddress={tokenAddress}
               size="medium"

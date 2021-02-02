@@ -6,11 +6,10 @@ import { withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
-import Avatar from '@material-ui/core/Avatar';
 
-import LPTList from 'containers/wallet/components/lptList';
+import LPTList from './lptList';
+import LPTAvatar from './lptAvatar';
 
 import styles from './styles';
 
@@ -32,9 +31,9 @@ class LPTSelection extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    // const { classes } = this.props;
     const { poolAddress } = this.props;
-    const { data: { address: lptAddress, icon } } = this.state;
+    const { data: { address: lptAddress } } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -44,9 +43,7 @@ class LPTSelection extends Component {
           value={lptAddress || ''}
           onChange={this.onAddress}
           InputProps={{
-            startAdornment: <Avatar className={classes.lptIcon}>
-              <Typography variant="h5">{icon}</Typography>
-            </Avatar>,
+            startAdornment: <LPTAvatar address={lptAddress} />,
             endAdornment: <LPTList
               poolAddress={poolAddress}
               size="medium"

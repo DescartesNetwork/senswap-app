@@ -19,7 +19,6 @@ import { SendRounded, CloseRounded, EcoRounded } from '@material-ui/icons';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
@@ -177,7 +176,7 @@ class TokenTransfer extends Component {
             severity="success"
             action={<IconButton onClick={this.onClear} size="small"><CloseRounded /></IconButton>}
           >
-            <Typography>Success - <Link color="inherit" href={configs.sol.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography>
+            <Typography>Success - <Link color="inherit" href={utils.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography>
           </Alert>
         </Collapse>
       </Grid>

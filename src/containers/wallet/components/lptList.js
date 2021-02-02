@@ -14,9 +14,10 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
-import Avatar from '@material-ui/core/Avatar';
 
 import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
+
+import LPTAvatar from './lptAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -73,13 +74,12 @@ class LPTList extends Component {
     const { onChange } = this.props;
     const { data } = this.state;
 
-    const icon = utils.randEmoji(lptAddress);
     let lptData = {}
     for (let each of data) {
       const { address } = each;
-      if (address === lptAddress) lptData = each;
+      if (address === lptAddress) lptData = { ...each };
     }
-    onChange({ ...lptData, icon });
+    onChange(lptData);
     return this.onClose();
   }
 
@@ -111,9 +111,7 @@ class LPTList extends Component {
         render.push(<MenuItem key={lptAddress} onClick={() => this.onSelect(lptAddress)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
             <Grid item>
-              <Avatar className={classes.lptIcon}>
-                <Typography variant="h5">{utils.randEmoji(lptAddress)}</Typography>
-              </Avatar>
+              <LPTAvatar address={lptAddress} />
             </Grid>
             <Grid item className={classes.stretch}>
               <Typography className={classes.address}>{lptAddress}</Typography>

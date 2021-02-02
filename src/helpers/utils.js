@@ -1,7 +1,10 @@
 import dateformat from 'dateformat';
 import axios from 'axios';
 import seedrandom from 'seedrandom';
-import emoji from './emoji.json';
+
+import configs from 'configs';
+import sol from 'helpers/sol';
+import emoji from 'helpers/emoji.json';
 
 const TOTAL_EMOJI = emoji.length;
 
@@ -112,6 +115,14 @@ Utils.imgFromCGK = (cgk) => {
       return resolve(null);
     });
   });
+}
+
+Utils.explorer = (addressOrTxId) => {
+  const { sol: { cluster } } = configs;
+  if (sol.isAddress(addressOrTxId)) {
+    return `https://explorer.solana.com/address/${addressOrTxId}?cluster=${cluster}`;
+  }
+  return `https://explorer.solana.com/tx/${addressOrTxId}?cluster=${cluster}`;
 }
 
 export default Utils;

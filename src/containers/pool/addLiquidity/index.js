@@ -261,7 +261,7 @@ class AddLiquidity extends Component {
             <Button
               variant="contained"
               color="secondary"
-              href={configs.sol.explorer(txId)}
+              href={utils.explorer(txId)}
               target="_blank"
               rel="noopener"
               startIcon={<PublicRounded />}

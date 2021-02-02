@@ -6,14 +6,18 @@ import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
-import Avatar from '@material-ui/core/Avatar';
+import Tooltip from '@material-ui/core/Tooltip';
+import IconButton from '@material-ui/core/IconButton';
 
+import { ExploreRounded } from '@material-ui/icons';
+
+import AccountAvatar from 'containers/wallet/components/accountAvatar';
+
+import styles from './styles';
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
-import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { setQRCode } from 'modules/wallet.reducer';
 
@@ -23,7 +27,6 @@ class PayerInfo extends Component {
     super();
 
     this.state = {
-      address: '',
       amount: 0,
     }
   }
@@ -41,7 +44,7 @@ class PayerInfo extends Component {
   fetchData = () => {
     const { wallet: { user: { address } }, setError } = this.props;
     return sol.getBalance(address).then(re => {
-      return this.setState({ address, amount: re });
+      return this.setState({ amount: re });
     }).catch(er => {
       return setError(er);
     });
@@ -55,7 +58,9 @@ class PayerInfo extends Component {
 
   render() {
     const { classes } = this.props;
-    const { address, amount } = this.state;
+    const { wallet: { user: { address } } } = this.props;
+    const { amount } = this.state;
+
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h4">{utils.prettyNumber(Number(amount))} SOL</Typography>
@@ -63,11 +68,7 @@ class PayerInfo extends Component {
       <Grid item xs={12}>
         <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
           <Grid item>
-            <Tooltip title="QR Code">
-              <Avatar className={classes.icon} onClick={this.onQRCode}>
-                <Typography>{utils.randEmoji(address)}</Typography>
-              </Avatar>
-            </Tooltip>
+            <AccountAvatar title="QR Code" address={address} onClick={this.onQRCode} />
           </Grid>
           <Grid item className={classes.stretch}>
             <InputBase
@@ -76,6 +77,19 @@ class PayerInfo extends Component {
               fullWidth
               readOnly
             />
+          </Grid>
+          <Grid item>
+            <Tooltip title="View on explorer">
+              <IconButton
+                color="secondary"
+                size="small"
+                href={utils.explorer(address)}
+                target="_blank"
+                rel="noopener"
+              >
+                <ExploreRounded />
+              </IconButton>
+            </Tooltip>
           </Grid>
         </Grid>
       </Grid>

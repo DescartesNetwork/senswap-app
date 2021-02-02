@@ -276,11 +276,14 @@ export const unlockWallet = () => {
           dispatch({ type: UNLOCK_WALLET_FAIL, data: { ...EMPTY_DATA }, reason: er });
           return reject(er);
         }
-        dispatch({ type: UNLOCK_WALLET_OK, data: { ...EMPTY_DATA } });
         const keystore = storage.get('keystore');
         return crypto.fromSolFlareKeystore(keystore, password).then(account => {
           const secretKey = Buffer.from(account.secretKey).toString('hex');
+          dispatch({ type: UNLOCK_WALLET_OK, data: { ...EMPTY_DATA } });
           return resolve(secretKey);
+        }).catch(er => {
+          dispatch({ type: UNLOCK_WALLET_FAIL, data: { ...EMPTY_DATA }, reason: er });
+          return reject(er);
         });
       }
       const data = { unlock: { visible: true, callback } }

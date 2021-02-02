@@ -19,6 +19,7 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
@@ -150,7 +151,7 @@ class Issuer extends Component {
                 <Grid item xs={12}>
                   <Grid container className={classes.noWrap} spacing={2}>
                     <Grid item className={classes.stretch}>
-                      {txId ? <Typography>Success - <Link href={configs.sol.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography> : null}
+                      {txId ? <Typography>Success - <Link href={utils.explorer(txId)} target="_blank" rel="noopener">check it out!</Link></Typography> : null}
                     </Grid>
                     <Grid item>
                       <Button

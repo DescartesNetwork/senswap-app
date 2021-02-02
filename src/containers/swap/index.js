@@ -27,7 +27,6 @@ import AccountSelection from 'containers/wallet/components/accountSelection';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
-import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
@@ -373,7 +372,7 @@ class Swap extends Component {
                       <Button
                         variant="contained"
                         color="secondary"
-                        href={configs.sol.explorer(txId)}
+                        href={utils.explorer(txId)}
                         target="_blank"
                         rel="noopener"
                         startIcon={<PublicRounded />}

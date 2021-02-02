@@ -67,7 +67,7 @@ class Unlock extends Component {
       <DialogTitle>
         <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
           <Grid item className={classes.stretch}>
-            <Typography variant="h6">QR Code</Typography>
+            <Typography variant="h6">Unlock wallet</Typography>
           </Grid>
           <Grid item>
             <IconButton onClick={this.onClose} edge="end">

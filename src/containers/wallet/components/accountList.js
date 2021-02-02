@@ -14,9 +14,10 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
-import Avatar from '@material-ui/core/Avatar';
 
 import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
+
+import AccountAvatar from './accountAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -72,13 +73,12 @@ class AccountList extends Component {
   onSelect = (accountAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-    const icon = utils.randEmoji(accountAddress);
     let accountData = {}
     for (let each of data) {
       const { address } = each;
-      if (address === accountAddress) accountData = each;
+      if (address === accountAddress) accountData = { ...each };
     }
-    onChange({ ...accountData, icon });
+    onChange(accountData);
     return this.onClose();
   }
 
@@ -95,28 +95,26 @@ class AccountList extends Component {
     const { classes } = this.props;
     const { data } = this.state;
     let groupedTokensData = {};
-    data.forEach(({ address, token }) => {
+    data.forEach(({ address: accountAddress, token }) => {
       const symbol = sol.toSymbol(token.symbol);
       const tokenAddress = token.address.substring(0, 6);
       const key = `${symbol} - ${tokenAddress}`;
       if (!groupedTokensData[key]) groupedTokensData[key] = [];
-      groupedTokensData[key].push(address);
+      groupedTokensData[key].push(accountAddress);
     });
 
     let render = [];
     for (let key in groupedTokensData) {
       render.push(<ListSubheader key={key}>{key}</ListSubheader>)
-      groupedTokensData[key].forEach(address => {
-        render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
+      groupedTokensData[key].forEach(accountAddress => {
+        render.push(<MenuItem key={accountAddress} onClick={() => this.onSelect(accountAddress)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
             <Grid item>
-              <Avatar className={classes.accountIcon}>
-                <Typography variant="h5">{utils.randEmoji(address)}</Typography>
-              </Avatar>
+              <AccountAvatar address={accountAddress} />
             </Grid>
             <Grid item className={classes.stretch}>
-              <Typography className={classes.address}>{address}</Typography>
-              <Typography variant="body2">{this.parseBalance(address)}</Typography>
+              <Typography className={classes.address}>{accountAddress}</Typography>
+              <Typography variant="body2">{this.parseBalance(accountAddress)}</Typography>
             </Grid>
           </Grid>
         </MenuItem>);
