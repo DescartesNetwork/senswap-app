@@ -83,7 +83,7 @@ class Tokens extends Component {
                   <TokenSettings />
                 </Grid>
                 <Grid item>
-                  <Tooltip title="Advanced Functions">
+                  <Tooltip disableFocusListener title="Advanced Functions">
                     <IconButton color="secondary" size="small" onClick={this.onAdvance}>
                       {advance ? <ExpandLessRounded /> : <ExpandMoreRounded />}
                     </IconButton>

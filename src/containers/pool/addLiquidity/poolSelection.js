@@ -113,9 +113,9 @@ class PoolSelection extends Component {
       <Grid item>
         <Badge
           badgeContent={
-            !verified ? <Tooltip title="This pool is NOT verified by SenSwap">
+            !verified ? <Tooltip disableFocusListener title="This pool is NOT verified by SenSwap">
               <HelpOutlineRounded className={classes.badgeIcon} />
-            </Tooltip> : <Tooltip title="This pool is verified by SenSwap">
+            </Tooltip> : <Tooltip disableFocusListener title="This pool is verified by SenSwap">
                 <CheckCircleOutlineRounded className={classes.badgeIcon} />
               </Tooltip>
           }

@@ -20,7 +20,7 @@ class BottomDrawer extends Component {
       </Grid>
     </Grid>
     return <Grid container spacing={2} justify="center">
-      <Tooltip title="Click to close">
+      <Tooltip disableFocusListener title="Click to close">
         <Grid item className={classes.swipeableArea} onClick={this.props.onClose}>
           <div className={classes.touchBarSign} />
         </Grid>

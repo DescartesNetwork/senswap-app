@@ -79,14 +79,14 @@ class Payer extends Component {
             <Grid item xs={12}>
               <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
                 <Grid item className={classes.stretch}>
-                  <Tooltip title="Account List">
+                  <Tooltip disableFocusListener title="Account List">
                     <IconButton color="secondary" size="small" onClick={this.onOpen}>
                       <MenuRounded />
                     </IconButton>
                   </Tooltip>
                 </Grid>
                 <Grid item>
-                  <Tooltip title="Advanced Functions">
+                  <Tooltip disableFocusListener title="Advanced Functions">
                     <IconButton color="secondary" size="small" onClick={this.onAdvanced}>
                       {visible ? <ExpandLessRounded /> : <ExpandMoreRounded />}
                     </IconButton>

@@ -272,7 +272,7 @@ class Swap extends Component {
                                   <Typography>Expert mode</Typography>
                                 </Grid>
                                 <Grid item className={classes.stretch}>
-                                  <Tooltip title="The token account will be selected, or generated automatically by default. By enabling expert mode, you can controll it by hands.">
+                                  <Tooltip disableFocusListener title="The token account will be selected, or generated automatically by default. By enabling expert mode, you can controll it by hands.">
                                     <IconButton size="small">
                                       <HelpOutlineRounded fontSize="small" />
                                     </IconButton>

@@ -70,7 +70,7 @@ class Header extends Component {
       </Button>
     </Grid>
     return <Grid item>
-      <Tooltip title={text}>
+      <Tooltip disableFocusListener title={text}>
         <Fab size="small" color="primary" onClick={this.connectWallet}>
           {icon}
         </Fab>
@@ -117,7 +117,7 @@ class Header extends Component {
             <Grid container alignItems="center" justify="flex-end" spacing={width >= 600 ? 5 : 2}>
               {/* Pool */}
               <Grid item>
-                <Tooltip title="Pool">
+                <Tooltip disableFocusListener title="Pool">
                   <IconButton
                     size="small"
                     color={currentRoute === 'pool' ? 'primary' : 'secondary'}
@@ -130,7 +130,7 @@ class Header extends Component {
               </Grid>
               {/* Swap */}
               <Grid item>
-                <Tooltip title="Swap">
+                <Tooltip disableFocusListener title="Swap">
                   <IconButton
                     size="small"
                     color={currentRoute === 'swap' ? 'primary' : 'secondary'}
@@ -143,7 +143,7 @@ class Header extends Component {
               </Grid>
               {/* Others */}
               <Grid item>
-                <Tooltip title="Others">
+                <Tooltip disableFocusListener title="Others">
                   <IconButton
                     color={currentRoute !== 'pool' && currentRoute !== 'swap' ? 'primary' : 'secondary'}
                     size="small"

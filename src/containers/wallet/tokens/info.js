@@ -50,7 +50,7 @@ class TokenInfo extends Component {
       <Grid item xs={12}>
         <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
           <Grid item>
-            <Tooltip title="QR Code">
+            <Tooltip disableFocusListener title="QR Code">
               <Avatar className={classes.icon} onClick={this.onQRCode}>
                 <Typography>{utils.randEmoji(address)}</Typography>
               </Avatar>

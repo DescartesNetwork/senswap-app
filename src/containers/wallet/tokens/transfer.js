@@ -137,7 +137,7 @@ class TokenTransfer extends Component {
               />
             </Grid>
             <Grid item>
-              <Tooltip title="Maximum amount">
+              <Tooltip disableFocusListener title="Maximum amount">
                 <IconButton
                   color="secondary"
                   size="small"

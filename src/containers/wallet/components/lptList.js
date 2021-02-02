@@ -140,7 +140,7 @@ class LPTList extends Component {
     const { icon, size, edge, openWallet } = this.props;
 
     return <Fragment>
-      <Tooltip title="Token List">
+      <Tooltip disableFocusListener title="Token List">
         <IconButton color="secondary" size={size} onClick={this.onOpen} edge={edge}>
           {icon}
         </IconButton>
