@@ -16,6 +16,7 @@ import Tokens from './tokens';
 import Pools from './pools';
 // Subapp
 import QRCode from './qrcode';
+import Unlock from './unlock';
 
 import styles from './styles';
 import storage from 'helpers/storage';
@@ -26,11 +27,15 @@ import { setWallet, closeWallet } from 'modules/wallet.reducer';
 class Wallet extends Component {
 
   componentDidMount() {
-    const address = storage.get('address');
-    const secretKey = storage.get('secretKey');
-    if (!address || !secretKey) return;
     const { setError, setWallet } = this.props;
-    return setWallet(address, secretKey).then(re => {
+    const address = storage.get('address');
+    const keystore = storage.get('keystore');
+    if (!address || !keystore) {
+      storage.clear('address');
+      storage.clear('keystore');
+      return setError('There are some old, but incorrupted, wallet on your browser. We just clear it for safety.')
+    };
+    return setWallet(address, keystore).then(re => {
       // Nothing
     }).catch(er => {
       return setError(er);
@@ -84,6 +89,7 @@ class Wallet extends Component {
       </Grid>
       <Grid item xs={12}>
         <QRCode />
+        <Unlock />
       </Grid>
     </Grid>
   }

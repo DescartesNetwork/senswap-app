@@ -21,6 +21,7 @@ import {
 
 import styles from './styles';
 import sol from 'helpers/sol';
+import crypto from 'helpers/crypto';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 
@@ -49,10 +50,13 @@ class SecretKey extends Component {
     const { setError, setWallet } = this.props;
     const { secretKey } = this.state;
     if (!secretKey) return setError('The secret key cannot be empty');
-    const account = sol.fromSecretKey(secretKey);
-    if (!account) return setError('The secret key is incorrect');
-    const address = account.publicKey.toBase58();
-    return setWallet(address, secretKey);
+    return crypto.createKeystore(secretKey, '123').then(keystore => {
+      const address = keystore.publicKey;
+      if (!address) return setError('The secret key is incorrect');
+      return setWallet(address, keystore);
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onGen = () => {

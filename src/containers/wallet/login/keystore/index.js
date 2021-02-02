@@ -80,8 +80,7 @@ class KeyStore extends Component {
     if (!password) return setError('Please enter your password to unlock your wallet');
     return crypto.fromSolFlareKeystore(keystore, password).then(account => {
       const address = account.publicKey.toBase58();
-      const secretKey = Buffer.from(account.secretKey).toString('hex');
-      return setWallet(address, secretKey);
+      return setWallet(address, keystore);
     }).catch(er => {
       return setError(er);
     });

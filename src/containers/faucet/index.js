@@ -24,7 +24,7 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { getSecretKey, updateWallet, openWallet } from 'modules/wallet.reducer';
+import { unlockWallet, updateWallet, openWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
 
 
@@ -80,7 +80,7 @@ class Faucet extends Component {
     const {
       wallet: { user },
       setError,
-      getSecretKey, updateWallet,
+      unlockWallet, updateWallet,
       airdropLamports, airdropTokens,
     } = this.props;
     const { tokenAddress, link } = this.state;
@@ -89,7 +89,7 @@ class Faucet extends Component {
 
     return this.setState({ loading: true }, () => {
       return airdropLamports(user.address).then(re => {
-        return getSecretKey();
+        return unlockWallet();
       }).then(secretKey => {
         const payer = sol.fromSecretKey(secretKey);
         const token = sol.fromAddress(tokenAddress);
@@ -203,7 +203,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getSecretKey, updateWallet, openWallet,
+  unlockWallet, updateWallet, openWallet,
   getWhiteList, airdropLamports, airdropTokens,
 }, dispatch);
 

@@ -20,7 +20,7 @@ import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
@@ -59,7 +59,7 @@ class Issuer extends Component {
 
   onCreate = () => {
     const { symbol: refSymbol, supply: refSupply, decimals: refDecimals } = this.state;
-    const { wallet: { user }, setError, getSecretKey, updateWallet } = this.props;
+    const { wallet: { user }, setError, unlockWallet, updateWallet } = this.props;
 
     const decimals = parseInt(refDecimals) || 0;
     const supply = parseInt(refSupply) || 0;
@@ -70,7 +70,7 @@ class Issuer extends Component {
     const symbol = refSymbol.split('');
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     return this.setState({ loading: true }, () => {
-      return getSecretKey().then(secretKey => {
+      return unlockWallet().then(secretKey => {
         const payer = sol.fromSecretKey(secretKey);
         return sol.newToken(symbol, totalSupply, decimals, payer);
       }).then(({ token, receiver, txId }) => {
@@ -181,7 +181,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, getSecretKey,
+  updateWallet, unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

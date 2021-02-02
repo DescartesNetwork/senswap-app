@@ -23,7 +23,7 @@ import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -64,7 +64,7 @@ class NewPool extends Component {
 
   newPool = () => {
     const { accountData: { address, initialized, token }, amount, price } = this.state;
-    const { wallet: { user }, setError, updateWallet, getSecretKey } = this.props;
+    const { wallet: { user }, setError, updateWallet, unlockWallet } = this.props;
     if (!initialized) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
     if (!price) return setError('Invalid price');
@@ -72,7 +72,7 @@ class NewPool extends Component {
     let poolAddress = '';
     let txId = '';
     return this.setState({ loading: true }, () => {
-      return getSecretKey().then(secretKey => {
+      return unlockWallet().then(secretKey => {
         const reserve = global.BigInt(amount * 10 ** token.decimals);
         const usd = global.BigInt(price * amount * 10 ** token.decimals);
         const srcTokenPublicKey = sol.fromAddress(address);
@@ -215,7 +215,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, getSecretKey,
+  updateWallet, unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

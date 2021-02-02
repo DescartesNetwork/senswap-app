@@ -14,7 +14,7 @@ import { EmojiObjectsRounded } from '@material-ui/icons';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 
 class CreateTokenAccount extends Component {
@@ -35,11 +35,11 @@ class CreateTokenAccount extends Component {
     const {
       wallet: { user },
       setError,
-      updateWallet, getSecretKey
+      updateWallet, unlockWallet
     } = this.props;
     const { tokenAddress } = this.state;
     if (!tokenAddress) return setError('The token address cannot be empty');
-    return getSecretKey().then(secretKey => {
+    return unlockWallet().then(secretKey => {
       const payer = sol.fromSecretKey(secretKey);
       const tokenPublicKey = sol.fromAddress(tokenAddress);
       return sol.newSRC20Account(tokenPublicKey, payer);
@@ -87,7 +87,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, getSecretKey,
+  updateWallet, unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

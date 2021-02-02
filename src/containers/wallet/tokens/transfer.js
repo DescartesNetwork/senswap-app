@@ -23,7 +23,7 @@ import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { getSecretKey } from 'modules/wallet.reducer';
+import { unlockWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -86,7 +86,7 @@ class TokenTransfer extends Component {
   }
 
   onTransfer = () => {
-    const { wallet: { currentTokenAccount }, setError, getSecretKey } = this.props;
+    const { wallet: { currentTokenAccount }, setError, unlockWallet } = this.props;
     const { address } = this.state;
     if (!sol.isAddress(currentTokenAccount)) return setError('Invalid sender address');
     if (!sol.isAddress(address)) return setError('Invalid receiver address');
@@ -98,7 +98,7 @@ class TokenTransfer extends Component {
         const { token: { address: _address, decimals: _decimals } } = re;
         tokenAddress = _address;
         decimals = _decimals;
-        return getSecretKey();
+        return unlockWallet();
       }).then(secretKey => {
         const amount = this.safelyParseAmount(decimals);
         if (!amount) throw new Error('Invalid amount');
@@ -192,7 +192,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getSecretKey,
+  unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

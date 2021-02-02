@@ -30,7 +30,7 @@ import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -103,7 +103,7 @@ class AddLiquidity extends Component {
   }
 
   addLiquidity = () => {
-    const { setError, getSecretKey } = this.props;
+    const { setError, unlockWallet } = this.props;
     const {
       amount,
       poolData: { initialized, address: poolAddress, token, treasury },
@@ -116,7 +116,7 @@ class AddLiquidity extends Component {
     let lptAddressOrAccount = null;
     let txId = null;
     return this.setState({ loading: true }, () => {
-      return getSecretKey().then(re => {
+      return unlockWallet().then(re => {
         secretKey = re;
         return this.onAutogenLPTAddress(secretKey);
       }).then(re => {
@@ -304,7 +304,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, getSecretKey,
+  updateWallet, unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

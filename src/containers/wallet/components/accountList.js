@@ -50,7 +50,7 @@ class AccountList extends Component {
       wallet: { user: { tokenAccounts } },
       tokenAddress, onChange
     } = this.props;
-    if (!tokenAccounts.length) return onChange();
+    if (!tokenAccounts.length) return onChange({});
 
     return Promise.all(tokenAccounts.map(tokenAccount => {
       return sol.getTokenData(tokenAccount);
@@ -59,7 +59,7 @@ class AccountList extends Component {
         const { token: { address } } = each;
         return address === tokenAddress;
       });
-      if (!data || !data.length) return onChange();
+      if (!data || !data.length) return onChange({});
       return this.setState({ data }, () => {
         const { address } = data[0];
         return this.onSelect(address);
@@ -72,7 +72,6 @@ class AccountList extends Component {
   onSelect = (accountAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-
     const icon = utils.randEmoji(accountAddress);
     let accountData = {}
     for (let each of data) {
@@ -173,6 +172,11 @@ const mapStateToProps = state => ({
   wallet: state.wallet,
 });
 
+const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
+  openWallet,
+}, dispatch);
+
 AccountList.defaultProps = {
   icon: <UnfoldMoreRounded />,
   size: 'small',
@@ -188,11 +192,6 @@ AccountList.propTypes = {
   tokenAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
-
-const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
-  openWallet,
-}, dispatch);
 
 export default withRouter(connect(
   mapStateToProps,

@@ -50,7 +50,7 @@ class LPTList extends Component {
       wallet: { user: { lptAccounts } },
       poolAddress, onChange
     } = this.props;
-    if (!lptAccounts.length) return onChange();
+    if (!lptAccounts.length) return onChange({});
 
     return Promise.all(lptAccounts.map(lptAccount => {
       return sol.getPoolData(lptAccount);
@@ -59,7 +59,7 @@ class LPTList extends Component {
         const { pool: { address } } = each;
         return address === poolAddress;
       });
-      if (!data || !data.length) return onChange();
+      if (!data || !data.length) return onChange({});
       return this.setState({ data }, () => {
         const { address } = data[0];
         return this.onSelect(address);
@@ -173,6 +173,11 @@ const mapStateToProps = state => ({
   wallet: state.wallet,
 });
 
+const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
+  openWallet,
+}, dispatch);
+
 LPTList.defaultProps = {
   icon: <UnfoldMoreRounded />,
   size: 'small',
@@ -188,11 +193,6 @@ LPTList.propTypes = {
   poolAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
-
-const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
-  openWallet,
-}, dispatch);
 
 export default withRouter(connect(
   mapStateToProps,

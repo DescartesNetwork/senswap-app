@@ -30,7 +30,7 @@ import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { getSecretKey, updateWallet } from 'modules/wallet.reducer';
+import { unlockWallet, updateWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -120,12 +120,12 @@ class RemoveLiquidity extends Component {
         pool: { token, treasury }
       },
     } = this.state;
-    const { setError, getSecretKey } = this.props;
+    const { setError, unlockWallet } = this.props;
     if (!initialized) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
     let secretKey = null;
     return this.setState({ loading: true }, () => {
-      return getSecretKey().then(re => {
+      return unlockWallet().then(re => {
         secretKey = re;
         return this.onAutogenDestinationAddress(token.address, secretKey);
       }).then(dstAddress => {
@@ -305,7 +305,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getSecretKey, updateWallet,
+  unlockWallet, updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

@@ -29,7 +29,7 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, getSecretKey } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
@@ -166,7 +166,7 @@ class Swap extends Component {
   }
 
   onSwap = () => {
-    const { setError, getSecretKey } = this.props;
+    const { setError, unlockWallet } = this.props;
     const {
       bidAmount, srcData: { address: srcAddress },
       bidData: { initialized: bidInitialized, address: bidAddress, token: bidToken, treasury: bidTreasury },
@@ -179,7 +179,7 @@ class Swap extends Component {
 
     let secretKey = null;
     return this.setState({ loading: true }, () => {
-      return getSecretKey().then(re => {
+      return unlockWallet().then(re => {
         secretKey = re;
         return this.onAutogenDestinationAddress(askToken.address, secretKey);
       }).then(dstAddress => {
@@ -421,7 +421,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, getSecretKey,
+  updateWallet, unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

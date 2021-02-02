@@ -1,6 +1,7 @@
 import configs from 'configs';
 import storage from 'helpers/storage';
 import api from 'helpers/api';
+import crypto from 'helpers/crypto';
 
 
 /**
@@ -18,6 +19,10 @@ const defaultState = {
   qrcode: {
     visible: false,
     message: ''
+  },
+  unlock: {
+    visible: false,
+    callback: (_er, _re) => { },
   }
 }
 
@@ -45,8 +50,8 @@ export const openWallet = () => {
       dispatch({ type: OPEN_WALLET_OK, data });
       return resolve(data);
     });
-  };
-};
+  }
+}
 
 /**
  * Close wallet
@@ -71,8 +76,8 @@ export const closeWallet = () => {
       dispatch({ type: CLOSE_WALLET_OK, data });
       return resolve(data);
     });
-  };
-};
+  }
+}
 
 /**
  * Set wallet
@@ -81,12 +86,12 @@ export const SET_WALLET = 'SET_WALLET';
 export const SET_WALLET_OK = 'SET_WALLET_OK';
 export const SET_WALLET_FAIL = 'SET_WALLET_FAIL';
 
-export const setWallet = (address, secretKey) => {
+export const setWallet = (address, keystore) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_WALLET });
 
-      if (!address || !secretKey) {
+      if (!address || !keystore) {
         const er = 'Invalid input';
         dispatch({ type: SET_WALLET_FAIL, reason: er });
         return reject(er);
@@ -98,7 +103,7 @@ export const setWallet = (address, secretKey) => {
         return Promise.resolve(re);
       }).then(({ data: user }) => {
         storage.set('address', address);
-        storage.set('secretKey', secretKey);
+        storage.set('keystore', keystore);
         const data = { user };
         const { wallet: { currentTokenAccount } } = getState();
         if (!currentTokenAccount || !user.tokenAccounts.includes(currentTokenAccount)) {
@@ -178,9 +183,8 @@ export const updateWallet = (user) => {
         return reject(er.toString());
       });
     });
-  };
-};
-
+  }
+}
 
 /**
  * Unset wallet
@@ -203,14 +207,14 @@ export const unsetWallet = () => {
 
       // Local storage
       storage.clear('address');
-      storage.clear('secretKey');
+      storage.clear('keystore');
 
       const data = { ...defaultState };
       dispatch({ type: UNSET_WALLET_OK, data });
       return resolve(data);
     });
-  };
-};
+  }
+}
 
 /**
  * Set QR Code
@@ -238,33 +242,52 @@ export const setQRCode = (visible = false, message = '') => {
       dispatch({ type: SET_QRCODE_OK, data });
       return resolve(data);
     });
-  };
-};
+  }
+}
 
 /**
  * Get secret key
  */
-export const GET_SECRET_KEY = 'GET_SECRET_KEY';
-export const GET_SECRET_KEY_OK = 'GET_SECRET_KEY_OK';
-export const GET_SECRET_KEY_FAIL = 'GET_SECRET_KEY_FAIL';
+export const UNLOCK_WALLET = 'UNLOCK_WALLET';
+export const UNLOCK_WALLET_PENDING = 'UNLOCK_WALLET_PENDING';
+export const UNLOCK_WALLET_OK = 'UNLOCK_WALLET_OK';
+export const UNLOCK_WALLET_FAIL = 'UNLOCK_WALLET_FAIL';
 
-export const getSecretKey = () => {
-  return dispatch => {
+export const unlockWallet = () => {
+  return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
-      dispatch({ type: GET_SECRET_KEY });
+      dispatch({ type: UNLOCK_WALLET });
 
-      const secretKey = storage.get('secretKey');
-      if (!secretKey) {
-        const er = 'The secret key is empty';
-        dispatch({ type: GET_SECRET_KEY_FAIL, reason: er });
+      const { wallet: { unlock: { visible: prevVisible } } } = getState();
+      if (prevVisible) {
+        const er = 'There is another pending request';
+        dispatch({ type: UNLOCK_WALLET_FAIL, reason: er });
         return reject(er);
       }
 
-      dispatch({ type: GET_SECRET_KEY_OK, data: {} });
-      return resolve(secretKey);
+      const EMPTY_DATA = {
+        unlock: {
+          visible: false,
+          callback: (_er, _re) => { },
+        }
+      }
+      const callback = (er, password) => {
+        if (er) {
+          dispatch({ type: UNLOCK_WALLET_FAIL, data: { ...EMPTY_DATA }, reason: er });
+          return reject(er);
+        }
+        dispatch({ type: UNLOCK_WALLET_OK, data: { ...EMPTY_DATA } });
+        const keystore = storage.get('keystore');
+        return crypto.fromSolFlareKeystore(keystore, password).then(account => {
+          const secretKey = Buffer.from(account.secretKey).toString('hex');
+          return resolve(secretKey);
+        });
+      }
+      const data = { unlock: { visible: true, callback } }
+      return dispatch({ type: UNLOCK_WALLET_PENDING, data });
     });
-  };
-};
+  }
+}
 
 /**
  * Set main token account
@@ -289,8 +312,8 @@ export const setMainTokenAccount = (tokenAccount) => {
       dispatch({ type: SET_MAIN_TOKEN_ACCOUNT_OK, data });
       return resolve(data);
     });
-  };
-};
+  }
+}
 
 /**
  * Reducder
@@ -325,9 +348,11 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case SET_QRCODE_FAIL:
       return { ...state, ...action.data };
-    case GET_SECRET_KEY_OK:
+    case UNLOCK_WALLET_OK:
       return { ...state, ...action.data };
-    case GET_SECRET_KEY_FAIL:
+    case UNLOCK_WALLET_PENDING:
+      return { ...state, ...action.data };
+    case UNLOCK_WALLET_FAIL:
       return { ...state, ...action.data };
     case SET_MAIN_TOKEN_ACCOUNT_OK:
       return { ...state, ...action.data };

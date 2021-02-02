@@ -61,7 +61,7 @@ class AccountSelection extends Component {
   render() {
     const { classes } = this.props;
     const { label } = this.props;
-    const { data: { address: accountAddress }, tokenAddress } = this.state;
+    const { data: { address: accountAddress, icon }, tokenAddress } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -71,7 +71,7 @@ class AccountSelection extends Component {
           value={accountAddress || ''}
           InputProps={{
             startAdornment: <Avatar className={classes.accountIcon}>
-              <Typography variant="h5">{utils.randEmoji(accountAddress)}</Typography>
+              <Typography variant="h5">{icon}</Typography>
             </Avatar>,
             endAdornment: <AccountList
               tokenAddress={tokenAddress}

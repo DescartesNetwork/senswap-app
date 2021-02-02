@@ -11,22 +11,27 @@ import Button from '@material-ui/core/Button';
 import { PowerSettingsNewRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import { unsetWallet, closeWallet } from 'modules/wallet.reducer';
+import { setError } from 'modules/ui.reducer';
+import { unsetWallet } from 'modules/wallet.reducer';
 
 
 class Wallet extends Component {
 
   disconnect = () => {
-    return this.props.unsetWallet().then(re => {
-      return this.props.closeWallet();
+    const { setError, unsetWallet } = this.props;
+    return unsetWallet().then(re => {
+      // Nothing
     }).catch(er => {
-      return console.error(er);
+      return setError(er);
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { ui: { width }, wallet: { user: { address } } } = this.props;
+    const {
+      ui: { width },
+      wallet: { user: { address } }
+    } = this.props;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -57,7 +62,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  unsetWallet, closeWallet,
+  setError,
+  unsetWallet,
 }, dispatch);
 
 export default withRouter(connect(

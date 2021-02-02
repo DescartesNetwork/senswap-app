@@ -24,7 +24,7 @@ import styles from './styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { getSecretKey } from 'modules/wallet.reducer';
+import { unlockWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -69,13 +69,13 @@ class PayerTransfer extends Component {
 
   onTransfer = () => {
     const { address, amount } = this.state;
-    const { setError, getSecretKey } = this.props;
+    const { setError, unlockWallet } = this.props;
     const lamports = parseFloat(amount) * LAMPORTS_PER_SOL;
     if (!sol.isAddress(address)) return setError('Invalid receiver address');
     if (!lamports || lamports < 0) return setError('Invalid amount');
 
     return this.setState({ loading: true }, () => {
-      return getSecretKey().then(secretKey => {
+      return unlockWallet().then(secretKey => {
         const dstPublicKey = sol.fromAddress(address);
         const payer = sol.fromSecretKey(secretKey);
         return sol.transferLamports(lamports, dstPublicKey, payer);
@@ -164,7 +164,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getSecretKey,
+  unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(
