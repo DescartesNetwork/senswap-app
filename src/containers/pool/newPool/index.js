@@ -123,7 +123,7 @@ class NewPool extends Component {
             <Typography variant="h6">Pool info</Typography>
           </Grid>
           <Grid item>
-            <Tooltip disableFocusListener title="You are the first liquidity provider. Once you are happy with the rate click the button to create a new pool.">
+            <Tooltip title="You are the first liquidity provider. Once you are happy with the rate click the button to create a new pool.">
               <IconButton size="small">
                 <HelpOutlineRounded fontSize="small" />
               </IconButton>

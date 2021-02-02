@@ -141,7 +141,7 @@ class Add extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Tooltip disableFocusListener title="Add a LPT account">
+        <Tooltip title="Add a LPT account">
           <IconButton color="primary" onClick={this.onOpen}>
             <AddRounded />
           </IconButton>

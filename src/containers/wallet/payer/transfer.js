@@ -109,7 +109,7 @@ class PayerTransfer extends Component {
               />
             </Grid>
             <Grid item>
-              <Tooltip disableFocusListener title="Maximum amount">
+              <Tooltip title="Maximum amount">
                 <IconButton
                   color="secondary"
                   size="small"

@@ -192,7 +192,7 @@ class RemoveLiquidity extends Component {
                         <Typography>Expert mode</Typography>
                       </Grid>
                       <Grid item className={classes.stretch}>
-                        <Tooltip disableFocusListener title="The LPT account will be selected, or generated automatically by default. By enabling expert mode, you can controll it by hands.">
+                        <Tooltip title="The LPT account will be selected, or generated automatically by default. By enabling expert mode, you can controll it by hands.">
                           <IconButton size="small">
                             <HelpOutlineRounded fontSize="small" />
                           </IconButton>

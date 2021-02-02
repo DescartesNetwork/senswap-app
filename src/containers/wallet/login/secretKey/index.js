@@ -79,7 +79,7 @@ class SecretKey extends Component {
           <Grid item>
             <Grid container spacing={0} alignItems="center" className={classes.noWrap}>
               <Grid item>
-                <Tooltip disableFocusListener title="Caution! This format is not recommended due to a lack of cryptographical protection. By switching the button, you agree that you will use this function at your own risk.">
+                <Tooltip title="Caution! This format is not recommended due to a lack of cryptographical protection. By switching the button, you agree that you will use this function at your own risk.">
                   <Chip
                     icon={<ErrorRounded className={classes.warning} />}
                     label="Caution!"

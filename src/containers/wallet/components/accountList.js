@@ -140,7 +140,7 @@ class AccountList extends Component {
     const { icon, size, edge, openWallet } = this.props;
 
     return <Fragment>
-      <Tooltip disableFocusListener title="Token List">
+      <Tooltip title="Token List">
         <IconButton color="secondary" size={size} onClick={this.onOpen} edge={edge}>
           {icon}
         </IconButton>
