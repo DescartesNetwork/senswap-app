@@ -32,6 +32,7 @@ class AccountList extends Component {
 
     this.state = {
       anchorEl: null,
+      index: 0,
       data: [],
     }
   }
@@ -51,6 +52,7 @@ class AccountList extends Component {
       wallet: { user: { tokenAccounts } },
       tokenAddress, onChange
     } = this.props;
+    const { index } = this.state;
     if (!tokenAccounts.length) return onChange({});
 
     return Promise.all(tokenAccounts.map(tokenAccount => {
@@ -62,7 +64,7 @@ class AccountList extends Component {
       });
       if (!data || !data.length) return onChange({});
       return this.setState({ data }, () => {
-        const { address } = data[0];
+        const { address } = data[index < data.length ? index : 0];
         return this.onSelect(address);
       });
     }).catch(er => {
@@ -73,22 +75,20 @@ class AccountList extends Component {
   onSelect = (accountAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-    let accountData = {}
-    for (let each of data) {
-      const { address } = each;
-      if (address === accountAddress) accountData = { ...each };
-    }
-    onChange(accountData);
-    return this.onClose();
+    const index = data.findIndex(({ address }) => address === accountAddress);
+    if (index < 0) return onChange({});
+    return this.setState({ index, anchorEl: null }, () => {
+      const accountData = data[index];
+      return onChange(accountData);
+    });
   }
 
   parseBalance = (accountAddress) => {
     const { data } = this.state;
-    for (let each of data) {
-      const { address, amount, token: { decimals } } = each;
-      if (address === accountAddress)
-        return utils.prettyNumber(utils.div(amount, global.BigInt(10 ** decimals)));
-    }
+    const index = data.findIndex(({ address }) => address === accountAddress);
+    if (index < 0) return 0;
+    const { amount, token: { decimals } } = data[index];
+    return utils.prettyNumber(utils.div(amount, global.BigInt(10 ** decimals)));
   }
 
   renderGroupedTokensData = () => {

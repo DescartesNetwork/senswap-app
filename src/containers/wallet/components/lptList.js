@@ -32,6 +32,7 @@ class LPTList extends Component {
 
     this.state = {
       anchorEl: null,
+      index: 0,
       data: [],
     }
   }
@@ -51,6 +52,7 @@ class LPTList extends Component {
       wallet: { user: { lptAccounts } },
       poolAddress, onChange
     } = this.props;
+    const { index } = this.state;
     if (!lptAccounts.length) return onChange({});
 
     return Promise.all(lptAccounts.map(lptAccount => {
@@ -62,7 +64,7 @@ class LPTList extends Component {
       });
       if (!data || !data.length) return onChange({});
       return this.setState({ data }, () => {
-        const { address } = data[0];
+        const { address } = data[index < data.length ? index : 0];
         return this.onSelect(address);
       });
     }).catch(er => {
@@ -73,23 +75,20 @@ class LPTList extends Component {
   onSelect = (lptAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-
-    let lptData = {}
-    for (let each of data) {
-      const { address } = each;
-      if (address === lptAddress) lptData = { ...each };
-    }
-    onChange(lptData);
-    return this.onClose();
+    const index = data.findIndex(({ address }) => address === lptAddress);
+    if (index < 0) return onChange({});
+    return this.setState({ index, anchorEl: null }, () => {
+      const lptData = data[index];
+      return onChange(lptData);
+    });
   }
 
   parseLPT = (lptAddress) => {
     const { data } = this.state;
-    for (let each of data) {
-      const { address, lpt, pool: { token: { decimals } } } = each;
-      if (address === lptAddress)
-        return utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** decimals)));
-    }
+    const index = data.findIndex(({ address }) => address === lptAddress);
+    if (index < 0) return 0;
+    const { lpt, pool: { token: { decimals } } } = data[index];
+    return utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** decimals)));
   }
 
   renderGroupedTokensData = () => {

@@ -51,7 +51,7 @@ class PayerInfo extends Component {
   }
 
   onQRCode = () => {
-    const { address } = this.state;
+    const { wallet: { user: { address } } } = this.props;
     const { setQRCode } = this.props;
     return setQRCode(true, address);
   }
