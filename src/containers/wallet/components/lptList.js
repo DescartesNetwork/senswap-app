@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -96,7 +97,7 @@ class LPTList extends Component {
     const { data } = this.state;
     let groupedTokensData = {};
     data.forEach(({ address: lptAddress, pool: { token } }) => {
-      const symbol = sol.toSymbol(token.symbol);
+      const symbol = ssjs.toSymbol(token.symbol);
       const tokenAddress = token.address.substring(0, 6);
       const key = `${symbol} - ${tokenAddress}`;
       if (!groupedTokensData[key]) groupedTokensData[key] = [];

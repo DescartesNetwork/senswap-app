@@ -30,7 +30,6 @@ storage.get = (key) => {
 }
 
 storage.clear = (key) => {
-  console.log(key)
   storage.set(key, null);
 }
 

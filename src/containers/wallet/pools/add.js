@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -90,7 +91,7 @@ class Add extends Component {
         treasury
       }
     } } = this.state;
-    const symbol = sol.toSymbol(token.symbol);
+    const symbol = ssjs.toSymbol(token.symbol);
     const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
     const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals)));
     const price = utils.div(poolLPT, poolReserve);

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -13,7 +14,6 @@ import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import sol from 'helpers/sol';
 import { setQRCode } from 'modules/wallet.reducer';
 
 
@@ -39,7 +39,7 @@ class TokenInfo extends Component {
   render() {
     const { classes } = this.props;
     const { data: { address, amount, initialized, token } } = this.state;
-    const symbol = initialized ? sol.toSymbol(token.symbol) : 'UNKOWN';
+    const symbol = initialized ? ssjs.toSymbol(token.symbol) : 'UNKOWN';
     const balance = initialized ? utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals))) : 0;
 
     return <Grid container spacing={2}>

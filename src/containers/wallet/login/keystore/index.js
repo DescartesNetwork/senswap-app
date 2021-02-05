@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import fileDownload from 'js-file-download';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
@@ -22,7 +23,6 @@ import {
 } from '@material-ui/icons';
 
 import styles from './styles';
-import crypto from 'helpers/crypto';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 
@@ -78,23 +78,19 @@ class KeyStore extends Component {
     const { setError, setWallet } = this.props;
     if (!keystore) return setError('Please upload your keystore');
     if (!password) return setError('Please enter your password to unlock your wallet');
-    return crypto.fromSolFlareKeystore(keystore, password).then(account => {
-      const address = account.publicKey.toBase58();
-      return setWallet(address, keystore);
-    }).catch(er => {
-      return setError(er);
-    });
+    const account = ssjs.fromKeystore(keystore, password);
+    if (!account) return setError('Corrupted keystore / Incorrect password');
+    const address = account.publicKey.toBase58();
+    return setWallet(address, keystore);
   }
 
   onGen = () => {
     const { newPassword } = this.state;
     const { setError } = this.props;
     if (!newPassword) return setError('Invalid input');
-    return crypto.createKeystore(null, newPassword).then(newKeystore => {
-      return this.setState({ newKeystore });
-    }).catch(er => {
-      return setError(er);
-    });
+    const newKeystore = ssjs.gen(newPassword);
+    if (!newKeystore) return setError('Cannot create a keystore');
+    return this.setState({ newKeystore });
   }
 
   onDownload = () => {

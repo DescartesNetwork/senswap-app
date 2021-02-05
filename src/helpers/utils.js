@@ -1,12 +1,7 @@
 import dateformat from 'dateformat';
-import axios from 'axios';
-import seedrandom from 'seedrandom';
 
 import configs from 'configs';
 import sol from 'helpers/sol';
-import emoji from 'helpers/emoji.json';
-
-const TOTAL_EMOJI = emoji.length;
 
 const Utils = {}
 
@@ -14,10 +9,6 @@ Utils.scrollTop = () => {
   let root = document.getElementById("root");
   if (!root) return;
   root.scrollIntoView();
-}
-
-Utils.randEmoji = (seed) => {
-  return emoji[Math.floor(seedrandom(seed)() * TOTAL_EMOJI)];
 }
 
 Utils.prettyNumber = (num, type = 'long') => {
@@ -101,20 +92,6 @@ Utils.div = (a, b) => {
   }
   decimals = Number(decimals) / (10 ** 9);
   return floor + decimals;
-}
-
-Utils.imgFromCGK = (cgk) => {
-  return new Promise((resolve, reject) => {
-    return axios({
-      method: 'get',
-      url: cgk,
-    }).then(({ data: { image: { large } } }) => {
-      if (!large) return resolve(null);
-      return resolve(large);
-    }).catch(er => {
-      return resolve(null);
-    });
-  });
 }
 
 Utils.explorer = (addressOrTxId) => {

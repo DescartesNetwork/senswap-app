@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -68,7 +69,7 @@ class ListTokenAccount extends Component {
       </Grid>
       {data.map(({ address, amount, initialized, token }) => {
         if (!initialized) return null;
-        const symbol = sol.toSymbol(token.symbol);
+        const symbol = ssjs.toSymbol(token.symbol);
         const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
         const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
 

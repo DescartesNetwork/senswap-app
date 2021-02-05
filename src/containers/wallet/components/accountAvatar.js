@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -7,8 +8,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
 
 import styles from './styles';
-import utils from 'helpers/utils';
-
 
 class AccountAvatar extends Component {
 
@@ -18,7 +17,7 @@ class AccountAvatar extends Component {
 
     return <Tooltip title={title}>
       <Avatar className={classes.accountIcon} onClick={onClick}>
-        <Typography variant="h5">{utils.randEmoji(address)}</Typography>
+        <Typography variant="h5">{ssjs.randEmoji(address)}</Typography>
       </Avatar>
     </Tooltip>
   }

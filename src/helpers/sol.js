@@ -43,8 +43,6 @@ const LPT_SCHEMA = [
   { key: 'initialized', type: 'bool' }
 ];
 
-SOL.FEE = 0.000005;
-
 SOL.isAddress = (address) => {
   try {
     const publicKey = new PublicKey(address);
@@ -75,11 +73,6 @@ SOL.safelyCreateAccount = (programId) => {
       return resolve(account);
     });
   });
-}
-
-SOL.toSymbol = (symbol) => {
-  if (!symbol) return '';
-  return symbol.join('').replace(/\u0000/g, '').replace(/-/g, '');
 }
 
 SOL.fromSecretKey = (secretKey) => {

@@ -1,7 +1,8 @@
+import ssjs from 'senswapjs';
+
 import configs from 'configs';
 import storage from 'helpers/storage';
 import api from 'helpers/api';
-import crypto from 'helpers/crypto';
 
 
 /**
@@ -277,14 +278,15 @@ export const unlockWallet = () => {
           return reject(er);
         }
         const keystore = storage.get('keystore');
-        return crypto.fromSolFlareKeystore(keystore, password).then(account => {
-          const secretKey = Buffer.from(account.secretKey).toString('hex');
-          dispatch({ type: UNLOCK_WALLET_OK, data: { ...EMPTY_DATA } });
-          return resolve(secretKey);
-        }).catch(er => {
+        const account = ssjs.fromKeystore(keystore, password);
+        if (!account) {
+          er = 'Corrupted keystore / Incorrect password';
           dispatch({ type: UNLOCK_WALLET_FAIL, data: { ...EMPTY_DATA }, reason: er });
           return reject(er);
-        });
+        }
+        const secretKey = Buffer.from(account.secretKey).toString('hex');
+        dispatch({ type: UNLOCK_WALLET_OK, data: { ...EMPTY_DATA } });
+        return resolve(secretKey);
       }
       const data = { unlock: { visible: true, callback } }
       return dispatch({ type: UNLOCK_WALLET_PENDING, data });

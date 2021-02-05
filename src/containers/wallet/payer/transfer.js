@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -61,7 +62,7 @@ class PayerTransfer extends Component {
   onMax = () => {
     const { wallet: { user: { address } }, setError } = this.props;
     return sol.getBalance(address).then(balance => {
-      return this.setState({ amount: balance - sol.FEE });
+      return this.setState({ amount: balance - ssjs.BASIC_TX_FEE });
     }).catch(er => {
       return setError(er);
     });

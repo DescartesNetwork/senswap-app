@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -115,7 +116,6 @@ class Faucet extends Component {
     const { classes } = this.props;
     const { tokenAddress, data, link, txId, loading } = this.state;
     const { faucet: { tokens }, openWallet } = this.props;
-    const symbol = sol.toSymbol(data.symbol);
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -158,9 +158,9 @@ class Faucet extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <FormControl variant="outlined" fullWidth>
-                    <InputLabel>{symbol}</InputLabel>
+                    <InputLabel>{ssjs.toSymbol(data.symbol)}</InputLabel>
                     <Select
-                      label={symbol}
+                      label={ssjs.toSymbol(data.symbol)}
                       value={tokenAddress}
                       onChange={this.onSelect}
                     >

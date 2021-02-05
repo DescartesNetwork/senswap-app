@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
@@ -51,7 +52,7 @@ function Row(props) {
   const classes = makeStyles(styles)();
 
   if (!initialized) return null;
-  const symbol = sol.toSymbol(token.symbol);
+  const symbol = ssjs.toSymbol(token.symbol);
   const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
   const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals)));
   const price = utils.div(poolLPT, poolReserve);

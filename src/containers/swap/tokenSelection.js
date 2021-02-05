@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -25,7 +26,6 @@ import {
 
 import styles from './styles';
 import sol from 'helpers/sol';
-import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 
@@ -97,7 +97,7 @@ class TokenSelection extends Component {
       }).then(data => {
         pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
         return Promise.all(pools.map(({ cgk }) => {
-          return utils.imgFromCGK(cgk);
+          return ssjs.imgFromCGK(cgk);
         }));
       }).then(icons => {
         pools = pools.map((pool, i) => {
@@ -193,7 +193,7 @@ class TokenSelection extends Component {
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{sol.toSymbol(symbol)}</Typography>
+        <Typography>{ssjs.toSymbol(symbol)}</Typography>
         <Typography className={classes.owner}>Created by {email || 'Unknown'}</Typography>
       </Grid>
     </Grid>
@@ -263,7 +263,7 @@ class TokenSelection extends Component {
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          value={sol.toSymbol(symbol)}
+          value={ssjs.toSymbol(symbol)}
           onClick={this.onOpen}
           InputProps={{
             startAdornment: <Badge

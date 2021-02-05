@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
@@ -21,7 +22,6 @@ import {
 
 import styles from './styles';
 import sol from 'helpers/sol';
-import crypto from 'helpers/crypto';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 
@@ -56,13 +56,9 @@ class SecretKey extends Component {
     const { setError, setWallet } = this.props;
     const { secretKey, password } = this.state;
     if (!secretKey) return setError('The secret key cannot be empty');
-    return crypto.createKeystore(secretKey, password).then(keystore => {
-      const address = keystore.publicKey;
-      if (!address) return setError('The secret key is incorrect');
-      return setWallet(address, keystore);
-    }).catch(er => {
-      return setError(er);
-    });
+    const keystore = ssjs.encrypt(secretKey, password);
+    if (!keystore) return setError('The secret key is incorrect');
+    return setWallet(keystore.publicKey, keystore);
   }
 
   onGen = () => {
