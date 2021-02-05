@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -40,8 +41,8 @@ class CreateTokenAccount extends Component {
     const { tokenAddress } = this.state;
     if (!tokenAddress) return setError('The token address cannot be empty');
     return unlockWallet().then(secretKey => {
-      const payer = sol.fromSecretKey(secretKey);
-      const tokenPublicKey = sol.fromAddress(tokenAddress);
+      const payer = ssjs.fromSecretKey(secretKey);
+      const tokenPublicKey = ssjs.fromAddress(tokenAddress);
       return sol.newSRC20Account(tokenPublicKey, payer);
     }).then(tokenAccount => {
       const tokenAccounts = [...user.tokenAccounts];

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -16,7 +17,6 @@ import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { addPool } from 'modules/pool.reducer';
 
@@ -67,7 +67,7 @@ class Audit extends Component {
   onSubmit = () => {
     const { poolAddress, email, cgk } = this.state;
     const { setError, addPool } = this.props;
-    if (!sol.isAddress(poolAddress)) return setError('The pool address is invalid');
+    if (!ssjs.isAddress(poolAddress)) return setError('The pool address is invalid');
     if (!email) return setError('The email is empty');
     if (!cgk) return setError('The CoinGecko link is empty');
     const pool = { address: poolAddress, email, cgk }

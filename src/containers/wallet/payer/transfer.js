@@ -72,13 +72,13 @@ class PayerTransfer extends Component {
     const { address, amount } = this.state;
     const { setError, unlockWallet } = this.props;
     const lamports = parseFloat(amount) * LAMPORTS_PER_SOL;
-    if (!sol.isAddress(address)) return setError('Invalid receiver address');
+    if (!ssjs.isAddress(address)) return setError('Invalid receiver address');
     if (!lamports || lamports < 0) return setError('Invalid amount');
 
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
-        const dstPublicKey = sol.fromAddress(address);
-        const payer = sol.fromSecretKey(secretKey);
+        const dstPublicKey = ssjs.fromAddress(address);
+        const payer = ssjs.fromSecretKey(secretKey);
         return sol.transferLamports(lamports, dstPublicKey, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });

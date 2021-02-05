@@ -4,6 +4,7 @@ import {
   TransactionInstruction,
 } from '@solana/web3.js';
 import soproxABI from 'soprox-abi';
+import ssjs from 'senswapjs';
 
 import configs from 'configs';
 
@@ -43,16 +44,6 @@ const LPT_SCHEMA = [
   { key: 'initialized', type: 'bool' }
 ];
 
-SOL.isAddress = (address) => {
-  try {
-    const publicKey = new PublicKey(address);
-    if (!publicKey) throw new Error('Invalid public key');
-    return true;
-  } catch (er) {
-    return false;
-  }
-}
-
 SOL.createAccount = () => {
   const account = new Account();
   return account;
@@ -75,20 +66,6 @@ SOL.safelyCreateAccount = (programId) => {
   });
 }
 
-SOL.fromSecretKey = (secretKey) => {
-  try {
-    const account = new Account(Buffer.from(secretKey, 'hex'));
-    return account;
-  } catch (er) {
-    return null;
-  }
-}
-
-SOL.fromAddress = (address) => {
-  const publicKey = new PublicKey(address);
-  return publicKey;
-}
-
 SOL.createConnection = () => {
   const { sol: { node } } = configs;
   const connection = new Connection(node, 'recent');
@@ -98,7 +75,7 @@ SOL.createConnection = () => {
 SOL.getBalance = (address) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
-    const publicKey = SOL.fromAddress(address);
+    const publicKey = ssjs.fromAddress(address);
     return connection.getBalance(publicKey).then(re => {
       return resolve(re / LAMPORTS_PER_SOL);
     }).catch(er => {
@@ -111,7 +88,7 @@ SOL.getPureTokenData = (tokenAddress) => {
   return new Promise((resolve, reject) => {
     if (!tokenAddress) return reject('Invalid address');
     const connection = SOL.createConnection();
-    return connection.getAccountInfo(SOL.fromAddress(tokenAddress)).then(({ data }) => {
+    return connection.getAccountInfo(ssjs.fromAddress(tokenAddress)).then(({ data }) => {
       if (!data) return reject(`Cannot find data of ${tokenAddress}`);
       const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
       tokenLayout.fromBuffer(data);
@@ -129,13 +106,13 @@ SOL.getTokenData = (accountAddress) => {
     if (!accountAddress) return reject('Invalid public key');
     const connection = SOL.createConnection();
     let result = { address: accountAddress }
-    return connection.getAccountInfo(SOL.fromAddress(accountAddress)).then(({ data: accountData }) => {
+    return connection.getAccountInfo(ssjs.fromAddress(accountAddress)).then(({ data: accountData }) => {
       if (!accountData) return reject(`Cannot find data of ${result.address}`);
       const accountLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
       accountLayout.fromBuffer(accountData);
       let token = { address: accountLayout.value.token };
       result = { ...result, ...accountLayout.value, token };
-      return connection.getAccountInfo(SOL.fromAddress(result.token.address));
+      return connection.getAccountInfo(ssjs.fromAddress(result.token.address));
     }).then(({ data: tokenData }) => {
       if (!tokenData) return reject(`Cannot find data of ${result.token.address}`);
       const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
@@ -154,20 +131,20 @@ SOL.getPurePoolData = (poolAddress) => {
     if (!poolAddress) return reject('Invalid public key');
     const connection = SOL.createConnection();
     let result = { address: poolAddress }
-    return connection.getAccountInfo(SOL.fromAddress(poolAddress)).then(({ data: poolData }) => {
+    return connection.getAccountInfo(ssjs.fromAddress(poolAddress)).then(({ data: poolData }) => {
       if (!poolData) return reject(`Cannot find data of ${result.address}`);
       const poolLayout = new soproxABI.struct(POOL_SCHEMA);
       poolLayout.fromBuffer(poolData);
       let treasury = { address: poolLayout.value.treasury };
       let token = { address: poolLayout.value.token };
       result = { ...result, ...poolLayout.value, treasury, token };
-      return connection.getAccountInfo(SOL.fromAddress(result.token.address));
+      return connection.getAccountInfo(ssjs.fromAddress(result.token.address));
     }).then(({ data: tokenData }) => {
       if (!tokenData) return reject(`Cannot find data of ${result.token.address}`);
       const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
       tokenLayout.fromBuffer(tokenData);
       result.token = { ...result.token, ...tokenLayout.value };
-      return connection.getAccountInfo(SOL.fromAddress(result.treasury.address));
+      return connection.getAccountInfo(ssjs.fromAddress(result.treasury.address));
     }).then(({ data: treasuryData }) => {
       if (!treasuryData) return reject(`Cannot find data of ${result.treasury.address}`);
       const treasuryLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
@@ -186,13 +163,13 @@ SOL.getPoolData = (lptAddress) => {
     if (!lptAddress) return reject('Invalid public key');
     const connection = SOL.createConnection();
     let result = { address: lptAddress }
-    return connection.getAccountInfo(SOL.fromAddress(lptAddress)).then(({ data: lptData }) => {
+    return connection.getAccountInfo(ssjs.fromAddress(lptAddress)).then(({ data: lptData }) => {
       if (!lptData) return reject(`Cannot find data of ${result.address}`);
       const lptLayout = new soproxABI.struct(LPT_SCHEMA);
       lptLayout.fromBuffer(lptData);
       let pool = { address: lptLayout.value.pool };
       result = { ...result, ...lptLayout.value, pool };
-      return connection.getAccountInfo(SOL.fromAddress(result.pool.address));
+      return connection.getAccountInfo(ssjs.fromAddress(result.pool.address));
     }).then(({ data: poolData }) => {
       if (!poolData) return reject(`Cannot find data of ${result.pool.address}`);
       const poolLayout = new soproxABI.struct(POOL_SCHEMA);
@@ -200,13 +177,13 @@ SOL.getPoolData = (lptAddress) => {
       let treasury = { address: poolLayout.value.treasury };
       let token = { address: poolLayout.value.token };
       result.pool = { ...result.pool, ...poolLayout.value, treasury, token };
-      return connection.getAccountInfo(SOL.fromAddress(result.pool.token.address));
+      return connection.getAccountInfo(ssjs.fromAddress(result.pool.token.address));
     }).then(({ data: tokenData }) => {
       if (!tokenData) return reject(`Cannot find data of ${result.pool.token.address}`);
       const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
       tokenLayout.fromBuffer(tokenData);
       result.pool.token = { ...result.pool.token, ...tokenLayout.value };
-      return connection.getAccountInfo(SOL.fromAddress(result.pool.treasury.address));
+      return connection.getAccountInfo(ssjs.fromAddress(result.pool.treasury.address));
     }).then(({ data: treasuryData }) => {
       if (!treasuryData) return reject(`Cannot find data of ${result.pool.treasury.address}`);
       const treasuryLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
@@ -224,7 +201,7 @@ SOL.newToken = (symbol, totalSupply, decimals, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress } } = configs;
-    const programId = SOL.fromAddress(tokenFactoryAddress);
+    const programId = ssjs.fromAddress(tokenFactoryAddress);
     const receiver = new Account();
     const token = new Account();
     const receiverSpace = (new soproxABI.struct(ACCOUNT_SCHEMA)).space;
@@ -293,7 +270,7 @@ SOL.newSRC20Account = (tokenPublicKey, payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress } } = configs;
-    const programId = SOL.fromAddress(tokenFactoryAddress);
+    const programId = ssjs.fromAddress(tokenFactoryAddress);
     const account = new Account();
     const space = (new soproxABI.struct(ACCOUNT_SCHEMA)).space;
     return connection.getMinimumBalanceForRentExemption(space).then(lamports => {
@@ -340,7 +317,7 @@ SOL.newLPTAccount = (payer) => {
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { swapFactoryAddress } } = configs;
-    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
     let lpt = new Account();
     const lptSpace = (new soproxABI.struct(LPT_SCHEMA)).space;
     return connection.getMinimumBalanceForRentExemption(lptSpace).then(lamports => {
@@ -369,8 +346,8 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
 
-    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
-    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const tokenProgramId = ssjs.fromAddress(tokenFactoryAddress);
+    const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
     let pool = null;
     let treasury = new Account();
     let lpt = new Account();
@@ -466,8 +443,8 @@ SOL.addLiquidityWithNewLPTAccount = (reserve, poolPublicKey, treasuryPublicKey, 
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
 
-    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
-    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const tokenProgramId = ssjs.fromAddress(tokenFactoryAddress);
+    const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
     const layout = new soproxABI.struct(
       [
         { key: 'code', type: 'u8' },
@@ -510,8 +487,8 @@ SOL.addLiquidity = (reserve, poolPublicKey, treasuryPublicKey, lptPublicKey, src
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
 
-    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
-    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const tokenProgramId = ssjs.fromAddress(tokenFactoryAddress);
+    const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
     const layout = new soproxABI.struct(
       [
         { key: 'code', type: 'u8' },
@@ -554,8 +531,8 @@ SOL.removeLiquidity = (lpt, poolPublicKey, treasuryPublicKey, lptPublickey, dstT
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
 
-    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
-    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const tokenProgramId = ssjs.fromAddress(tokenFactoryAddress);
+    const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
     const layout = new soproxABI.struct(
       [
         { key: 'code', type: 'u8' },
@@ -609,8 +586,8 @@ SOL.swap = (
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress, swapFactoryAddress } } = configs;
 
-    const tokenProgramId = SOL.fromAddress(tokenFactoryAddress);
-    const swapProgramId = SOL.fromAddress(swapFactoryAddress);
+    const tokenProgramId = ssjs.fromAddress(tokenFactoryAddress);
+    const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
     const layout = new soproxABI.struct(
       [
         { key: 'code', type: 'u8' },
@@ -679,7 +656,7 @@ SOL.transferTokens = (amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer)
   return new Promise((resolve, reject) => {
     const connection = SOL.createConnection();
     const { sol: { tokenFactoryAddress } } = configs;
-    const programId = SOL.fromAddress(tokenFactoryAddress);
+    const programId = ssjs.fromAddress(tokenFactoryAddress);
 
     const layout = new soproxABI.struct(
       [

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -72,7 +73,7 @@ class Issuer extends Component {
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
-        const payer = sol.fromSecretKey(secretKey);
+        const payer = ssjs.fromSecretKey(secretKey);
         return sol.newToken(symbol, totalSupply, decimals, payer);
       }).then(({ token, receiver, txId }) => {
         return this.setState({

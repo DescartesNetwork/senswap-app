@@ -1,7 +1,8 @@
 import dateformat from 'dateformat';
+import ssjs from 'senswapjs';
 
 import configs from 'configs';
-import sol from 'helpers/sol';
+
 
 const Utils = {}
 
@@ -96,7 +97,7 @@ Utils.div = (a, b) => {
 
 Utils.explorer = (addressOrTxId) => {
   const { sol: { cluster } } = configs;
-  if (sol.isAddress(addressOrTxId)) {
+  if (ssjs.isAddress(addressOrTxId)) {
     return `https://explorer.solana.com/address/${addressOrTxId}?cluster=${cluster}`;
   }
   return `https://explorer.solana.com/tx/${addressOrTxId}?cluster=${cluster}`;

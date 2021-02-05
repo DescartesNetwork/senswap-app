@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -95,8 +96,8 @@ class RemoveLiquidity extends Component {
 
       let newAddress = null;
       const { wallet: { user }, updateWallet } = this.props;
-      const payer = sol.fromSecretKey(secretKey);
-      const tokenPublicKey = sol.fromAddress(tokenAddress);
+      const payer = ssjs.fromSecretKey(secretKey);
+      const tokenPublicKey = ssjs.fromAddress(tokenAddress);
       return sol.newSRC20Account(tokenPublicKey, payer).then(tokenAccount => {
         const tokenAccounts = [...user.tokenAccounts];
         newAddress = tokenAccount.publicKey.toBase58();
@@ -129,12 +130,12 @@ class RemoveLiquidity extends Component {
         return this.onAutogenDestinationAddress(token.address, secretKey);
       }).then(dstAddress => {
         const lpt = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-        const lptPublicKey = sol.fromAddress(lptAddress);
-        const poolPublicKey = sol.fromAddress(poolAddress);
-        const treasuryPublicKey = sol.fromAddress(treasury.address);
-        const dstTokenPublickKey = sol.fromAddress(dstAddress);
-        const tokenPublicKey = sol.fromAddress(token.address);
-        const payer = sol.fromSecretKey(secretKey);
+        const lptPublicKey = ssjs.fromAddress(lptAddress);
+        const poolPublicKey = ssjs.fromAddress(poolAddress);
+        const treasuryPublicKey = ssjs.fromAddress(treasury.address);
+        const dstTokenPublickKey = ssjs.fromAddress(dstAddress);
+        const tokenPublicKey = ssjs.fromAddress(token.address);
+        const payer = ssjs.fromSecretKey(secretKey);
         return sol.removeLiquidity(
           lpt,
           poolPublicKey,

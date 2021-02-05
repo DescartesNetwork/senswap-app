@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -115,7 +116,7 @@ class Swap extends Component {
 
   onBidAddress = (bidAddress) => {
     const { setError } = this.props;
-    if (!sol.isAddress(bidAddress)) return setError('Invalid bid address');
+    if (!ssjs.isAddress(bidAddress)) return setError('Invalid bid address');
     return sol.getPurePoolData(bidAddress).then(bidData => {
       return this.setState({ bidData }, this.estimateAmount);
     }).catch(er => {
@@ -129,7 +130,7 @@ class Swap extends Component {
 
   onAskAddress = (askAddress) => {
     const { setError } = this.props;
-    if (!sol.isAddress(askAddress)) return setError('Invalid ask address');
+    if (!ssjs.isAddress(askAddress)) return setError('Invalid ask address');
     return sol.getPurePoolData(askAddress).then(askData => {
       return this.setState({ askData }, this.estimateAmount);
     }).catch(er => {
@@ -149,8 +150,8 @@ class Swap extends Component {
 
       let newAddress = null;
       const { wallet: { user }, updateWallet } = this.props;
-      const payer = sol.fromSecretKey(secretKey);
-      const tokenPublicKey = sol.fromAddress(tokenAddress);
+      const payer = ssjs.fromSecretKey(secretKey);
+      const tokenPublicKey = ssjs.fromAddress(tokenAddress);
       return sol.newSRC20Account(tokenPublicKey, payer).then(tokenAccount => {
         const tokenAccounts = [...user.tokenAccounts];
         newAddress = tokenAccount.publicKey.toBase58();
@@ -174,7 +175,7 @@ class Swap extends Component {
 
     if (!bidInitialized || !askInitialized) return setError('Please wait for data loaded');
     if (!bidAmount) return setError('Invalid bid amount');
-    if (!sol.isAddress(srcAddress)) return setError('Invalid source address');
+    if (!ssjs.isAddress(srcAddress)) return setError('Invalid source address');
 
     let secretKey = null;
     return this.setState({ loading: true }, () => {
@@ -183,15 +184,15 @@ class Swap extends Component {
         return this.onAutogenDestinationAddress(askToken.address, secretKey);
       }).then(dstAddress => {
         const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
-        const payer = sol.fromSecretKey(secretKey);
-        const bidPoolPublicKey = sol.fromAddress(bidAddress);
-        const bidTreasuryPublicKey = sol.fromAddress(bidTreasury.address);
-        const srcTokenPublickKey = sol.fromAddress(srcAddress);
-        const bidTokenPublickKey = sol.fromAddress(bidToken.address);
-        const askPoolPublicKey = sol.fromAddress(askAddress);
-        const askTreasuryPublickKey = sol.fromAddress(askTreasury.address);
-        const dstTokenPublickKey = sol.fromAddress(dstAddress);
-        const askTokenPublicKey = sol.fromAddress(askToken.address);
+        const payer = ssjs.fromSecretKey(secretKey);
+        const bidPoolPublicKey = ssjs.fromAddress(bidAddress);
+        const bidTreasuryPublicKey = ssjs.fromAddress(bidTreasury.address);
+        const srcTokenPublickKey = ssjs.fromAddress(srcAddress);
+        const bidTokenPublickKey = ssjs.fromAddress(bidToken.address);
+        const askPoolPublicKey = ssjs.fromAddress(askAddress);
+        const askTreasuryPublickKey = ssjs.fromAddress(askTreasury.address);
+        const dstTokenPublickKey = ssjs.fromAddress(dstAddress);
+        const askTokenPublicKey = ssjs.fromAddress(askToken.address);
 
         return sol.swap(
           amount,

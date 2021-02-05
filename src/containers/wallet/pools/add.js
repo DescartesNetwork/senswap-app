@@ -39,7 +39,7 @@ class Add extends Component {
   fetchData = () => {
     const { lptAccount } = this.state;
     return this.setState({ loading: true }, () => {
-      if (!sol.isAddress(lptAccount)) return this.setState({ loading: false });
+      if (!ssjs.isAddress(lptAccount)) return this.setState({ loading: false });
       return sol.getPoolData(lptAccount).then(data => {
         return this.setState({ loading: false, data });
       }).catch(er => {

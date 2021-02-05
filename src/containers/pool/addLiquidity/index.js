@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -92,7 +93,7 @@ class AddLiquidity extends Component {
       const { lptData: { address: lptAddress } } = this.state;
       if (lptAddress) return resolve(lptAddress);
 
-      const payer = sol.fromSecretKey(secretKey);
+      const payer = ssjs.fromSecretKey(secretKey);
       return sol.newLPTAccount(payer).then(lptAccount => {
         return resolve(lptAccount);
       }).catch(er => {
@@ -121,12 +122,12 @@ class AddLiquidity extends Component {
       }).then(re => {
         lptAddressOrAccount = re;
         const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-        const poolPublicKey = sol.fromAddress(poolAddress);
-        const treasuryPublicKey = sol.fromAddress(treasury.address);
-        const srcTokenPublickKey = sol.fromAddress(srcAddress);
-        const tokenPublicKey = sol.fromAddress(token.address);
-        const payer = sol.fromSecretKey(secretKey);
-        const lpt = typeof lptAddressOrAccount === 'string' ? sol.fromAddress(lptAddressOrAccount) : lptAddressOrAccount;
+        const poolPublicKey = ssjs.fromAddress(poolAddress);
+        const treasuryPublicKey = ssjs.fromAddress(treasury.address);
+        const srcTokenPublickKey = ssjs.fromAddress(srcAddress);
+        const tokenPublicKey = ssjs.fromAddress(token.address);
+        const payer = ssjs.fromSecretKey(secretKey);
+        const lpt = typeof lptAddressOrAccount === 'string' ? ssjs.fromAddress(lptAddressOrAccount) : lptAddressOrAccount;
         const addLiquidity = typeof lptAddressOrAccount === 'string' ? sol.addLiquidity : sol.addLiquidityWithNewLPTAccount;
         return addLiquidity(
           reserve,

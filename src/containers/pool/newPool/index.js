@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -75,9 +76,9 @@ class NewPool extends Component {
       return unlockWallet().then(secretKey => {
         const reserve = global.BigInt(amount * 10 ** token.decimals);
         const usd = global.BigInt(price * amount * 10 ** token.decimals);
-        const srcTokenPublicKey = sol.fromAddress(address);
-        const tokenPublicKey = sol.fromAddress(token.address);
-        const payer = sol.fromSecretKey(secretKey);
+        const srcTokenPublicKey = ssjs.fromAddress(address);
+        const tokenPublicKey = ssjs.fromAddress(token.address);
+        const payer = ssjs.fromSecretKey(secretKey);
         return sol.newPool(
           reserve,
           usd,

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -87,8 +88,8 @@ class TokenTransfer extends Component {
   onTransfer = () => {
     const { wallet: { currentTokenAccount }, setError, unlockWallet } = this.props;
     const { address } = this.state;
-    if (!sol.isAddress(currentTokenAccount)) return setError('Invalid sender address');
-    if (!sol.isAddress(address)) return setError('Invalid receiver address');
+    if (!ssjs.isAddress(currentTokenAccount)) return setError('Invalid sender address');
+    if (!ssjs.isAddress(address)) return setError('Invalid receiver address');
 
     let decimals = null;
     let tokenAddress = null;
@@ -101,11 +102,11 @@ class TokenTransfer extends Component {
       }).then(secretKey => {
         const amount = this.safelyParseAmount(decimals);
         if (!amount) throw new Error('Invalid amount');
-        if (!sol.isAddress(tokenAddress)) throw new Error('Invalid token address');
-        const tokenPublicKey = sol.fromAddress(tokenAddress);
-        const srcPublicKey = sol.fromAddress(currentTokenAccount);
-        const dstPublicKey = sol.fromAddress(address);
-        const payer = sol.fromSecretKey(secretKey);
+        if (!ssjs.isAddress(tokenAddress)) throw new Error('Invalid token address');
+        const tokenPublicKey = ssjs.fromAddress(tokenAddress);
+        const srcPublicKey = ssjs.fromAddress(currentTokenAccount);
+        const dstPublicKey = ssjs.fromAddress(address);
+        const payer = ssjs.fromSecretKey(secretKey);
         return sol.transferTokens(amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });

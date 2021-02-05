@@ -85,15 +85,15 @@ class Faucet extends Component {
       airdropLamports, airdropTokens,
     } = this.props;
     const { tokenAddress, link } = this.state;
-    if (!sol.isAddress(tokenAddress)) return setError('Invalid token');
+    if (!ssjs.isAddress(tokenAddress)) return setError('Invalid token');
     if (!link) return setError('Please parse the share link into the box');
 
     return this.setState({ loading: true }, () => {
       return airdropLamports(user.address).then(re => {
         return unlockWallet();
       }).then(secretKey => {
-        const payer = sol.fromSecretKey(secretKey);
-        const token = sol.fromAddress(tokenAddress);
+        const payer = ssjs.fromSecretKey(secretKey);
+        const token = ssjs.fromAddress(tokenAddress);
         return sol.newSRC20Account(token, payer);
       }).then(tokenAccount => {
         const dstAddress = tokenAccount.publicKey.toBase58();

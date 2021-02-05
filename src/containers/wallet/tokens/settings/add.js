@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -68,7 +69,7 @@ class AddTokenAccount extends Component {
     return <Grid container spacing={2}>
       <Grid item xs={6}>
         <TextField
-          label={sol.toSymbol(token.symbol)}
+          label={ssjs.toSymbol(token.symbol)}
           variant="outlined"
           color="primary"
           value={token.address}
