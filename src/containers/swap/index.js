@@ -51,6 +51,8 @@ class Swap extends Component {
       bidData: {},
       askData: {},
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   onOpen = (e) => {
@@ -117,7 +119,7 @@ class Swap extends Component {
   onBidAddress = (bidAddress) => {
     const { setError } = this.props;
     if (!ssjs.isAddress(bidAddress)) return setError('Invalid bid address');
-    return sol.getPurePoolData(bidAddress).then(bidData => {
+    return this.swap.getPoolData(bidAddress).then(bidData => {
       return this.setState({ bidData }, this.estimateAmount);
     }).catch(er => {
       return setError(er);
@@ -131,7 +133,7 @@ class Swap extends Component {
   onAskAddress = (askAddress) => {
     const { setError } = this.props;
     if (!ssjs.isAddress(askAddress)) return setError('Invalid ask address');
-    return sol.getPurePoolData(askAddress).then(askData => {
+    return this.swap.getPoolData(askAddress).then(askData => {
       return this.setState({ askData }, this.estimateAmount);
     }).catch(er => {
       return setError(er);

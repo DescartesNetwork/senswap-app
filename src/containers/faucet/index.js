@@ -46,6 +46,8 @@ class Faucet extends Component {
       link: '',
       tokenAddress: '',
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   componentDidMount() {
@@ -67,7 +69,7 @@ class Faucet extends Component {
     const tokenAddress = e.target.value || '';
     const { setError } = this.props;
     return this.setState({ tokenAddress }, () => {
-      if (tokenAddress) return sol.getPureTokenData(tokenAddress).then(data => {
+      if (tokenAddress) return this.src20.getTokenData(tokenAddress).then(data => {
         return this.setState({ ...EMPTY, data });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {

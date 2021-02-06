@@ -14,10 +14,10 @@ class LPTAvatar extends Component {
 
   render() {
     const { classes } = this.props;
-    const { address, title, onClick } = this.props;
+    const { address, title, marginRight, onClick } = this.props;
 
     return <Tooltip title={title}>
-      <Avatar className={classes.lptIcon} onClick={onClick}>
+      <Avatar className={classes.lptIcon} onClick={onClick} style={{ marginRight: marginRight ? 8 : 0 }}>
         <Typography variant="h5">{ssjs.randEmoji(address)}</Typography>
       </Avatar>
     </Tooltip>
@@ -27,12 +27,14 @@ class LPTAvatar extends Component {
 LPTAvatar.defaultProps = {
   address: '',
   title: '',
+  marginRight: false,
   onClick: () => { },
 }
 
 LPTAvatar.propTypes = {
   address: PropTypes.string,
   title: PropTypes.string,
+  marginRight: PropTypes.bool,
   onClick: PropTypes.func,
 }
 

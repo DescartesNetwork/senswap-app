@@ -13,7 +13,6 @@ import TextField from '@material-ui/core/TextField';
 import { AddRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, setMainTokenAccount } from 'modules/wallet.reducer';
 
@@ -26,13 +25,15 @@ class AddTokenAccount extends Component {
       tokenAccount: '',
       data: {},
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   onTokenAccount = (e) => {
     const { setError } = this.props;
     const tokenAccount = e.target.value || '';
     return this.setState({ tokenAccount }, () => {
-      return sol.getTokenData(tokenAccount).then(re => {
+      return this.src20.getAccountData(tokenAccount).then(re => {
         return this.setState({ data: re });
       }).catch(er => {
         return this.setState({ data: {} }, () => {

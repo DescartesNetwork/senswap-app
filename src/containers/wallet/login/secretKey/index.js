@@ -21,7 +21,6 @@ import {
 } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 
@@ -62,7 +61,7 @@ class SecretKey extends Component {
   }
 
   onGen = () => {
-    const account = sol.createAccount();
+    const account = ssjs.createAccount();
     const secretKey = Buffer.from(account.secretKey).toString('hex');
     return this.setState({ secretKey });
   }

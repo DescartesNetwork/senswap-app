@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
@@ -24,6 +25,18 @@ import { setError } from 'modules/ui.reducer';
 import { setWallet, closeWallet } from 'modules/wallet.reducer';
 
 
+/**
+ * Need to call this function in very first age of application
+ * to avoid unexpected exception
+ */
+export const configSenWallet = () => {
+  window.senwallet = {
+    src20: new ssjs.SRC20(),
+    swap: new ssjs.Swap()
+  }
+}
+
+
 class Wallet extends Component {
 
   componentDidMount() {
@@ -33,8 +46,8 @@ class Wallet extends Component {
     if (!address || !keystore) {
       storage.clear('address');
       storage.clear('keystore');
-      return setError('There are some old, but incorrupted, wallet on your browser. We just clear it for safety.')
-    };
+      return;
+    }
     return setWallet(address, keystore).then(re => {
       // Nothing
     }).catch(er => {

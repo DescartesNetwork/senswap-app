@@ -13,10 +13,10 @@ class AccountAvatar extends Component {
 
   render() {
     const { classes } = this.props;
-    const { address, title, onClick } = this.props;
+    const { address, title, marginRight, onClick } = this.props;
 
     return <Tooltip title={title}>
-      <Avatar className={classes.accountIcon} onClick={onClick}>
+      <Avatar className={classes.accountIcon} onClick={onClick} style={{ marginRight: marginRight ? 8 : 0 }}>
         <Typography variant="h5">{ssjs.randEmoji(address)}</Typography>
       </Avatar>
     </Tooltip>
@@ -26,12 +26,14 @@ class AccountAvatar extends Component {
 AccountAvatar.defaultProps = {
   address: '',
   title: '',
+  marginRight: false,
   onClick: () => { },
 }
 
 AccountAvatar.propTypes = {
   address: PropTypes.string,
   title: PropTypes.string,
+  marginRight: PropTypes.bool,
   onClick: PropTypes.func,
 }
 

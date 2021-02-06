@@ -16,14 +16,12 @@ import Link from '@material-ui/core/Link';
 import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
 
-
 import { SendRounded, CloseRounded, EcoRounded } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
 
@@ -43,6 +41,8 @@ class PayerTransfer extends Component {
       address: '',
       amount: '',
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   onAddress = (e) => {
@@ -61,8 +61,8 @@ class PayerTransfer extends Component {
 
   onMax = () => {
     const { wallet: { user: { address } }, setError } = this.props;
-    return sol.getBalance(address).then(balance => {
-      return this.setState({ amount: balance - ssjs.BASIC_TX_FEE });
+    return this.src20.getLamports(address).then(re => {
+      return this.setState({ amount: re / LAMPORTS_PER_SOL - ssjs.BASIC_TX_FEE });
     }).catch(er => {
       return setError(er);
     });
@@ -77,9 +77,8 @@ class PayerTransfer extends Component {
 
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
-        const dstPublicKey = ssjs.fromAddress(address);
         const payer = ssjs.fromSecretKey(secretKey);
-        return sol.transferLamports(lamports, dstPublicKey, payer);
+        return this.src20.transferLamports(lamports, address, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

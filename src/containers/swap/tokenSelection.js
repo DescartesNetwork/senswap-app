@@ -25,7 +25,6 @@ import {
 } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 
@@ -53,6 +52,9 @@ class TokenSelection extends Component {
         pools: [],
       },
     }
+
+    this.src20 = window.senwallet.src20;
+    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -77,7 +79,7 @@ class TokenSelection extends Component {
       if (!tokenAccounts.length) return resolve(pools);
 
       return Promise.all(tokenAccounts.map(tokenAccount => {
-        return sol.getTokenData(tokenAccount);
+        return this.src20.getAccountData(tokenAccount);
       })).then(tokens => {
         const recommendedCondition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
         const newCondition = !tokens.length ? {} : { '$and': tokens.map(({ token: { address } }) => ({ token: { '$ne': address } })) }
@@ -92,7 +94,7 @@ class TokenSelection extends Component {
       }).then(data => {
         pools = data;
         return Promise.all(pools.map(({ address }) => {
-          return sol.getPurePoolData(address);
+          return this.swap.getPoolData(address);
         }));
       }).then(data => {
         pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));

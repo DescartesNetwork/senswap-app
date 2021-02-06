@@ -23,7 +23,6 @@ import {
 } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 
@@ -37,6 +36,9 @@ class PoolSelection extends Component {
       index: 0,
       pools: [],
     }
+
+    this.src20 = window.senwallet.src20;
+    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -59,7 +61,7 @@ class PoolSelection extends Component {
 
     let pools = [];
     return Promise.all(tokenAccounts.map(tokenAccount => {
-      return sol.getTokenData(tokenAccount);
+      return this.src20.getAccountData(tokenAccount);
     })).then(tokens => {
       const condition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
       return getPools(condition, 1000, 0);
@@ -70,7 +72,7 @@ class PoolSelection extends Component {
     }).then(data => {
       pools = data;
       return Promise.all(pools.map(({ address }) => {
-        return sol.getPurePoolData(address);
+        return this.swap.getPoolData(address);
       }));
     }).then(data => {
       pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
@@ -109,7 +111,7 @@ class PoolSelection extends Component {
 
   renderToken = (symbol, icon, email, verified) => {
     const { classes } = this.props;
-    return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+    return <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
       <Grid item>
         <Badge
           badgeContent={
@@ -176,7 +178,7 @@ class PoolSelection extends Component {
                 horizontal: 'left'
               }}
             >
-              <Avatar src={icon} className={classes.iconWithMarginLeft}>
+              <Avatar src={icon} className={classes.iconWithMarginRight}>
                 <HelpOutlineRounded />
               </Avatar>
             </Badge>,

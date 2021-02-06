@@ -18,7 +18,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { AddRounded, CloseRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
@@ -34,17 +33,21 @@ class Add extends Component {
       lptAccount: '',
       data: {},
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   fetchData = () => {
     const { lptAccount } = this.state;
+    const { setError } = this.props;
     return this.setState({ loading: true }, () => {
       if (!ssjs.isAddress(lptAccount)) return this.setState({ loading: false });
-      return sol.getPoolData(lptAccount).then(data => {
+      return this.swap.getLPTData(lptAccount).then(data => {
         return this.setState({ loading: false, data });
       }).catch(er => {
-        console.error(er);
-        return this.setState({ loading: false });
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
       });
     });
   }

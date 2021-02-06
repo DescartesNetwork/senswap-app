@@ -22,7 +22,6 @@ import LPTAvatar from './lptAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
 
@@ -36,6 +35,8 @@ class LPTList extends Component {
       index: 0,
       data: [],
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -57,7 +58,7 @@ class LPTList extends Component {
     if (!lptAccounts.length) return onChange({});
 
     return Promise.all(lptAccounts.map(lptAccount => {
-      return sol.getPoolData(lptAccount);
+      return this.swap.getLPTData(lptAccount);
     })).then(data => {
       if (poolAddress && data) data = data.filter(each => {
         const { pool: { address } } = each;

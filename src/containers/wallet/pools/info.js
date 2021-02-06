@@ -24,9 +24,8 @@ import Paper from '@material-ui/core/Paper';
 
 import { VisibilityRounded, CloseRounded, RemoveRounded } from '@material-ui/icons';
 
-import sol from 'helpers/sol';
-import utils from 'helpers/utils';
 import styles from './styles';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 
@@ -140,6 +139,8 @@ class Info extends Component {
     this.state = {
       data: [],
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -155,9 +156,9 @@ class Info extends Component {
   fetchData = () => {
     const { wallet: { user: { lptAccounts } }, setError } = this.props;
     if (!lptAccounts.length) return;
-    
+
     return Promise.all(lptAccounts.map(lptAccount => {
-      return sol.getPoolData(lptAccount);
+      return this.swap.getLPTData(lptAccount);
     })).then(data => {
       return this.setState({ data });
     }).catch(er => {

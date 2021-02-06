@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -17,7 +18,6 @@ import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { setQRCode } from 'modules/wallet.reducer';
 
@@ -29,6 +29,8 @@ class PayerInfo extends Component {
     this.state = {
       amount: 0,
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   componentDidMount() {
@@ -43,8 +45,8 @@ class PayerInfo extends Component {
 
   fetchData = () => {
     const { wallet: { user: { address } }, setError } = this.props;
-    return sol.getBalance(address).then(re => {
-      return this.setState({ amount: re });
+    return this.src20.getLamports(address).then(re => {
+      return this.setState({ amount: re / LAMPORTS_PER_SOL });
     }).catch(er => {
       return setError(er);
     });

@@ -35,7 +35,7 @@ class Wallet extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="flex-end" className={classes.noWrap}>
+        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
             <Typography variant={width < 600 ? 'h4' : 'h2'}>SenWallet</Typography>
           </Grid>

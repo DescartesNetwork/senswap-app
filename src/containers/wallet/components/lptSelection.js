@@ -43,7 +43,7 @@ class LPTSelection extends Component {
           value={lptAddress || ''}
           onChange={this.onAddress}
           InputProps={{
-            startAdornment: <LPTAvatar address={lptAddress} />,
+            startAdornment: <LPTAvatar address={lptAddress} marginRight />,
             endAdornment: <LPTList
               poolAddress={poolAddress}
               size="medium"

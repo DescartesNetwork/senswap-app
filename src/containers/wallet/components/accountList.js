@@ -22,7 +22,6 @@ import AccountAvatar from './accountAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
 
@@ -36,6 +35,8 @@ class AccountList extends Component {
       index: 0,
       data: [],
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   componentDidMount() {
@@ -57,7 +58,7 @@ class AccountList extends Component {
     if (!tokenAccounts.length) return onChange({});
 
     return Promise.all(tokenAccounts.map(tokenAccount => {
-      return sol.getTokenData(tokenAccount);
+      return this.src20.getAccountData(tokenAccount);
     })).then(data => {
       if (tokenAddress && data) data = data.filter(each => {
         const { token: { address } } = each;

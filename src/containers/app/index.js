@@ -12,7 +12,7 @@ import Drain from 'components/drain';
 // Static component
 import Header from 'containers/header';
 import UiUx from 'containers/uiux';
-import Wallet from 'containers/wallet';
+import Wallet, { configSenWallet } from 'containers/wallet';
 // Pages
 import NotFound from 'containers/404';
 import Swap from 'containers/swap';
@@ -25,6 +25,9 @@ import Audit from 'containers/audit';
 import theme from 'static/styles/theme';
 import 'static/styles/index.css';
 import styles from './styles';
+
+// Correctly initialize wallet
+configSenWallet();
 
 
 class App extends Component {

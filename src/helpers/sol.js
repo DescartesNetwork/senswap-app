@@ -1,6 +1,6 @@
 import {
   Account, Connection, PublicKey, Transaction,
-  LAMPORTS_PER_SOL, SystemProgram, sendAndConfirmTransaction,
+  SystemProgram, sendAndConfirmTransaction,
   TransactionInstruction,
 } from '@solana/web3.js';
 import soproxABI from 'soprox-abi';
@@ -44,157 +44,10 @@ const LPT_SCHEMA = [
   { key: 'initialized', type: 'bool' }
 ];
 
-SOL.createAccount = () => {
-  const account = new Account();
-  return account;
-}
-
-SOL.safelyCreateAccount = (programId) => {
-  const safelyCreateAccountCallback = (_programId, cb) => {
-    const account = new Account();
-    const seeds = [account.publicKey.toBuffer()];
-    return PublicKey.createProgramAddress(seeds, _programId).then(re => {
-      return cb(account);
-    }).catch(er => {
-      return safelyCreateAccountCallback(_programId, cb);
-    });
-  }
-  return new Promise((resolve, reject) => {
-    return safelyCreateAccountCallback(programId, account => {
-      return resolve(account);
-    });
-  });
-}
-
 SOL.createConnection = () => {
   const { sol: { node } } = configs;
   const connection = new Connection(node, 'recent');
   return connection;
-}
-
-SOL.getBalance = (address) => {
-  return new Promise((resolve, reject) => {
-    const connection = SOL.createConnection();
-    const publicKey = ssjs.fromAddress(address);
-    return connection.getBalance(publicKey).then(re => {
-      return resolve(re / LAMPORTS_PER_SOL);
-    }).catch(er => {
-      return reject(er);
-    });
-  })
-}
-
-SOL.getPureTokenData = (tokenAddress) => {
-  return new Promise((resolve, reject) => {
-    if (!tokenAddress) return reject('Invalid address');
-    const connection = SOL.createConnection();
-    return connection.getAccountInfo(ssjs.fromAddress(tokenAddress)).then(({ data }) => {
-      if (!data) return reject(`Cannot find data of ${tokenAddress}`);
-      const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
-      tokenLayout.fromBuffer(data);
-      const result = { address: tokenAddress, ...tokenLayout.value };
-      return resolve(result);
-    }).catch(er => {
-      console.error(er);
-      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
-    });
-  });
-}
-
-SOL.getTokenData = (accountAddress) => {
-  return new Promise((resolve, reject) => {
-    if (!accountAddress) return reject('Invalid public key');
-    const connection = SOL.createConnection();
-    let result = { address: accountAddress }
-    return connection.getAccountInfo(ssjs.fromAddress(accountAddress)).then(({ data: accountData }) => {
-      if (!accountData) return reject(`Cannot find data of ${result.address}`);
-      const accountLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
-      accountLayout.fromBuffer(accountData);
-      let token = { address: accountLayout.value.token };
-      result = { ...result, ...accountLayout.value, token };
-      return connection.getAccountInfo(ssjs.fromAddress(result.token.address));
-    }).then(({ data: tokenData }) => {
-      if (!tokenData) return reject(`Cannot find data of ${result.token.address}`);
-      const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
-      tokenLayout.fromBuffer(tokenData);
-      result.token = { ...result.token, ...tokenLayout.value };
-      return resolve(result);
-    }).catch(er => {
-      console.error(er);
-      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
-    });
-  });
-}
-
-SOL.getPurePoolData = (poolAddress) => {
-  return new Promise((resolve, reject) => {
-    if (!poolAddress) return reject('Invalid public key');
-    const connection = SOL.createConnection();
-    let result = { address: poolAddress }
-    return connection.getAccountInfo(ssjs.fromAddress(poolAddress)).then(({ data: poolData }) => {
-      if (!poolData) return reject(`Cannot find data of ${result.address}`);
-      const poolLayout = new soproxABI.struct(POOL_SCHEMA);
-      poolLayout.fromBuffer(poolData);
-      let treasury = { address: poolLayout.value.treasury };
-      let token = { address: poolLayout.value.token };
-      result = { ...result, ...poolLayout.value, treasury, token };
-      return connection.getAccountInfo(ssjs.fromAddress(result.token.address));
-    }).then(({ data: tokenData }) => {
-      if (!tokenData) return reject(`Cannot find data of ${result.token.address}`);
-      const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
-      tokenLayout.fromBuffer(tokenData);
-      result.token = { ...result.token, ...tokenLayout.value };
-      return connection.getAccountInfo(ssjs.fromAddress(result.treasury.address));
-    }).then(({ data: treasuryData }) => {
-      if (!treasuryData) return reject(`Cannot find data of ${result.treasury.address}`);
-      const treasuryLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
-      treasuryLayout.fromBuffer(treasuryData);
-      result.treasury = { ...result.treasury, ...treasuryLayout.value };
-      return resolve(result);
-    }).catch(er => {
-      console.error(er);
-      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
-    });
-  });
-}
-
-SOL.getPoolData = (lptAddress) => {
-  return new Promise((resolve, reject) => {
-    if (!lptAddress) return reject('Invalid public key');
-    const connection = SOL.createConnection();
-    let result = { address: lptAddress }
-    return connection.getAccountInfo(ssjs.fromAddress(lptAddress)).then(({ data: lptData }) => {
-      if (!lptData) return reject(`Cannot find data of ${result.address}`);
-      const lptLayout = new soproxABI.struct(LPT_SCHEMA);
-      lptLayout.fromBuffer(lptData);
-      let pool = { address: lptLayout.value.pool };
-      result = { ...result, ...lptLayout.value, pool };
-      return connection.getAccountInfo(ssjs.fromAddress(result.pool.address));
-    }).then(({ data: poolData }) => {
-      if (!poolData) return reject(`Cannot find data of ${result.pool.address}`);
-      const poolLayout = new soproxABI.struct(POOL_SCHEMA);
-      poolLayout.fromBuffer(poolData);
-      let treasury = { address: poolLayout.value.treasury };
-      let token = { address: poolLayout.value.token };
-      result.pool = { ...result.pool, ...poolLayout.value, treasury, token };
-      return connection.getAccountInfo(ssjs.fromAddress(result.pool.token.address));
-    }).then(({ data: tokenData }) => {
-      if (!tokenData) return reject(`Cannot find data of ${result.pool.token.address}`);
-      const tokenLayout = new soproxABI.struct(TOKEN_SCHEMA);
-      tokenLayout.fromBuffer(tokenData);
-      result.pool.token = { ...result.pool.token, ...tokenLayout.value };
-      return connection.getAccountInfo(ssjs.fromAddress(result.pool.treasury.address));
-    }).then(({ data: treasuryData }) => {
-      if (!treasuryData) return reject(`Cannot find data of ${result.pool.treasury.address}`);
-      const treasuryLayout = new soproxABI.struct(ACCOUNT_SCHEMA);
-      treasuryLayout.fromBuffer(treasuryData);
-      result.pool.treasury = { ...result.pool.treasury, ...treasuryLayout.value };
-      return resolve(result);
-    }).catch(er => {
-      console.error(er);
-      return reject('Cannot read on-chain data. It usually happens, because the internet connection is unstable.');
-    })
-  });
 }
 
 SOL.newToken = (symbol, totalSupply, decimals, payer) => {
@@ -354,7 +207,7 @@ SOL.newPool = (reserve, stable, srcTokenPublickKey, tokenPublicKey, payer) => {
     const poolSpace = (new soproxABI.struct(POOL_SCHEMA)).space;
     const treasurySpace = (new soproxABI.struct(ACCOUNT_SCHEMA)).space;
     const lptSpace = (new soproxABI.struct(LPT_SCHEMA)).space;
-    return SOL.safelyCreateAccount(swapProgramId).then(re => {
+    return ssjs.createStrictAccount(swapProgramId).then(re => {
       pool = re;
       // Create accounts
       return connection.getMinimumBalanceForRentExemption(poolSpace)
@@ -625,68 +478,6 @@ SOL.swap = (
       console.error(er);
       return reject('Cannot swap');
     })
-  });
-}
-
-SOL.transferLamports = (lamports, dstPublicKey, payer) => {
-  return new Promise((resolve, reject) => {
-    const connection = SOL.createConnection();
-    const instruction = SystemProgram.transfer({
-      fromPubkey: payer.publicKey,
-      toPubkey: dstPublicKey,
-      lamports
-    });
-    const transaction = new Transaction();
-    transaction.add(instruction);
-    return sendAndConfirmTransaction(
-      connection, transaction, [payer],
-      {
-        skipPreflight: true,
-        commitment: 'recent'
-      }).then(txId => {
-        return resolve(txId);
-      }).catch(er => {
-        console.error(er);
-        return reject('Cannot transfer lamports');
-      });
-  });
-}
-
-SOL.transferTokens = (amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer) => {
-  return new Promise((resolve, reject) => {
-    const connection = SOL.createConnection();
-    const { sol: { tokenFactoryAddress } } = configs;
-    const programId = ssjs.fromAddress(tokenFactoryAddress);
-
-    const layout = new soproxABI.struct(
-      [
-        { key: 'code', type: 'u8' },
-        { key: 'amount', type: 'u64' }
-      ],
-      { code: 3, amount });
-    const instruction = new TransactionInstruction({
-      keys: [
-        { pubkey: payer.publicKey, isSigner: true, isWritable: false },
-        { pubkey: tokenPublicKey, isSigner: false, isWritable: false },
-        { pubkey: srcPublicKey, isSigner: false, isWritable: true },
-        { pubkey: dstPublicKey, isSigner: false, isWritable: true },
-      ],
-      programId,
-      data: layout.toBuffer()
-    });
-    const transaction = new Transaction();
-    transaction.add(instruction);
-    return sendAndConfirmTransaction(
-      connection, transaction, [payer],
-      {
-        skipPreflight: true,
-        commitment: 'recent'
-      }).then(txId => {
-        return resolve(txId);
-      }).catch(er => {
-        console.error(er);
-        return reject('Cannot transfer token');
-      });
   });
 }
 

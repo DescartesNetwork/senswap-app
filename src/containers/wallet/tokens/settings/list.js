@@ -14,7 +14,6 @@ import TextField from '@material-ui/core/TextField';
 import { RemoveRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
@@ -27,6 +26,8 @@ class ListTokenAccount extends Component {
     this.state = {
       data: []
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   componentDidMount() {
@@ -42,7 +43,7 @@ class ListTokenAccount extends Component {
   fetchData = () => {
     const { wallet: { user: { tokenAccounts } }, setError } = this.props;
     return Promise.all(tokenAccounts.map(tokenAccount => {
-      return sol.getTokenData(tokenAccount);
+      return this.src20.getAccountData(tokenAccount);
     })).then(re => {
       return this.setState({ data: re });
     }).catch(er => {

@@ -13,7 +13,6 @@ import AccountList from './accountList';
 import AccountAvatar from './accountAvatar';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 
 
@@ -25,6 +24,8 @@ class AccountSelection extends Component {
       tokenAddress: '',
       data: {},
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -40,7 +41,7 @@ class AccountSelection extends Component {
   fetchData = () => {
     const { poolAddress } = this.props;
     if (!poolAddress) return this.setState({ tokenAddress: '' });
-    return sol.getPurePoolData(poolAddress).then(re => {
+    return this.swap.getPoolData(poolAddress).then(re => {
       if (!re) return this.setState({ tokenAddress: '' });
       const { token: { address: tokenAddress } } = re;
       return this.setState({ tokenAddress });
@@ -68,7 +69,7 @@ class AccountSelection extends Component {
           variant="outlined"
           value={accountAddress || ''}
           InputProps={{
-            startAdornment: <AccountAvatar address={accountAddress} />,
+            startAdornment: <AccountAvatar address={accountAddress} marginRight />,
             endAdornment: <AccountList
               tokenAddress={tokenAddress}
               size="medium"

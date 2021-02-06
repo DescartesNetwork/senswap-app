@@ -20,7 +20,6 @@ import { SendRounded, CloseRounded, EcoRounded } from '@material-ui/icons';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
@@ -40,6 +39,8 @@ class TokenTransfer extends Component {
       address: '',
       amount: '',
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   onAddress = (e) => {
@@ -54,7 +55,7 @@ class TokenTransfer extends Component {
 
   onMax = () => {
     const { wallet: { currentTokenAccount }, setError } = this.props;
-    return sol.getTokenData(currentTokenAccount).then(data => {
+    return this.src20.getAccountData(currentTokenAccount).then(data => {
       const { amount, token } = data;
       return this.setState({ amount: utils.div(amount, global.BigInt(10 ** token.decimals)).toString() });
     }).catch(er => {
@@ -94,7 +95,7 @@ class TokenTransfer extends Component {
     let decimals = null;
     let tokenAddress = null;
     return this.setState({ loading: true }, () => {
-      return sol.getTokenData(currentTokenAccount).then(re => {
+      return this.src20.getAccountData(currentTokenAccount).then(re => {
         const { token: { address: _address, decimals: _decimals } } = re;
         tokenAddress = _address;
         decimals = _decimals;
@@ -102,12 +103,8 @@ class TokenTransfer extends Component {
       }).then(secretKey => {
         const amount = this.safelyParseAmount(decimals);
         if (!amount) throw new Error('Invalid amount');
-        if (!ssjs.isAddress(tokenAddress)) throw new Error('Invalid token address');
-        const tokenPublicKey = ssjs.fromAddress(tokenAddress);
-        const srcPublicKey = ssjs.fromAddress(currentTokenAccount);
-        const dstPublicKey = ssjs.fromAddress(address);
         const payer = ssjs.fromSecretKey(secretKey);
-        return sol.transferTokens(amount, tokenPublicKey, srcPublicKey, dstPublicKey, payer);
+        return this.src20.transferTokens(amount, tokenAddress, currentTokenAccount, address, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

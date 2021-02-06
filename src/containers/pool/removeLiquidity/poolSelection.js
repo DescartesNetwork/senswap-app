@@ -23,7 +23,6 @@ import {
 } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 
@@ -37,6 +36,8 @@ class PoolSelection extends Component {
       index: 0,
       pools: [],
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -59,7 +60,7 @@ class PoolSelection extends Component {
 
     let pools = [];
     return Promise.all(lptAccounts.map(lptAccount => {
-      return sol.getPoolData(lptAccount);
+      return this.swap.getLPTData(lptAccount);
     })).then(data => {
       pools = data.map(({ pool }) => pool);
       const condition = { '$or': pools.map(({ address }) => ({ address })) }
@@ -113,7 +114,7 @@ class PoolSelection extends Component {
 
   renderToken = (symbol, icon, email, verified) => {
     const { classes } = this.props;
-    return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+    return <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
       <Grid item>
         <Badge
           badgeContent={
@@ -180,7 +181,7 @@ class PoolSelection extends Component {
                 horizontal: 'left'
               }}
             >
-              <Avatar src={icon} className={classes.iconWithMarginLeft}>
+              <Avatar src={icon} className={classes.iconWithMarginRight}>
                 <HelpOutlineRounded />
               </Avatar>
             </Badge>,
