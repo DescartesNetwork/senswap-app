@@ -41,6 +41,8 @@ class Issuer extends Component {
       supply: 5000000000,
       decimals: 9,
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   onSymbol = (e) => {
@@ -74,7 +76,7 @@ class Issuer extends Component {
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
         const payer = ssjs.fromSecretKey(secretKey);
-        return sol.newToken(symbol, totalSupply, decimals, payer);
+        return this.src20.newToken(symbol, totalSupply, decimals, payer);
       }).then(({ token, receiver, txId }) => {
         return this.setState({
           ...EMPTY,

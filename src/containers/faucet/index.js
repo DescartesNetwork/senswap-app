@@ -23,7 +23,6 @@ import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, openWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
@@ -95,8 +94,7 @@ class Faucet extends Component {
         return unlockWallet();
       }).then(secretKey => {
         const payer = ssjs.fromSecretKey(secretKey);
-        const token = ssjs.fromAddress(tokenAddress);
-        return sol.newSRC20Account(token, payer);
+        return this.src20.newAccount(tokenAddress, payer);
       }).then(tokenAccount => {
         const dstAddress = tokenAccount.publicKey.toBase58();
         return airdropTokens(dstAddress, tokenAddress);

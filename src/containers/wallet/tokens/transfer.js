@@ -54,8 +54,8 @@ class TokenTransfer extends Component {
   }
 
   onMax = () => {
-    const { wallet: { currentTokenAccount }, setError } = this.props;
-    return this.src20.getAccountData(currentTokenAccount).then(data => {
+    const { wallet: { mainAccount }, setError } = this.props;
+    return this.src20.getAccountData(mainAccount).then(data => {
       const { amount, token } = data;
       return this.setState({ amount: utils.div(amount, global.BigInt(10 ** token.decimals)).toString() });
     }).catch(er => {
@@ -87,15 +87,15 @@ class TokenTransfer extends Component {
   }
 
   onTransfer = () => {
-    const { wallet: { currentTokenAccount }, setError, unlockWallet } = this.props;
+    const { wallet: { mainAccount }, setError, unlockWallet } = this.props;
     const { address } = this.state;
-    if (!ssjs.isAddress(currentTokenAccount)) return setError('Invalid sender address');
+    if (!ssjs.isAddress(mainAccount)) return setError('Invalid sender address');
     if (!ssjs.isAddress(address)) return setError('Invalid receiver address');
 
     let decimals = null;
     let tokenAddress = null;
     return this.setState({ loading: true }, () => {
-      return this.src20.getAccountData(currentTokenAccount).then(re => {
+      return this.src20.getAccountData(mainAccount).then(re => {
         const { token: { address: _address, decimals: _decimals } } = re;
         tokenAddress = _address;
         decimals = _decimals;
@@ -104,7 +104,7 @@ class TokenTransfer extends Component {
         const amount = this.safelyParseAmount(decimals);
         if (!amount) throw new Error('Invalid amount');
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.transferTokens(amount, tokenAddress, currentTokenAccount, address, payer);
+        return this.src20.transferTokens(amount, tokenAddress, mainAccount, address, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

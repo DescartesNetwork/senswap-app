@@ -51,6 +51,8 @@ class RemoveLiquidity extends Component {
       amount: 0,
       advance: false,
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   onOpen = (e) => {
@@ -97,8 +99,7 @@ class RemoveLiquidity extends Component {
       let newAddress = null;
       const { wallet: { user }, updateWallet } = this.props;
       const payer = ssjs.fromSecretKey(secretKey);
-      const tokenPublicKey = ssjs.fromAddress(tokenAddress);
-      return sol.newSRC20Account(tokenPublicKey, payer).then(tokenAccount => {
+      return this.src20.newAccount(tokenAddress, payer).then(tokenAccount => {
         const tokenAccounts = [...user.tokenAccounts];
         newAddress = tokenAccount.publicKey.toBase58();
         tokenAccounts.push(newAddress);

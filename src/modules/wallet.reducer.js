@@ -16,7 +16,7 @@ const defaultState = {
     tokenAccounts: [],
     lptAccounts: [],
   },
-  currentTokenAccount: null,
+  mainAccount: null,
   qrcode: {
     visible: false,
     message: ''
@@ -106,9 +106,9 @@ export const setWallet = (address, keystore) => {
         storage.set('address', address);
         storage.set('keystore', keystore);
         const data = { user };
-        const { wallet: { currentTokenAccount } } = getState();
-        if (!currentTokenAccount || !user.tokenAccounts.includes(currentTokenAccount)) {
-          data.currentTokenAccount = user.tokenAccounts[0];
+        const { wallet: { mainAccount } } = getState();
+        if (!mainAccount || !user.tokenAccounts.includes(mainAccount)) {
+          data.mainAccount = user.tokenAccounts[0];
         }
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
@@ -173,9 +173,9 @@ export const updateWallet = (user) => {
       const { api: { base } } = configs;
       return api.put(base + '/user', { user }).then(({ data: user }) => {
         const data = { user };
-        const { wallet: { currentTokenAccount } } = getState();
-        if (!currentTokenAccount || !user.tokenAccounts.includes(currentTokenAccount)) {
-          data.currentTokenAccount = user.tokenAccounts[0];
+        const { wallet: { mainAccount } } = getState();
+        if (!mainAccount || !user.tokenAccounts.includes(mainAccount)) {
+          data.mainAccount = user.tokenAccounts[0];
         }
         dispatch({ type: UPDATE_WALLET_OK, data });
         return resolve(data);
@@ -306,14 +306,14 @@ export const setMainTokenAccount = (tokenAccount) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_MAIN_TOKEN_ACCOUNT });
 
-      const { wallet: { currentTokenAccount } } = getState();
-      if (currentTokenAccount === tokenAccount) {
+      const { wallet: { mainAccount } } = getState();
+      if (mainAccount === tokenAccount) {
         const er = 'The token account is same';
         dispatch({ type: SET_MAIN_TOKEN_ACCOUNT_FAIL, reason: er });
         return reject(er);
       }
 
-      const data = { currentTokenAccount: tokenAccount };
+      const data = { mainAccount: tokenAccount };
       dispatch({ type: SET_MAIN_TOKEN_ACCOUNT_OK, data });
       return resolve(data);
     });

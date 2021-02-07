@@ -9,22 +9,30 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { EmojiObjectsRounded } from '@material-ui/icons';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
+
+const EMPTY = {
+  loading: false,
+  txId: '',
+  tokenAddress: '',
+}
 
 class CreateTokenAccount extends Component {
   constructor() {
     super();
 
     this.state = {
-      tokenAddress: '',
+      ...EMPTY
     }
+
+    this.src20 = window.senwallet.src20;
   }
 
   onTokenAddress = (e) => {
@@ -39,28 +47,29 @@ class CreateTokenAccount extends Component {
       updateWallet, unlockWallet
     } = this.props;
     const { tokenAddress } = this.state;
-    if (!tokenAddress) return setError('The token address cannot be empty');
-    return unlockWallet().then(secretKey => {
-      const payer = ssjs.fromSecretKey(secretKey);
-      const tokenPublicKey = ssjs.fromAddress(tokenAddress);
-      return sol.newSRC20Account(tokenPublicKey, payer);
-    }).then(tokenAccount => {
-      const tokenAccounts = [...user.tokenAccounts];
-      tokenAccounts.push(tokenAccount.publicKey.toBase58());
-      return updateWallet({ ...user, tokenAccounts });
-    }).then(re => {
-      return this.setState({ tokenAddress: '' });
-    }).catch(er => {
-      return setError(er);
+    if (!ssjs.isAddress(tokenAddress)) return setError('The account address cannot be empty');
+    return this.setState({ loading: true }, () => {
+      return unlockWallet().then(secretKey => {
+        const payer = ssjs.fromSecretKey(secretKey);
+        return this.src20.newAccount(tokenAddress, payer);
+      }).then(({ account, txId }) => {
+        return this.setState({ ...EMPTY, txId }, () => {
+          const tokenAccounts = [...user.tokenAccounts];
+          tokenAccounts.push(account.publicKey.toBase58());
+          return updateWallet({ ...user, tokenAccounts });
+        });
+      }).catch(er => {
+        return setError(er);
+      });
     });
   }
 
   render() {
-    const { tokenAddress } = this.state;
+    const { tokenAddress, loading } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="body2">Create a new token account</Typography>
+        <Typography variant="body2">New account</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -70,10 +79,16 @@ class CreateTokenAccount extends Component {
           onChange={this.onTokenAddress}
           value={tokenAddress}
           InputProps={{
-            endAdornment: <IconButton color="primary" onClick={this.newAccount} edge="end" >
-              <EmojiObjectsRounded />
+            endAdornment: <IconButton
+              color="primary"
+              onClick={this.newAccount}
+              edge="end"
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={17} /> : <EmojiObjectsRounded />}
             </IconButton>
           }}
+          disabled={loading}
           fullWidth
         />
       </Grid>
