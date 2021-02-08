@@ -19,7 +19,6 @@ import { BaseCard } from 'components/cards';
 
 import styles from './styles';
 import configs from 'configs';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';

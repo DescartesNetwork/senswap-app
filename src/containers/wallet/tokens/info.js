@@ -14,7 +14,7 @@ import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import { setQRCode, setMainTokenAccount } from 'modules/wallet.reducer';
+import { setQRCode, setMainAccount } from 'modules/wallet.reducer';
 
 
 class TokenInfo extends Component {
@@ -33,10 +33,10 @@ class TokenInfo extends Component {
   }
 
   onData = (data = {}) => {
-    const { setMainTokenAccount } = this.props;
+    const { setMainAccount } = this.props;
     return this.setState({ data }, () => {
       const { address } = data;
-      if (ssjs.isAddress(address)) return setMainTokenAccount(address);
+      if (ssjs.isAddress(address)) return setMainAccount(address);
     });
   }
 
@@ -78,7 +78,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setQRCode, setMainTokenAccount,
+  setQRCode, setMainAccount,
 }, dispatch);
 
 export default withRouter(connect(

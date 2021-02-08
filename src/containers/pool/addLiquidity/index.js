@@ -27,7 +27,6 @@ import AccountSelection from 'containers/wallet/components/accountSelection';
 import PoolSelection from './poolSelection';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
@@ -51,6 +50,8 @@ class AddLiquidity extends Component {
       amount: 0,
       advance: false,
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   onOpen = (e) => {
@@ -94,8 +95,8 @@ class AddLiquidity extends Component {
       if (lptAddress) return resolve(lptAddress);
 
       const payer = ssjs.fromSecretKey(secretKey);
-      return sol.newLPTAccount(payer).then(lptAccount => {
-        return resolve(lptAccount);
+      return this.swap.newLPT(payer).then(({ lpt }) => {
+        return resolve(lpt);
       }).catch(er => {
         return reject(er);
       });
@@ -122,20 +123,15 @@ class AddLiquidity extends Component {
       }).then(re => {
         lptAddressOrAccount = re;
         const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-        const poolPublicKey = ssjs.fromAddress(poolAddress);
-        const treasuryPublicKey = ssjs.fromAddress(treasury.address);
-        const srcTokenPublickKey = ssjs.fromAddress(srcAddress);
-        const tokenPublicKey = ssjs.fromAddress(token.address);
         const payer = ssjs.fromSecretKey(secretKey);
-        const lpt = typeof lptAddressOrAccount === 'string' ? ssjs.fromAddress(lptAddressOrAccount) : lptAddressOrAccount;
-        const addLiquidity = typeof lptAddressOrAccount === 'string' ? sol.addLiquidity : sol.addLiquidityWithNewLPTAccount;
+        const addLiquidity = typeof lptAddressOrAccount === 'string' ? this.swap.addLiquidity : this.swap.addLiquidityWithNewLPT;
         return addLiquidity(
           reserve,
-          poolPublicKey,
-          treasuryPublicKey,
-          lpt,
-          srcTokenPublickKey,
-          tokenPublicKey,
+          poolAddress,
+          treasury.address,
+          lptAddressOrAccount,
+          srcAddress,
+          token.address,
           payer
         );
       }).then(re => {
@@ -143,9 +139,9 @@ class AddLiquidity extends Component {
         const { wallet: { user }, updateWallet } = this.props;
         const lptAccounts = [...user.lptAccounts];
         const lptAddress = typeof lptAddressOrAccount === 'string' ? lptAddressOrAccount : lptAddressOrAccount.publicKey.toBase58();
-        lptAccounts.push(lptAddress);
+        if (!lptAccounts.includes(lptAddress)) lptAccounts.push(lptAddress);
         return updateWallet({ ...user, lptAccounts });
-      }).then(re => {
+      }).then(_ => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {

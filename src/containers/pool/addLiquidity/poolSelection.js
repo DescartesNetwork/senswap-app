@@ -77,7 +77,8 @@ class PoolSelection extends Component {
     }).then(data => {
       pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
       return Promise.all(pools.map(({ cgk }) => {
-        return ssjs.imgFromCGK(cgk);
+        if (cgk) return ssjs.imgFromCGK(cgk);
+        return null;
       }));
     }).then(icons => {
       pools = pools.map((pool, i) => {

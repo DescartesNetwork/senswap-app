@@ -297,24 +297,24 @@ export const unlockWallet = () => {
 /**
  * Set main token account
  */
-export const SET_MAIN_TOKEN_ACCOUNT = 'SET_MAIN_TOKEN_ACCOUNT';
-export const SET_MAIN_TOKEN_ACCOUNT_OK = 'SET_MAIN_TOKEN_ACCOUNT_OK';
-export const SET_MAIN_TOKEN_ACCOUNT_FAIL = 'SET_MAIN_TOKEN_ACCOUNT_FAIL';
+export const SET_MAIN_ACCOUNT = 'SET_MAIN_ACCOUNT';
+export const SET_MAIN_ACCOUNT_OK = 'SET_MAIN_ACCOUNT_OK';
+export const SET_MAIN_ACCOUNT_FAIL = 'SET_MAIN_ACCOUNT_FAIL';
 
-export const setMainTokenAccount = (tokenAccount) => {
+export const setMainAccount = (tokenAccount) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
-      dispatch({ type: SET_MAIN_TOKEN_ACCOUNT });
+      dispatch({ type: SET_MAIN_ACCOUNT });
 
       const { wallet: { mainAccount } } = getState();
       if (mainAccount === tokenAccount) {
         const er = 'The token account is same';
-        dispatch({ type: SET_MAIN_TOKEN_ACCOUNT_FAIL, reason: er });
+        dispatch({ type: SET_MAIN_ACCOUNT_FAIL, reason: er });
         return reject(er);
       }
 
       const data = { mainAccount: tokenAccount };
-      dispatch({ type: SET_MAIN_TOKEN_ACCOUNT_OK, data });
+      dispatch({ type: SET_MAIN_ACCOUNT_OK, data });
       return resolve(data);
     });
   }
@@ -359,9 +359,9 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case UNLOCK_WALLET_FAIL:
       return { ...state, ...action.data };
-    case SET_MAIN_TOKEN_ACCOUNT_OK:
+    case SET_MAIN_ACCOUNT_OK:
       return { ...state, ...action.data };
-    case SET_MAIN_TOKEN_ACCOUNT_FAIL:
+    case SET_MAIN_ACCOUNT_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

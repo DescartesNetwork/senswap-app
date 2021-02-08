@@ -26,7 +26,6 @@ import TokenSelection from './tokenSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
@@ -187,26 +186,18 @@ class Swap extends Component {
       }).then(dstAddress => {
         const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        const bidPoolPublicKey = ssjs.fromAddress(bidAddress);
-        const bidTreasuryPublicKey = ssjs.fromAddress(bidTreasury.address);
-        const srcTokenPublickKey = ssjs.fromAddress(srcAddress);
-        const bidTokenPublickKey = ssjs.fromAddress(bidToken.address);
-        const askPoolPublicKey = ssjs.fromAddress(askAddress);
-        const askTreasuryPublickKey = ssjs.fromAddress(askTreasury.address);
-        const dstTokenPublickKey = ssjs.fromAddress(dstAddress);
-        const askTokenPublicKey = ssjs.fromAddress(askToken.address);
 
-        return sol.swap(
+        return this.swap.swap(
           amount,
-          payer,
-          bidPoolPublicKey,
-          bidTreasuryPublicKey,
-          srcTokenPublickKey,
-          bidTokenPublickKey,
-          askPoolPublicKey,
-          askTreasuryPublickKey,
-          dstTokenPublickKey,
-          askTokenPublicKey,
+          bidAddress,
+          bidTreasury.address,
+          srcAddress,
+          bidToken.address,
+          askAddress,
+          askTreasury.address,
+          dstAddress,
+          askToken.address,
+          payer
         );
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });

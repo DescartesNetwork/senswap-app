@@ -27,7 +27,6 @@ import LPTSelection from 'containers/wallet/components/lptSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet } from 'modules/wallet.reducer';
@@ -53,6 +52,7 @@ class RemoveLiquidity extends Component {
     }
 
     this.src20 = window.senwallet.src20;
+    this.swap = window.senwallet.swap;
   }
 
   onOpen = (e) => {
@@ -131,19 +131,14 @@ class RemoveLiquidity extends Component {
         return this.onAutogenDestinationAddress(token.address, secretKey);
       }).then(dstAddress => {
         const lpt = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-        const lptPublicKey = ssjs.fromAddress(lptAddress);
-        const poolPublicKey = ssjs.fromAddress(poolAddress);
-        const treasuryPublicKey = ssjs.fromAddress(treasury.address);
-        const dstTokenPublickKey = ssjs.fromAddress(dstAddress);
-        const tokenPublicKey = ssjs.fromAddress(token.address);
         const payer = ssjs.fromSecretKey(secretKey);
-        return sol.removeLiquidity(
+        return this.swap.removeLiquidity(
           lpt,
-          poolPublicKey,
-          treasuryPublicKey,
-          lptPublicKey,
-          dstTokenPublickKey,
-          tokenPublicKey,
+          poolAddress,
+          treasury.address,
+          lptAddress,
+          dstAddress,
+          token.address,
           payer
         );
       }).then(txId => {

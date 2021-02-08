@@ -59,8 +59,8 @@ class PoolSelection extends Component {
     if (!lptAccounts.length) return;
 
     let pools = [];
-    return Promise.all(lptAccounts.map(lptAccount => {
-      return this.swap.getLPTData(lptAccount);
+    return Promise.all(lptAccounts.map(lptAddress => {
+      return this.swap.getLPTData(lptAddress);
     })).then(data => {
       pools = data.map(({ pool }) => pool);
       const condition = { '$or': pools.map(({ address }) => ({ address })) }
@@ -79,7 +79,8 @@ class PoolSelection extends Component {
         return { ...pool }
       });
       return Promise.all(pools.map(({ cgk }) => {
-        return ssjs.imgFromCGK(cgk);
+        if (cgk) return ssjs.imgFromCGK(cgk);
+        return null;
       }));
     }).then(icons => {
       pools = pools.map((pool, i) => {

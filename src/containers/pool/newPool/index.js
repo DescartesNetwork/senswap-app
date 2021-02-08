@@ -22,7 +22,6 @@ import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
@@ -43,6 +42,8 @@ class NewPool extends Component {
       ...EMPTY,
       accountData: {},
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   onClear = () => {
@@ -74,16 +75,14 @@ class NewPool extends Component {
     let txId = '';
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
-        const reserve = global.BigInt(amount * 10 ** token.decimals);
-        const usd = global.BigInt(price * amount * 10 ** token.decimals);
-        const srcTokenPublicKey = ssjs.fromAddress(address);
-        const tokenPublicKey = ssjs.fromAddress(token.address);
+        const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
+        const value = global.BigInt(price * amount) * global.BigInt(10 ** token.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        return sol.newPool(
+        return this.swap.newPool(
           reserve,
-          usd,
-          srcTokenPublicKey,
-          tokenPublicKey,
+          value,
+          address,
+          token.address,
           payer
         );
       }).then(({ pool, lpt, txId: refTxId }) => {
@@ -93,7 +92,7 @@ class NewPool extends Component {
         const lptAccounts = [...user.lptAccounts];
         lptAccounts.push(lptAddress);
         return updateWallet({ ...user, lptAccounts });
-      }).then(re => {
+      }).then(_ => {
         return this.setState({ ...EMPTY, txId, poolAddress });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {

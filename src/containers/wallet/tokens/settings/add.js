@@ -14,7 +14,7 @@ import { AddRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, setMainTokenAccount } from 'modules/wallet.reducer';
+import { updateWallet, setMainAccount } from 'modules/wallet.reducer';
 
 
 class AddTokenAccount extends Component {
@@ -47,7 +47,7 @@ class AddTokenAccount extends Component {
     const {
       wallet: { user },
       setError,
-      updateWallet, setMainTokenAccount
+      updateWallet, setMainAccount
     } = this.props;
     const { tokenAccount } = this.state;
     if (!tokenAccount) return setError('Token account cannot be empty');
@@ -56,7 +56,7 @@ class AddTokenAccount extends Component {
     const tokenAccounts = [...user.tokenAccounts];
     tokenAccounts.push(tokenAccount);
     return updateWallet({ ...user, tokenAccounts }).then(re => {
-      return setMainTokenAccount(tokenAccount);
+      return setMainAccount(tokenAccount);
     }).then(re => {
       return this.setState({ data: {}, tokenAccount: '' });
     }).catch(er => {
@@ -150,7 +150,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, setMainTokenAccount,
+  updateWallet, setMainAccount,
 }, dispatch);
 
 export default withRouter(connect(
