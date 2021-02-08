@@ -14,6 +14,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { EmojiObjectsRounded } from '@material-ui/icons';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
@@ -48,18 +49,27 @@ class CreateTokenAccount extends Component {
     } = this.props;
     const { tokenAddress } = this.state;
     if (!ssjs.isAddress(tokenAddress)) return setError('The account address cannot be empty');
+
+    let newAccount = null;
+    let txId = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
+        const path = sol.tokenPath(tokenAddress, 0);
+        newAccount = ssjs.deriveChild(secretKey, path);
+        console.log(newAccount.publicKey.toBase58())
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.newAccount(tokenAddress, payer);
-      }).then(({ account, txId }) => {
-        return this.setState({ ...EMPTY, txId }, () => {
-          const tokenAccounts = [...user.tokenAccounts];
-          tokenAccounts.push(account.publicKey.toBase58());
-          return updateWallet({ ...user, tokenAccounts });
-        });
+        return this.src20.newAccount(newAccount, tokenAddress, payer);
+      }).then(re => {
+        txId = re;
+        const tokenAccounts = [...user.tokenAccounts];
+        tokenAccounts.push(newAccount.publicKey.toBase58());
+        return updateWallet({ ...user, tokenAccounts });
+      }).then(_ => {
+        return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        return setError(er);
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }

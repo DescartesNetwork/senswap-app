@@ -30,15 +30,12 @@ class AddTokenAccount extends Component {
   }
 
   onTokenAccount = (e) => {
-    const { setError } = this.props;
     const tokenAccount = e.target.value || '';
     return this.setState({ tokenAccount }, () => {
       return this.src20.getAccountData(tokenAccount).then(re => {
         return this.setState({ data: re });
-      }).catch(er => {
-        return this.setState({ data: {} }, () => {
-          return setError(er);
-        });
+      }).catch(_ => {
+        return this.setState({ data: {} });
       });
     });
   }
@@ -55,9 +52,9 @@ class AddTokenAccount extends Component {
 
     const tokenAccounts = [...user.tokenAccounts];
     tokenAccounts.push(tokenAccount);
-    return updateWallet({ ...user, tokenAccounts }).then(re => {
+    return updateWallet({ ...user, tokenAccounts }).then(_ => {
       return setMainAccount(tokenAccount);
-    }).then(re => {
+    }).then(_ => {
       return this.setState({ data: {}, tokenAccount: '' });
     }).catch(er => {
       return setError(er);
