@@ -27,6 +27,7 @@ import {
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
+import { getPoolData } from 'modules/bucket.reducer';
 
 
 class TokenSelection extends Component {
@@ -53,7 +54,6 @@ class TokenSelection extends Component {
       },
     }
 
-    this.src20 = window.senwallet.src20;
     this.swap = window.senwallet.swap;
   }
 
@@ -73,28 +73,24 @@ class TokenSelection extends Component {
 
   fetchPools = (typeOrCondition, limit, page) => {
     return new Promise((resolve, reject) => {
-      const { wallet: { user: { tokenAccounts } } } = this.props;
-      const { getPools, getPool } = this.props;
+      const { wallet: { user: { tokens } } } = this.props;
+      const { getPools, getPool, getPoolData } = this.props;
       let pools = [];
-      if (!tokenAccounts.length) return resolve(pools);
+      if (!tokens.length) return resolve(pools);
 
-      return Promise.all(tokenAccounts.map(tokenAccount => {
-        return this.src20.getAccountData(tokenAccount);
-      })).then(tokens => {
-        const recommendedCondition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
-        const newCondition = !tokens.length ? {} : { '$and': tokens.map(({ token: { address } }) => ({ token: { '$ne': address } })) }
-        let condition = typeOrCondition;
-        if (typeOrCondition === 'recommended') condition = recommendedCondition;
-        if (typeOrCondition === 'new') condition = newCondition;
-        return getPools(condition, limit, page);
-      }).then(poolIds => {
+      const recommendedCondition = { '$or': tokens.map(tokenAddress => ({ token: tokenAddress })) }
+      const newCondition = !tokens.length ? {} : { '$and': tokens.map(tokenAddress => ({ token: { '$ne': tokenAddress } })) }
+      let condition = typeOrCondition;
+      if (typeOrCondition === 'recommended') condition = recommendedCondition;
+      if (typeOrCondition === 'new') condition = newCondition;
+      return getPools(condition, limit, page).then(poolIds => {
         return Promise.all(poolIds.map(({ _id }) => {
           return getPool(_id);
         }));
       }).then(data => {
         pools = data;
         return Promise.all(pools.map(({ address }) => {
-          return this.swap.getPoolData(address);
+          return getPoolData(address);
         }));
       }).then(data => {
         pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
@@ -320,6 +316,7 @@ class TokenSelection extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  bucket: state.bucket,
   wallet: state.wallet,
   pool: state.pool,
 });
@@ -327,6 +324,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
+  getPoolData,
 }, dispatch);
 
 TokenSelection.defaultProps = {

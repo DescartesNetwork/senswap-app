@@ -23,6 +23,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -54,8 +55,12 @@ class TokenTransfer extends Component {
   }
 
   onMax = () => {
-    const { wallet: { mainAccount }, setError } = this.props;
-    return this.src20.getAccountData(mainAccount).then(data => {
+    const {
+      wallet: { mainAccount },
+      getAccountData,
+      setError
+    } = this.props;
+    return getAccountData(mainAccount).then(data => {
       const { amount, token } = data;
       return this.setState({ amount: utils.div(amount, global.BigInt(10 ** token.decimals)).toString() });
     }).catch(er => {
@@ -87,7 +92,12 @@ class TokenTransfer extends Component {
   }
 
   onTransfer = () => {
-    const { wallet: { mainAccount }, setError, unlockWallet } = this.props;
+    const {
+      wallet: { mainAccount },
+      setError,
+      unlockWallet,
+      getAccountData
+    } = this.props;
     const { address } = this.state;
     if (!ssjs.isAddress(mainAccount)) return setError('Invalid sender address');
     if (!ssjs.isAddress(address)) return setError('Invalid receiver address');
@@ -95,7 +105,7 @@ class TokenTransfer extends Component {
     let decimals = null;
     let tokenAddress = null;
     return this.setState({ loading: true }, () => {
-      return this.src20.getAccountData(mainAccount).then(re => {
+      return getAccountData(mainAccount).then(re => {
         const { token: { address: _address, decimals: _decimals } } = re;
         tokenAddress = _address;
         decimals = _decimals;
@@ -185,11 +195,13 @@ class TokenTransfer extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   unlockWallet,
+  getAccountData,
 }, dispatch);
 
 export default withRouter(connect(

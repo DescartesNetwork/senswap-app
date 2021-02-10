@@ -23,6 +23,7 @@ import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, openWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
@@ -89,21 +90,22 @@ class Faucet extends Component {
     if (!ssjs.isAddress(tokenAddress)) return setError('Invalid token');
     if (!link) return setError('Please parse the share link into the box');
 
+    let txId = null;
     return this.setState({ loading: true }, () => {
       return airdropLamports(user.address).then(re => {
         return unlockWallet();
       }).then(secretKey => {
-        const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.newAccount(tokenAddress, payer);
-      }).then(tokenAccount => {
-        const dstAddress = tokenAccount.publicKey.toBase58();
+        return sol.newSRC20Account(tokenAddress, secretKey);
+      }).then(({ account, txId }) => {
+        const dstAddress = account.publicKey.toBase58();
         return airdropTokens(dstAddress, tokenAddress);
-      }).then(({ dstAddress, txId }) => {
-        return this.setState({ ...EMPTY, txId }, () => {
-          const tokenAccounts = [...user.tokenAccounts];
-          tokenAccounts.push(dstAddress);
-          return updateWallet({ ...user, tokenAccounts });
-        });
+      }).then(({ txId: refTxId }) => {
+        txId = refTxId;
+        const tokens = [...user.tokens];
+        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
+        return updateWallet({ ...user, tokens });
+      }).then(re => {
+        return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
           return setError(er);

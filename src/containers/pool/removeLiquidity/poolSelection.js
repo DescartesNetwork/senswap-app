@@ -41,16 +41,16 @@ class PoolSelection extends Component {
   }
 
   componentDidMount() {
-    this.fetchPools();
+    this.fetchData();
   }
 
   componentDidUpdate(prevProps) {
     const { wallet: { user: prevUser } } = prevProps;
     const { wallet: { user } } = this.props;
-    if (!isEqual(user, prevUser)) this.fetchPools();
+    if (!isEqual(user, prevUser)) this.fetchData();
   }
 
-  fetchPools = () => {
+  fetchData = () => {
     const {
       wallet: { user: { lptAccounts } },
       setError,

@@ -50,20 +50,15 @@ class CreateTokenAccount extends Component {
     const { tokenAddress } = this.state;
     if (!ssjs.isAddress(tokenAddress)) return setError('The account address cannot be empty');
 
-    let newAccount = null;
     let txId = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
-        const path = sol.tokenPath(tokenAddress, 0);
-        newAccount = ssjs.deriveChild(secretKey, path);
-        console.log(newAccount.publicKey.toBase58())
-        const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.newAccount(newAccount, tokenAddress, payer);
-      }).then(re => {
-        txId = re;
-        const tokenAccounts = [...user.tokenAccounts];
-        tokenAccounts.push(newAccount.publicKey.toBase58());
-        return updateWallet({ ...user, tokenAccounts });
+        return sol.newSRC20Account(tokenAddress, secretKey);
+      }).then(({ account, txId: refTxId }) => {
+        txId = refTxId;
+        const tokens = [...user.tokens];
+        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
+        return updateWallet({ ...user, tokens });
       }).then(_ => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

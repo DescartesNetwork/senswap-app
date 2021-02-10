@@ -26,6 +26,7 @@ import TokenSelection from './tokenSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
@@ -152,12 +153,11 @@ class Swap extends Component {
 
       let newAddress = null;
       const { wallet: { user }, updateWallet } = this.props;
-      const payer = ssjs.fromSecretKey(secretKey);
-      return this.src20.newAccount(tokenAddress, payer).then(tokenAccount => {
-        const tokenAccounts = [...user.tokenAccounts];
-        newAddress = tokenAccount.publicKey.toBase58();
-        tokenAccounts.push(newAddress);
-        return updateWallet({ ...user, tokenAccounts });
+      return sol.newSRC20Account(tokenAddress, secretKey).then(({ account, txId }) => {
+        newAddress = account.publicKey.toBase58();
+        const tokens = [...user.tokens];
+        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
+        return updateWallet({ ...user, tokens });
       }).then(re => {
         return resolve(newAddress);
       }).catch(er => {

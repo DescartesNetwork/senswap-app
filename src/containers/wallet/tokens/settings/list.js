@@ -8,15 +8,15 @@ import ssjs from 'senswapjs';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 
-import { RemoveRounded } from '@material-ui/icons';
+import { } from '@material-ui/icons';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet } from 'modules/wallet.reducer';
+import { unlockWallet, updateWallet } from 'modules/wallet.reducer';
 
 
 class ListTokenAccount extends Component {
@@ -41,21 +41,18 @@ class ListTokenAccount extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { tokenAccounts } }, setError } = this.props;
-    return Promise.all(tokenAccounts.map(tokenAccount => {
-      return this.src20.getAccountData(tokenAccount);
-    })).then(re => {
-      return this.setState({ data: re });
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  removeToken = (address) => {
-    const { wallet: { user }, setError, updateWallet } = this.props;
-    const tokenAccounts = user.tokenAccounts.filter(tokenAccount => tokenAccount !== address);
-    return updateWallet({ ...user, tokenAccounts }).then(re => {
-      // Nothing
+    const {
+      wallet: { user: { tokens } },
+      setError,
+      unlockWallet,
+    } = this.props;
+    return unlockWallet().then(secretKey => {
+      return Promise.all(tokens.map(tokenAddress => {
+        return sol.scanSRC20Account(tokenAddress, secretKey);
+      }));
+    }).then(data => {
+      data = data.map(({ data }) => data).flat();
+      return this.setState({ data });
     }).catch(er => {
       return setError(er);
     });
@@ -83,15 +80,6 @@ class ListTokenAccount extends Component {
                 color="primary"
                 value={address}
                 helperText={`Token: ${token.address}`}
-                InputProps={{
-                  startAdornment: <IconButton
-                    color="primary"
-                    onClick={() => this.removeToken(address)}
-                    edge="start"
-                  >
-                    <RemoveRounded />
-                  </IconButton>
-                }}
                 fullWidth
               />
             </Grid>
@@ -119,7 +107,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet,
+  unlockWallet, updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

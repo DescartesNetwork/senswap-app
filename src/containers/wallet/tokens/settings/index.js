@@ -16,7 +16,6 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { CloseRounded, SettingsRounded } from '@material-ui/icons';
 
 import ListTokenAccount from './list';
-import AddTokenAccount from './add';
 import CreateTokenAccount from './create';
 
 import styles from './styles';
@@ -65,9 +64,6 @@ class TokenSettings extends Component {
           </DialogTitle>
           <DialogContent>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <AddTokenAccount />
-              </Grid>
               <Grid item xs={12}>
                 <CreateTokenAccount />
               </Grid>

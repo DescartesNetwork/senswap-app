@@ -21,8 +21,10 @@ import Unlock from './unlock';
 
 import styles from './styles';
 import storage from 'helpers/storage';
+import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { setWallet, closeWallet } from 'modules/wallet.reducer';
+import { unlockWallet, setWallet, updateWallet, closeWallet } from 'modules/wallet.reducer';
+import { setItem } from 'modules/bucket.reducer';
 
 
 /**
@@ -30,6 +32,11 @@ import { setWallet, closeWallet } from 'modules/wallet.reducer';
  * to avoid unexpected exception
  */
 export const configSenWallet = () => {
+  // Need it cause https://github.com/GoogleChromeLabs/jsbi/issues/30
+  global.BigInt.prototype.toJSON = function () {
+    return this.toString();
+  }
+  // Global access
   window.senwallet = {
     src20: new ssjs.SRC20(),
     swap: new ssjs.Swap()
@@ -49,7 +56,40 @@ class Wallet extends Component {
       return;
     }
     return setWallet(address, keystore).then(re => {
-      // Nothing
+      return this.fetchData();
+    }).catch(er => {
+      return setError(er);
+    });
+  }
+
+  fetchData = () => {
+    const {
+      setError,
+      unlockWallet, updateWallet,
+      setItem,
+    } = this.props;
+    return unlockWallet().then(secretKey => {
+      const { wallet: { user: { tokens } } } = this.props;
+      return Promise.all(tokens.map(tokenAddress => {
+        return sol.scanSRC20Account(tokenAddress, secretKey);
+      }));
+    }).then(data => {
+      data = data.map(({ data }) => data).flat();
+      return Promise.all(data.map(accountData => {
+        return setItem(accountData);
+      }));
+    }).then(re => {
+      const data = re.map(each => {
+        return Object.keys(each)[0];
+      });
+      const { wallet } = this.props;
+      const accounts = [...wallet.accounts];
+      data.forEach(accountAddress => {
+        if (!accounts.includes(accountAddress))
+          return accounts.push(accountAddress);
+      });
+      const mainAccount = accounts[0];
+      return updateWallet({ accounts, mainAccount });
     }).catch(er => {
       return setError(er);
     });
@@ -115,7 +155,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  setWallet, closeWallet,
+  unlockWallet, setWallet, updateWallet, closeWallet,
+  setItem,
 }, dispatch);
 
 export default withRouter(connect(

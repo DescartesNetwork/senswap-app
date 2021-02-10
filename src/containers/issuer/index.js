@@ -19,14 +19,13 @@ import { BaseCard } from 'components/cards';
 
 import styles from './styles';
 import configs from 'configs';
+import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
-  tokenAddress: '',
-  accountAddress: '',
   txId: ''
 }
 
@@ -62,7 +61,11 @@ class Issuer extends Component {
 
   onCreate = () => {
     const { symbol: refSymbol, supply: refSupply, decimals: refDecimals } = this.state;
-    const { wallet: { user }, setError, unlockWallet, updateWallet } = this.props;
+    const {
+      wallet: { user },
+      setError,
+      unlockWallet, updateWallet
+    } = this.props;
 
     const decimals = parseInt(refDecimals) || 0;
     const supply = parseInt(refSupply) || 0;
@@ -70,23 +73,26 @@ class Issuer extends Component {
     if (refSymbol.length !== 4) return setError('Symbol must include 4 characters');
     if (supply < 1 || supply > 1000000000000) return setError('Total supply must be grearer than0, and less than or equal to 1000000000000');
 
+    const token = ssjs.createAccount();
+    const tokenAddress = token.publicKey.toBase58();
+    let secretKey = null;
+    let txId = null;
     const symbol = refSymbol.split('');
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(secretKey => {
+      return unlockWallet().then(refSecretKey => {
+        secretKey = refSecretKey;
+        return sol.scanSRC20Account(tokenAddress, secretKey);
+      }).then(({ nextAccount: receiver }) => {
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.newToken(symbol, totalSupply, decimals, payer);
-      }).then(({ token, receiver, txId }) => {
-        return this.setState({
-          ...EMPTY,
-          tokenAddress: token.publicKey.toBase58(),
-          accountAddress: receiver.publicKey.toBase58(),
-          txId
-        }, () => {
-          const tokenAccounts = [...user.tokenAccounts];
-          tokenAccounts.push(receiver.publicKey.toBase58());
-          return updateWallet({ ...user, tokenAccounts });
-        });
+        return this.src20.newToken(symbol, totalSupply, decimals, receiver, token, payer);
+      }).then(refTxId => {
+        txId = refTxId;
+        const tokens = [...user.tokens];
+        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
+        return updateWallet({ ...user, tokens });
+      }).then(re => {
+        return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
           return setError(er);

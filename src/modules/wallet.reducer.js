@@ -13,9 +13,10 @@ const defaultState = {
   visible: false,
   user: {
     address: null,
-    tokenAccounts: [],
+    tokens: [],
     lptAccounts: [],
   },
+  accounts: [],
   mainAccount: null,
   qrcode: {
     visible: false,
@@ -102,14 +103,12 @@ export const setWallet = (address, keystore) => {
       return api.get(base + '/user', { address }).then(re => {
         if (!re.data) return api.post(base + '/user', { user: { address } });
         return Promise.resolve(re);
-      }).then(({ data: user }) => {
+      }).then(re => {
         storage.set('address', address);
         storage.set('keystore', keystore);
-        const data = { user };
-        const { wallet: { mainAccount } } = getState();
-        if (!mainAccount || !user.tokenAccounts.includes(mainAccount)) {
-          data.mainAccount = user.tokenAccounts[0];
-        }
+        const { wallet } = getState();
+        const user = { ...wallet.user, ...re.data }
+        const data = { user }
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
@@ -159,29 +158,49 @@ export const UPDATE_WALLET = 'UPDATE_WALLET';
 export const UPDATE_WALLET_OK = 'UPDATE_WALLET_OK';
 export const UPDATE_WALLET_FAIL = 'UPDATE_WALLET_FAIL';
 
-export const updateWallet = (user) => {
-  return (dispatch, getState) => {
+export const updateWallet = (data) => {
+  return dispatch => {
     return new Promise((resolve, reject) => {
       dispatch({ type: UPDATE_WALLET });
 
-      if (!user) {
-        const er = 'Invalid input';
+      if (!data) {
+        const er = 'Invalid data';
         dispatch({ type: UPDATE_WALLET_FAIL, reason: er });
+        return reject(er);
+      }
+
+      dispatch({ type: UPDATE_WALLET_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
+ * Sync wallet
+ */
+export const SYNC_WALLET = 'SYNC_WALLET';
+export const SYNC_WALLET_OK = 'SYNC_WALLET_OK';
+export const SYNC_WALLET_FAIL = 'SYNC_WALLET_FAIL';
+
+export const syncWallet = (user) => {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: SYNC_WALLET });
+
+      if (!user) {
+        const er = 'Invalid data';
+        dispatch({ type: SYNC_WALLET_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
       return api.put(base + '/user', { user }).then(({ data: user }) => {
-        const data = { user };
-        const { wallet: { mainAccount } } = getState();
-        if (!mainAccount || !user.tokenAccounts.includes(mainAccount)) {
-          data.mainAccount = user.tokenAccounts[0];
-        }
-        dispatch({ type: UPDATE_WALLET_OK, data });
+        const data = { user }
+        dispatch({ type: SYNC_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
-        dispatch({ type: UPDATE_WALLET_FAIL, reason: er.toString() });
-        return reject(er.toString());
+        dispatch({ type: SYNC_WALLET_FAIL, reason: er.toString() });
+        return reject(er);
       });
     });
   }
@@ -344,6 +363,10 @@ export default (state = defaultState, action) => {
     case UPDATE_WALLET_OK:
       return { ...state, ...action.data };
     case UPDATE_WALLET_FAIL:
+      return { ...state, ...action.data };
+    case SYNC_WALLET_OK:
+      return { ...state, ...action.data };
+    case SYNC_WALLET_FAIL:
       return { ...state, ...action.data };
     case UNSET_WALLET_OK:
       return { ...state, ...action.data };

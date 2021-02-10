@@ -24,6 +24,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 class AccountList extends Component {
@@ -51,20 +52,21 @@ class AccountList extends Component {
 
   fetchData = () => {
     const {
-      wallet: { user: { tokenAccounts } },
-      tokenAddress, onChange
+      wallet: { accounts },
+      getAccountData,
+      tokenAddress, onChange,
     } = this.props;
     const { index } = this.state;
-    if (!tokenAccounts.length) return onChange({});
+    if (!accounts.length) return onChange({});
 
-    return Promise.all(tokenAccounts.map(tokenAccount => {
-      return this.src20.getAccountData(tokenAccount);
+    return Promise.all(accounts.map(accountAddress => {
+      return getAccountData(accountAddress);
     })).then(data => {
+      if (!data || !data.length) return onChange({});
       if (tokenAddress && data) data = data.filter(each => {
         const { token: { address } } = each;
         return address === tokenAddress;
       });
-      if (!data || !data.length) return onChange({});
       return this.setState({ data }, () => {
         const { address } = data[index < data.length ? index : 0];
         return this.onSelect(address);
@@ -170,11 +172,13 @@ class AccountList extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   openWallet,
+  getAccountData,
 }, dispatch);
 
 AccountList.defaultProps = {

@@ -5,6 +5,7 @@ import ui from './ui.reducer';
 import wallet from './wallet.reducer';
 import faucet from './faucet.reducer';
 import pool from './pool.reducer';
+import bucket from './bucket.reducer';
 
 export default (history) => combineReducers({
   router: connectRouter(history),
@@ -12,4 +13,5 @@ export default (history) => combineReducers({
   wallet,
   faucet,
   pool,
+  bucket,
 });

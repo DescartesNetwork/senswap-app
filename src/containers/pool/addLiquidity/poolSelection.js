@@ -25,6 +25,7 @@ import {
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
+import { getPoolData } from 'modules/bucket.reducer';
 
 
 class PoolSelection extends Component {
@@ -36,9 +37,6 @@ class PoolSelection extends Component {
       index: 0,
       pools: [],
     }
-
-    this.src20 = window.senwallet.src20;
-    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -53,26 +51,23 @@ class PoolSelection extends Component {
 
   fetchPools = () => {
     const {
-      wallet: { user: { tokenAccounts } },
+      wallet: { user: { tokens } },
       setError,
       getPools, getPool,
+      getPoolData,
     } = this.props;
-    if (!tokenAccounts.length) return;
+    if (!tokens.length) return;
 
     let pools = [];
-    return Promise.all(tokenAccounts.map(tokenAccount => {
-      return this.src20.getAccountData(tokenAccount);
-    })).then(tokens => {
-      const condition = { '$or': tokens.map(({ token: { address } }) => ({ token: address })) }
-      return getPools(condition, 1000, 0);
-    }).then(poolIds => {
+    const condition = { '$or': tokens.map(tokenAddress => ({ token: tokenAddress })) }
+    return getPools(condition, 1000, 0).then(poolIds => {
       return Promise.all(poolIds.map(({ _id }) => {
         return getPool(_id);
       }));
     }).then(data => {
       pools = data;
       return Promise.all(pools.map(({ address }) => {
-        return this.swap.getPoolData(address);
+        return getPoolData(address);
       }));
     }).then(data => {
       pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
@@ -206,11 +201,13 @@ const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
   pool: state.pool,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
+  getPoolData,
 }, dispatch);
 
 PoolSelection.defaultProps = {
