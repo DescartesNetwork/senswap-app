@@ -321,19 +321,19 @@ export const SET_MAIN_ACCOUNT = 'SET_MAIN_ACCOUNT';
 export const SET_MAIN_ACCOUNT_OK = 'SET_MAIN_ACCOUNT_OK';
 export const SET_MAIN_ACCOUNT_FAIL = 'SET_MAIN_ACCOUNT_FAIL';
 
-export const setMainAccount = (tokenAccount) => {
+export const setMainAccount = (accountAddress) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_MAIN_ACCOUNT });
 
       const { wallet: { mainAccount } } = getState();
-      if (mainAccount === tokenAccount) {
+      if (mainAccount === accountAddress) {
         const er = 'The token account is same';
         dispatch({ type: SET_MAIN_ACCOUNT_FAIL, reason: er });
         return reject(er);
       }
 
-      const data = { mainAccount: tokenAccount };
+      const data = { mainAccount: accountAddress };
       dispatch({ type: SET_MAIN_ACCOUNT_OK, data });
       return resolve(data);
     });

@@ -33,7 +33,6 @@ class AccountList extends Component {
 
     this.state = {
       anchorEl: null,
-      index: 0,
       data: [],
     }
   }
@@ -54,21 +53,16 @@ class AccountList extends Component {
       getAccountData,
       tokenAddress, onChange,
     } = this.props;
-    const { index } = this.state;
     if (!accounts.length) return onChange({});
 
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
     })).then(data => {
-      if (!data || !data.length) return onChange({});
-      if (tokenAddress && data) data = data.filter(each => {
+      if (tokenAddress) data = data.filter(each => {
         const { token: { address } } = each;
         return address === tokenAddress;
       });
-      return this.setState({ data }, () => {
-        const { address } = data[index < data.length ? index : 0];
-        return this.onSelect(address);
-      });
+      return this.setState({ data }, this.onSelect);
     }).catch(er => {
       return setError(er);
     });
@@ -77,19 +71,17 @@ class AccountList extends Component {
   onSelect = (accountAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-    const index = data.findIndex(({ address }) => address === accountAddress);
-    if (index < 0) return onChange({});
-    return this.setState({ index, anchorEl: null }, () => {
-      const accountData = data[index];
+    return this.setState({ anchorEl: null }, () => {
+      if (!data || !data.length) return onChange({});
+      const accountData = !accountAddress ? data[0] : data.find(({ address }) => address === accountAddress);
       return onChange(accountData);
     });
   }
 
   parseBalance = (accountAddress) => {
     const { data } = this.state;
-    const index = data.findIndex(({ address }) => address === accountAddress);
-    if (index < 0) return 0;
-    const { amount, token: { decimals } } = data[index];
+    const accountData = data.find(({ address }) => address === accountAddress);
+    const { amount, token: { decimals } } = accountData;
     return utils.prettyNumber(utils.div(amount, global.BigInt(10 ** decimals)));
   }
 

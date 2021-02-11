@@ -33,7 +33,6 @@ class LPTList extends Component {
 
     this.state = {
       anchorEl: null,
-      index: 0,
       data: [],
     }
   }
@@ -54,21 +53,16 @@ class LPTList extends Component {
       poolAddress, onChange,
       getLPTData,
     } = this.props;
-    const { index } = this.state;
     if (!lptAccounts.length) return onChange({});
 
     return Promise.all(lptAccounts.map(lptAddress => {
       return getLPTData(lptAddress);
     })).then(data => {
-      if (!data || !data.length) return onChange({});
-      if (poolAddress && data) data = data.filter(lptData => {
+      if (poolAddress) data = data.filter(lptData => {
         const { pool: { address } } = lptData;
         return address === poolAddress;
       });
-      return this.setState({ data }, () => {
-        const { address } = data[index < data.length ? index : 0];
-        return this.onSelect(address);
-      });
+      return this.setState({ data }, this.onSelect);
     }).catch(er => {
       return setError(er);
     });
@@ -77,19 +71,17 @@ class LPTList extends Component {
   onSelect = (lptAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-    const index = data.findIndex(({ address }) => address === lptAddress);
-    if (index < 0) return onChange({});
-    return this.setState({ index, anchorEl: null }, () => {
-      const lptData = data[index];
+    return this.setState({ anchorEl: null }, () => {
+      if (!data || !data.length) return onChange({});
+      const lptData = !lptAddress ? data[0] : data.find(({ address }) => address === lptAddress);
       return onChange(lptData);
     });
   }
 
   parseLPT = (lptAddress) => {
     const { data } = this.state;
-    const index = data.findIndex(({ address }) => address === lptAddress);
-    if (index < 0) return 0;
-    const { lpt, pool: { token: { decimals } } } = data[index];
+    const lptData = data.find(({ address }) => address === lptAddress);
+    const { lpt, pool: { token: { decimals } } } = lptData;
     return utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** decimals)));
   }
 
