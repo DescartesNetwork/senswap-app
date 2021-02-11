@@ -14,9 +14,10 @@ const defaultState = {
   user: {
     address: null,
     tokens: [],
-    lptAccounts: [],
+    pools: [],
   },
   accounts: [],
+  lpts: [],
   mainAccount: null,
   qrcode: {
     visible: false,
@@ -24,7 +25,7 @@ const defaultState = {
   },
   unlock: {
     visible: false,
-    callback: (_er, _re) => { },
+    callback: (er, re) => { },
   }
 }
 
@@ -189,7 +190,7 @@ export const syncWallet = () => {
       dispatch({ type: SYNC_WALLET });
 
       const { wallet: { user } } = getState();
-      
+
       if (!user) {
         const er = 'Invalid data';
         dispatch({ type: SYNC_WALLET_FAIL, reason: er });

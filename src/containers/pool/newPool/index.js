@@ -21,9 +21,11 @@ import {
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
+import configs from 'configs';
+import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -65,16 +67,37 @@ class NewPool extends Component {
   }
 
   newPool = () => {
-    const { accountData: { address, initialized, token }, amount, price } = this.state;
-    const { wallet: { user }, setError, updateWallet, unlockWallet } = this.props;
+    const {
+      accountData: { address, initialized, token },
+      amount, price
+    } = this.state;
+    const {
+      wallet: { user, lpts },
+      setError,
+      updateWallet, unlockWallet, syncWallet
+    } = this.props;
+    const { sol: { swapFactoryAddress } } = configs;
     if (!initialized) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
     if (!price) return setError('Invalid price');
 
     let poolAddress = '';
     let txId = '';
+    let secretKey = null;
+    let pool = null;
+    let treasury = ssjs.createAccount();
+    let lpt = null;
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(secretKey => {
+      return unlockWallet().then(re => {
+        secretKey = re;
+        const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
+        return ssjs.createStrictAccount(swapProgramId);
+      }).then(re => {
+        pool = re;
+        poolAddress = pool.publicKey.toBase58();
+        return sol.scanLPT(poolAddress, secretKey);
+      }).then(({ nextLPT }) => {
+        lpt = nextLPT;
         const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
         const value = global.BigInt(price * amount) * global.BigInt(10 ** token.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
@@ -83,16 +106,22 @@ class NewPool extends Component {
           value,
           address,
           token.address,
+          pool,
+          treasury,
+          lpt,
           payer
         );
-      }).then(({ pool, lpt, txId: refTxId }) => {
-        txId = refTxId;
-        poolAddress = pool.publicKey.toBase58();
+      }).then(re => {
+        txId = re;
         const lptAddress = lpt.publicKey.toBase58();
-        const lptAccounts = [...user.lptAccounts];
-        lptAccounts.push(lptAddress);
-        return updateWallet({ ...user, lptAccounts });
-      }).then(_ => {
+        const newPools = [...user.pools];
+        if (!newPools.includes(poolAddress)) newPools.push(poolAddress);
+        const newLPTs = [...lpts];
+        if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
+        return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
+      }).then(re => {
+        return syncWallet();
+      }).then(re => {
         return this.setState({ ...EMPTY, txId, poolAddress });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -215,7 +244,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet,
+  updateWallet, unlockWallet, syncWallet,
 }, dispatch);
 
 export default withRouter(connect(

@@ -42,26 +42,23 @@ class LPTList extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser }, poolAddress: prevPoolAddress } = prevProps;
-    const { wallet: { user }, poolAddress } = this.props;
-    if (!isEqual(user, prevUser) || !isEqual(poolAddress, prevPoolAddress)) this.fetchData();
+    const { wallet: { lpts: prevLPTs }, poolAddress: prevPoolAddress } = prevProps;
+    const { wallet: { lpts }, poolAddress } = this.props;
+    if (!isEqual(lpts, prevLPTs) || !isEqual(poolAddress, prevPoolAddress)) this.fetchData();
   }
 
   fetchData = () => {
     const {
-      wallet: { user: { lptAccounts } },
+      wallet: { lpts },
       poolAddress, onChange,
       getLPTData,
     } = this.props;
-    if (!lptAccounts.length) return onChange({});
+    if (!lpts.length) return onChange({});
 
-    return Promise.all(lptAccounts.map(lptAddress => {
+    return Promise.all(lpts.map(lptAddress => {
       return getLPTData(lptAddress);
     })).then(data => {
-      if (poolAddress) data = data.filter(lptData => {
-        const { pool: { address } } = lptData;
-        return address === poolAddress;
-      });
+      if (poolAddress) data = data.filter(({ pool: { address } }) => address === poolAddress);
       return this.setState({ data }, this.onSelect);
     }).catch(er => {
       return setError(er);

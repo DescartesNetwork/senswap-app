@@ -176,7 +176,7 @@ export const setItem = (value) => {
       const key = value.address;
       const data = { [key]: value }
       dispatch({ type: SET_ITEM_OK, data });
-      return resolve(data);
+      return resolve(value);
     });
   }
 }

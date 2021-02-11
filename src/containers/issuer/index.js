@@ -80,17 +80,17 @@ class Issuer extends Component {
     const symbol = refSymbol.split('');
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(refSecretKey => {
-        secretKey = refSecretKey;
-        return sol.scanSRC20Account(tokenAddress, secretKey);
+      return unlockWallet().then(re => {
+        secretKey = re;
+        return sol.scanAccount(tokenAddress, secretKey);
       }).then(({ nextAccount: receiver }) => {
         const payer = ssjs.fromSecretKey(secretKey);
         return this.src20.newToken(symbol, totalSupply, decimals, receiver, token, payer);
       }).then(refTxId => {
         txId = refTxId;
-        const tokens = [...user.tokens];
-        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        return updateWallet({ user: { ...user, tokens } });
+        const newTokens = [...user.tokens];
+        if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+        return updateWallet({ user: { ...user, tokens: newTokens } });
       }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

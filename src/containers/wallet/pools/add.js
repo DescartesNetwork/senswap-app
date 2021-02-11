@@ -31,17 +31,17 @@ class Add extends Component {
     this.state = {
       visible: false,
       loading: false,
-      lptAccount: '',
+      lptAddress: '',
       data: {},
     }
   }
 
   fetchData = () => {
-    const { lptAccount } = this.state;
+    const { lptAddress } = this.state;
     const { setError, getLPTData } = this.props;
     return this.setState({ loading: true }, () => {
-      if (!ssjs.isAddress(lptAccount)) return this.setState({ loading: false });
-      return getLPTData(lptAccount).then(data => {
+      if (!ssjs.isAddress(lptAddress)) return this.setState({ loading: false });
+      return getLPTData(lptAddress).then(data => {
         return this.setState({ loading: false, data });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
@@ -60,17 +60,16 @@ class Add extends Component {
   }
 
   onAddress = (e) => {
-    const lptAccount = e.target.value || '';
-    return this.setState({ lptAccount }, this.fetchData);
+    const lptAddress = e.target.value || '';
+    return this.setState({ lptAddress }, this.fetchData);
   }
 
   onAdd = () => {
-    const { lptAccount } = this.state;
-    const { wallet: { user }, setError, updateWallet } = this.props;
-    if (user.lptAccounts.includes(lptAccount)) return setError('The LPT account is already added');
-    const lptAccounts = [...user.lptAccounts];
-    lptAccounts.push(lptAccount);
-    return updateWallet({ ...user, lptAccounts }).then(re => {
+    const { lptAddress } = this.state;
+    const { wallet: { lpts }, setError, updateWallet } = this.props;
+    const newLPTs = [...lpts];
+    if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
+    return updateWallet({ lpts: newLPTs }).then(re => {
       return this.onClose();
     }).catch(er => {
       return setError(er);
@@ -140,7 +139,7 @@ class Add extends Component {
 
   render() {
     const { classes } = this.props;
-    const { visible, loading, lptAccount } = this.state;
+    const { visible, loading, lptAddress } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -168,7 +167,7 @@ class Add extends Component {
                 <TextField
                   label="Address"
                   variant="outlined"
-                  value={lptAccount}
+                  value={lptAddress}
                   onChange={this.onAddress}
                   InputProps={{
                     endAdornment: <IconButton

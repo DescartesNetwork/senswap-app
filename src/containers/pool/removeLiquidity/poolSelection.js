@@ -25,7 +25,7 @@ import {
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
-import { getLPTData } from 'modules/bucket.reducer';
+import { getPoolData } from 'modules/bucket.reducer';
 
 
 class PoolSelection extends Component {
@@ -35,7 +35,7 @@ class PoolSelection extends Component {
     this.state = {
       anchorEl: null,
       index: 0,
-      pools: [],
+      data: [],
     }
   }
 
@@ -51,43 +51,43 @@ class PoolSelection extends Component {
 
   fetchData = () => {
     const {
-      wallet: { user: { lptAccounts } },
+      wallet: { user: { pools } },
       setError,
       getPools, getPool,
-      getLPTData,
+      getPoolData,
     } = this.props;
-    if (!lptAccounts.length) return;
+    if (!pools.length) return;
 
-    let pools = [];
-    return Promise.all(lptAccounts.map(lptAddress => {
-      return getLPTData(lptAddress);
-    })).then(data => {
-      pools = data.map(({ pool }) => pool);
-      const condition = { '$or': pools.map(({ address }) => ({ address })) }
+    let data = null;
+    return Promise.all(pools.map(poolAddress => {
+      return getPoolData(poolAddress);
+    })).then(re => {
+      data = re;
+      const condition = { '$or': data.map(({ address }) => ({ address })) }
       return getPools(condition, 1000, 0);
     }).then(poolIds => {
       return Promise.all(poolIds.map(({ _id }) => {
         return getPool(_id);
       }));
-    }).then(data => {
-      pools = pools.map(pool => {
-        const { address: refAddress } = pool;
-        for (let each of data) {
+    }).then(re => {
+      data = data.map(poolData => {
+        const { address: refAddress } = poolData;
+        for (let each of re) {
           const { address } = each;
-          if (address === refAddress) return { ...each, ...pool }
+          if (address === refAddress) return { ...each, ...poolData }
         }
-        return { ...pool }
+        return { ...poolData }
       });
-      return Promise.all(pools.map(({ cgk }) => {
+      return Promise.all(data.map(({ cgk }) => {
         if (cgk) return ssjs.imgFromCGK(cgk);
         return null;
       }));
     }).then(icons => {
-      pools = pools.map((pool, i) => {
-        pool.token.icon = icons[i];
-        return pool;
+      data = data.map((poolData, i) => {
+        poolData.token.icon = icons[i];
+        return poolData;
       });
-      return this.setState({ pools }, () => {
+      return this.setState({ data }, () => {
         return this.onSelect(0);
       });
     }).catch(er => {
@@ -97,11 +97,12 @@ class PoolSelection extends Component {
 
   onSelect = (index) => {
     return this.setState({ index }, () => {
-      const { pools } = this.state;
-      if (!pools.length) return;
-      const { address } = pools[index];
+      const { onChange } = this.props;
+      const { data } = this.state;
+      if (!data.length) return;
+      const { address } = data[index];
       this.onClose();
-      return this.props.onChange(address);
+      return onChange(address);
     });
   }
 
@@ -146,10 +147,10 @@ class PoolSelection extends Component {
   }
 
   renderPools = () => {
-    const { pools } = this.state;
-    if (!pools.length) return null;
+    const { data } = this.state;
+    if (!data.length) return null;
     return <MenuList>
-      {pools.map((pool, index) => {
+      {data.map((pool, index) => {
         const { address, email, verified, token: { symbol, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect(index)}>
           {this.renderToken(symbol, icon, email, verified)}
@@ -160,11 +161,11 @@ class PoolSelection extends Component {
 
   render() {
     const { classes } = this.props;
-    const { anchorEl, index, pools } = this.state;
+    const { anchorEl, index, data } = this.state;
 
-    const verified = pools[index] && pools[index].verified;
-    const symbol = pools[index] && pools[index].token && pools[index].token.symbol;
-    const icon = pools[index] && pools[index].token && pools[index].token.icon;
+    const verified = data[index] && data[index].verified;
+    const symbol = data[index] && data[index].token && data[index].token.symbol;
+    const icon = data[index] && data[index].token && data[index].token.icon;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -215,7 +216,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
-  getLPTData,
+  getPoolData,
 }, dispatch);
 
 PoolSelection.defaultProps = {

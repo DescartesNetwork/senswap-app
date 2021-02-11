@@ -42,9 +42,16 @@ class AccountList extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { accounts: prevAccounts }, tokenAddress: prevTokenAddress } = prevProps;
-    const { wallet: { accounts }, tokenAddress } = this.props;
-    if (!isEqual(accounts, prevAccounts) || !isEqual(tokenAddress, prevTokenAddress)) this.fetchData();
+    const {
+      wallet: { accounts: prevAccounts },
+      tokenAddress: prevTokenAddress
+    } = prevProps;
+    const {
+      wallet: { accounts },
+      tokenAddress
+    } = this.props;
+    if (!isEqual(accounts, prevAccounts) || !isEqual(tokenAddress, prevTokenAddress))
+      this.fetchData();
   }
 
   fetchData = () => {
@@ -58,8 +65,8 @@ class AccountList extends Component {
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
     })).then(data => {
-      if (tokenAddress) data = data.filter(each => {
-        const { token: { address } } = each;
+      if (tokenAddress) data = data.filter(accountData => {
+        const { token: { address } } = accountData;
         return address === tokenAddress;
       });
       return this.setState({ data }, this.onSelect);

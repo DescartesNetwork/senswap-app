@@ -27,9 +27,10 @@ import AccountSelection from 'containers/wallet/components/accountSelection';
 import PoolSelection from './poolSelection';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -88,14 +89,29 @@ class AddLiquidity extends Component {
     return this.setState({ lptData });
   }
 
-  onAutogenLPTAddress = (secretKey) => {
+  onAutogenLPTAddress = (poolAddress, secretKey) => {
     return new Promise((resolve, reject) => {
-      if (!secretKey) return reject('Cannot unlock accouunt');
+      if (!ssjs.isAddress(poolAddress)) return reject('Invalid pool address');
+      if (!secretKey) return reject('Cannot unlock wallet');
+      const {
+        wallet: { user, lpts },
+        updateWallet, syncWallet
+      } = this.props;
       const { lptData: { address: lptAddress } } = this.state;
       if (lptAddress) return resolve(lptAddress);
 
-      const payer = ssjs.fromSecretKey(secretKey);
-      return this.swap.newLPT(payer).then(({ lpt }) => {
+      let lpt = null;
+      return sol.newLPT(poolAddress, secretKey).then(({ lpt: re }) => {
+        lpt = re;
+        const newPools = [...user.pools];
+        if (!newPools.includes(poolAddress)) newPools.push(poolAddress);
+        const newLPTs = [...lpts];
+        const address = lpt.publicKey.toBase58();
+        if (!newLPTs.includes(address)) newLPTs.push(address);
+        return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
+      }).then(re => {
+        return syncWallet();
+      }).then(re => {
         return resolve(lpt);
       }).catch(er => {
         return reject(er);
@@ -115,11 +131,10 @@ class AddLiquidity extends Component {
 
     let secretKey = null;
     let lptAddressOrAccount = null;
-    let txId = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
-        return this.onAutogenLPTAddress(secretKey);
+        return this.onAutogenLPTAddress(poolAddress, secretKey);
       }).then(re => {
         lptAddressOrAccount = re;
         const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
@@ -134,14 +149,7 @@ class AddLiquidity extends Component {
           token.address,
           payer
         );
-      }).then(re => {
-        txId = re;
-        const { wallet: { user }, updateWallet } = this.props;
-        const lptAccounts = [...user.lptAccounts];
-        const lptAddress = typeof lptAddressOrAccount === 'string' ? lptAddressOrAccount : lptAddressOrAccount.publicKey.toBase58();
-        if (!lptAccounts.includes(lptAddress)) lptAccounts.push(lptAddress);
-        return updateWallet({ ...user, lptAccounts });
-      }).then(_ => {
+      }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -300,7 +308,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet,
+  updateWallet, unlockWallet, syncWallet,
 }, dispatch);
 
 export default withRouter(connect(

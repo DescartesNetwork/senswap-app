@@ -64,32 +64,46 @@ class Wallet extends Component {
 
   fetchData = () => {
     const {
+      wallet: { user: { tokens, pools }, accounts, lpts },
       setError,
       unlockWallet, updateWallet,
       setItem,
     } = this.props;
-    return unlockWallet().then(secretKey => {
-      const { wallet: { user: { tokens } } } = this.props;
+    let secretKey = null;
+    return unlockWallet().then(re => {
+      secretKey = re;
       return Promise.all(tokens.map(tokenAddress => {
-        return sol.scanSRC20Account(tokenAddress, secretKey);
+        return sol.scanAccount(tokenAddress, secretKey);
       }));
     }).then(data => {
       data = data.map(({ data }) => data).flat();
       return Promise.all(data.map(accountData => {
         return setItem(accountData);
       }));
+    }).then(data => {
+      const newAccounts = [...accounts];
+      data.forEach(({ address: accountAddress }) => {
+        if (!newAccounts.includes(accountAddress))
+          return newAccounts.push(accountAddress);
+      });
+      const mainAccount = newAccounts[0];
+      return updateWallet({ accounts: newAccounts, mainAccount });
     }).then(re => {
-      const data = re.map(each => {
-        return Object.keys(each)[0];
+      return Promise.all(pools.map(poolAddress => {
+        return sol.scanLPT(poolAddress, secretKey);
+      }));
+    }).then(data => {
+      data = data.map(({ data }) => data).flat();
+      return Promise.all(data.map(lptData => {
+        return setItem(lptData);
+      }));
+    }).then(data => {
+      const newLPTs = [...lpts];
+      data.forEach(({ address: lptAddress }) => {
+        if (!newLPTs.includes(lptAddress))
+          return newLPTs.push(lptAddress);
       });
-      const { wallet } = this.props;
-      const accounts = [...wallet.accounts];
-      data.forEach(accountAddress => {
-        if (!accounts.includes(accountAddress))
-          return accounts.push(accountAddress);
-      });
-      const mainAccount = accounts[0];
-      return updateWallet({ accounts, mainAccount });
+      return updateWallet({ lpts: newLPTs });
     }).catch(er => {
       return setError(er);
     });

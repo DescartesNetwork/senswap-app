@@ -51,14 +51,15 @@ class CreateTokenAccount extends Component {
     let txId = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
-        return sol.newSRC20Account(tokenAddress, secretKey);
+        return sol.newAccount(tokenAddress, secretKey);
       }).then(({ account, txId: refTxId }) => {
         txId = refTxId;
         const accountAddress = account.publicKey.toBase58();
-        const tokens = [...user.tokens];
-        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        if (!accounts.includes(accountAddress)) accounts.push(accountAddress);
-        return updateWallet({ user: { ...user, tokens }, accounts });
+        const newTokens = [...user.tokens];
+        if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+        const newAccounts = [...accounts];
+        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
+        return updateWallet({ user: { ...user, tokens: newTokens }, accounts: newAccounts });
       }).then(re => {
         return syncWallet();
       }).then(re => {

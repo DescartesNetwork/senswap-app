@@ -27,7 +27,7 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, openWallet, syncWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
-import { getTokenData } from 'modules/bucket.reducer';
+import { getTokenData, getAccountData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -78,6 +78,43 @@ class Faucet extends Component {
     });
   }
 
+  onAutogenDestinationAddress = (tokenAddress, secretKey) => {
+    return new Promise((resolve, reject) => {
+      if (!secretKey) return reject('Cannot unlock account');
+      if (!tokenAddress) return reject('Unknown token');
+      const {
+        wallet: { user, accounts },
+        getAccountData,
+        updateWallet, syncWallet
+      } = this.props;
+
+      return Promise.all(accounts.map(accountAddress => {
+        return getAccountData(accountAddress);
+      })).then(data => {
+        const accountData = data.find(({ token: { address } }) => address === tokenAddress);
+        let accountAddress = null;
+        if (accountData.length) accountAddress = accountData.address;
+        if (accountAddress) return resolve(accountAddress);
+        return sol.newAccount(tokenAddress, secretKey).then(({ account }) => {
+          accountAddress = account.publicKey.toBase58();
+          const newTokens = [...user.tokens];
+          if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+          const newAccounts = [...accounts];
+          if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
+          return updateWallet({ user: { ...user, tokens: newTokens }, accounts: newAccounts });
+        }).then(re => {
+          return syncWallet();
+        }).then(re => {
+          return resolve(accountAddress);
+        }).catch(er => {
+          return reject(er);
+        });
+      }).catch(er => {
+        return reject(er);
+      });
+    });
+  }
+
   onAirdrop = () => {
     const {
       wallet: { user, accounts },
@@ -94,19 +131,10 @@ class Faucet extends Component {
       return airdropLamports(user.address).then(re => {
         return unlockWallet();
       }).then(secretKey => {
-        return sol.newSRC20Account(tokenAddress, secretKey);
-      }).then(({ account }) => {
-        const dstAddress = account.publicKey.toBase58();
+        return this.onAutogenDestinationAddress(tokenAddress, secretKey);
+      }).then(dstAddress => {
         return airdropTokens(dstAddress, tokenAddress);
-      }).then(({ dstAddress, txId: refTxId }) => {
-        txId = refTxId;
-        const tokens = [...user.tokens];
-        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        if (!accounts.includes(dstAddress)) accounts.push(dstAddress);
-        return updateWallet({ user: { ...user, tokens }, accounts });
-      }).then(re => {
-        return syncWallet();
-      }).then(re => {
+      }).then(({ txId }) => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -210,7 +238,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   unlockWallet, updateWallet, openWallet, syncWallet,
   getWhiteList, airdropLamports, airdropTokens,
-  getTokenData,
+  getTokenData, getAccountData,
 }, dispatch);
 
 export default withRouter(connect(

@@ -147,7 +147,7 @@ class Swap extends Component {
 
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
     return new Promise((resolve, reject) => {
-      if (!tokenAddress || !secretKey) return reject('Invalid input');
+      if (!ssjs.isAddress(tokenAddress) || !secretKey) return reject('Invalid input');
       const {
         wallet: { user, accounts },
         updateWallet, syncWallet
@@ -156,12 +156,13 @@ class Swap extends Component {
       if (dstAddress) return resolve(dstAddress);
 
       let accountAddress = null;
-      return sol.newSRC20Account(tokenAddress, secretKey).then(({ account }) => {
+      return sol.newAccount(tokenAddress, secretKey).then(({ account }) => {
         accountAddress = account.publicKey.toBase58();
-        const tokens = [...user.tokens];
-        if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        if (!accounts.includes(accountAddress)) accounts.push(accountAddress);
-        return updateWallet({ user: { ...user, tokens }, accounts });
+        const newTokens = [...user.tokens];
+        if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+        const newAccounts = [...accounts];
+        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
+        return updateWallet({ user: { ...user, tokens: newTokens }, accounts: newAccounts });
       }).then(re => {
         return syncWallet();
       }).then(re => {

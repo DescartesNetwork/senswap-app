@@ -22,7 +22,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 
-import { VisibilityRounded, CloseRounded, RemoveRounded } from '@material-ui/icons';
+import { VisibilityRounded, CloseRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -37,7 +37,7 @@ function Row(props) {
       lpt,
       initialized,
       pool: {
-        address: _poolAddress,
+        address: poolAddress,
         fee_numerator,
         fee_denominator,
         reserve: poolReserve,
@@ -46,7 +46,6 @@ function Row(props) {
         treasury
       }
     },
-    onRemove
   } = props;
   const [visible, onVisible] = useState(false);
   const classes = makeStyles(styles)();
@@ -79,11 +78,6 @@ function Row(props) {
       <TableCell align="right">
         <Typography>{lptAmount}</Typography>
       </TableCell>
-      <TableCell align="right">
-        <IconButton size="small" color="primary" onClick={onRemove}>
-          <RemoveRounded />
-        </IconButton>
-      </TableCell>
     </TableRow>
     <Dialog open={visible} onClose={onClose}>
       <DialogTitle>
@@ -104,7 +98,7 @@ function Row(props) {
             <Typography variant="body2">Pool</Typography>
           </Grid>
           <Grid item xs={8}>
-            <TextField label="Pool Address" variant="outlined" value={_poolAddress} fullWidth />
+            <TextField label="Pool Address" variant="outlined" value={poolAddress} fullWidth />
           </Grid>
           <Grid item xs={4}>
             <TextField label="Fee %" variant="outlined" value={fee} fullWidth />
@@ -147,32 +141,26 @@ class Info extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser } } = prevProps;
-    const { wallet: { user } } = this.props;
-    if (!isEqual(user, prevUser)) this.fetchData();
+    const { wallet: { lpts: prevLPTs } } = prevProps;
+    const { wallet: { lpts } } = this.props;
+    if (!isEqual(lpts, prevLPTs)) this.fetchData();
   }
 
   fetchData = () => {
     const {
-      wallet: { user: { lptAccounts } },
+      wallet: { lpts },
       setError,
       getLPTData,
     } = this.props;
-    if (!lptAccounts.length) return;
+    if (!lpts.length) return;
 
-    return Promise.all(lptAccounts.map(lptAccount => {
-      return getLPTData(lptAccount);
+    return Promise.all(lpts.map(lptAddress => {
+      return getLPTData(lptAddress);
     })).then(data => {
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
     });
-  }
-
-  onRemove = (address) => {
-    const { wallet: { user }, updateWallet } = this.props;
-    const lptAccounts = user.lptAccounts.filter(lptAccount => lptAccount !== address);
-    return updateWallet({ ...user, lptAccounts });
   }
 
   render() {
@@ -198,15 +186,10 @@ class Info extends Component {
                 <TableCell align="right">
                   <Typography variant="body2">LPT</Typography>
                 </TableCell>
-                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map(data => <Row
-                key={data.address}
-                data={data}
-                onRemove={() => this.onRemove(data.address)}
-              />)}
+              {data.map(data => <Row key={data.address} data={data} />)}
             </TableBody>
           </Table>
         </TableContainer>
