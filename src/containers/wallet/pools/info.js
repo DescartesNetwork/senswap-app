@@ -28,6 +28,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
+import { getLPTData } from 'modules/bucket.reducer';
 
 function Row(props) {
   const {
@@ -139,8 +140,6 @@ class Info extends Component {
     this.state = {
       data: [],
     }
-
-    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -154,11 +153,15 @@ class Info extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { lptAccounts } }, setError } = this.props;
+    const {
+      wallet: { user: { lptAccounts } },
+      setError,
+      getLPTData,
+    } = this.props;
     if (!lptAccounts.length) return;
 
     return Promise.all(lptAccounts.map(lptAccount => {
-      return this.swap.getLPTData(lptAccount);
+      return getLPTData(lptAccount);
     })).then(data => {
       return this.setState({ data });
     }).catch(er => {
@@ -215,11 +218,13 @@ class Info extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
+  getLPTData,
 }, dispatch);
 
 export default withRouter(connect(

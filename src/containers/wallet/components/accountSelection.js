@@ -14,6 +14,7 @@ import AccountAvatar from './accountAvatar';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
+import { getPoolData } from 'modules/bucket.reducer';
 
 
 class AccountSelection extends Component {
@@ -24,8 +25,6 @@ class AccountSelection extends Component {
       tokenAddress: '',
       data: {},
     }
-
-    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -39,9 +38,9 @@ class AccountSelection extends Component {
   }
 
   fetchData = () => {
-    const { poolAddress } = this.props;
+    const { poolAddress, getPoolData } = this.props;
     if (!poolAddress) return this.setState({ tokenAddress: '' });
-    return this.swap.getPoolData(poolAddress).then(re => {
+    return getPoolData(poolAddress).then(re => {
       if (!re) return this.setState({ tokenAddress: '' });
       const { token: { address: tokenAddress } } = re;
       return this.setState({ tokenAddress });
@@ -87,10 +86,13 @@ class AccountSelection extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
+  getPoolData,
 }, dispatch);
 
 AccountSelection.defaultProps = {

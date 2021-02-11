@@ -52,7 +52,6 @@ class RemoveLiquidity extends Component {
       advance: false,
     }
 
-    this.src20 = window.senwallet.src20;
     this.swap = window.senwallet.swap;
   }
 

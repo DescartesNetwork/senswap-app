@@ -26,8 +26,6 @@ class ListTokenAccount extends Component {
     this.state = {
       data: []
     }
-
-    this.src20 = window.senwallet.src20;
   }
 
   componentDidMount() {

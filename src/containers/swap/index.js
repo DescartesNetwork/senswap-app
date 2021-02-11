@@ -30,6 +30,7 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { getPoolData } from 'modules/bucket.reducer';
 
 const EMPTY = {
   loading: false,
@@ -52,7 +53,6 @@ class Swap extends Component {
       askData: {},
     }
 
-    this.src20 = window.senwallet.src20;
     this.swap = window.senwallet.swap;
   }
 
@@ -118,9 +118,9 @@ class Swap extends Component {
   }
 
   onBidAddress = (bidAddress) => {
-    const { setError } = this.props;
+    const { setError, getPoolData } = this.props;
     if (!ssjs.isAddress(bidAddress)) return setError('Invalid bid address');
-    return this.swap.getPoolData(bidAddress).then(bidData => {
+    return getPoolData(bidAddress).then(bidData => {
       return this.setState({ bidData }, this.estimateAmount);
     }).catch(er => {
       return setError(er);
@@ -132,9 +132,9 @@ class Swap extends Component {
   }
 
   onAskAddress = (askAddress) => {
-    const { setError } = this.props;
+    const { setError, getPoolData } = this.props;
     if (!ssjs.isAddress(askAddress)) return setError('Invalid ask address');
-    return this.swap.getPoolData(askAddress).then(askData => {
+    return getPoolData(askAddress).then(askData => {
       return this.setState({ askData }, this.estimateAmount);
     }).catch(er => {
       return setError(er);
@@ -170,8 +170,18 @@ class Swap extends Component {
     const { setError, unlockWallet } = this.props;
     const {
       bidAmount, srcData: { address: srcAddress },
-      bidData: { initialized: bidInitialized, address: bidAddress, token: bidToken, treasury: bidTreasury },
-      askData: { initialized: askInitialized, address: askAddress, token: askToken, treasury: askTreasury }
+      bidData: {
+        initialized: bidInitialized,
+        address: bidAddress,
+        token: bidToken,
+        treasury: bidTreasury
+      },
+      askData: {
+        initialized: askInitialized,
+        address: askAddress,
+        token: askToken,
+        treasury: askTreasury
+      }
     } = this.state;
 
     if (!bidInitialized || !askInitialized) return setError('Please wait for data loaded');
@@ -415,6 +425,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet, unlockWallet,
+  getPoolData,
 }, dispatch);
 
 export default withRouter(connect(

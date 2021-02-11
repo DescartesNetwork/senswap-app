@@ -24,6 +24,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
+import { getLPTData } from 'modules/bucket.reducer';
 
 
 class LPTList extends Component {
@@ -35,8 +36,6 @@ class LPTList extends Component {
       index: 0,
       data: [],
     }
-
-    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -52,19 +51,20 @@ class LPTList extends Component {
   fetchData = () => {
     const {
       wallet: { user: { lptAccounts } },
-      poolAddress, onChange
+      poolAddress, onChange,
+      getLPTData,
     } = this.props;
     const { index } = this.state;
     if (!lptAccounts.length) return onChange({});
 
-    return Promise.all(lptAccounts.map(lptAccount => {
-      return this.swap.getLPTData(lptAccount);
+    return Promise.all(lptAccounts.map(lptAddress => {
+      return getLPTData(lptAddress);
     })).then(data => {
-      if (poolAddress && data) data = data.filter(each => {
-        const { pool: { address } } = each;
+      if (!data || !data.length) return onChange({});
+      if (poolAddress && data) data = data.filter(lptData => {
+        const { pool: { address } } = lptData;
         return address === poolAddress;
       });
-      if (!data || !data.length) return onChange({});
       return this.setState({ data }, () => {
         const { address } = data[index < data.length ? index : 0];
         return this.onSelect(address);
@@ -175,6 +175,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   openWallet,
+  getLPTData,
 }, dispatch);
 
 LPTList.defaultProps = {

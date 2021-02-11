@@ -25,6 +25,7 @@ import {
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
+import { getLPTData } from 'modules/bucket.reducer';
 
 
 class PoolSelection extends Component {
@@ -36,8 +37,6 @@ class PoolSelection extends Component {
       index: 0,
       pools: [],
     }
-
-    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -55,12 +54,13 @@ class PoolSelection extends Component {
       wallet: { user: { lptAccounts } },
       setError,
       getPools, getPool,
+      getLPTData,
     } = this.props;
     if (!lptAccounts.length) return;
 
     let pools = [];
     return Promise.all(lptAccounts.map(lptAddress => {
-      return this.swap.getLPTData(lptAddress);
+      return getLPTData(lptAddress);
     })).then(data => {
       pools = data.map(({ pool }) => pool);
       const condition = { '$or': pools.map(({ address }) => ({ address })) }
@@ -209,11 +209,13 @@ const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
   pool: state.pool,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
+  getLPTData,
 }, dispatch);
 
 PoolSelection.defaultProps = {

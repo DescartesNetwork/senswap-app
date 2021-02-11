@@ -169,6 +169,7 @@ export const updateWallet = (data) => {
         return reject(er);
       }
 
+      data = JSON.parse(JSON.stringify(data));
       dispatch({ type: UPDATE_WALLET_OK, data });
       return resolve(data);
     });

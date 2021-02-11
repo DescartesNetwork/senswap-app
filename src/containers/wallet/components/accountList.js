@@ -36,8 +36,6 @@ class AccountList extends Component {
       index: 0,
       data: [],
     }
-
-    this.src20 = window.senwallet.src20;
   }
 
   componentDidMount() {
@@ -45,9 +43,9 @@ class AccountList extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser }, tokenAddress: prevTokenAddress } = prevProps;
-    const { wallet: { user }, tokenAddress } = this.props;
-    if (!isEqual(user, prevUser) || !isEqual(tokenAddress, prevTokenAddress)) this.fetchData();
+    const { wallet: { accounts: prevAccounts }, tokenAddress: prevTokenAddress } = prevProps;
+    const { wallet: { accounts }, tokenAddress } = this.props;
+    if (!isEqual(accounts, prevAccounts) || !isEqual(tokenAddress, prevTokenAddress)) this.fetchData();
   }
 
   fetchData = () => {

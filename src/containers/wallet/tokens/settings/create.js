@@ -32,8 +32,6 @@ class CreateTokenAccount extends Component {
     this.state = {
       ...EMPTY
     }
-
-    this.src20 = window.senwallet.src20;
   }
 
   onTokenAddress = (e) => {

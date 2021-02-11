@@ -21,6 +21,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
+import { getLPTData } from 'modules/bucket.reducer';
 
 
 class Add extends Component {
@@ -33,16 +34,14 @@ class Add extends Component {
       lptAccount: '',
       data: {},
     }
-
-    this.swap = window.senwallet.swap;
   }
 
   fetchData = () => {
     const { lptAccount } = this.state;
-    const { setError } = this.props;
+    const { setError, getLPTData } = this.props;
     return this.setState({ loading: true }, () => {
       if (!ssjs.isAddress(lptAccount)) return this.setState({ loading: false });
-      return this.swap.getLPTData(lptAccount).then(data => {
+      return getLPTData(lptAccount).then(data => {
         return this.setState({ loading: false, data });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
@@ -82,18 +81,20 @@ class Add extends Component {
     const { data: { initialized } } = this.state;
     if (!initialized) return null;
 
-    const { data: {
-      lpt,
-      pool: {
-        address: poolAddress,
-        fee_numerator,
-        fee_denominator,
-        reserve: poolReserve,
-        lpt: poolLPT,
-        token,
-        treasury
+    const {
+      data: {
+        lpt,
+        pool: {
+          address: poolAddress,
+          fee_numerator,
+          fee_denominator,
+          reserve: poolReserve,
+          lpt: poolLPT,
+          token,
+          treasury
+        }
       }
-    } } = this.state;
+    } = this.state;
     const symbol = ssjs.toSymbol(token.symbol);
     const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
     const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals)));
@@ -135,13 +136,11 @@ class Add extends Component {
           fullWidth />
       </Grid>
     </Grid>
-
   }
 
   render() {
     const { classes } = this.props;
     const { visible, loading, lptAccount } = this.state;
-
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -199,11 +198,13 @@ class Add extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
+  getLPTData,
 }, dispatch);
 
 export default withRouter(connect(

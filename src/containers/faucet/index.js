@@ -27,6 +27,7 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, openWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
+import { getTokenData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -46,8 +47,6 @@ class Faucet extends Component {
       link: '',
       tokenAddress: '',
     }
-
-    this.src20 = window.senwallet.src20;
   }
 
   componentDidMount() {
@@ -67,9 +66,9 @@ class Faucet extends Component {
 
   onSelect = (e) => {
     const tokenAddress = e.target.value || '';
-    const { setError } = this.props;
+    const { setError, getTokenData } = this.props;
     return this.setState({ tokenAddress }, () => {
-      if (tokenAddress) return this.src20.getTokenData(tokenAddress).then(data => {
+      if (tokenAddress) return getTokenData(tokenAddress).then(data => {
         return this.setState({ ...EMPTY, data });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -201,12 +200,14 @@ const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
   faucet: state.faucet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   unlockWallet, updateWallet, openWallet,
   getWhiteList, airdropLamports, airdropTokens,
+  getTokenData,
 }, dispatch);
 
 export default withRouter(connect(

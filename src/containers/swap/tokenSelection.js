@@ -53,8 +53,6 @@ class TokenSelection extends Component {
         pools: [],
       },
     }
-
-    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
