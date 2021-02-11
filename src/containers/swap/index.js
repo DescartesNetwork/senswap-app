@@ -29,7 +29,7 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 const EMPTY = {
@@ -148,18 +148,24 @@ class Swap extends Component {
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
     return new Promise((resolve, reject) => {
       if (!tokenAddress || !secretKey) return reject('Invalid input');
+      const {
+        wallet: { user, accounts },
+        updateWallet, syncWallet
+      } = this.props;
       const { dstData: { address: dstAddress } } = this.state;
       if (dstAddress) return resolve(dstAddress);
 
-      let newAddress = null;
-      const { wallet: { user }, updateWallet } = this.props;
-      return sol.newSRC20Account(tokenAddress, secretKey).then(({ account, txId }) => {
-        newAddress = account.publicKey.toBase58();
+      let accountAddress = null;
+      return sol.newSRC20Account(tokenAddress, secretKey).then(({ account }) => {
+        accountAddress = account.publicKey.toBase58();
         const tokens = [...user.tokens];
         if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        return updateWallet({ ...user, tokens });
+        if (!accounts.includes(accountAddress)) accounts.push(accountAddress);
+        return updateWallet({ user: { ...user, tokens }, accounts });
       }).then(re => {
-        return resolve(newAddress);
+        return syncWallet();
+      }).then(re => {
+        return resolve(accountAddress);
       }).catch(er => {
         return reject(er);
       });
@@ -420,11 +426,12 @@ class Swap extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet,
+  updateWallet, unlockWallet, syncWallet,
   getPoolData,
 }, dispatch);
 

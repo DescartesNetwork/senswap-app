@@ -16,7 +16,7 @@ import { EmojiObjectsRounded } from '@material-ui/icons';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -41,9 +41,9 @@ class CreateTokenAccount extends Component {
 
   newAccount = () => {
     const {
-      wallet: { user },
+      wallet: { user, accounts },
       setError,
-      updateWallet, unlockWallet
+      updateWallet, unlockWallet, syncWallet
     } = this.props;
     const { tokenAddress } = this.state;
     if (!ssjs.isAddress(tokenAddress)) return setError('The account address cannot be empty');
@@ -54,10 +54,14 @@ class CreateTokenAccount extends Component {
         return sol.newSRC20Account(tokenAddress, secretKey);
       }).then(({ account, txId: refTxId }) => {
         txId = refTxId;
+        const accountAddress = account.publicKey.toBase58();
         const tokens = [...user.tokens];
         if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        return updateWallet({ ...user, tokens });
-      }).then(_ => {
+        if (!accounts.includes(accountAddress)) accounts.push(accountAddress);
+        return updateWallet({ user: { ...user, tokens }, accounts });
+      }).then(re => {
+        return syncWallet();
+      }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -106,7 +110,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet,
+  updateWallet, unlockWallet, syncWallet,
 }, dispatch);
 
 export default withRouter(connect(

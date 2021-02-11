@@ -201,14 +201,12 @@ class TokenSelection extends Component {
     if (!pools.length || search) return null;
     return <MenuList>
       <ListSubheader>Recommended pools</ListSubheader>
-      {
-        pools.map((pool, index) => {
-          const { address, email, verified, token: { symbol, icon } } = pool;
-          return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
-            {this.renderToken(symbol, icon, email, verified)}
-          </MenuItem>
-        })
-      }
+      {pools.map((pool, index) => {
+        const { address, email, verified, token: { symbol, icon } } = pool;
+        return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
+          {this.renderToken(symbol, icon, email, verified)}
+        </MenuItem>
+      })}
     </MenuList>
   }
 
@@ -217,14 +215,12 @@ class TokenSelection extends Component {
     if (!pools.length || search) return null;
     return <MenuList>
       <ListSubheader>New pools</ListSubheader>
-      {
-        pools.map((pool, index) => {
-          const { address, email, verified, token: { symbol, icon } } = pool;
-          return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
-            {this.renderToken(symbol, icon, email, verified)}
-          </MenuItem>
-        })
-      }
+      {pools.map((pool, index) => {
+        const { address, email, verified, token: { symbol, icon } } = pool;
+        return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
+          {this.renderToken(symbol, icon, email, verified)}
+        </MenuItem>
+      })}
     </MenuList>
   }
 
@@ -236,14 +232,12 @@ class TokenSelection extends Component {
     }
     return <MenuList>
       <ListSubheader>Search</ListSubheader>
-      {
-        pools.map((pool, index) => {
-          const { address, email, verified, token: { symbol, icon } } = pool;
-          return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
-            {this.renderToken(symbol, icon, email, verified)}
-          </MenuItem>
-        })
-      }
+      {pools.map((pool, index) => {
+        const { address, email, verified, token: { symbol, icon } } = pool;
+        return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
+          {this.renderToken(symbol, icon, email, verified)}
+        </MenuItem>
+      })}
     </MenuList>
   }
 

@@ -10,13 +10,11 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 
-import { } from '@material-ui/icons';
-
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet, updateWallet } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 class ListTokenAccount extends Component {
@@ -40,16 +38,13 @@ class ListTokenAccount extends Component {
 
   fetchData = () => {
     const {
-      wallet: { user: { tokens } },
+      wallet: { accounts },
       setError,
-      unlockWallet,
+      getAccountData,
     } = this.props;
-    return unlockWallet().then(secretKey => {
-      return Promise.all(tokens.map(tokenAddress => {
-        return sol.scanSRC20Account(tokenAddress, secretKey);
-      }));
-    }).then(data => {
-      data = data.map(({ data }) => data).flat();
+    return Promise.all(accounts.map(accountAddress => {
+      return getAccountData(accountAddress);
+    })).then(data => {
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -101,11 +96,13 @@ class ListTokenAccount extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet, updateWallet,
+  getAccountData,
+  updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

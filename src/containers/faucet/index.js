@@ -25,7 +25,7 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet, updateWallet, openWallet } from 'modules/wallet.reducer';
+import { unlockWallet, updateWallet, openWallet, syncWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
 import { getTokenData } from 'modules/bucket.reducer';
 
@@ -80,9 +80,9 @@ class Faucet extends Component {
 
   onAirdrop = () => {
     const {
-      wallet: { user },
+      wallet: { user, accounts },
       setError,
-      unlockWallet, updateWallet,
+      unlockWallet, updateWallet, syncWallet,
       airdropLamports, airdropTokens,
     } = this.props;
     const { tokenAddress, link } = this.state;
@@ -95,14 +95,17 @@ class Faucet extends Component {
         return unlockWallet();
       }).then(secretKey => {
         return sol.newSRC20Account(tokenAddress, secretKey);
-      }).then(({ account, txId }) => {
+      }).then(({ account }) => {
         const dstAddress = account.publicKey.toBase58();
         return airdropTokens(dstAddress, tokenAddress);
-      }).then(({ txId: refTxId }) => {
+      }).then(({ dstAddress, txId: refTxId }) => {
         txId = refTxId;
         const tokens = [...user.tokens];
         if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        return updateWallet({ ...user, tokens });
+        if (!accounts.includes(dstAddress)) accounts.push(dstAddress);
+        return updateWallet({ user: { ...user, tokens }, accounts });
+      }).then(re => {
+        return syncWallet();
       }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
@@ -205,7 +208,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet, updateWallet, openWallet,
+  unlockWallet, updateWallet, openWallet, syncWallet,
   getWhiteList, airdropLamports, airdropTokens,
   getTokenData,
 }, dispatch);

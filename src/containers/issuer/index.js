@@ -90,7 +90,7 @@ class Issuer extends Component {
         txId = refTxId;
         const tokens = [...user.tokens];
         if (!tokens.includes(tokenAddress)) tokens.push(tokenAddress);
-        return updateWallet({ ...user, tokens });
+        return updateWallet({ user: { ...user, tokens } });
       }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

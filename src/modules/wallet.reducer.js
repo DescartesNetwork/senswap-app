@@ -183,11 +183,13 @@ export const SYNC_WALLET = 'SYNC_WALLET';
 export const SYNC_WALLET_OK = 'SYNC_WALLET_OK';
 export const SYNC_WALLET_FAIL = 'SYNC_WALLET_FAIL';
 
-export const syncWallet = (user) => {
-  return dispatch => {
+export const syncWallet = () => {
+  return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SYNC_WALLET });
 
+      const { wallet: { user } } = getState();
+      
       if (!user) {
         const er = 'Invalid data';
         dispatch({ type: SYNC_WALLET_FAIL, reason: er });
