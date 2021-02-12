@@ -15,9 +15,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 
-import {
-  CloseRounded, ErrorOutlineRounded,
-} from '@material-ui/icons';
+import { CloseRounded, ErrorOutlineRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 

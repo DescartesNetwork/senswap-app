@@ -28,7 +28,7 @@ import { setItem } from 'modules/bucket.reducer';
 
 
 /**
- * Need to call this function in very first age of application
+ * Need to call this function at the very first moment of application
  * to avoid unexpected exception
  */
 export const configSenWallet = () => {
