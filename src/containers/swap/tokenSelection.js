@@ -200,7 +200,7 @@ class TokenSelection extends Component {
     const { recommended: { pools }, search } = this.state;
     if (!pools.length || search) return null;
     return <MenuList>
-      <ListSubheader>Recommended pools</ListSubheader>
+      <ListSubheader disableSticky>Recommended pools</ListSubheader>
       {pools.map((pool, index) => {
         const { address, email, verified, token: { symbol, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
@@ -214,7 +214,7 @@ class TokenSelection extends Component {
     const { new: { pools }, search } = this.state;
     if (!pools.length || search) return null;
     return <MenuList>
-      <ListSubheader>New pools</ListSubheader>
+      <ListSubheader disableSticky>New pools</ListSubheader>
       {pools.map((pool, index) => {
         const { address, email, verified, token: { symbol, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
@@ -228,10 +228,10 @@ class TokenSelection extends Component {
     const { search, searched: { pools } } = this.state;
     if (!pools.length) {
       if (!search) return null;
-      return <ListSubheader>No result</ListSubheader>
+      return <ListSubheader disableSticky>No result</ListSubheader>
     }
     return <MenuList>
-      <ListSubheader>Search</ListSubheader>
+      <ListSubheader disableSticky>Search</ListSubheader>
       {pools.map((pool, index) => {
         const { address, email, verified, token: { symbol, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -46,6 +47,12 @@ export const configSenWallet = () => {
 
 class Wallet extends Component {
 
+  componentDidUpdate(prevProps) {
+    const { wallet: { user: { address: prevAddress } } } = prevProps;
+    const { wallet: { user: { address } } } = this.props;
+    if (!isEqual(address, prevAddress)) this.fetchData();
+  }
+
   componentDidMount() {
     const { setError, setWallet } = this.props;
     const address = storage.get('address');
@@ -56,7 +63,7 @@ class Wallet extends Component {
       return;
     }
     return setWallet(address, keystore).then(re => {
-      return this.fetchData();
+      // Nothing
     }).catch(er => {
       return setError(er);
     });

@@ -96,7 +96,7 @@ class LPTList extends Component {
 
     let render = [];
     for (let key in groupedTokensData) {
-      render.push(<ListSubheader key={key}>{key}</ListSubheader>)
+      render.push(<ListSubheader key={key} disableSticky>{key}</ListSubheader>)
       groupedTokensData[key].forEach(lptAddress => {
         render.push(<MenuItem key={lptAddress} onClick={() => this.onSelect(lptAddress)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
@@ -139,7 +139,7 @@ class LPTList extends Component {
         onClose={this.onClose}
       >
         {this.renderGroupedTokensData()}
-        <ListSubheader>Your accounts not presented here</ListSubheader>
+        <ListSubheader disableSticky>Your accounts not presented here</ListSubheader>
         <MenuItem>
           <Button
             variant="contained"
