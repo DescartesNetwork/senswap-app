@@ -9,6 +9,8 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -59,10 +61,25 @@ class UiUx extends Component {
 
   render() {
     const { classes } = this.props;
-    const { ui: { error, visible }, unsetError } = this.props;
+    const {
+      ui: { error, visible, loading },
+      unsetError,
+    } = this.props;
 
     return <Grid container spacing={2}>
+      {/* Loading backdrop */}
       <Grid item xs={12}>
+        <Backdrop className={classes.backdrop} open={loading} transitionDuration={500}>
+          <Grid container spacing={2} justify="center">
+            <Grid item>
+              <CircularProgress color="primary" />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography align="center">Loading data please wait</Typography>
+            </Grid>
+          </Grid>
+        </Backdrop>
+        {/* Error dialog */}
         <Dialog open={visible} onClose={unsetError} maxWidth="xs">
           <DialogTitle>
             <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
@@ -109,7 +126,7 @@ class UiUx extends Component {
           </DialogContent>
         </Dialog>
       </Grid>
-    </Grid>
+    </Grid >
   }
 }
 

@@ -22,7 +22,7 @@ import Unlock from './unlock';
 import styles from './styles';
 import storage from 'helpers/storage';
 import sol from 'helpers/sol';
-import { setError } from 'modules/ui.reducer';
+import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { unlockWallet, setWallet, updateWallet, closeWallet } from 'modules/wallet.reducer';
 import { setItem } from 'modules/bucket.reducer';
 
@@ -65,13 +65,15 @@ class Wallet extends Component {
   fetchData = () => {
     const {
       wallet: { user: { tokens, pools }, accounts, lpts },
-      setError,
+      setError, setLoading, unsetLoading,
       unlockWallet, updateWallet,
       setItem,
     } = this.props;
     let secretKey = null;
     return unlockWallet().then(re => {
       secretKey = re;
+      return setLoading();
+    }).then(re => {
       return Promise.all(tokens.map(tokenAddress => {
         return sol.scanAccount(tokenAddress, secretKey);
       }));
@@ -104,6 +106,8 @@ class Wallet extends Component {
           return newLPTs.push(lptAddress);
       });
       return updateWallet({ lpts: newLPTs });
+    }).then(re => {
+      return unsetLoading();
     }).catch(er => {
       return setError(er);
     });
@@ -165,10 +169,11 @@ class Wallet extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
+  setError, setLoading, unsetLoading,
   unlockWallet, setWallet, updateWallet, closeWallet,
   setItem,
 }, dispatch);

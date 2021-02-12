@@ -117,16 +117,15 @@ class Faucet extends Component {
 
   onAirdrop = () => {
     const {
-      wallet: { user, accounts },
+      wallet: { user },
       setError,
-      unlockWallet, updateWallet, syncWallet,
+      unlockWallet,
       airdropLamports, airdropTokens,
     } = this.props;
     const { tokenAddress, link } = this.state;
     if (!ssjs.isAddress(tokenAddress)) return setError('Invalid token');
     if (!link) return setError('Please parse the share link into the box');
 
-    let txId = null;
     return this.setState({ loading: true }, () => {
       return airdropLamports(user.address).then(re => {
         return unlockWallet();

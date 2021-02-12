@@ -8,6 +8,7 @@ const defaultState = {
   type: 'xs',
   error: '',
   visible: false,
+  loading: false,
 }
 
 
@@ -132,6 +133,58 @@ export const unsetError = () => {
 }
 
 /**
+ * Loading
+ */
+export const SET_LOADING = 'SET_LOADING';
+export const SET_LOADING_OK = 'SET_LOADING_OK';
+export const SET_LOADING_FAIL = 'SET_LOADING_FAIL';
+
+export const setLoading = () => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: SET_LOADING });
+
+      const { ui: { loading: prevLoading } } = getState();
+      if (prevLoading) {
+        const er = 'Already loading';
+        dispatch({ type: SET_LOADING_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const data = { loading: true }
+      dispatch({ type: SET_LOADING_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
+ * Unloading
+ */
+export const UNSET_LOADING = 'UNSET_LOADING';
+export const UNSET_LOADING_OK = 'UNSET_LOADING_OK';
+export const UNSET_LOADING_FAIL = 'UNSET_LOADING_FAIL';
+
+export const unsetLoading = () => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: UNSET_LOADING });
+
+      const { ui: { loading: prevLoading } } = getState();
+      if (!prevLoading) {
+        const er = 'Already unloading';
+        dispatch({ type: UNSET_LOADING_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const data = { loading: false }
+      dispatch({ type: UNSET_LOADING_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
  * Reducder
  */
 export default (state = defaultState, action) => {
@@ -151,6 +204,14 @@ export default (state = defaultState, action) => {
     case UNSET_ERROR_OK:
       return { ...state, ...action.data };
     case UNSET_ERROR_FAIL:
+      return { ...state, ...action.data };
+    case SET_LOADING_OK:
+      return { ...state, ...action.data };
+    case SET_LOADING_FAIL:
+      return { ...state, ...action.data };
+    case UNSET_LOADING_OK:
+      return { ...state, ...action.data };
+    case UNSET_LOADING_FAIL:
       return { ...state, ...action.data };
     default:
       return state;
