@@ -47,14 +47,8 @@ export const configSenWallet = () => {
 
 class Wallet extends Component {
 
-  componentDidUpdate(prevProps) {
-    const { wallet: { user: { address: prevAddress } } } = prevProps;
-    const { wallet: { user: { address } } } = this.props;
-    if (!isEqual(address, prevAddress)) this.fetchData();
-  }
-
   componentDidMount() {
-    const { setError, setWallet } = this.props;
+    const { setError, setWallet, setItem } = this.props;
     const address = storage.get('address');
     const keystore = storage.get('keystore');
     if (!address || !keystore) {
@@ -63,10 +57,23 @@ class Wallet extends Component {
       return;
     }
     return setWallet(address, keystore).then(re => {
-      // Nothing
+      window.senwallet.src20.watch((er, re) => {
+        if (er) return setError(er);
+        return setItem(re);
+      });
+      window.senwallet.swap.watch((er, re) => {
+        if (er) return setError(er);
+        return setItem(re);
+      });
     }).catch(er => {
       return setError(er);
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    const { wallet: { user: { address: prevAddress } } } = prevProps;
+    const { wallet: { user: { address } } } = this.props;
+    if (!isEqual(address, prevAddress)) this.fetchData();
   }
 
   fetchData = () => {

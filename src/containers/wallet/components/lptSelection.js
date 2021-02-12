@@ -19,21 +19,21 @@ class LPTSelection extends Component {
     super();
 
     this.state = {
-      data: {},
+      lptAddress: '',
     }
   }
 
-  onData = (data = {}) => {
+  onAddress = (lptAddress) => {
     const { onChange } = this.props;
-    return this.setState({ data }, () => {
-      return onChange(data);
+    return this.setState({ lptAddress }, () => {
+      return onChange(lptAddress);
     });
   }
 
   render() {
     // const { classes } = this.props;
     const { poolAddress } = this.props;
-    const { data: { address: lptAddress } } = this.state;
+    const { lptAddress } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -47,7 +47,7 @@ class LPTSelection extends Component {
             endAdornment: <LPTList
               poolAddress={poolAddress}
               size="medium"
-              onChange={this.onData}
+              onChange={this.onAddress}
               edge="end"
             />,
             readOnly: true

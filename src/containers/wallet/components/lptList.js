@@ -38,16 +38,20 @@ class LPTList extends Component {
   }
 
   componentDidMount() {
-    this.fetchData();
+    this.fetchData(this.onSelect);
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate(prevProps, prevState) {
     const { wallet: { lpts: prevLPTs }, poolAddress: prevPoolAddress } = prevProps;
     const { wallet: { lpts }, poolAddress } = this.props;
-    if (!isEqual(lpts, prevLPTs) || !isEqual(poolAddress, prevPoolAddress)) this.fetchData();
+    const { anchorEl: prevAnchorEl } = prevState;
+    const { anchorEl } = this.state;
+    if (!isEqual(lpts, prevLPTs)) return this.fetchData(this.onSelect);
+    if (!isEqual(poolAddress, prevPoolAddress)) return this.fetchData(this.onSelect);
+    if (!isEqual(prevAnchorEl, anchorEl) && Boolean(anchorEl)) return this.fetchData();
   }
 
-  fetchData = () => {
+  fetchData = (callback) => {
     const {
       wallet: { lpts },
       poolAddress, onChange,
@@ -59,7 +63,7 @@ class LPTList extends Component {
       return getLPTData(lptAddress);
     })).then(data => {
       if (poolAddress) data = data.filter(({ pool: { address } }) => address === poolAddress);
-      return this.setState({ data }, this.onSelect);
+      return this.setState({ data }, callback);
     }).catch(er => {
       return setError(er);
     });
@@ -68,10 +72,10 @@ class LPTList extends Component {
   onSelect = (lptAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
+    if (!data || !data.length) return onChange('');
     return this.setState({ anchorEl: null }, () => {
-      if (!data || !data.length) return onChange({});
-      const lptData = !lptAddress ? data[0] : data.find(({ address }) => address === lptAddress);
-      return onChange(lptData);
+      const address = lptAddress || data[0].address || '';
+      return onChange(address);
     });
   }
 

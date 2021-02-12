@@ -141,9 +141,10 @@ class Info extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { lpts: prevLPTs } } = prevProps;
-    const { wallet: { lpts } } = this.props;
-    if (!isEqual(lpts, prevLPTs)) this.fetchData();
+    const { wallet: { lpts: prevLPTs }, bucket: prevBucket } = prevProps;
+    const { wallet: { lpts }, bucket } = this.props;
+    if (!isEqual(lpts, prevLPTs)) return this.fetchData();
+    if (!isEqual(bucket, prevBucket)) return this.fetchData();
   }
 
   fetchData = () => {

@@ -133,10 +133,11 @@ class TokenSelection extends Component {
   }
 
   onSelect = (type, index) => {
+    const { onChange } = this.props;
+    const { [type]: { pools } } = this.state;
     return this.setState({ type, index }, () => {
-      const { [type]: { pools } } = this.state;
       const { address } = pools[index];
-      this.props.onChange(address);
+      onChange(address);
       return this.onClose();
     });
   }

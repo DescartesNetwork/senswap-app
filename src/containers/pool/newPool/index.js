@@ -26,6 +26,7 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -52,8 +53,14 @@ class NewPool extends Component {
     return this.setState({ ...EMPTY });
   }
 
-  onData = (accountData) => {
-    return this.setState({ accountData });
+  onAddress = (accountAddress) => {
+    const { getAccountData, setError } = this.props;
+    if (!ssjs.isAddress(accountAddress)) return;
+    return getAccountData(accountAddress).then(accountData => {
+      return this.setState({ accountData });
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onAmount = (e) => {
@@ -144,7 +151,7 @@ class NewPool extends Component {
         <Typography variant="h6">Your token info</Typography>
       </Grid>
       <Grid item xs={12}>
-        <AccountSelection onChange={this.onData} />
+        <AccountSelection onChange={this.onAddress} />
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
@@ -240,11 +247,13 @@ class NewPool extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet, unlockWallet, syncWallet,
+  getAccountData,
 }, dispatch);
 
 export default withRouter(connect(

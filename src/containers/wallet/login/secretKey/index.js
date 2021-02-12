@@ -57,7 +57,11 @@ class SecretKey extends Component {
     if (!secretKey) return setError('The secret key cannot be empty');
     const keystore = ssjs.encrypt(secretKey, password);
     if (!keystore) return setError('The secret key is incorrect');
-    return setWallet(keystore.publicKey, keystore);
+    return setWallet(keystore.publicKey, keystore).then(re => {
+      // Do nothing
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onGen = () => {

@@ -38,29 +38,26 @@ class AccountList extends Component {
   }
 
   componentDidMount() {
-    this.fetchData();
+    this.fetchData(this.onSelect);
   }
 
-  componentDidUpdate(prevProps) {
-    const {
-      wallet: { accounts: prevAccounts },
-      tokenAddress: prevTokenAddress
-    } = prevProps;
-    const {
-      wallet: { accounts },
-      tokenAddress
-    } = this.props;
-    if (!isEqual(accounts, prevAccounts) || !isEqual(tokenAddress, prevTokenAddress))
-      this.fetchData();
+  componentDidUpdate(prevProps, prevState) {
+    const { wallet: { accounts: prevAccounts }, tokenAddress: prevTokenAddress } = prevProps;
+    const { wallet: { accounts }, tokenAddress } = this.props;
+    const { anchorEl: prevAnchorEl } = prevState;
+    const { anchorEl } = this.state;
+    if (!isEqual(tokenAddress, prevTokenAddress)) return this.fetchData(this.onSelect);
+    if (!isEqual(accounts, prevAccounts)) return this.fetchData(this.onSelect);
+    if (!isEqual(prevAnchorEl, anchorEl) && Boolean(anchorEl)) return this.fetchData();
   }
 
-  fetchData = () => {
+  fetchData = (callback) => {
     const {
       wallet: { accounts },
       getAccountData,
       tokenAddress, onChange,
     } = this.props;
-    if (!accounts.length) return onChange({});
+    if (!accounts.length) return onChange('');
 
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
@@ -69,7 +66,7 @@ class AccountList extends Component {
         const { token: { address } } = accountData;
         return address === tokenAddress;
       });
-      return this.setState({ data }, this.onSelect);
+      return this.setState({ data }, callback);
     }).catch(er => {
       return setError(er);
     });
@@ -78,10 +75,10 @@ class AccountList extends Component {
   onSelect = (accountAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
+    if (!data || !data.length) return onChange('');
     return this.setState({ anchorEl: null }, () => {
-      if (!data || !data.length) return onChange({});
-      const accountData = !accountAddress ? data[0] : data.find(({ address }) => address === accountAddress);
-      return onChange(accountData);
+      const address = accountAddress || data[0].address || '';
+      return onChange(address);
     });
   }
 

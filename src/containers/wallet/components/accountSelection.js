@@ -23,7 +23,7 @@ class AccountSelection extends Component {
 
     this.state = {
       tokenAddress: '',
-      data: {},
+      accountAddress: '',
     }
   }
 
@@ -49,17 +49,17 @@ class AccountSelection extends Component {
     });
   }
 
-  onData = (data = {}) => {
+  onAddress = (accountAddress) => {
     const { onChange } = this.props;
-    return this.setState({ data }, () => {
-      return onChange(data);
+    return this.setState({ accountAddress }, () => {
+      return onChange(accountAddress);
     });
   }
 
   render() {
     // const { classes } = this.props;
     const { label } = this.props;
-    const { data: { address: accountAddress }, tokenAddress } = this.state;
+    const { accountAddress, tokenAddress } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -72,7 +72,7 @@ class AccountSelection extends Component {
             endAdornment: <AccountList
               tokenAddress={tokenAddress}
               size="medium"
-              onChange={this.onData}
+              onChange={this.onAddress}
               edge="end"
             />,
             readOnly: true

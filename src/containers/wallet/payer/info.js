@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -35,12 +36,13 @@ class PayerInfo extends Component {
 
   componentDidMount() {
     this.fetchData();
+    this.watch();
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser } } = prevProps;
-    const { wallet: { user } } = this.props;
-    if (!isEqual(user, prevUser)) this.fetchData();
+    const { wallet: { user: { address: prevAddress } } } = prevProps;
+    const { wallet: { user: { address } } } = this.props;
+    if (!isEqual(address, prevAddress)) this.fetchData();
   }
 
   fetchData = () => {
@@ -50,6 +52,14 @@ class PayerInfo extends Component {
     }).catch(er => {
       return setError(er);
     });
+  }
+
+  watch = () => {
+    const { wallet: { user: { address } } } = this.props;
+    return this.src20.connection.onAccountChange(
+      ssjs.fromAddress(address),
+      this.fetchData
+    );
   }
 
   onQRCode = () => {

@@ -46,8 +46,8 @@ class AddLiquidity extends Component {
     this.state = {
       ...EMPTY,
       poolData: {},
-      srcData: {},
-      lptData: {},
+      srcAddress: '',
+      lptAddress: '',
       amount: 0,
       advance: false,
     }
@@ -81,12 +81,12 @@ class AddLiquidity extends Component {
     return this.setState({ poolData });
   }
 
-  onSourceData = (srcData = {}) => {
-    return this.setState({ srcData });
+  onSourceAddress = (srcAddress) => {
+    return this.setState({ srcAddress });
   }
 
-  onLPTData = (lptData = {}) => {
-    return this.setState({ lptData });
+  onLPTAddress = (lptAddress) => {
+    return this.setState({ lptAddress });
   }
 
   onAutogenLPTAddress = (poolAddress, secretKey) => {
@@ -97,7 +97,7 @@ class AddLiquidity extends Component {
         wallet: { user, lpts },
         updateWallet, syncWallet
       } = this.props;
-      const { lptData: { address: lptAddress } } = this.state;
+      const { lptAddress } = this.state;
       if (lptAddress) return resolve(lptAddress);
 
       let lpt = null;
@@ -124,7 +124,7 @@ class AddLiquidity extends Component {
     const {
       amount,
       poolData: { initialized, address: poolAddress, token, treasury },
-      srcData: { address: srcAddress },
+      srcAddress,
     } = this.state;
     if (!initialized) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
@@ -244,13 +244,13 @@ class AddLiquidity extends Component {
         <Collapse in={advance}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <LPTSelection onChange={this.onLPTData} poolAddress={poolAddress} />
+              <LPTSelection onChange={this.onLPTAddress} poolAddress={poolAddress} />
             </Grid>
             <Grid item xs={12}>
               <AccountSelection
                 label="Source Address"
                 poolAddress={poolAddress}
-                onChange={this.onSourceData}
+                onChange={this.onSourceAddress}
               />
             </Grid>
           </Grid>
@@ -304,6 +304,7 @@ class AddLiquidity extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

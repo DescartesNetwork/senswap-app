@@ -45,8 +45,8 @@ class Swap extends Component {
     this.state = {
       ...EMPTY,
       advance: false,
-      srcData: {},
-      dstData: {},
+      srcAddress: '',
+      dstAddress: '',
       bidAmount: 0,
       askAmount: 0,
       bidData: {},
@@ -127,8 +127,8 @@ class Swap extends Component {
     });
   }
 
-  onSourceData = (srcData) => {
-    return this.setState({ srcData });
+  onSourceAddress = (srcAddress) => {
+    return this.setState({ srcAddress });
   }
 
   onAskAddress = (askAddress) => {
@@ -141,8 +141,8 @@ class Swap extends Component {
     });
   }
 
-  onDestinationData = (dstData) => {
-    return this.setState({ dstData });
+  onDestinationAddress = (dstAddress) => {
+    return this.setState({ dstAddress });
   }
 
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
@@ -152,8 +152,8 @@ class Swap extends Component {
         wallet: { user, accounts },
         updateWallet, syncWallet
       } = this.props;
-      const { dstData: { address: dstAddress } } = this.state;
-      if (dstAddress) return resolve(dstAddress);
+      const { dstAddress } = this.state;
+      if (ssjs.isAddress(dstAddress)) return resolve(dstAddress);
 
       let accountAddress = null;
       return sol.newAccount(tokenAddress, secretKey).then(({ account }) => {
@@ -176,7 +176,7 @@ class Swap extends Component {
   onSwap = () => {
     const { setError, unlockWallet } = this.props;
     const {
-      bidAmount, srcData: { address: srcAddress },
+      bidAmount, srcAddress,
       bidData: {
         initialized: bidInitialized,
         address: bidAddress,
@@ -230,11 +230,6 @@ class Swap extends Component {
     const { classes } = this.props;
     const {
       bidAmount, askAmount,
-      srcData: {
-        initialized: srcInitialized,
-        amount: srcAmount,
-        token: srcToken
-      },
       bidData: {
         initialized: bidInitialized,
         address: bidAddress,
@@ -320,7 +315,6 @@ class Swap extends Component {
                   <TextField
                     label="Bid Amount"
                     variant="outlined"
-                    helperText={`Balance: ${srcInitialized ? utils.prettyNumber(utils.div(srcAmount, global.BigInt(10 ** srcToken.decimals))) : 0}`}
                     value={bidAmount}
                     onChange={this.onBidAmount}
                     fullWidth
@@ -331,7 +325,7 @@ class Swap extends Component {
                     <AccountSelection
                       label="Source Address"
                       poolAddress={bidAddress}
-                      onChange={this.onSourceData}
+                      onChange={this.onSourceAddress}
                     />
                   </Collapse>
                 </Grid>
@@ -362,7 +356,7 @@ class Swap extends Component {
                     <AccountSelection
                       poolAddress={askAddress}
                       label="Destination Address"
-                      onChange={this.onDestinationData}
+                      onChange={this.onDestinationAddress}
                     />
                   </Collapse>
                 </Grid>

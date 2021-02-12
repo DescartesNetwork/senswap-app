@@ -81,7 +81,11 @@ class KeyStore extends Component {
     const account = ssjs.fromKeystore(keystore, password);
     if (!account) return setError('Corrupted keystore / Incorrect password');
     const address = account.publicKey.toBase58();
-    return setWallet(address, keystore);
+    return setWallet(address, keystore).then(re => {
+      // Do nothing
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onGen = () => {

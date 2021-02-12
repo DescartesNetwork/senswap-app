@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -14,7 +15,9 @@ import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
 import styles from './styles';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
 import { setQRCode, setMainAccount } from 'modules/wallet.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 class TokenInfo extends Component {
@@ -22,8 +25,28 @@ class TokenInfo extends Component {
     super();
 
     this.state = {
+      accountAddress: '',
       data: {},
     }
+  }
+
+  componentDidUpdate = (prevProps, prevState) => {
+    const { bucket: prevBucket } = prevProps;
+    const { bucket } = this.props;
+    const { accountAddress: prevAccountAddress } = prevState;
+    const { accountAddress } = this.state;
+    if (!isEqual(bucket, prevBucket) || !isEqual(accountAddress, prevAccountAddress)) this.fetchData();
+  }
+
+  fetchData = () => {
+    const { setError, getAccountData } = this.props;
+    const { accountAddress } = this.state;
+    if (!ssjs.isAddress(accountAddress)) return this.setState({ accountAddress: '', data: {} });
+    return getAccountData(accountAddress).then(data => {
+      return this.setState({ data });
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onQRCode = () => {
@@ -32,12 +55,8 @@ class TokenInfo extends Component {
     return setQRCode(true, address);
   }
 
-  onData = (data = {}) => {
-    const { setMainAccount } = this.props;
-    return this.setState({ data }, () => {
-      const { address } = data;
-      if (ssjs.isAddress(address)) return setMainAccount(address);
-    });
+  onAddress = (accountAddress) => {
+    return this.setState({ accountAddress });
   }
 
   render() {
@@ -64,7 +83,7 @@ class TokenInfo extends Component {
             />
           </Grid>
           <Grid item>
-            <AccountList onChange={this.onData} />
+            <AccountList onChange={this.onAddress} />
           </Grid>
         </Grid>
       </Grid>
@@ -75,10 +94,13 @@ class TokenInfo extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
   setQRCode, setMainAccount,
+  getAccountData,
 }, dispatch);
 
 export default withRouter(connect(

@@ -44,9 +44,10 @@ class PoolSelection extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser } } = prevProps;
-    const { wallet: { user } } = this.props;
-    if (!isEqual(user, prevUser)) this.fetchData();
+    const { wallet: { user: prevUser }, bucket: prevBucket } = prevProps;
+    const { wallet: { user }, bucket } = this.props;
+    if (!isEqual(user, prevUser)) return this.fetchData();
+    if (!isEqual(bucket, prevBucket)) return this.fetchData();
   }
 
   fetchData = () => {

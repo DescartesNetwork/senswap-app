@@ -31,6 +31,7 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, syncWallet } from 'modules/wallet.reducer';
+import { getLPTData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -46,7 +47,7 @@ class RemoveLiquidity extends Component {
     this.state = {
       ...EMPTY,
       poolAddress: '',
-      dstData: {},
+      dstAddress: '',
       lptData: {},
       amount: 0,
       advance: false,
@@ -81,12 +82,18 @@ class RemoveLiquidity extends Component {
     return this.setState({ poolAddress });
   }
 
-  onLPTData = (lptData) => {
-    return this.setState({ lptData });
+  onLPTAddress = (lptAddress) => {
+    const { getLPTData, setError } = this.props;
+    if (!ssjs.isAddress) return this.setState({ lptData: {} });
+    return getLPTData(lptAddress).then(lptData => {
+      return this.setState({ lptData });
+    }).catch(er => {
+      return setError(er);
+    })
   }
 
-  onDestinationData = (dstData) => {
-    return this.setState({ dstData });
+  onDestinationAddress = (dstAddress) => {
+    return this.setState({ dstAddress });
   }
 
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
@@ -97,7 +104,7 @@ class RemoveLiquidity extends Component {
         wallet: { user, accounts },
         updateWallet, syncWallet
       } = this.props;
-      const { dstData: { address: dstAddress } } = this.state;
+      const { dstAddress } = this.state;
       if (dstAddress) return resolve(dstAddress);
 
       let accountAddress = null;
@@ -243,13 +250,13 @@ class RemoveLiquidity extends Component {
         <Collapse in={advance}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <LPTSelection onChange={this.onLPTData} poolAddress={poolAddress} />
+              <LPTSelection onChange={this.onLPTAddress} poolAddress={poolAddress} />
             </Grid>
             <Grid item xs={12}>
               <AccountSelection
                 label="Destination Address"
                 poolAddress={poolAddress}
-                onChange={this.onDestinationData}
+                onChange={this.onDestinationAddress}
               />
             </Grid>
           </Grid>
@@ -303,11 +310,13 @@ class RemoveLiquidity extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   unlockWallet, updateWallet, syncWallet,
+  getLPTData,
 }, dispatch);
 
 export default withRouter(connect(
