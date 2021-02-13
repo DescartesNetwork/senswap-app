@@ -24,7 +24,7 @@ import styles from './styles';
 import storage from 'helpers/storage';
 import sol from 'helpers/sol';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
-import { unlockWallet, setWallet, updateWallet, closeWallet } from 'modules/wallet.reducer';
+import { unlockWallet, setWallet, updateWallet, closeWallet, unsetWallet } from 'modules/wallet.reducer';
 import { setItem } from 'modules/bucket.reducer';
 
 
@@ -84,11 +84,12 @@ class Wallet extends Component {
 
   fetchData = () => {
     const {
-      wallet: { user: { tokens, pools }, accounts, lpts },
+      wallet: { user: { address, tokens, pools }, accounts, lpts },
       setError, setLoading, unsetLoading,
-      unlockWallet, updateWallet,
+      unlockWallet, updateWallet, unsetWallet,
       setItem,
     } = this.props;
+    if (!ssjs.isAddress(address)) return;
     let secretKey = null;
     return unlockWallet().then(re => {
       secretKey = re;
@@ -129,6 +130,7 @@ class Wallet extends Component {
     }).then(re => {
       return unsetLoading();
     }).catch(er => {
+      if (!secretKey) return unsetWallet();
       return setError(er);
     });
   }
@@ -194,7 +196,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setLoading, unsetLoading,
-  unlockWallet, setWallet, updateWallet, closeWallet,
+  unlockWallet, setWallet, updateWallet, closeWallet, unsetWallet,
   setItem,
 }, dispatch);
 
