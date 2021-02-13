@@ -6,12 +6,10 @@ import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Collapse from '@material-ui/core/Collapse';
 import Switch from '@material-ui/core/Switch';
 import Tooltip from '@material-ui/core/Tooltip';
 import Popover from '@material-ui/core/Popover';
@@ -22,8 +20,8 @@ import {
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
-import TokenSelection from './tokenSelection';
-import AccountSelection from 'containers/wallet/components/accountSelection';
+import Bid from './bid';
+import Ask from './ask';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -45,11 +43,15 @@ class Swap extends Component {
     this.state = {
       ...EMPTY,
       advance: false,
+
       srcAddress: '',
-      dstAddress: '',
       bidAmount: 0,
-      askAmount: 0,
+      bidAddress: '',
       bidData: {},
+
+      dstAddress: '',
+      askAmount: 0,
+      askAddress: '',
       askData: {},
     }
 
@@ -112,47 +114,27 @@ class Swap extends Component {
     return this.setState({ askAmount: paidAmountWithFee });
   }
 
-  onBidAmount = (e) => {
-    const bidAmount = e.target.value || '';
-    return this.setState({ bidAmount }, this.estimateAmount);
+  onBid = ({ amount, poolData, accountAddress }) => {
+    return this.setState({
+      bidAmount: amount,
+      bidData: poolData,
+      srcAddress: accountAddress,
+    }, this.estimateAmount);
   }
 
-  onBidAddress = (bidAddress) => {
-    const { setError, getPoolData } = this.props;
-    if (!ssjs.isAddress(bidAddress)) return setError('Invalid bid address');
-    return getPoolData(bidAddress).then(bidData => {
-      return this.setState({ bidData }, this.estimateAmount);
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  onSourceAddress = (srcAddress) => {
-    return this.setState({ srcAddress });
-  }
-
-  onAskAddress = (askAddress) => {
-    const { setError, getPoolData } = this.props;
-    if (!ssjs.isAddress(askAddress)) return setError('Invalid ask address');
-    return getPoolData(askAddress).then(askData => {
-      return this.setState({ askData }, this.estimateAmount);
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  onDestinationAddress = (dstAddress) => {
-    return this.setState({ dstAddress });
+  onAsk = ({ amount, poolData, accountAddress }) => {
+    return this.setState({
+      askAmount: amount,
+      askData: poolData,
+      dstAddress: accountAddress,
+    }, this.estimateAmount);
   }
 
   onAutogenDestinationAddress = (tokenAddress, secretKey) => {
     return new Promise((resolve, reject) => {
-      if (!ssjs.isAddress(tokenAddress) || !secretKey) return reject('Invalid input');
-      const {
-        wallet: { user, accounts },
-        updateWallet, syncWallet
-      } = this.props;
       const { dstAddress } = this.state;
+      const { wallet: { user, accounts }, updateWallet, syncWallet } = this.props;
+      if (!ssjs.isAddress(tokenAddress) || !secretKey) return reject('Invalid input');
       if (ssjs.isAddress(dstAddress)) return resolve(dstAddress);
 
       let accountAddress = null;
@@ -229,18 +211,17 @@ class Swap extends Component {
   render() {
     const { classes } = this.props;
     const {
-      bidAmount, askAmount,
       bidData: {
         initialized: bidInitialized,
-        address: bidAddress,
         reserve: bidReserve,
         lpt: bidLPT,
       },
+      askAmount,
       askData: {
         initialized: askInitialized,
-        address: askAddress,
         reserve: askReserve,
-        lpt: askLPT, },
+        lpt: askLPT
+      },
       txId, loading, advance, anchorEl
     } = this.state;
 
@@ -299,66 +280,10 @@ class Swap extends Component {
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                  <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-                    <Grid item className={classes.stretch}>
-                      <Typography variant="h6">From</Typography>
-                    </Grid>
-                    <Grid item>
-                      <Typography className={classes.price}>Price: ${utils.prettyNumber(utils.div(bidLPT, bidReserve))}</Typography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={6}>
-                  <TokenSelection onChange={this.onBidAddress} />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Bid Amount"
-                    variant="outlined"
-                    value={bidAmount}
-                    onChange={this.onBidAmount}
-                    fullWidth
-                  />
+                  <Bid advance={advance} onChange={this.onBid} />
                 </Grid>
                 <Grid item xs={12}>
-                  <Collapse in={advance}>
-                    <AccountSelection
-                      label="Source Address"
-                      poolAddress={bidAddress}
-                      onChange={this.onSourceAddress}
-                    />
-                  </Collapse>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-                    <Grid item className={classes.stretch}>
-                      <Typography variant="h6">To</Typography>
-                    </Grid>
-                    <Grid item>
-                      <Typography className={classes.price}>Price: ${utils.prettyNumber(utils.div(askLPT, askReserve))}</Typography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={6}>
-                  <TokenSelection onChange={this.onAskAddress} />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Ask Amount"
-                    variant="outlined"
-                    value={askAmount}
-                    disabled={!askAmount}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Collapse in={advance}>
-                    <AccountSelection
-                      poolAddress={askAddress}
-                      label="Destination Address"
-                      onChange={this.onDestinationAddress}
-                    />
-                  </Collapse>
+                  <Ask advance={advance} amount={askAmount} onChange={this.onAsk} />
                 </Grid>
                 {bidInitialized && askInitialized ? <Grid item xs={6}>
                   <Typography variant="h5" align="center">0.25%</Typography>
