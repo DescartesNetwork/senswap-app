@@ -59,11 +59,17 @@ class Wallet extends Component {
     return setWallet(address, keystore).then(re => {
       window.senwallet.src20.watch((er, re) => {
         if (er) return setError(er);
-        return setItem(re);
+        const { wallet: { user: { tokens }, accounts } } = this.props;
+        const address = re.address;
+        if (tokens.includes(address)) return setItem(re);
+        if (accounts.includes(address)) return setItem(re);
       });
       window.senwallet.swap.watch((er, re) => {
         if (er) return setError(er);
-        return setItem(re);
+        const { wallet: { user: { pools }, lpts } } = this.props;
+        const address = re.address;
+        if (pools.includes(address)) return setItem(re);
+        if (lpts.includes(address)) return setItem(re);
       });
     }).catch(er => {
       return setError(er);

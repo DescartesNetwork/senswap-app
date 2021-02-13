@@ -40,12 +40,12 @@ class TokenSelection extends Component {
       index: 0,
       recommended: {
         pools: [],
-        limit: 3,
+        limit: 5,
         page: -1
       },
       new: {
         pools: [],
-        limit: 3,
+        limit: 5,
         page: -1
       },
       search: '',
@@ -76,8 +76,8 @@ class TokenSelection extends Component {
       let pools = [];
       if (!tokens.length) return resolve(pools);
 
-      const recommendedCondition = { '$or': tokens.map(tokenAddress => ({ token: tokenAddress })) }
-      const newCondition = !tokens.length ? {} : { '$and': tokens.map(tokenAddress => ({ token: { '$ne': tokenAddress } })) }
+      const recommendedCondition = { '$or': tokens.map(tokenAddress => ({ token: tokenAddress, verified: true })) }
+      const newCondition = !tokens.length ? {} : { '$and': tokens.map(tokenAddress => ({ '$or': [{ token: { '$ne': tokenAddress } }, { verified: false }] })) }
       let condition = typeOrCondition;
       if (typeOrCondition === 'recommended') condition = recommendedCondition;
       if (typeOrCondition === 'new') condition = newCondition;
