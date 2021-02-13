@@ -52,12 +52,8 @@ class LPTList extends Component {
   }
 
   fetchData = (callback) => {
-    const {
-      wallet: { lpts },
-      poolAddress, onChange,
-      getLPTData,
-    } = this.props;
-    if (!lpts.length) return onChange({});
+    const { wallet: { lpts }, poolAddress, onChange, getLPTData } = this.props;
+    if (!lpts.length) return onChange('');
 
     return Promise.all(lpts.map(lptAddress => {
       return getLPTData(lptAddress);

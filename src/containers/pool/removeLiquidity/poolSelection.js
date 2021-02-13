@@ -57,7 +57,7 @@ class PoolSelection extends Component {
       getPools, getPool,
       getPoolData,
     } = this.props;
-    if (!pools.length) return;
+    if (!pools || !pools.length) return;
 
     let data = null;
     return Promise.all(pools.map(poolAddress => {

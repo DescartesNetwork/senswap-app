@@ -41,7 +41,6 @@ class LPTSelection extends Component {
           label="LPT account"
           variant="outlined"
           value={lptAddress || ''}
-          onChange={this.onAddress}
           InputProps={{
             startAdornment: <LPTAvatar address={lptAddress} marginRight />,
             endAdornment: <LPTList

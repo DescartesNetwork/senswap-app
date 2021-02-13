@@ -57,7 +57,7 @@ class AccountList extends Component {
       getAccountData,
       tokenAddress, onChange,
     } = this.props;
-    if (!accounts.length) return onChange('');
+    if (!accounts || !accounts.length) return onChange('');
 
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);

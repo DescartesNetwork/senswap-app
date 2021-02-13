@@ -84,12 +84,12 @@ class RemoveLiquidity extends Component {
 
   onLPTAddress = (lptAddress) => {
     const { getLPTData, setError } = this.props;
-    if (!ssjs.isAddress) return this.setState({ lptData: {} });
+    if (!ssjs.isAddress(lptAddress)) return this.setState({ lptData: {} });
     return getLPTData(lptAddress).then(lptData => {
       return this.setState({ lptData });
     }).catch(er => {
       return setError(er);
-    })
+    });
   }
 
   onDestinationAddress = (dstAddress) => {

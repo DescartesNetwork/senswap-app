@@ -92,9 +92,8 @@ class Faucet extends Component {
         return getAccountData(accountAddress);
       })).then(data => {
         const accountData = data.find(({ token: { address } }) => address === tokenAddress);
+        if (accountData && accountData.address) return resolve(accountData.address);
         let accountAddress = null;
-        if (accountData.length) accountAddress = accountData.address;
-        if (accountAddress) return resolve(accountAddress);
         return sol.newAccount(tokenAddress, secretKey).then(({ account }) => {
           accountAddress = account.publicKey.toBase58();
           const newTokens = [...user.tokens];
