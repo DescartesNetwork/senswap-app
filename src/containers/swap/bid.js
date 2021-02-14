@@ -85,25 +85,15 @@ class Bid extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    // const { classes } = this.props;
     const { advance } = this.props;
-    const { value, poolData: { address, reserve, lpt } } = this.state;
+    const { value, poolData: { address } } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-          <Grid item className={classes.stretch}>
-            <Typography variant="h6">From</Typography>
-          </Grid>
-          <Grid item>
-            <Typography className={classes.price}>Price: ${utils.prettyNumber(utils.div(lpt, reserve))}</Typography>
-          </Grid>
-        </Grid>
+        <Typography variant="h6">From</Typography>
       </Grid>
-      <Grid item xs={6}>
-        <TokenSelection onChange={this.onPoolAddress} />
-      </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={12}>
         <TextField
           label="Bid Amount"
           variant="outlined"
@@ -111,6 +101,9 @@ class Bid extends Component {
           onChange={this.onAmount}
           fullWidth
         />
+      </Grid>
+      <Grid item xs={12}>
+        <TokenSelection onChange={this.onPoolAddress} />
       </Grid>
       <Grid item xs={12}>
         <Collapse in={advance}>

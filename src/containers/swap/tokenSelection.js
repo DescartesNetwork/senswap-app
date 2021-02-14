@@ -18,13 +18,15 @@ import MenuList from '@material-ui/core/MenuList';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
 import Tooltip from '@material-ui/core/Tooltip';
+import Chip from '@material-ui/core/Chip';
 
 import {
-  CheckCircleOutlineRounded,
-  UnfoldMoreRounded, HelpOutlineRounded, SearchRounded
+  CheckCircleOutlineRounded, ExpandMoreRounded,
+  HelpOutlineRounded, SearchRounded
 } from '@material-ui/icons';
 
 import styles from './styles';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
@@ -171,15 +173,19 @@ class TokenSelection extends Component {
       <Grid item>
         <Badge
           badgeContent={
-            !verified ? <Tooltip title="This pool is NOT verified by SenSwap">
-              <HelpOutlineRounded className={classes.badgeIcon} />
-            </Tooltip> : <Tooltip title="This pool is verified by SenSwap">
-                <CheckCircleOutlineRounded className={classes.badgeIcon} />
+            verified ? <Tooltip title="This pool is verified by SenSwap">
+              <CheckCircleOutlineRounded className={classes.badgeIcon} />
+            </Tooltip> : <Tooltip title="This pool is NOT verified by SenSwap">
+                <HelpOutlineRounded className={classes.badgeIcon} />
               </Tooltip>
           }
           overlap="circle"
-          color="primary"
-          classes={{ colorPrimary: !verified ? classes.unverified : classes.verified }}
+          color={verified ? 'primary' : 'secondary'}
+          classes={{
+            badge: classes.badge,
+            colorPrimary: classes.verified,
+            colorSecondary: classes.unverified,
+          }}
           anchorOrigin={{
             vertical: 'bottom',
             horizontal: 'left'
@@ -247,36 +253,31 @@ class TokenSelection extends Component {
     const { anchorEl, index, type, search } = this.state;
     const { [type]: { pools } } = this.state;
 
-    const verified = pools[index] && pools[index].verified;
-    const symbol = pools[index] && pools[index].token && pools[index].token.symbol;
-    const icon = pools[index] && pools[index].token && pools[index].token.icon;
-
-    return <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <TextField
-          variant="outlined"
-          value={ssjs.toSymbol(symbol)}
+    const pool = pools[index] || {
+      verified: false,
+      lpt: global.BigInt(0),
+      reserve: global.BigInt(1),
+      token: {
+        symbol: [],
+        icon: '',
+      }
+    }
+    const { verified, lpt, reserve, token: { symbol, icon } } = pool;
+    return <Grid container spacing={2} alignItems="flex-end" className={classes.noWrap}>
+      <Grid item className={classes.stretch}>
+        <Chip
+          avatar={<Avatar src={icon}>
+            <HelpOutlineRounded />
+          </Avatar>}
+          label={ssjs.toSymbol(symbol) || 'Unkown'}
           onClick={this.onOpen}
-          InputProps={{
-            startAdornment: <Badge
-              variant="dot"
-              color="primary"
-              classes={{ colorPrimary: !verified ? classes.unverified : classes.verified }}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'left'
-              }}
-            >
-              <Avatar src={icon} className={classes.iconWithMarginLeft}>
-                <HelpOutlineRounded />
-              </Avatar>
-            </Badge>,
-            endAdornment: <IconButton onClick={this.onOpen} edge="end">
-              <UnfoldMoreRounded />
-            </IconButton>,
-            readOnly: true,
+          deleteIcon={<ExpandMoreRounded />}
+          onDelete={this.onOpen}
+          color={verified ? 'primary' : 'secondary'}
+          classes={{
+            colorPrimary: classes.verified,
+            colorSecondary: classes.unverified,
           }}
-          fullWidth
         />
         <Menu
           anchorEl={anchorEl}
@@ -302,6 +303,9 @@ class TokenSelection extends Component {
           {this.renderRecommendedPools()}
           {this.renderNewPools()}
         </Menu>
+      </Grid>
+      <Grid item>
+        <Typography variant="h5"><span className={classes.price}>Price:</span> ${utils.prettyNumber(utils.div(lpt, reserve))}</Typography>
       </Grid>
     </Grid>
   }
