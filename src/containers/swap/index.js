@@ -94,9 +94,8 @@ class Swap extends Component {
       }
     } = this.state;
     if (!bidAmount || !bidInitialized || !askInitialized) return this.setState({ askAmount: 0 });
-    const _bidAmount = parseInt(bidAmount) || 0;
     const _bidReserve = utils.div(bidReserve, global.BigInt(10 ** bidToken.decimals));
-    const _newBidReserve = _bidReserve + _bidAmount;
+    const _newBidReserve = _bidReserve + bidAmount;
     const _bidLPT = utils.div(bidLPT, global.BigInt(10 ** bidToken.decimals));
     const _askReserve = utils.div(askReserve, global.BigInt(10 ** askToken.decimals));
     const _askLPT = utils.div(askLPT, global.BigInt(10 ** askToken.decimals));
@@ -183,7 +182,7 @@ class Swap extends Component {
         secretKey = re;
         return this.onAutogenDestinationAddress(askToken.address, secretKey);
       }).then(dstAddress => {
-        const amount = global.BigInt(bidAmount) * global.BigInt(10 ** bidToken.decimals);
+        const amount = global.BigInt(bidAmount * 10 ** bidToken.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
 
         return this.swap.swap(
@@ -211,6 +210,7 @@ class Swap extends Component {
   render() {
     const { classes } = this.props;
     const {
+      bidAmount,
       bidData: {
         initialized: bidInitialized,
         reserve: bidReserve,
@@ -280,7 +280,7 @@ class Swap extends Component {
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
-                  <Bid advance={advance} onChange={this.onBid} />
+                  <Bid advance={advance} amount={bidAmount} onChange={this.onBid} />
                 </Grid>
                 <Grid item xs={12}>
                   <Ask advance={advance} amount={askAmount} onChange={this.onAsk} />

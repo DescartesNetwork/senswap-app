@@ -30,6 +30,7 @@ class Ask extends Component {
 
     this.state = {
       accountAddress: '',
+      value: '0',
       amount: 0,
       poolAddress: '',
       poolData: {},
@@ -44,7 +45,7 @@ class Ask extends Component {
     const { poolAddress: prevPoolAddress } = prevState;
     const { poolAddress } = this.state;
     if (!isEqual(amount, prevAmount)) {
-      const pseudoEvent = { target: { value: amount } }
+      const pseudoEvent = { target: { value: amount.toString() } }
       this.onAmount(pseudoEvent);
     }
     if (!isEqual(bucket, prevBucket) || !isEqual(poolAddress, prevPoolAddress)) {
@@ -53,8 +54,9 @@ class Ask extends Component {
   }
 
   onAmount = (e) => {
-    const amount = e.target.value || '';
-    return this.setState({ amount }, this.returnData);
+    const value = e.target.value || '';
+    const amount = parseFloat(value) || 0;
+    return this.setState({ value, amount }, this.returnData);
   }
 
   onPoolAddress = (poolAddress) => {
@@ -85,7 +87,7 @@ class Ask extends Component {
   render() {
     const { classes } = this.props;
     const { advance } = this.props;
-    const { amount, poolData: { address, reserve, lpt } } = this.state;
+    const { value, poolData: { address, reserve, lpt } } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -105,7 +107,7 @@ class Ask extends Component {
         <TextField
           label="Ask Amount"
           variant="outlined"
-          value={amount}
+          value={value}
           onChange={this.onAmount}
           fullWidth
         />
