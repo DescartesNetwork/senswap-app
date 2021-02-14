@@ -18,7 +18,6 @@ import TokenSelection from './tokenSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
-import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
