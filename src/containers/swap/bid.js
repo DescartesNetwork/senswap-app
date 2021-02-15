@@ -38,18 +38,14 @@ class Bid extends Component {
     this.swap = window.senwallet.swap;
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     const { bucket: prevBucket, amount: prevAmount } = prevProps;
     const { bucket, amount } = this.props;
-    const { poolAddress: prevPoolAddress } = prevState;
-    const { poolAddress } = this.state;
     if (!isEqual(amount, prevAmount)) {
       const pseudoEvent = { target: { value: amount.toString() } }
       this.onAmount(pseudoEvent);
     }
-    if (!isEqual(bucket, prevBucket) || !isEqual(poolAddress, prevPoolAddress)) {
-      this.fetchData();
-    }
+    if (!isEqual(bucket, prevBucket)) this.fetchData();
   }
 
   onAmount = (e) => {
@@ -59,22 +55,22 @@ class Bid extends Component {
   }
 
   onPoolAddress = (poolAddress) => {
-    return this.setState({ poolAddress });
+    return this.setState({ poolAddress }, this.fetchData);
   }
 
   fetchData = () => {
     const { setError, getPoolData } = this.props;
     const { poolAddress } = this.state;
     if (!ssjs.isAddress(poolAddress)) return this.setState({ poolData: {} }, this.returnData);
-    return getPoolData(poolAddress).then(poolData => {
-      return this.setState({ poolData }, this.returnData);
+    return getPoolData(poolAddress).then(data => {
+      return this.setState({ poolData: { ...data } }, this.returnData);
     }).catch(er => {
       return setError(er);
     });
   }
 
   onAccountAddress = (accountAddress) => {
-    return this.setState({ accountAddress });
+    return this.setState({ accountAddress }, this.returnData);
   }
 
   returnData = () => {

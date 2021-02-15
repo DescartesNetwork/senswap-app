@@ -25,8 +25,9 @@ import {
   HelpOutlineRounded, SearchRounded
 } from '@material-ui/icons';
 
+import PoolPrice from './poolPrice';
+
 import styles from './styles';
-import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
@@ -58,15 +59,15 @@ class TokenSelection extends Component {
   }
 
   componentDidMount() {
-    this.fetchRecommededPools();
+    this.fetchRecommendedPools();
     this.fetchNewPools();
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: prevUser } } = prevProps;
-    const { wallet: { user } } = this.props;
-    if (!isEqual(user, prevUser)) {
-      this.fetchRecommededPools();
+    const { wallet: { user: { tokens: prevTokens } } } = prevProps;
+    const { wallet: { user: { tokens } } } = this.props;
+    if (!isEqual(tokens, prevTokens)) {
+      this.fetchRecommendedPools();
       this.fetchNewPools();
     }
   }
@@ -74,7 +75,7 @@ class TokenSelection extends Component {
   fetchPools = (typeOrCondition, limit, page) => {
     return new Promise((resolve, reject) => {
       const { wallet: { user: { tokens } } } = this.props;
-      const { getPools, getPool, getPoolData } = this.props;
+      const { getPools, getPool } = this.props;
       let pools = [];
       if (!tokens.length) return resolve(pools);
 
@@ -89,18 +90,13 @@ class TokenSelection extends Component {
         }));
       }).then(data => {
         pools = data;
-        return Promise.all(pools.map(({ address }) => {
-          return getPoolData(address);
-        }));
-      }).then(data => {
-        pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
         return Promise.all(pools.map(({ cgk }) => {
           if (cgk) return ssjs.imgFromCGK(cgk);
           return null;
         }));
       }).then(icons => {
         pools = pools.map((pool, i) => {
-          pool.token.icon = icons[i];
+          pool.icon = icons[i];
           return pool;
         });
         return resolve(pools);
@@ -110,7 +106,7 @@ class TokenSelection extends Component {
     });
   }
 
-  fetchRecommededPools = () => {
+  fetchRecommendedPools = () => {
     const { setError } = this.props;
     const { recommended: { limit, page } } = this.state;
     return this.fetchPools('recommended', limit, page + 1).then(pools => {
@@ -151,7 +147,7 @@ class TokenSelection extends Component {
       const { search: value } = this.state;
       if (value.length < 2) return this.setState({ searched: { pools: [] } });
       const condition = { symbol: { '$regex': value, '$options': 'gi' } }
-      return this.fetchPools(condition, 50, 0).then(pools => {
+      return this.fetchPools(condition, 1000, 0).then(pools => {
         return this.setState({ searched: { pools } });
       }).catch(er => {
         return this.setState({ searched: { pools: [] } });
@@ -197,7 +193,7 @@ class TokenSelection extends Component {
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{ssjs.toSymbol(symbol)}</Typography>
+        <Typography>{symbol}</Typography>
         <Typography className={classes.owner}>Created by {email || 'Unknown'}</Typography>
       </Grid>
     </Grid>
@@ -209,7 +205,7 @@ class TokenSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>Recommended pools</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, email, verified, token: { symbol, icon } } = pool;
+        const { address, email, verified, symbol, icon } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
           {this.renderToken(symbol, icon, email, verified)}
         </MenuItem>
@@ -223,7 +219,7 @@ class TokenSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>New pools</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, email, verified, token: { symbol, icon } } = pool;
+        const { address, email, verified, symbol, icon } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
           {this.renderToken(symbol, icon, email, verified)}
         </MenuItem>
@@ -240,7 +236,7 @@ class TokenSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>Search</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, email, verified, token: { symbol, icon } } = pool;
+        const { address, email, verified, symbol, icon } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
           {this.renderToken(symbol, icon, email, verified)}
         </MenuItem>
@@ -255,21 +251,19 @@ class TokenSelection extends Component {
 
     const pool = pools[index] || {
       verified: false,
-      lpt: global.BigInt(0),
-      reserve: global.BigInt(1),
-      token: {
-        symbol: [],
-        icon: '',
-      }
+      address: '',
+      symbol: 'Unknown',
+      icon: '',
     }
-    const { verified, lpt, reserve, token: { symbol, icon } } = pool;
+    const { verified, address, symbol, icon } = pool;
+    
     return <Grid container spacing={2} alignItems="flex-end" className={classes.noWrap}>
       <Grid item className={classes.stretch}>
         <Chip
           avatar={<Avatar src={icon}>
             <HelpOutlineRounded />
           </Avatar>}
-          label={ssjs.toSymbol(symbol) || 'Unkown'}
+          label={symbol}
           onClick={this.onOpen}
           deleteIcon={<ExpandMoreRounded />}
           onDelete={this.onOpen}
@@ -305,7 +299,7 @@ class TokenSelection extends Component {
         </Menu>
       </Grid>
       <Grid item>
-        <Typography variant="h5"><span className={classes.price}>Price:</span> ${utils.prettyNumber(utils.div(lpt, reserve))}</Typography>
+        <PoolPrice address={address} />
       </Grid>
     </Grid>
   }
@@ -313,9 +307,9 @@ class TokenSelection extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  bucket: state.bucket,
   wallet: state.wallet,
   pool: state.pool,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

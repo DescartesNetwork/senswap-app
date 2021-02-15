@@ -9,11 +9,6 @@ export default theme => ({
     width: theme.spacing(4),
     height: theme.spacing(4),
   },
-  iconWithMarginLeft: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
-    marginRight: theme.spacing(1),
-  },
   owner: {
     fontSize: 9
   },

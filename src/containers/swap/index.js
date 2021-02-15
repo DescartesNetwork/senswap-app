@@ -184,7 +184,6 @@ class Swap extends Component {
       }).then(dstAddress => {
         const amount = global.BigInt(bidAmount * 10 ** bidToken.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-
         return this.swap.swap(
           amount,
           bidAddress,
