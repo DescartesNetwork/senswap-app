@@ -190,6 +190,11 @@ class Info extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
+              {!data.length ? <TableRow>
+                <TableCell>
+                  <Typography className={classes.subtitle}>No data</Typography>
+                </TableCell>
+              </TableRow> : null}
               {data.map(data => <Row key={data.address} data={data} />)}
             </TableBody>
           </Table>

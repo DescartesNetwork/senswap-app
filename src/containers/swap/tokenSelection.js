@@ -269,6 +269,7 @@ class TokenSelection extends Component {
           onDelete={this.onOpen}
           color={verified ? 'primary' : 'secondary'}
           classes={{
+            root: classes.chip,
             colorPrimary: classes.verified,
             colorSecondary: classes.unverified,
           }}

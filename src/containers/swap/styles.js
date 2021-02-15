@@ -33,12 +33,19 @@ export default theme => ({
     fontWeight: theme.typography.fontWeightLight,
     color: theme.palette.text.secondary
   },
-  opticalCorrection:{
+  opticalCorrection: {
     paddingTop: `0px !important`
   },
   action: {
     backgroundColor: '#F2F3F5',
     borderRadius: theme.shape.borderRadius,
     paddingTop: theme.spacing(2)
+  },
+  chip: {
+    boxShadow: theme.shadows[2],
+    transition: theme.transitions.create(),
+    '&:hover': {
+      boxShadow: theme.shadows[4],
+    },
   }
 });

@@ -121,8 +121,8 @@ class Header extends Component {
                   <IconButton
                     size="small"
                     color={currentRoute === 'pool' ? 'primary' : 'secondary'}
-                    component={RouterLink
-                    } to={'/pool'}
+                    component={RouterLink}
+                    to={'/pool'}
                   >
                     <LocalGasStationRounded />
                   </IconButton>

@@ -25,24 +25,24 @@ class TokenInfo extends Component {
     super();
 
     this.state = {
-      accountAddress: '',
       data: {},
     }
   }
 
-  componentDidUpdate = (prevProps, prevState) => {
-    const { bucket: prevBucket } = prevProps;
-    const { bucket } = this.props;
-    const { accountAddress: prevAccountAddress } = prevState;
-    const { accountAddress } = this.state;
-    if (!isEqual(bucket, prevBucket) || !isEqual(accountAddress, prevAccountAddress)) this.fetchData();
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  componentDidUpdate = (prevProps) => {
+    const { bucket: prevBucket, wallet: { mainAccount: prevMainAccount } } = prevProps;
+    const { bucket, wallet: { mainAccount } } = this.props;
+    if (!isEqual(bucket, prevBucket) || !isEqual(mainAccount, prevMainAccount)) this.fetchData();
   }
 
   fetchData = () => {
-    const { setError, getAccountData } = this.props;
-    const { accountAddress } = this.state;
-    if (!ssjs.isAddress(accountAddress)) return this.setState({ accountAddress: '', data: {} });
-    return getAccountData(accountAddress).then(data => {
+    const { wallet: { mainAccount }, setError, getAccountData } = this.props;
+    if (!ssjs.isAddress(mainAccount)) return this.setState({ data: {} });
+    return getAccountData(mainAccount).then(data => {
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -56,7 +56,8 @@ class TokenInfo extends Component {
   }
 
   onAddress = (accountAddress) => {
-    return this.setState({ accountAddress });
+    const { setMainAccount } = this.props;
+    return setMainAccount(accountAddress);
   }
 
   render() {

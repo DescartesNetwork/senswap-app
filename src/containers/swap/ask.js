@@ -11,6 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Collapse from '@material-ui/core/Collapse';
 
+import Drain from 'components/drain';
 import TokenSelection from './tokenSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
@@ -101,6 +102,7 @@ class Ask extends Component {
             poolAddress={address}
             onChange={this.onAccountAddress}
           />
+          <Drain small />
         </Collapse>
       </Grid>
     </Grid>

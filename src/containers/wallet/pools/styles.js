@@ -16,4 +16,9 @@ export default theme => ({
       boxShadow: theme.shadows[6],
     },
   },
+  subtitle: {
+    fontSize: 10,
+    fontWeight: theme.typography.fontWeightLight,
+    color: theme.palette.text.secondary
+  }
 });
