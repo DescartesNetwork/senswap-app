@@ -256,7 +256,7 @@ class TokenSelection extends Component {
       icon: '',
     }
     const { verified, address, symbol, icon } = pool;
-    
+
     return <Grid container spacing={2} alignItems="flex-end" className={classes.noWrap}>
       <Grid item className={classes.stretch}>
         <Chip

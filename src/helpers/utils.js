@@ -45,7 +45,7 @@ Utils.prettyNumber = (num, type = 'long') => {
       return a;
     }).reverse().join('');
     if (!fraction) return separateNumber;
-    if (fraction.length > 6) fraction = fraction.substring(0, 6);
+    if (fraction.length > 4) fraction = fraction.substring(0, 4);
     return separateNumber + '.' + fraction;
   }
 }

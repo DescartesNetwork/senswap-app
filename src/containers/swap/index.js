@@ -285,59 +285,61 @@ class Swap extends Component {
                 <Grid item xs={12}>
                   <Bid advance={advance} amount={bidAmount} onChange={this.onBid} />
                 </Grid>
-                <Grid item xs={12} />
                 <Grid item xs={12}>
                   <Ask advance={advance} amount={askAmount} onChange={this.onAsk} />
                 </Grid>
-                {bidInitialized && askInitialized ? <Grid item xs={6}>
-                  <Typography variant="h5" align="center">0.25%</Typography>
-                  <Typography variant="body2" align="center">Fee</Typography>
-                </Grid> : null}
-                {bidInitialized && askInitialized ? <Grid item xs={6}>
-                  <Typography variant="h5" align="center">{utils.prettyNumber(utils.div(bidLPT, bidReserve) / utils.div(askLPT, askReserve))}</Typography>
-                  <Typography variant="body2" align="center">Rate</Typography>
-                </Grid> : null}
-                {txId ? <Grid item xs={12}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <Typography variant="body2">Done! Click the button to view the transaction.</Typography>
-                    </Grid>
-                    <Grid item xs={8}>
-                      <Button
-                        variant="contained"
-                        color="secondary"
-                        href={utils.explorer(txId)}
-                        target="_blank"
-                        rel="noopener"
-                        startIcon={<PublicRounded />}
-                        fullWidth
-                      >
-                        <Typography>Explore</Typography>
-                      </Button>
-                    </Grid>
-                    <Grid item xs={4}>
-                      <Button
-                        color="secondary"
-                        onClick={this.onClear}
-                        endIcon={<ArrowForwardRounded />}
-                        fullWidth
-                      >
-                        <Typography>Skip</Typography>
-                      </Button>
-                    </Grid>
+                <Grid item xs={12}>
+                  <Grid container spacing={2} className={classes.action}>
+                    {bidInitialized && askInitialized ? <Grid item xs={12}>
+                      <Grid container justify="space-around" spacing={2}>
+                        <Grid item>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> 0.25%</Typography>
+                        </Grid>
+                        <Grid item>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Rate</span> {utils.prettyNumber(utils.div(bidLPT, bidReserve) / utils.div(askLPT, askReserve))}</Typography>
+                        </Grid>
+                      </Grid>
+                    </Grid> : null}
+                    {txId ? <Grid item xs={12}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={8}>
+                          <Button
+                            variant="contained"
+                            color="secondary"
+                            href={utils.explorer(txId)}
+                            target="_blank"
+                            rel="noopener"
+                            startIcon={<PublicRounded />}
+                            fullWidth
+                          >
+                            <Typography>Explore</Typography>
+                          </Button>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <Button
+                            color="secondary"
+                            onClick={this.onClear}
+                            endIcon={<ArrowForwardRounded />}
+                            fullWidth
+                          >
+                            <Typography>Done</Typography>
+                          </Button>
+                        </Grid>
+                      </Grid>
+                    </Grid> : <Grid item xs={12}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={this.onSwap}
+                          startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
+                          disabled={loading || !bidInitialized || !askInitialized}
+                          fullWidth
+                        >
+                          <Typography variant="body2">Swap</Typography>
+                        </Button>
+                      </Grid>}
                   </Grid>
-                </Grid> : <Grid item xs={12}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={this.onSwap}
-                      startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
-                      disabled={loading || !bidInitialized || !askInitialized}
-                      fullWidth
-                    >
-                      <Typography variant="body2">Swap</Typography>
-                    </Button>
-                  </Grid>}
+                </Grid>
               </Grid>
             </BaseCard>
           </Grid>

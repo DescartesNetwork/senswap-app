@@ -76,7 +76,7 @@ class PoolPrice extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h5"><span className={classes.price}>Price:</span> ${utils.prettyNumber(price)}</Typography>
+        <Typography variant="h5"><span className={classes.subtitle}>Price</span> ${utils.prettyNumber(price)}</Typography>
       </Grid>
     </Grid>
   }

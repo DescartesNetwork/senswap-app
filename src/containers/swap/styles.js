@@ -28,8 +28,17 @@ export default theme => ({
   unverified: {
     background: 'linear-gradient(45deg, hsla(333, 100%, 53%, 1) 0%, hsla(33, 94%, 57%, 1) 100%)'
   },
-  price: {
+  subtitle: {
     fontSize: 10,
+    fontWeight: theme.typography.fontWeightLight,
     color: theme.palette.text.secondary
+  },
+  opticalCorrection:{
+    paddingTop: `0px !important`
+  },
+  action: {
+    backgroundColor: '#F2F3F5',
+    borderRadius: theme.shape.borderRadius,
+    paddingTop: theme.spacing(2)
   }
 });

@@ -77,7 +77,7 @@ class Ask extends Component {
   }
 
   render() {
-    // const { classes } = this.props;
+    const { classes } = this.props;
     const { advance } = this.props;
     const { value, poolData: { address } } = this.state;
 
@@ -91,7 +91,7 @@ class Ask extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} className={classes.opticalCorrection}>
         <TokenSelection onChange={this.onPoolAddress} />
       </Grid>
       <Grid item xs={12}>
