@@ -20,6 +20,7 @@ import {
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
+import Drain from 'components/drain';
 import Bid from './bid';
 import Ask from './ask';
 
@@ -279,8 +280,12 @@ class Swap extends Component {
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
+                  <Drain small />
+                </Grid>
+                <Grid item xs={12}>
                   <Bid advance={advance} amount={bidAmount} onChange={this.onBid} />
                 </Grid>
+                <Grid item xs={12} />
                 <Grid item xs={12}>
                   <Ask advance={advance} amount={askAmount} onChange={this.onAsk} />
                 </Grid>

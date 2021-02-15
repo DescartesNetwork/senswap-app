@@ -9,10 +9,7 @@ import ssjs from 'senswapjs';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
 import Collapse from '@material-ui/core/Collapse';
-
-import { } from '@material-ui/icons';
 
 import TokenSelection from './tokenSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
@@ -86,11 +83,8 @@ class Bid extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h6">From</Typography>
-      </Grid>
-      <Grid item xs={12}>
         <TextField
-          label="Bid Amount"
+          label="From"
           variant="outlined"
           value={value}
           onChange={this.onAmount}
