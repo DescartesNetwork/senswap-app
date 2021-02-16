@@ -11,7 +11,6 @@ import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import Link from '@material-ui/core/Link';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Fab from '@material-ui/core/Fab';
 import Popover from '@material-ui/core/Popover';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -21,10 +20,12 @@ import Divider from '@material-ui/core/Divider';
 import Image from 'material-ui-image';
 
 import {
-  SwapCallsRounded, LocalGasStationRounded, PhonelinkLockRounded,
-  WidgetsRounded, MobileFriendlyRounded, ColorizeRounded,
+  SwapCallsRounded, LocalGasStationRounded,
+  WidgetsRounded, ColorizeRounded,
   AccountBalanceRounded, VerifiedUserRounded, DescriptionRounded,
 } from '@material-ui/icons';
+
+import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
 import SEN_LOGO from 'static/images/sen-logo.svg';
 import styles from './styles';
@@ -55,26 +56,19 @@ class Header extends Component {
       ui: { width },
       wallet: { user: { address } },
     } = this.props;
-    const icon = address ? <MobileFriendlyRounded size="small" /> : <PhonelinkLockRounded size="small" />;
-    const text = address ? 'Connected' : 'Connect Wallet';
+    const text = address ? address.substring(0, 3) + '...' + address.substring(address.length - 3, address.length) : 'Connect Wallet';
 
     if (width >= 600) return <Grid item>
       <Button
         size="small"
-        variant="contained"
-        color="primary"
         onClick={this.connectWallet}
-        endIcon={icon}
+        startIcon={<AccountAvatar address={address} title={address} />}
       >
         <Typography noWrap>{text}</Typography>
       </Button>
     </Grid>
     return <Grid item>
-      <Tooltip title={text}>
-        <Fab size="small" color="primary" onClick={this.connectWallet}>
-          {icon}
-        </Fab>
-      </Tooltip>
+      <AccountAvatar address={address} title={address} onClick={this.connectWallet} />
     </Grid>
   }
 
