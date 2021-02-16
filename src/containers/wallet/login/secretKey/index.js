@@ -92,14 +92,12 @@ class SecretKey extends Component {
                   <Chip
                     icon={<ErrorRounded className={classes.warning} />}
                     label="Caution!"
-                    deleteIcon={<Switch color="primary" checked={advance} size="small" />}
-                    onDelete={this.onAdvance}
                     clickable
                   />
                 </Tooltip>
               </Grid>
               <Grid item>
-
+                <Switch color="primary" checked={advance} onClick={this.onAdvance} />
               </Grid>
             </Grid>
           </Grid>
