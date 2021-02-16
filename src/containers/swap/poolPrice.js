@@ -7,7 +7,6 @@ import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
 import styles from './styles';
@@ -73,12 +72,7 @@ class PoolPrice extends Component {
   render() {
     const { classes } = this.props;
     const { price } = this.state;
-
-    return <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant="h5"><span className={classes.subtitle}>Price</span> ${utils.prettyNumber(price)}</Typography>
-      </Grid>
-    </Grid>
+    return <Typography variant="h5" noWrap><span className={classes.subtitle}>Price</span> ${utils.prettyNumber(price)}</Typography>
   }
 }
 

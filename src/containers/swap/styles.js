@@ -9,9 +9,6 @@ export default theme => ({
     width: theme.spacing(4),
     height: theme.spacing(4),
   },
-  owner: {
-    fontSize: 9
-  },
   tools: {
     width: `calc(100% - ${theme.spacing(2)}px)`,
     margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
@@ -47,5 +44,5 @@ export default theme => ({
     '&:hover': {
       boxShadow: theme.shadows[4],
     },
-  }
+  },
 });

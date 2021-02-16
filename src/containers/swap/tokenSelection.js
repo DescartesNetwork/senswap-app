@@ -77,12 +77,14 @@ class TokenSelection extends Component {
       const { wallet: { user: { tokens } } } = this.props;
       const { getPools, getPool } = this.props;
       let pools = [];
-      if (!tokens.length) return resolve(pools);
 
       const recommendedCondition = { '$or': tokens.map(tokenAddress => ({ token: tokenAddress, verified: true })) }
       const newCondition = !tokens.length ? {} : { '$and': tokens.map(tokenAddress => ({ '$or': [{ token: { '$ne': tokenAddress } }, { verified: false }] })) }
       let condition = typeOrCondition;
-      if (typeOrCondition === 'recommended') condition = recommendedCondition;
+      if (typeOrCondition === 'recommended') {
+        if (!tokens.length) return resolve(pools);
+        condition = recommendedCondition;
+      }
       if (typeOrCondition === 'new') condition = newCondition;
       return getPools(condition, limit, page).then(poolIds => {
         return Promise.all(poolIds.map(({ _id }) => {
@@ -124,7 +126,9 @@ class TokenSelection extends Component {
     const { new: { limit, page } } = this.state;
     return this.fetchPools('new', limit, page + 1).then(pools => {
       if (!pools.length) return;
-      return this.setState({ new: { pools, limit, page: page + 1 } });
+      return this.setState({ new: { pools, limit, page: page + 1 } }, () => {
+        return this.onSelect('new', 0);
+      });
     }).catch(er => {
       return setError(er);
     });
@@ -194,7 +198,7 @@ class TokenSelection extends Component {
       </Grid>
       <Grid item className={classes.stretch}>
         <Typography>{symbol}</Typography>
-        <Typography className={classes.owner}>Created by {email || 'Unknown'}</Typography>
+        <Typography className={classes.subtitle}>Created by {email || 'Unknown'}</Typography>
       </Grid>
     </Grid>
   }
