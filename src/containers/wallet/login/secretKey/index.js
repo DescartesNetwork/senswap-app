@@ -16,8 +16,8 @@ import Collapse from '@material-ui/core/Collapse';
 import Chip from '@material-ui/core/Chip';
 
 import {
-  VpnKeyRounded, PowerRounded, HelpRounded,
-  ErrorRounded,
+  VpnKeyRounded, PowerRounded, RoomServiceRounded,
+  ErrorRounded, HelpOutlineRounded,
 } from '@material-ui/icons';
 
 import styles from './styles';
@@ -92,12 +92,14 @@ class SecretKey extends Component {
                   <Chip
                     icon={<ErrorRounded className={classes.warning} />}
                     label="Caution!"
+                    deleteIcon={<Switch color="primary" checked={advance} size="small" />}
+                    onDelete={this.onAdvance}
                     clickable
                   />
                 </Tooltip>
               </Grid>
               <Grid item>
-                <Switch color="primary" checked={advance} onClick={this.onAdvance} />
+
               </Grid>
             </Grid>
           </Grid>
@@ -126,22 +128,31 @@ class SecretKey extends Component {
                 value={password}
                 onChange={this.onPassword}
                 InputProps={{
-                  endAdornment: <IconButton
-                    color="primary"
-                    onClick={this.onSave}
-                    edge="end"
+                  startAdornment: <Tooltip
+                    title="You have to input a password to encrypt your secret key. If the software needs to sign a transaction, or related work afterwards, you will be required to input this password to unlock your wallet"
                   >
-                    <PowerRounded />
-                  </IconButton>
+                    <IconButton edge="start">
+                      <HelpOutlineRounded />
+                    </IconButton>
+                  </Tooltip>,
+                  endAdornment: <Grid item>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={this.onSave}
+                      startIcon={<PowerRounded />}
+                    >
+                      <Typography>Connect</Typography>
+                    </Button>
+                  </Grid>
                 }}
-                helperText="You have to input a password to encrypt your secret key. If the software needs to sign a transaction, or related work afterwards, you will be required to input this password to unlock your wallet"
                 fullWidth
               />
             </Grid>
             <Grid item xs={12}>
-              <Grid container spacing={2} justify="flex-end">
+              <Grid container spacing={2}>
                 <Grid item>
-                  <Button onClick={this.onGen} startIcon={<HelpRounded />} fullWidth>
+                  <Button onClick={this.onGen} startIcon={<RoomServiceRounded />} fullWidth>
                     <Typography>Not have secret key yet?</Typography>
                   </Button>
                 </Grid>

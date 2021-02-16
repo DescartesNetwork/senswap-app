@@ -18,7 +18,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 
 import {
   PublishRounded, DescriptionRounded, PowerRounded,
-  HelpRounded, CloseRounded, GetAppRounded,
+  RoomServiceRounded, CloseRounded, GetAppRounded,
   VisibilityRounded, VisibilityOffRounded,
 } from '@material-ui/icons';
 
@@ -165,21 +165,24 @@ class KeyStore extends Component {
           value={password}
           onChange={this.onPassword}
           InputProps={{
-            endAdornment: <IconButton
-              color="primary"
-              onClick={this.onSave}
-              edge="end"
-            >
-              <PowerRounded />
-            </IconButton>
+            endAdornment: <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={this.onSave}
+                startIcon={<PowerRounded />}
+              >
+                <Typography>Connect</Typography>
+              </Button>
+            </Grid>
           }}
           fullWidth
         />
       </Grid>
       <Grid item xs={12}>
-        <Grid container spacing={2} justify="flex-end">
+        <Grid container spacing={2}>
           <Grid item>
-            <Button onClick={this.onOpen} startIcon={<HelpRounded />} fullWidth >
+            <Button onClick={this.onOpen} startIcon={<RoomServiceRounded />} fullWidth >
               <Typography>Not have keystore yet?</Typography>
             </Button>
           </Grid>
