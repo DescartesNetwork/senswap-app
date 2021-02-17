@@ -258,9 +258,6 @@ class AddLiquidity extends Component {
       </Grid>
       {txId ? <Grid item xs={12}>
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="body2">Done! Click the button to view the transaction.</Typography>
-          </Grid>
           <Grid item xs={8}>
             <Button
               variant="contained"
@@ -281,7 +278,7 @@ class AddLiquidity extends Component {
               endIcon={<ArrowForwardRounded />}
               fullWidth
             >
-              <Typography>Skip</Typography>
+              <Typography>Done</Typography>
             </Button>
           </Grid>
         </Grid>
