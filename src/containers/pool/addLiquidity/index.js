@@ -127,7 +127,7 @@ class AddLiquidity extends Component {
       srcAddress,
     } = this.state;
     if (!initialized) return setError('Please wait for data loaded');
-    if (!amount) return setError('Invalid amount');
+    if (!amount || !parseFloat(amount)) return setError('Invalid amount');
 
     let secretKey = null;
     let lptAddressOrAccount = null;
@@ -137,7 +137,7 @@ class AddLiquidity extends Component {
         return this.onAutogenLPTAddress(poolAddress, secretKey);
       }).then(re => {
         lptAddressOrAccount = re;
-        const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
+        const reserve = global.BigInt(parseFloat(amount) * 10 ** token.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
         const addLiquidity = typeof lptAddressOrAccount === 'string' ? this.swap.addLiquidity : this.swap.addLiquidityWithNewLPT;
         return addLiquidity(

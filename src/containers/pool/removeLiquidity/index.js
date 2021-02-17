@@ -136,14 +136,14 @@ class RemoveLiquidity extends Component {
     } = this.state;
     const { setError, unlockWallet } = this.props;
     if (!initialized) return setError('Please wait for data loaded');
-    if (!amount) return setError('Invalid amount');
+    if (!amount || !parseFloat(amount)) return setError('Invalid amount');
     let secretKey = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
         return this.onAutogenDestinationAddress(token.address, secretKey);
       }).then(dstAddress => {
-        const lpt = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
+        const lpt = global.BigInt(parseFloat(amount) * 10 ** token.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.removeLiquidity(
           lpt,
