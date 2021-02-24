@@ -27,8 +27,9 @@ import {
 
 import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
-import SEN_LOGO from 'static/images/sen-logo.svg';
 import styles from './styles';
+import SEN_LOGO from 'static/images/sen-logo.svg';
+import WHITEPAPER from 'static/docs/senswap_whitepaper.pdf';
 import { openWallet } from 'modules/wallet.reducer';
 
 
@@ -57,18 +58,13 @@ class Header extends Component {
       wallet: { user: { address } },
     } = this.props;
     const text = address ? address.substring(0, 3) + '...' + address.substring(address.length - 3, address.length) : 'Connect Wallet';
-
     if (width >= 600) return <Grid item>
-      <Button
-        size="small"
-        onClick={this.connectWallet}
-        startIcon={<AccountAvatar address={address} title={address} />}
-      >
+      <Button onClick={this.connectWallet} startIcon={<AccountAvatar address={address} title={address || text} />} >
         <Typography noWrap>{text}</Typography>
       </Button>
     </Grid>
     return <Grid item>
-      <AccountAvatar address={address} title={address} onClick={this.connectWallet} />
+      <AccountAvatar address={address} title={address || text} onClick={this.connectWallet} />
     </Grid>
   }
 
@@ -174,7 +170,7 @@ class Header extends Component {
                       <ListItemText primary="SenAudit" />
                     </ListItem>
                     <Divider />
-                    <ListItem button component={RouterLink} to={'/whitepaper'} disabled>
+                    <ListItem button component={RouterLink} to={WHITEPAPER} target="_blank" rel="noopener">
                       <ListItemIcon>
                         <DescriptionRounded color="secondary" />
                       </ListItemIcon>

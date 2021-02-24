@@ -226,9 +226,9 @@ class Swap extends Component {
     } = this.state;
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} md={10}>
+      <Grid item xs={11} lg={8}>
         <Grid container spacing={2} justify="center">
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={8} md={6}>
             <BaseCard>
               <Grid container spacing={2}>
                 <Grid item xs={12}>

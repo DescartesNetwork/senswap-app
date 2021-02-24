@@ -28,9 +28,9 @@ class Pool extends Component {
     const { location: { pathname } } = this.props;
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} md={10}>
+      <Grid item xs={11} lg={8}>
         <Grid container justify="center" spacing={2}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={8} md={6}>
             <NotiCard
               title="Liquidity provider incentive"
               description="Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
@@ -40,7 +40,7 @@ class Pool extends Component {
           <Grid item xs={12}>
             <Drain small />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={8} md={6}>
             <BaseCard >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
