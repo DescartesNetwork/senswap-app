@@ -7,9 +7,7 @@ import ssjs from 'senswapjs';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
@@ -17,7 +15,7 @@ import Select from '@material-ui/core/Select';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Link from '@material-ui/core/Link';
 
-import { Facebook, Twitter, FlightTakeoffRounded } from '@material-ui/icons';
+import { FlightTakeoffRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
@@ -27,15 +25,13 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, openWallet, syncWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
-import { getTokenData, getAccountData } from 'modules/bucket.reducer';
+import { getMintData, getAccountData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
   loading: false,
   txId: ''
 }
-const SHARE_TEXT = 'luv%20this%20tool%20%E2%9D%A4%EF%B8%8F%20guys';
-const SHARE_URL = 'https%3A%2F%2Fsenswap.io';
 
 class Faucet extends Component {
   constructor() {
@@ -44,31 +40,25 @@ class Faucet extends Component {
     this.state = {
       ...EMPTY,
       data: {},
-      link: '',
-      tokenAddress: '',
+      mintAddress: '',
     }
   }
 
   componentDidMount() {
     const { setError, getWhiteList } = this.props;
-    return getWhiteList().then(({ tokens }) => {
-      const pseudoEvent = { target: { value: tokens[0] } };
+    return getWhiteList().then(({ mints }) => {
+      const pseudoEvent = { target: { value: mints[0] } };
       return this.onSelect(pseudoEvent);
     }).catch(er => {
       return setError(er);
     });
   }
 
-  onLink = (e) => {
-    const link = e.target.value || '';
-    return this.setState({ link, ...EMPTY });
-  }
-
   onSelect = (e) => {
-    const tokenAddress = e.target.value || '';
-    const { setError, getTokenData } = this.props;
-    return this.setState({ tokenAddress }, () => {
-      if (tokenAddress) return getTokenData(tokenAddress).then(data => {
+    const mintAddress = e.target.value || '';
+    const { setError, getMintData } = this.props;
+    return this.setState({ mintAddress }, () => {
+      if (mintAddress) return getMintData(mintAddress).then(data => {
         return this.setState({ ...EMPTY, data });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -78,29 +68,30 @@ class Faucet extends Component {
     });
   }
 
-  onAutogenDestinationAddress = (tokenAddress, secretKey) => {
+  onAutogenDestinationAddress = (mintAddress, secretKey) => {
     return new Promise((resolve, reject) => {
       if (!secretKey) return reject('Cannot unlock account');
-      if (!tokenAddress) return reject('Unknown token');
+      if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
+
       const {
         wallet: { user, accounts },
         getAccountData,
         updateWallet, syncWallet
       } = this.props;
-
       return Promise.all(accounts.map(accountAddress => {
         return getAccountData(accountAddress);
       })).then(data => {
-        const accountData = data.find(({ token: { address } }) => address === tokenAddress);
+        const accountData = data.find(({ mint: { address } }) => address === mintAddress);
         if (accountData && accountData.address) return resolve(accountData.address);
         let accountAddress = null;
-        return sol.newAccount(tokenAddress, secretKey).then(({ account }) => {
-          accountAddress = account.publicKey.toBase58();
-          const newTokens = [...user.tokens];
-          if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+        console.log("Start")
+        return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
+          accountAddress = address;
+          const newMints = [...user.mints];
+          if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
           const newAccounts = [...accounts];
           if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-          return updateWallet({ user: { ...user, tokens: newTokens }, accounts: newAccounts });
+          return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
         }).then(re => {
           return syncWallet();
         }).then(re => {
@@ -121,17 +112,16 @@ class Faucet extends Component {
       unlockWallet,
       airdropLamports, airdropTokens,
     } = this.props;
-    const { tokenAddress, link } = this.state;
-    if (!ssjs.isAddress(tokenAddress)) return setError('Invalid token');
-    if (!link) return setError('Please parse the share link into the box');
+    const { mintAddress } = this.state;
+    if (!ssjs.isAddress(mintAddress)) return setError('Invalid token address');
 
     return this.setState({ loading: true }, () => {
       return airdropLamports(user.address).then(re => {
         return unlockWallet();
       }).then(secretKey => {
-        return this.onAutogenDestinationAddress(tokenAddress, secretKey);
+        return this.onAutogenDestinationAddress(mintAddress, secretKey);
       }).then(dstAddress => {
-        return airdropTokens(dstAddress, tokenAddress);
+        return airdropTokens(dstAddress, mintAddress);
       }).then(({ txId }) => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
@@ -144,8 +134,8 @@ class Faucet extends Component {
 
   render() {
     const { classes } = this.props;
-    const { tokenAddress, data, link, txId, loading } = this.state;
-    const { faucet: { tokens }, openWallet } = this.props;
+    const { mintAddress, data, txId, loading } = this.state;
+    const { faucet: { mints }, openWallet } = this.props;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -161,40 +151,16 @@ class Faucet extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <Typography>You will receive a little amount of desired token to test. Be aware that these tokens are valueless.</Typography>
-                  <Typography>Please spread this great function to other people and then paste the link to execute an airdrop. 🚀</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-                    <Grid item className={classes.stretch}>
-                      <TextField
-                        label="Social link"
-                        variant="outlined"
-                        value={link}
-                        onChange={this.onLink}
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item>
-                      <IconButton color="secondary" href={`https://www.facebook.com/sharer/sharer.php?u=${SHARE_URL}`} target="_blank" rel="noopener">
-                        <Facebook />
-                      </IconButton>
-                    </Grid>
-                    <Grid item>
-                      <IconButton color="secondary" href={`https://twitter.com/intent/tweet?text=${SHARE_TEXT}&url=${SHARE_URL}`} target="_blank" rel="noopener">
-                        <Twitter />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <FormControl variant="outlined" fullWidth>
                     <InputLabel>{ssjs.toSymbol(data.symbol)}</InputLabel>
                     <Select
                       label={ssjs.toSymbol(data.symbol)}
-                      value={tokenAddress}
+                      value={mintAddress}
                       onChange={this.onSelect}
                     >
-                      {tokens.map(tokenAddress => <MenuItem key={tokenAddress} value={tokenAddress}>{tokenAddress}</MenuItem>)}
+                      {mints.map(mintAddress => <MenuItem key={mintAddress} value={mintAddress}>{mintAddress}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -236,7 +202,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   unlockWallet, updateWallet, openWallet, syncWallet,
   getWhiteList, airdropLamports, airdropTokens,
-  getTokenData, getAccountData,
+  getMintData, getAccountData,
 }, dispatch);
 
 export default withRouter(connect(

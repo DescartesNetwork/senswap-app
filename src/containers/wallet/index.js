@@ -24,7 +24,7 @@ import styles from './styles';
 import storage from 'helpers/storage';
 import sol from 'helpers/sol';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
-import { unlockWallet, setWallet, updateWallet, closeWallet, unsetWallet } from 'modules/wallet.reducer';
+import { unlockWallet, setWallet, updateWallet, closeWallet } from 'modules/wallet.reducer';
 import { setItem } from 'modules/bucket.reducer';
 
 
@@ -39,8 +39,9 @@ export const configSenWallet = () => {
   }
   // Global access
   window.senwallet = {
-    src20: new ssjs.SRC20(),
-    swap: new ssjs.Swap()
+    splt: new ssjs.SPLT(),
+    swap: new ssjs.Swap(),
+    lamports: new ssjs.Lamports(),
   }
 }
 
@@ -57,20 +58,21 @@ class Wallet extends Component {
       return;
     }
     return setWallet(address, keystore).then(re => {
-      window.senwallet.src20.watch((er, re) => {
-        if (er) return setError(er);
-        const { wallet: { user: { tokens }, accounts } } = this.props;
-        const address = re.address;
-        if (tokens.includes(address)) return setItem(re);
-        if (accounts.includes(address)) return setItem(re);
-      });
-      window.senwallet.swap.watch((er, re) => {
-        if (er) return setError(er);
-        const { wallet: { user: { pools }, lpts } } = this.props;
-        const address = re.address;
-        if (pools.includes(address)) return setItem(re);
-        if (lpts.includes(address)) return setItem(re);
-      });
+      // window.senwallet.splt.watch((er, re) => {
+      //   console.log(er)
+      //   if (er) return setError(er);
+      //   const { wallet: { user: { tokens }, accounts } } = this.props;
+      //   const address = re.address;
+      //   if (tokens.includes(address)) return setItem(re);
+      //   if (accounts.includes(address)) return setItem(re);
+      // });
+      // window.senwallet.swap.watch((er, re) => {
+      //   if (er) return setError(er);
+      //   const { wallet: { user: { pools }, lpts } } = this.props;
+      //   const address = re.address;
+      //   if (pools.includes(address)) return setItem(re);
+      //   if (lpts.includes(address)) return setItem(re);
+      // });
     }).catch(er => {
       return setError(er);
     });
@@ -84,9 +86,9 @@ class Wallet extends Component {
 
   fetchData = () => {
     const {
-      wallet: { user: { address, tokens, pools }, accounts, lpts },
+      wallet: { user: { address, mints, pools }, accounts, lpts },
       setError, setLoading, unsetLoading,
-      unlockWallet, updateWallet, unsetWallet,
+      unlockWallet, updateWallet,
       setItem,
     } = this.props;
     if (!ssjs.isAddress(address)) return;
@@ -95,11 +97,11 @@ class Wallet extends Component {
       secretKey = re;
       return setLoading();
     }).then(re => {
-      return Promise.all(tokens.map(tokenAddress => {
-        return sol.scanAccount(tokenAddress, secretKey);
+      return Promise.all(mints.map(mintAddress => {
+        return sol.scanAccount(mintAddress, secretKey);
       }));
     }).then(data => {
-      data = data.map(({ data }) => data).flat();
+      data = data.filter(({ state }) => state > 0);
       return Promise.all(data.map(accountData => {
         return setItem(accountData);
       }));
@@ -130,7 +132,6 @@ class Wallet extends Component {
     }).then(re => {
       return unsetLoading();
     }).catch(er => {
-      if (!secretKey) return unsetWallet();
       return setError(er);
     });
   }
@@ -196,7 +197,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setLoading, unsetLoading,
-  unlockWallet, setWallet, updateWallet, closeWallet, unsetWallet,
+  unlockWallet, setWallet, updateWallet, closeWallet,
   setItem,
 }, dispatch);
 

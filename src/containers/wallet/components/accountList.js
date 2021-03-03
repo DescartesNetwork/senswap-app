@@ -42,11 +42,11 @@ class AccountList extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const { wallet: { accounts: prevAccounts }, tokenAddress: prevTokenAddress } = prevProps;
-    const { wallet: { accounts }, tokenAddress } = this.props;
+    const { wallet: { accounts: prevAccounts }, mintAddress: prevMintAddress } = prevProps;
+    const { wallet: { accounts }, mintAddress } = this.props;
     const { anchorEl: prevAnchorEl } = prevState;
     const { anchorEl } = this.state;
-    if (!isEqual(tokenAddress, prevTokenAddress)) return this.fetchData(this.onSelect);
+    if (!isEqual(mintAddress, prevMintAddress)) return this.fetchData(this.onSelect);
     if (!isEqual(accounts, prevAccounts)) return this.fetchData(this.onSelect);
     if (!isEqual(prevAnchorEl, anchorEl) && Boolean(anchorEl)) return this.fetchData();
   }
@@ -55,16 +55,16 @@ class AccountList extends Component {
     const {
       wallet: { accounts },
       getAccountData,
-      tokenAddress, onChange,
+      mintAddress, onChange,
     } = this.props;
     if (!accounts || !accounts.length) return onChange('');
 
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
     })).then(data => {
-      if (tokenAddress) data = data.filter(accountData => {
-        const { token: { address } } = accountData;
-        return address === tokenAddress;
+      if (mintAddress) data = data.filter(accountData => {
+        const { mint: { address } } = accountData;
+        return address === mintAddress;
       });
       return this.setState({ data }, callback);
     }).catch(er => {
@@ -85,26 +85,26 @@ class AccountList extends Component {
   parseBalance = (accountAddress) => {
     const { data } = this.state;
     const accountData = data.find(({ address }) => address === accountAddress);
-    const { amount, token: { decimals } } = accountData;
+    const { amount, mint: { decimals } } = accountData;
     return utils.prettyNumber(utils.div(amount, global.BigInt(10 ** decimals)));
   }
 
-  renderGroupedTokensData = () => {
+  renderGroupedMintsData = () => {
     const { classes } = this.props;
     const { data } = this.state;
-    let groupedTokensData = {};
-    data.forEach(({ address: accountAddress, token }) => {
-      const symbol = ssjs.toSymbol(token.symbol);
-      const tokenAddress = token.address.substring(0, 6);
-      const key = `${symbol} - ${tokenAddress}`;
-      if (!groupedTokensData[key]) groupedTokensData[key] = [];
-      groupedTokensData[key].push(accountAddress);
+    let groupedMintsData = {};
+    data.forEach(({ address: accountAddress, mint }) => {
+      const symbol = ssjs.toSymbol(mint.symbol);
+      const mintAddress = mint.address.substring(0, 6);
+      const key = `${symbol} - ${mintAddress}`;
+      if (!groupedMintsData[key]) groupedMintsData[key] = [];
+      groupedMintsData[key].push(accountAddress);
     });
 
     let render = [];
-    for (let key in groupedTokensData) {
+    for (let key in groupedMintsData) {
       render.push(<ListSubheader key={key} disableSticky>{key}</ListSubheader>)
-      groupedTokensData[key].forEach(accountAddress => {
+      groupedMintsData[key].forEach(accountAddress => {
         render.push(<MenuItem key={accountAddress} onClick={() => this.onSelect(accountAddress)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
             <Grid item>
@@ -145,7 +145,7 @@ class AccountList extends Component {
         open={Boolean(anchorEl)}
         onClose={this.onClose}
       >
-        {this.renderGroupedTokensData()}
+        {this.renderGroupedMintsData()}
         <ListSubheader disableSticky>Your accounts not presented here</ListSubheader>
         <MenuItem>
           <Button
@@ -179,7 +179,7 @@ AccountList.defaultProps = {
   icon: <UnfoldMoreRounded />,
   size: 'small',
   edge: false,
-  tokenAddress: '',
+  mintAddress: '',
   onChange: () => { },
 }
 
@@ -187,7 +187,7 @@ AccountList.propTypes = {
   icon: PropTypes.object,
   size: PropTypes.string,
   edge: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-  tokenAddress: PropTypes.string,
+  mintAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
 

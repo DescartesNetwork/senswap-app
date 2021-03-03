@@ -13,7 +13,7 @@ const defaultState = {
   visible: false,
   user: {
     address: null,
-    tokens: [],
+    mints: [],
     pools: [],
   },
   accounts: [],

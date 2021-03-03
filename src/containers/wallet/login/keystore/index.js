@@ -100,10 +100,7 @@ class KeyStore extends Component {
   onDownload = () => {
     const { newKeystore } = this.state;
     if (!newKeystore.publicKey) return setError('Cannot download now');
-    return fileDownload(
-      JSON.stringify(newKeystore),
-      `senwallet-keystore-${newKeystore.publicKey}.json`
-    );
+    return fileDownload(JSON.stringify(newKeystore), `senwallet-keystore-${newKeystore.publicKey}.json`);
   }
 
   onOpen = () => {

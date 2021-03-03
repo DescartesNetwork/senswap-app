@@ -31,7 +31,7 @@ class PayerInfo extends Component {
       amount: 0,
     }
 
-    this.src20 = window.senwallet.src20;
+    this.lamports = window.senwallet.lamports;
   }
 
   componentDidMount() {
@@ -47,7 +47,7 @@ class PayerInfo extends Component {
 
   fetchData = () => {
     const { wallet: { user: { address } }, setError } = this.props;
-    return this.src20.getLamports(address).then(re => {
+    return this.lamports.get(address).then(re => {
       return this.setState({ amount: re / LAMPORTS_PER_SOL });
     }).catch(er => {
       return setError(er);
@@ -56,7 +56,7 @@ class PayerInfo extends Component {
 
   watch = () => {
     const { wallet: { user: { address } } } = this.props;
-    return this.src20.connection.onAccountChange(
+    return this.lamports.connection.onAccountChange(
       ssjs.fromAddress(address),
       this.fetchData
     );

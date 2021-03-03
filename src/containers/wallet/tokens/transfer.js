@@ -41,7 +41,7 @@ class TokenTransfer extends Component {
       amount: '',
     }
 
-    this.src20 = window.senwallet.src20;
+    this.splt = window.senwallet.splt;
   }
 
   onAddress = (e) => {
@@ -61,8 +61,8 @@ class TokenTransfer extends Component {
       setError
     } = this.props;
     return getAccountData(mainAccount).then(data => {
-      const { amount, token } = data;
-      return this.setState({ amount: utils.div(amount, global.BigInt(10 ** token.decimals)).toString() });
+      const { amount, mint } = data;
+      return this.setState({ amount: utils.div(amount, global.BigInt(10 ** mint.decimals)).toString() });
     }).catch(er => {
       return setError(er);
     });
@@ -103,18 +103,16 @@ class TokenTransfer extends Component {
     if (!ssjs.isAddress(address)) return setError('Invalid receiver address');
 
     let decimals = null;
-    let tokenAddress = null;
     return this.setState({ loading: true }, () => {
       return getAccountData(mainAccount).then(re => {
-        const { token: { address: _address, decimals: _decimals } } = re;
-        tokenAddress = _address;
+        const { mint: { decimals: _decimals } } = re;
         decimals = _decimals;
         return unlockWallet();
       }).then(secretKey => {
         const amount = this.safelyParseAmount(decimals);
         if (!amount) throw new Error('Invalid amount');
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.transferTokens(amount, tokenAddress, mainAccount, address, payer);
+        return this.splt.transfer(amount, mainAccount, address, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

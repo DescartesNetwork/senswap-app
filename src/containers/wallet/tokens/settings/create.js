@@ -22,7 +22,7 @@ import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 const EMPTY = {
   loading: false,
   txId: '',
-  tokenAddress: '',
+  mintAddress: '',
 }
 
 class CreateTokenAccount extends Component {
@@ -34,9 +34,9 @@ class CreateTokenAccount extends Component {
     }
   }
 
-  onTokenAddress = (e) => {
-    const tokenAddress = e.target.value || '';
-    return this.setState({ tokenAddress });
+  onMintAddress = (e) => {
+    const mintAddress = e.target.value || '';
+    return this.setState({ mintAddress });
   }
 
   newAccount = () => {
@@ -45,21 +45,20 @@ class CreateTokenAccount extends Component {
       setError,
       updateWallet, unlockWallet, syncWallet
     } = this.props;
-    const { tokenAddress } = this.state;
-    if (!ssjs.isAddress(tokenAddress)) return setError('The account address cannot be empty');
+    const { mintAddress } = this.state;
+    if (!ssjs.isAddress(mintAddress)) return setError('The token address cannot be empty');
 
     let txId = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
-        return sol.newAccount(tokenAddress, secretKey);
-      }).then(({ account, txId: refTxId }) => {
+        return sol.newAccount(mintAddress, secretKey);
+      }).then(({ address: accountAddress, txId: refTxId }) => {
         txId = refTxId;
-        const accountAddress = account.publicKey.toBase58();
-        const newTokens = [...user.tokens];
-        if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+        const newMints = [...user.mints];
+        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ user: { ...user, tokens: newTokens }, accounts: newAccounts });
+        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
       }).then(re => {
         return syncWallet();
       }).then(re => {
@@ -73,7 +72,7 @@ class CreateTokenAccount extends Component {
   }
 
   render() {
-    const { tokenAddress, loading } = this.state;
+    const { mintAddress, loading } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -84,8 +83,8 @@ class CreateTokenAccount extends Component {
           label="Token Address"
           variant="outlined"
           color="primary"
-          onChange={this.onTokenAddress}
-          value={tokenAddress}
+          onChange={this.onMintAddress}
+          value={mintAddress}
           InputProps={{
             endAdornment: <IconButton
               color="primary"

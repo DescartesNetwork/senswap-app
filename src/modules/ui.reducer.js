@@ -92,8 +92,8 @@ export const setError = (error) => {
         dispatch({ type: SET_ERROR_FAIL, reason: er });
         return reject(er);
       }
-      const { ui: { visible: prevVisible } } = getState();
-      if (prevVisible) {
+      const { ui: { visible: prevVisible, error: prevError } } = getState();
+      if (prevVisible && error === prevError) {
         const er = 'There exists another error needed to handle first';
         dispatch({ type: SET_ERROR_FAIL, reason: er });
         return reject(er);

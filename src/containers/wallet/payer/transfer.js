@@ -42,7 +42,7 @@ class PayerTransfer extends Component {
       amount: '',
     }
 
-    this.src20 = window.senwallet.src20;
+    this.lamports = window.senwallet.lamports;
   }
 
   onAddress = (e) => {
@@ -61,7 +61,7 @@ class PayerTransfer extends Component {
 
   onMax = () => {
     const { wallet: { user: { address } }, setError } = this.props;
-    return this.src20.getLamports(address).then(re => {
+    return this.lamports.get(address).then(re => {
       return this.setState({ amount: re / LAMPORTS_PER_SOL - ssjs.BASIC_TX_FEE });
     }).catch(er => {
       return setError(er);
@@ -78,7 +78,7 @@ class PayerTransfer extends Component {
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.transferLamports(lamports, address, payer);
+        return this.lamports.transfer(lamports, address, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

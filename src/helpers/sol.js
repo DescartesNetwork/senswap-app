@@ -21,26 +21,26 @@ SOL.poolPath = (poolAddress, index) => {
   return path;
 }
 
-SOL.scanAccount = (tokenAddress, secretKey) => {
+SOL.scanAccount = (mintAddress, secretKey) => {
   return new Promise((resolve, reject) => {
-    if (!ssjs.isAddress(tokenAddress)) return reject('Invalid token address');
-    let nextIndex = 0;
-    let nextPath = null;
-    let nextAccount = null;
-    let data = [];
-    return forever(next => {
-      nextPath = SOL.tokenPath(tokenAddress, nextIndex);
-      nextAccount = ssjs.deriveChild(secretKey, nextPath);
-      const address = nextAccount.publicKey.toBase58();
-      return window.senwallet.src20.getAccountData(address).then(re => {
-        data.push(re);
-        nextIndex = nextIndex + 1;
-        return next();
-      }).catch(er => {
-        return next(er);
-      });
-    }, er => {
-      return resolve({ data, nextIndex, nextPath, nextAccount });
+    if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
+
+    const splt = window.senwallet.splt;
+    const payer = ssjs.fromSecretKey(secretKey);
+    const walletAddress = payer.publicKey.toBase58();
+    const spltAddress = splt.spltProgramId.toBase58();
+    const splataAddress = splt.splataProgramId.toBase58();
+
+    let data = {}
+    return ssjs.deriveAssociatedAddress(walletAddress, mintAddress, spltAddress, splataAddress).then(re => {
+      data.address = re;
+      return splt.getAccountData(data.address);
+    }).then(re => {
+      data = { ...data, ...re };
+      return resolve(data);
+    }).catch(er => {
+      if (data.address) return resolve(data);
+      return reject('Cannot parse data');
     });
   });
 }
@@ -69,16 +69,25 @@ SOL.scanLPT = (poolAddress, secretKey) => {
   });
 }
 
-SOL.newAccount = (tokenAddress, secretKey) => {
+SOL.newAccount = (mintAddress, secretKey) => {
   return new Promise((resolve, reject) => {
-    if (!ssjs.isAddress(tokenAddress)) return reject('Invalid token address');
-    let account = null;
-    return SOL.scanAccount(tokenAddress, secretKey).then(({ nextAccount }) => {
-      account = nextAccount;
-      const payer = ssjs.fromSecretKey(secretKey);
-      return window.senwallet.src20.newAccount(account, tokenAddress, payer);
+    if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
+
+    const splt = window.senwallet.splt;
+    const payer = ssjs.fromSecretKey(secretKey);
+    const walletAddress = payer.publicKey.toBase58();
+    const spltAddress = splt.spltProgramId.toBase58();
+    const splataAddress = splt.splataProgramId.toBase58();
+    let address = null;
+    return ssjs.deriveAssociatedAddress(walletAddress, mintAddress, spltAddress, splataAddress).then(re => {
+      address = re;
+      return splt.getAccountData(address);
+    }).then(data => {
+      if (data) return resolve({ address });
+    }).catch(er => {
+      return splt.initializeAccount(address, mintAddress, payer);
     }).then(txId => {
-      return resolve({ account, txId });
+      return resolve({ address, txId });
     }).catch(er => {
       return reject(er);
     });

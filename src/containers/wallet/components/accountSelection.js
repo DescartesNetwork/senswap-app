@@ -22,7 +22,7 @@ class AccountSelection extends Component {
     super();
 
     this.state = {
-      tokenAddress: '',
+      mintAddress: '',
       accountAddress: '',
     }
   }
@@ -39,11 +39,11 @@ class AccountSelection extends Component {
 
   fetchData = () => {
     const { poolAddress, getPoolData } = this.props;
-    if (!poolAddress) return this.setState({ tokenAddress: '' });
+    if (!poolAddress) return this.setState({ mintAddress: '' });
     return getPoolData(poolAddress).then(re => {
-      if (!re) return this.setState({ tokenAddress: '' });
-      const { token: { address: tokenAddress } } = re;
-      return this.setState({ tokenAddress });
+      if (!re) return this.setState({ mintAddress: '' });
+      const { mint: { address: mintAddress } } = re;
+      return this.setState({ mintAddress });
     }).catch(er => {
       return setError(er);
     });
@@ -59,7 +59,7 @@ class AccountSelection extends Component {
   render() {
     // const { classes } = this.props;
     const { label } = this.props;
-    const { accountAddress, tokenAddress } = this.state;
+    const { accountAddress, mintAddress } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -70,7 +70,7 @@ class AccountSelection extends Component {
           InputProps={{
             startAdornment: <AccountAvatar address={accountAddress} marginRight />,
             endAdornment: <AccountList
-              tokenAddress={tokenAddress}
+              mintAddress={mintAddress}
               size="medium"
               onChange={this.onAddress}
               edge="end"

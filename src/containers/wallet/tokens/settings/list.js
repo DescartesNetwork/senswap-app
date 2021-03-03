@@ -58,11 +58,11 @@ class ListTokenAccount extends Component {
       <Grid item xs={12}>
         <Typography variant="body2">Your accounts</Typography>
       </Grid>
-      {data.map(({ address, amount, initialized, token }) => {
-        if (!initialized) return null;
-        const symbol = ssjs.toSymbol(token.symbol);
-        const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals)));
-        const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
+      {data.map(({ address, amount, state, mint }) => {
+        if (!state) return null;
+        const symbol = ssjs.toSymbol(mint.symbol);
+        const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** mint.decimals)));
+        const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
 
         return <Grid key={address} item xs={12}>
           <Grid container spacing={2}>
@@ -72,7 +72,7 @@ class ListTokenAccount extends Component {
                 variant="outlined"
                 color="primary"
                 value={address}
-                helperText={`Token: ${token.address}`}
+                helperText={`Token: ${mint.address}`}
                 fullWidth
               />
             </Grid>

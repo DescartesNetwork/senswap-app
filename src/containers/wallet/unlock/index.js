@@ -85,11 +85,15 @@ class Unlock extends Component {
               variant="outlined"
               value={password}
               onChange={this.onPassword}
+              onKeyPress={e => {
+                if (e.key === 'Enter') return this.onSubmit();
+              }}
               InputProps={{
                 endAdornment: <IconButton onClick={this.onVisiblePassword} edge="end">
                   {visiblePassword ? <VisibilityRounded /> : <VisibilityOffRounded />}
                 </IconButton>
               }}
+              autoFocus
               fullWidth
             />
           </Grid>

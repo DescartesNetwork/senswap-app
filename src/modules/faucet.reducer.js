@@ -1,3 +1,4 @@
+import ssjs from 'senswapjs';
 import configs from 'configs';
 import api from 'helpers/api';
 
@@ -8,7 +9,7 @@ import api from 'helpers/api';
  */
 const defaultState = {
   txId: '',
-  tokens: []
+  mints: []
 }
 
 /**
@@ -47,14 +48,14 @@ export const airdropLamports = (dstAddress) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: AIRDROP_LAMPORTS });
 
-      if (!dstAddress) {
+      if (!ssjs.isAddress(dstAddress)) {
         const er = 'Invalid input';
         dispatch({ type: AIRDROP_LAMPORTS_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.post(base + '/faucet/lamports', { dstAddress }).then(({ data }) => {
+      return api.post(base + '/faucet/fund', { dstAddress }).then(({ data }) => {
         dispatch({ type: AIRDROP_LAMPORTS_OK, data });
         return resolve(data);
       }).catch(er => {
@@ -72,19 +73,19 @@ export const AIRDROP_TOKENS = 'AIRDROP_TOKENS';
 export const AIRDROP_TOKENS_OK = 'AIRDROP_TOKENS_OK';
 export const AIRDROP_TOKENS_FAIL = 'AIRDROP_TOKENS_FAIL';
 
-export const airdropTokens = (dstAddress, tokenAddress) => {
+export const airdropTokens = (dstAddress, mintAddress) => {
   return dispatch => {
     return new Promise((resolve, reject) => {
       dispatch({ type: AIRDROP_TOKENS });
 
-      if (!dstAddress || !tokenAddress) {
+      if (!ssjs.isAddress(dstAddress) || !ssjs.isAddress(mintAddress)) {
         const er = 'Invalid input';
         dispatch({ type: AIRDROP_TOKENS_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.post(base + '/faucet/tokens', { dstAddress, tokenAddress }).then(({ data }) => {
+      return api.post(base + '/faucet/airdrop', { dstAddress, mintAddress }).then(({ data }) => {
         dispatch({ type: AIRDROP_TOKENS_OK, data });
         return resolve(data);
       }).catch(er => {

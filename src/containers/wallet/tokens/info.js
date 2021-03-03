@@ -62,9 +62,9 @@ class TokenInfo extends Component {
 
   render() {
     const { classes } = this.props;
-    const { data: { address, amount, initialized, token } } = this.state;
-    const symbol = initialized ? ssjs.toSymbol(token.symbol) : 'UNKOWN';
-    const balance = initialized ? utils.prettyNumber(utils.div(amount, global.BigInt(10 ** token.decimals))) : 0;
+    const { data: { address, amount, state, mint } } = this.state;
+    const symbol = state > 0 ? ssjs.toSymbol(mint.symbol) : 'UNKOWN';
+    const balance = state > 0 ? utils.prettyNumber(utils.div(amount, global.BigInt(10 ** mint.decimals))) : 0;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -77,7 +77,7 @@ class TokenInfo extends Component {
           </Grid>
           <Grid item className={classes.stretch}>
             <InputBase
-              placeholder='Receiver'
+              placeholder='No data'
               value={address || ''}
               fullWidth
               readOnly

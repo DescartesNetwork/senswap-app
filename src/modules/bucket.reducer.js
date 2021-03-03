@@ -26,7 +26,7 @@ export const getAccountData = (accountAddress, force = false) => {
 
       const { bucket: { [accountAddress]: accountData } } = getState();
       if (!accountData || force) {
-        return window.senwallet.src20.getAccountData(accountAddress).then(re => {
+        return window.senwallet.splt.getAccountData(accountAddress).then(re => {
           const data = { [accountAddress]: re }
           dispatch({ type: GET_ACCOUNT_DATA_OK, data });
           return resolve(re);
@@ -44,37 +44,37 @@ export const getAccountData = (accountAddress, force = false) => {
 }
 
 /**
- * Get token data
+ * Get mint data
  */
-export const GET_TOKEN_DATA = 'GET_TOKEN_DATA';
-export const GET_TOKEN_DATA_OK = 'GET_TOKEN_DATA_OK';
-export const GET_TOKEN_DATA_FAIL = 'GET_TOKEN_DATA_FAIL';
+export const GET_MINT_DATA = 'GET_MINT_DATA';
+export const GET_MINT_DATA_OK = 'GET_MINT_DATA_OK';
+export const GET_MINT_DATA_FAIL = 'GET_MINT_DATA_FAIL';
 
-export const getTokenData = (tokenAddress, force = false) => {
+export const getMintData = (mintAddress, force = false) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
-      dispatch({ type: GET_TOKEN_DATA });
+      dispatch({ type: GET_MINT_DATA });
 
-      if (!ssjs.isAddress(tokenAddress)) {
-        const er = 'Invalid token address';
-        dispatch({ type: GET_TOKEN_DATA_FAIL, reason: er });
+      if (!ssjs.isAddress(mintAddress)) {
+        const er = 'Invalid mint address';
+        dispatch({ type: GET_MINT_DATA_FAIL, reason: er });
         return reject(er);
       }
 
-      const { bucket: { [tokenAddress]: tokenData } } = getState();
-      if (!tokenData || force) {
-        return window.senwallet.src20.getTokenData(tokenAddress).then(re => {
-          const data = { [tokenAddress]: re }
-          dispatch({ type: GET_TOKEN_DATA_OK, data });
+      const { bucket: { [mintAddress]: mintData } } = getState();
+      if (!mintData || force) {
+        return window.senwallet.splt.getMintData(mintAddress).then(re => {
+          const data = { [mintAddress]: re }
+          dispatch({ type: GET_MINT_DATA_OK, data });
           return resolve(re);
         }).catch(er => {
-          dispatch({ type: GET_TOKEN_DATA_FAIL, reason: er.toString() });
+          dispatch({ type: GET_MINT_DATA_FAIL, reason: er.toString() });
           return reject(er);
         });
       } else {
-        const data = { [tokenAddress]: tokenData };
-        dispatch({ type: GET_TOKEN_DATA_OK, data });
-        return resolve(tokenData);
+        const data = { [mintAddress]: mintData };
+        dispatch({ type: GET_MINT_DATA_OK, data });
+        return resolve(mintData);
       }
     });
   }
@@ -190,9 +190,9 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case GET_ACCOUNT_DATA_FAIL:
       return { ...state, ...action.data };
-    case GET_TOKEN_DATA_OK:
+    case GET_MINT_DATA_OK:
       return { ...state, ...action.data };
-    case GET_TOKEN_DATA_FAIL:
+    case GET_MINT_DATA_FAIL:
       return { ...state, ...action.data };
     case GET_POOL_DATA_OK:
       return { ...state, ...action.data };
