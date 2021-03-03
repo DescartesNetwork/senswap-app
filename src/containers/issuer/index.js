@@ -18,7 +18,6 @@ import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
-import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
@@ -35,18 +34,11 @@ class Issuer extends Component {
 
     this.state = {
       ...EMPTY,
-      symbol: '',
       supply: 5000000000,
       decimals: 9,
     }
 
-    this.src20 = window.senwallet.src20;
-  }
-
-  onSymbol = (e) => {
-    const symbol = e.target.value || '';
-    if (symbol.length > 4) return;
-    return this.setState({ symbol, ...EMPTY });
+    this.splt = window.senwallet.splt;
   }
 
   onSupply = (e) => {
@@ -60,9 +52,9 @@ class Issuer extends Component {
   }
 
   onCreate = () => {
-    const { symbol: refSymbol, supply: refSupply, decimals: refDecimals } = this.state;
+    const { supply: refSupply, decimals: refDecimals } = this.state;
     const {
-      wallet: { user },
+      wallet: { user, accounts },
       setError,
       unlockWallet, updateWallet
     } = this.props;
@@ -70,27 +62,32 @@ class Issuer extends Component {
     const decimals = parseInt(refDecimals) || 0;
     const supply = parseInt(refSupply) || 0;
     if (decimals < 1 || decimals > 9) return setError('Decimals must be an integer that greater than 0, and less then 10');
-    if (refSymbol.length !== 4) return setError('Symbol must include 4 characters');
     if (supply < 1 || supply > 1000000000000) return setError('Total supply must be grearer than0, and less than or equal to 1000000000000');
 
-    const token = ssjs.createAccount();
-    const tokenAddress = token.publicKey.toBase58();
+    const mint = ssjs.createAccount();
+    const mintAddress = mint.publicKey.toBase58();
     let secretKey = null;
     let txId = null;
-    const symbol = refSymbol.split('');
+    let accountAddress = null;
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
-        return sol.scanAccount(tokenAddress, secretKey);
-      }).then(({ nextAccount: receiver }) => {
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.src20.newToken(symbol, totalSupply, decimals, receiver, token, payer);
+        return this.splt.initializeMint(decimals, null, mint, payer);
+      }).then(txId => {
+        return sol.newAccount(mintAddress, secretKey);
+      }).then(({ address, txId }) => {
+        accountAddress = address;
+        const payer = ssjs.fromSecretKey(secretKey);
+        return this.splt.mintTo(totalSupply, mintAddress, accountAddress, payer);
       }).then(refTxId => {
         txId = refTxId;
-        const newTokens = [...user.tokens];
-        if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
-        return updateWallet({ user: { ...user, tokens: newTokens } });
+        const newMints = [...user.mints];
+        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
+        const newAccounts = [...accounts];
+        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
+        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
       }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
@@ -103,8 +100,7 @@ class Issuer extends Component {
 
   render() {
     const { classes } = this.props;
-    const { sol: { tokenFactoryAddress } } = configs;
-    const { loading, symbol, supply, decimals, txId } = this.state;
+    const { loading, supply, decimals, txId } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -120,9 +116,9 @@ class Issuer extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
-                    label="Token Fcatory"
+                    label="SPL Token Address"
                     variant="outlined"
-                    value={tokenFactoryAddress}
+                    value={this.splt.spltProgramId.toBase58()}
                     inputProps={{ readOnly: true }}
                     fullWidth
                   />
@@ -138,21 +134,11 @@ class Issuer extends Component {
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
-                    label="Total supply"
+                    label="Supply"
                     variant="outlined"
                     helperText="Do not include decimals."
                     value={supply}
                     onChange={this.onSupply}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Symbol"
-                    variant="outlined"
-                    helperText="The symbol must include 4 characters. You can use - to replace empty characters."
-                    value={symbol}
-                    onChange={this.onSymbol}
                     fullWidth
                   />
                 </Grid>

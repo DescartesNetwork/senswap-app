@@ -80,26 +80,26 @@ class Swap extends Component {
     const {
       bidAmount,
       bidData: {
-        initialized: bidInitialized,
+        is_initialized: bidInitialized,
         reserve: bidReserve,
         lpt: bidLPT,
-        token: bidToken,
+        mint: bidMint,
       },
       askData: {
-        initialized: askInitialized,
+        is_initialized: askInitialized,
         reserve: askReserve,
         lpt: askLPT,
-        token: askToken,
+        mint: askMint,
         fee_numerator: askFeeNumerator,
         fee_denominator: askFeeDenominator,
       }
     } = this.state;
     if (!bidAmount || !bidInitialized || !askInitialized) return this.setState({ askAmount: 0 });
-    const _bidReserve = utils.div(bidReserve, global.BigInt(10 ** bidToken.decimals));
+    const _bidReserve = utils.div(bidReserve, global.BigInt(10 ** bidMint.decimals));
     const _newBidReserve = _bidReserve + bidAmount;
-    const _bidLPT = utils.div(bidLPT, global.BigInt(10 ** bidToken.decimals));
-    const _askReserve = utils.div(askReserve, global.BigInt(10 ** askToken.decimals));
-    const _askLPT = utils.div(askLPT, global.BigInt(10 ** askToken.decimals));
+    const _bidLPT = utils.div(bidLPT, global.BigInt(10 ** bidMint.decimals));
+    const _askReserve = utils.div(askReserve, global.BigInt(10 ** askMint.decimals));
+    const _askLPT = utils.div(askLPT, global.BigInt(10 ** askMint.decimals));
 
     const alpha = _bidReserve / _newBidReserve;
     const reversedAlpha = 1 / alpha;
@@ -130,21 +130,21 @@ class Swap extends Component {
     }, this.estimateAmount);
   }
 
-  onAutogenDestinationAddress = (tokenAddress, secretKey) => {
+  onAutogenDestinationAddress = (mintAddress, secretKey) => {
     return new Promise((resolve, reject) => {
       const { dstAddress } = this.state;
       const { wallet: { user, accounts }, updateWallet, syncWallet } = this.props;
-      if (!ssjs.isAddress(tokenAddress) || !secretKey) return reject('Invalid input');
+      if (!ssjs.isAddress(mintAddress) || !secretKey) return reject('Invalid input');
       if (ssjs.isAddress(dstAddress)) return resolve(dstAddress);
 
       let accountAddress = null;
-      return sol.newAccount(tokenAddress, secretKey).then(({ account }) => {
-        accountAddress = account.publicKey.toBase58();
-        const newTokens = [...user.tokens];
-        if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+      return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
+        accountAddress = address;
+        const newMints = [...user.mints];
+        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ user: { ...user, tokens: newTokens }, accounts: newAccounts });
+        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
       }).then(re => {
         return syncWallet();
       }).then(re => {
@@ -160,15 +160,15 @@ class Swap extends Component {
     const {
       bidAmount, srcAddress,
       bidData: {
-        initialized: bidInitialized,
+        is_initialized: bidInitialized,
         address: bidAddress,
-        token: bidToken,
+        mint: bidMint,
         treasury: bidTreasury
       },
       askData: {
-        initialized: askInitialized,
+        is_initialized: askInitialized,
         address: askAddress,
-        token: askToken,
+        mint: askMint,
         treasury: askTreasury
       }
     } = this.state;
@@ -181,20 +181,18 @@ class Swap extends Component {
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
-        return this.onAutogenDestinationAddress(askToken.address, secretKey);
+        return this.onAutogenDestinationAddress(askMint.address, secretKey);
       }).then(dstAddress => {
-        const amount = global.BigInt(bidAmount * 10 ** bidToken.decimals);
+        const amount = global.BigInt(bidAmount * 10 ** bidMint.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.swap(
           amount,
           bidAddress,
           bidTreasury.address,
           srcAddress,
-          bidToken.address,
           askAddress,
           askTreasury.address,
           dstAddress,
-          askToken.address,
           payer
         );
       }).then(txId => {
@@ -212,13 +210,13 @@ class Swap extends Component {
     const {
       bidAmount,
       bidData: {
-        initialized: bidInitialized,
+        is_initialized: bidInitialized,
         reserve: bidReserve,
         lpt: bidLPT,
       },
       askAmount,
       askData: {
-        initialized: askInitialized,
+        is_initialized: askInitialized,
         reserve: askReserve,
         lpt: askLPT
       },

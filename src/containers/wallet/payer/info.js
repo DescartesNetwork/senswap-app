@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
-import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -34,34 +32,6 @@ class PayerInfo extends Component {
     this.lamports = window.senwallet.lamports;
   }
 
-  componentDidMount() {
-    this.fetchData();
-    this.watch();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { wallet: { user: { address: prevAddress } } } = prevProps;
-    const { wallet: { user: { address } } } = this.props;
-    if (!isEqual(address, prevAddress)) this.fetchData();
-  }
-
-  fetchData = () => {
-    const { wallet: { user: { address } }, setError } = this.props;
-    return this.lamports.get(address).then(re => {
-      return this.setState({ amount: re / LAMPORTS_PER_SOL });
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  watch = () => {
-    const { wallet: { user: { address } } } = this.props;
-    return this.lamports.connection.onAccountChange(
-      ssjs.fromAddress(address),
-      this.fetchData
-    );
-  }
-
   onQRCode = () => {
     const { wallet: { user: { address } } } = this.props;
     const { setQRCode } = this.props;
@@ -70,12 +40,13 @@ class PayerInfo extends Component {
 
   render() {
     const { classes } = this.props;
-    const { wallet: { user: { address } } } = this.props;
-    const { amount } = this.state;
+    const { wallet: { lamports, user: { address } } } = this.props;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h4">{utils.prettyNumber(Number(amount))} SOL</Typography>
+        <Typography variant="h4">{utils.prettyNumber(
+          ssjs.div(global.BigInt(lamports), global.BigInt(ssjs.LAMPORTS_PER_SOL))
+        )} SOL</Typography>
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={1} alignItems="center" className={classes.noWrap}>

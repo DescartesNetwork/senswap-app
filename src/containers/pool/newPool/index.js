@@ -21,7 +21,6 @@ import {
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
-import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
@@ -75,7 +74,7 @@ class NewPool extends Component {
 
   newPool = () => {
     const {
-      accountData: { address, initialized, token },
+      accountData: { address, state, mint },
       amount, price
     } = this.state;
     const {
@@ -83,8 +82,7 @@ class NewPool extends Component {
       setError,
       updateWallet, unlockWallet, syncWallet
     } = this.props;
-    const { sol: { swapFactoryAddress } } = configs;
-    if (!initialized) return setError('Please wait for data loaded');
+    if (!state) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
     if (!price) return setError('Invalid price');
 
@@ -97,22 +95,21 @@ class NewPool extends Component {
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
-        const swapProgramId = ssjs.fromAddress(swapFactoryAddress);
-        return ssjs.createStrictAccount(swapProgramId);
+        return ssjs.createStrictAccount(this.swap.swapProgramId);
       }).then(re => {
         pool = re;
         poolAddress = pool.publicKey.toBase58();
         return sol.scanLPT(poolAddress, secretKey);
       }).then(({ nextLPT }) => {
         lpt = nextLPT;
-        const reserve = global.BigInt(amount) * global.BigInt(10 ** token.decimals);
-        const value = global.BigInt(price * amount) * global.BigInt(10 ** token.decimals);
+        const reserve = global.BigInt(parseFloat(amount) * 10 ** mint.decimals);
+        const value = global.BigInt(parseFloat(price) * parseFloat(amount) * 10 ** mint.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.newPool(
+        return this.swap.initializePool(
           reserve,
           value,
           address,
-          token.address,
+          mint.address,
           pool,
           treasury,
           lpt,
@@ -143,7 +140,7 @@ class NewPool extends Component {
     const {
       amount, price,
       loading, txId, poolAddress,
-      accountData: { initialized }
+      accountData: { state }
     } = this.state;
 
     return <Grid container justify="center" spacing={2}>
@@ -173,7 +170,7 @@ class NewPool extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
-          disabled={!initialized}
+          disabled={!state}
           fullWidth
         />
       </Grid>
@@ -183,7 +180,7 @@ class NewPool extends Component {
           variant="outlined"
           value={price}
           onChange={this.onPrice}
-          disabled={!initialized}
+          disabled={!state}
           fullWidth
         />
       </Grid>
@@ -234,7 +231,7 @@ class NewPool extends Component {
             color="primary"
             startIcon={loading ? <CircularProgress size={17} /> : <CheckCircleOutlineRounded />}
             onClick={this.newPool}
-            disabled={loading || !initialized}
+            disabled={loading || !state}
             fullWidth
           >
             <Typography variant="body2">Create</Typography>

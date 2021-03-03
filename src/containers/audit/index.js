@@ -10,8 +10,9 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { DoneRounded, FlightTakeoffRounded } from '@material-ui/icons';
+import { FlightTakeoffRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
@@ -21,15 +22,20 @@ import { setError } from 'modules/ui.reducer';
 import { addPool } from 'modules/pool.reducer';
 
 
+const EMPTY = {
+  loading: false,
+  done: false
+}
+
 class Audit extends Component {
   constructor() {
     super();
 
     this.state = {
+      ...EMPTY,
       poolAddress: '',
       email: '',
       cgk: '',
-      ok: false,
     }
   }
 
@@ -71,18 +77,20 @@ class Audit extends Component {
     if (!email) return setError('The email is empty');
     if (!cgk) return setError('The CoinGecko link is empty');
     const pool = { address: poolAddress, email, cgk }
-    return addPool(pool).then(re => {
-      return this.setState({ ok: true });
-    }).catch(er => {
-      return this.setState({ ok: false }, () => {
-        return setError(er);
+    return this.setState({ loading: true }, () => {
+      return addPool(pool).then(re => {
+        return this.setState({ ...EMPTY, done: true });
+      }).catch(er => {
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { poolAddress, email, cgk, ok } = this.state;
+    const { poolAddress, email, cgk, loading, done } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -125,16 +133,19 @@ class Audit extends Component {
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Grid container justify="flex-end" className={classes.noWrap} spacing={2}>
+                  <Grid container justify="space-between" alignItems="flex-end" className={classes.noWrap} spacing={2}>
+                    <Grid item>
+                      {done ? <Typography>Done! We will verify it soon.</Typography> : null}
+                    </Grid>
                     <Grid item>
                       <Button
                         variant="contained"
                         color="primary"
-                        endIcon={ok ? <DoneRounded /> : <FlightTakeoffRounded />}
-                        disabled={ok}
+                        endIcon={loading ? <CircularProgress size={17} /> : <FlightTakeoffRounded />}
+                        disabled={loading || done}
                         onClick={this.onSubmit}
                       >
-                        <Typography>{ok ? 'Submitted' : 'Submit'}</Typography>
+                        <Typography>Submit</Typography>
                       </Button>
                     </Grid>
                   </Grid>

@@ -52,15 +52,15 @@ class PoolSelection extends Component {
 
   fetchData = () => {
     const {
-      wallet: { user: { tokens } },
+      wallet: { user: { mints } },
       setError,
       getPools, getPool,
       getPoolData,
     } = this.props;
-    if (!tokens.length) return;
+    if (!mints.length) return;
 
     let pools = [];
-    const condition = { '$or': tokens.map(tokenAddress => ({ token: tokenAddress })) }
+    const condition = { '$or': mints.map(mintAddress => ({ mint: mintAddress })) }
     return getPools(condition, 1000, 0).then(poolIds => {
       return Promise.all(poolIds.map(({ _id }) => {
         return getPool(_id);
@@ -78,7 +78,16 @@ class PoolSelection extends Component {
       }));
     }).then(icons => {
       pools = pools.map((pool, i) => {
-        pool.token.icon = icons[i];
+        pool.mint.icon = icons[i];
+        return pool;
+      });
+      return Promise.all(pools.map(({ cgk }) => {
+        if (cgk) return ssjs.symbolFromCGK(cgk);
+        return null;
+      }));
+    }).then(symbols => {
+      pools = pools.map((pool, i) => {
+        pool.mint.symbol = symbols[i];
         return pool;
       });
       return this.setState({ pools }, () => {
@@ -106,7 +115,7 @@ class PoolSelection extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderToken = (symbol, icon, email, verified) => {
+  renderMint = (symbol, icon, email, verified) => {
     const { classes } = this.props;
     return <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
       <Grid item>
@@ -132,7 +141,7 @@ class PoolSelection extends Component {
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{ssjs.toSymbol(symbol)}</Typography>
+        <Typography>{symbol}</Typography>
         <Typography className={classes.owner}>Created by {email || 'Unknown'}</Typography>
       </Grid>
     </Grid>
@@ -143,9 +152,9 @@ class PoolSelection extends Component {
     if (!pools.length) return null;
     return <MenuList>
       {pools.map((pool, index) => {
-        const { address, email, verified, token: { symbol, icon } } = pool;
+        const { address, email, verified, mint: { symbol, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect(index)}>
-          {this.renderToken(symbol, icon, email, verified)}
+          {this.renderMint(symbol, icon, email, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -156,14 +165,14 @@ class PoolSelection extends Component {
     const { anchorEl, index, pools } = this.state;
 
     const verified = pools[index] && pools[index].verified;
-    const symbol = pools[index] && pools[index].token && pools[index].token.symbol;
-    const icon = pools[index] && pools[index].token && pools[index].token.icon;
+    const symbol = pools[index] && pools[index].mint && pools[index].mint.symbol;
+    const icon = pools[index] && pools[index].mint && pools[index].mint.icon;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          value={ssjs.toSymbol(symbol)}
+          value={symbol}
           onClick={this.onOpen}
           InputProps={{
             startAdornment: <Badge

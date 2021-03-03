@@ -77,8 +77,8 @@ class Add extends Component {
   }
 
   renderInfo = () => {
-    const { data: { initialized } } = this.state;
-    if (!initialized) return null;
+    const { data: { is_initialized } } = this.state;
+    if (!is_initialized) return null;
 
     const {
       data: {
@@ -89,17 +89,17 @@ class Add extends Component {
           fee_denominator,
           reserve: poolReserve,
           lpt: poolLPT,
-          token,
+          mint,
           treasury
         }
       }
     } = this.state;
-    const symbol = ssjs.toSymbol(token.symbol);
-    const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
-    const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals)));
+    const symbol = ssjs.toSymbol(mint.symbol);
+    const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
+    const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
     const price = utils.div(poolLPT, poolReserve);
     const fee = utils.div(fee_numerator, fee_denominator) * 100;
-    const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
+    const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** mint.decimals)));
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -130,8 +130,8 @@ class Add extends Component {
         <TextField
           label={symbol}
           variant="outlined"
-          value={token.address}
-          helperText={`Total supply: ${totalSupply} - Decimals: ${token.decimals}`}
+          value={mint.address}
+          helperText={`Total supply: ${totalSupply} - Decimals: ${mint.decimals}`}
           fullWidth />
       </Grid>
     </Grid>

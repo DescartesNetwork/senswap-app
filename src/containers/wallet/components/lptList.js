@@ -78,26 +78,26 @@ class LPTList extends Component {
   parseLPT = (lptAddress) => {
     const { data } = this.state;
     const lptData = data.find(({ address }) => address === lptAddress);
-    const { lpt, pool: { token: { decimals } } } = lptData;
+    const { lpt, pool: { mint: { decimals } } } = lptData;
     return utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** decimals)));
   }
 
-  renderGroupedTokensData = () => {
+  renderGroupedMintsData = () => {
     const { classes } = this.props;
     const { data } = this.state;
-    let groupedTokensData = {};
-    data.forEach(({ address: lptAddress, pool: { token } }) => {
-      const symbol = ssjs.toSymbol(token.symbol);
-      const tokenAddress = token.address.substring(0, 6);
-      const key = `${symbol} - ${tokenAddress}`;
-      if (!groupedTokensData[key]) groupedTokensData[key] = [];
-      groupedTokensData[key].push(lptAddress);
+    let groupedMintsData = {};
+    data.forEach(({ address: lptAddress, pool: { mint } }) => {
+      const symbol = ssjs.toSymbol(mint.symbol);
+      const mintAddress = mint.address.substring(0, 6);
+      const key = `${symbol} - ${mintAddress}`;
+      if (!groupedMintsData[key]) groupedMintsData[key] = [];
+      groupedMintsData[key].push(lptAddress);
     });
 
     let render = [];
-    for (let key in groupedTokensData) {
+    for (let key in groupedMintsData) {
       render.push(<ListSubheader key={key} disableSticky>{key}</ListSubheader>)
-      groupedTokensData[key].forEach(lptAddress => {
+      groupedMintsData[key].forEach(lptAddress => {
         render.push(<MenuItem key={lptAddress} onClick={() => this.onSelect(lptAddress)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
             <Grid item>
@@ -138,7 +138,7 @@ class LPTList extends Component {
         open={Boolean(anchorEl)}
         onClose={this.onClose}
       >
-        {this.renderGroupedTokensData()}
+        {this.renderGroupedMintsData()}
         <ListSubheader disableSticky>Your accounts not presented here</ListSubheader>
         <MenuItem>
           <Button

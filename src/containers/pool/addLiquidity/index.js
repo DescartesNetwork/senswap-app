@@ -97,22 +97,19 @@ class AddLiquidity extends Component {
         wallet: { user, lpts },
         updateWallet, syncWallet
       } = this.props;
-      const { lptAddress } = this.state;
+      let { lptAddress } = this.state;
       if (lptAddress) return resolve(lptAddress);
-
-      let lpt = null;
-      return sol.newLPT(poolAddress, secretKey).then(({ lpt: re }) => {
-        lpt = re;
+      return sol.newLPT(poolAddress, secretKey).then(({ lpt }) => {
         const newPools = [...user.pools];
         if (!newPools.includes(poolAddress)) newPools.push(poolAddress);
         const newLPTs = [...lpts];
-        const address = lpt.publicKey.toBase58();
-        if (!newLPTs.includes(address)) newLPTs.push(address);
+        const lptAddress = lpt.publicKey.toBase58();
+        if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
         return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
       }).then(re => {
         return syncWallet();
       }).then(re => {
-        return resolve(lpt);
+        return resolve(lptAddress);
       }).catch(er => {
         return reject(er);
       });
@@ -123,35 +120,37 @@ class AddLiquidity extends Component {
     const { setError, unlockWallet } = this.props;
     const {
       amount,
-      poolData: { initialized, address: poolAddress, token, treasury },
+      poolData: {
+        is_initialized,
+        address: poolAddress,
+        mint: { decimals },
+        treasury: { address: treasuryAddress }
+      },
       srcAddress,
     } = this.state;
-    if (!initialized) return setError('Please wait for data loaded');
+    if (!is_initialized) return setError('Please wait for data loaded');
     if (!amount || !parseFloat(amount)) return setError('Invalid amount');
 
     let secretKey = null;
-    let lptAddressOrAccount = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
         return this.onAutogenLPTAddress(poolAddress, secretKey);
-      }).then(re => {
-        lptAddressOrAccount = re;
-        const reserve = global.BigInt(parseFloat(amount) * 10 ** token.decimals);
+      }).then(lptAddress => {
+        const reserve = global.BigInt(parseFloat(amount) * 10 ** decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        const addLiquidity = typeof lptAddressOrAccount === 'string' ? this.swap.addLiquidity : this.swap.addLiquidityWithNewLPT;
-        return addLiquidity(
+        return this.swap.addLiquidity(
           reserve,
           poolAddress,
-          treasury.address,
-          lptAddressOrAccount,
+          treasuryAddress,
+          lptAddress,
           srcAddress,
-          token.address,
           payer
         );
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
+        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
@@ -164,7 +163,7 @@ class AddLiquidity extends Component {
     const {
       anchorEl, advance, loading, txId,
       amount,
-      poolData: { initialized, address: poolAddress, lpt, reserve, token },
+      poolData: { is_initialized, address: poolAddress, lpt, reserve, mint },
     } = this.state;
 
     return <Grid container justify="center" spacing={2}>
@@ -230,13 +229,13 @@ class AddLiquidity extends Component {
       </Grid>
       <Grid item xs={6}>
         <Typography variant="h5" align="center">
-          {initialized ? utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** token.decimals))) : 0}
+          {is_initialized ? utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** mint.decimals))) : 0}
         </Typography>
         <Typography variant="body2" align="center">Reserve</Typography>
       </Grid>
       <Grid item xs={6}>
         <Typography variant="h5" align="center">
-          $ {initialized ? utils.prettyNumber(utils.div(lpt, reserve)) : 0}
+          $ {is_initialized ? utils.prettyNumber(utils.div(lpt, reserve)) : 0}
         </Typography>
         <Typography variant="body2" align="center">Price</Typography>
       </Grid>
@@ -288,7 +287,7 @@ class AddLiquidity extends Component {
             color="primary"
             startIcon={loading ? <CircularProgress size={17} /> : <AddCircleOutlineRounded />}
             onClick={this.addLiquidity}
-            disabled={loading || !initialized}
+            disabled={loading || !is_initialized}
             fullWidth
           >
             <Typography variant="body2">Add</Typography>

@@ -101,7 +101,7 @@ SOL.newLPT = (poolAddress, secretKey) => {
     return SOL.scanLPT(poolAddress, secretKey).then(({ nextLPT }) => {
       lpt = nextLPT;
       const payer = ssjs.fromSecretKey(secretKey);
-      return window.senwallet.swap.newLPT(lpt, payer);
+      return window.senwallet.swap.initializeLPT(lpt, poolAddress, payer);
     }).then(txId => {
       return resolve({ lpt, txId });
     }).catch(er => {

@@ -35,14 +35,14 @@ function Row(props) {
     data: {
       address: lptAddress,
       lpt,
-      initialized,
+      is_initialized,
       pool: {
         address: poolAddress,
         fee_numerator,
         fee_denominator,
         reserve: poolReserve,
         lpt: poolLPT,
-        token,
+        mint,
         treasury
       }
     },
@@ -50,13 +50,13 @@ function Row(props) {
   const [visible, onVisible] = useState(false);
   const classes = makeStyles(styles)();
 
-  if (!initialized) return null;
-  const symbol = ssjs.toSymbol(token.symbol);
-  const totalSupply = utils.prettyNumber(utils.div(token.total_supply, global.BigInt(10 ** token.decimals)));
-  const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals)));
+  if (!is_initialized) return null;
+  const symbol = ssjs.toSymbol(mint.symbol);
+  const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
+  const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
   const price = utils.div(poolLPT, poolReserve);
   const fee = utils.div(fee_numerator, fee_denominator) * 100;
-  const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** token.decimals)));
+  const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** mint.decimals)));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);
   return <Fragment>
@@ -116,8 +116,8 @@ function Row(props) {
             <TextField
               label={symbol}
               variant="outlined"
-              value={token.address}
-              helperText={`Total supply: ${totalSupply} - Decimals: ${token.decimals}`}
+              value={mint.address}
+              helperText={`Total supply: ${totalSupply} - Decimals: ${mint.decimals}`}
               fullWidth />
           </Grid>
           <Grid item xs={12} /> {/* Safe space */}

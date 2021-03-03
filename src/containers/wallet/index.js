@@ -49,7 +49,7 @@ export const configSenWallet = () => {
 class Wallet extends Component {
 
   componentDidMount() {
-    const { setError, setWallet, setItem } = this.props;
+    const { setError, setWallet, updateWallet, setItem } = this.props;
     const address = storage.get('address');
     const keystore = storage.get('keystore');
     if (!address || !keystore) {
@@ -58,21 +58,24 @@ class Wallet extends Component {
       return;
     }
     return setWallet(address, keystore).then(re => {
-      // window.senwallet.splt.watch((er, re) => {
-      //   console.log(er)
-      //   if (er) return setError(er);
-      //   const { wallet: { user: { tokens }, accounts } } = this.props;
-      //   const address = re.address;
-      //   if (tokens.includes(address)) return setItem(re);
-      //   if (accounts.includes(address)) return setItem(re);
-      // });
-      // window.senwallet.swap.watch((er, re) => {
-      //   if (er) return setError(er);
-      //   const { wallet: { user: { pools }, lpts } } = this.props;
-      //   const address = re.address;
-      //   if (pools.includes(address)) return setItem(re);
-      //   if (lpts.includes(address)) return setItem(re);
-      // });
+      window.senwallet.splt.watch((er, re) => {
+        if (er) return setError(er);
+        const { wallet: { user: { mints }, accounts } } = this.props;
+        const address = re.address;
+        if (mints.includes(address)) return setItem(re);
+        if (accounts.includes(address)) return setItem(re);
+      });
+      window.senwallet.swap.watch((er, re) => {
+        if (er) return setError(er);
+        const { wallet: { user: { pools }, lpts } } = this.props;
+        const address = re.address;
+        if (pools.includes(address)) return setItem(re);
+        if (lpts.includes(address)) return setItem(re);
+      });
+      window.senwallet.lamports.watch(address, (er, re) => {
+        if (er) return setError(er);
+        return updateWallet({ lamports: re });
+      });
     }).catch(er => {
       return setError(er);
     });
@@ -96,6 +99,10 @@ class Wallet extends Component {
     return unlockWallet().then(re => {
       secretKey = re;
       return setLoading();
+    }).then(re => {
+      return window.senwallet.lamports.get(address);
+    }).then(lamports => {
+      return updateWallet({ lamports });
     }).then(re => {
       return Promise.all(mints.map(mintAddress => {
         return sol.scanAccount(mintAddress, secretKey);

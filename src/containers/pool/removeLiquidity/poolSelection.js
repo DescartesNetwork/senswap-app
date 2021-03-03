@@ -85,8 +85,17 @@ class PoolSelection extends Component {
       }));
     }).then(icons => {
       data = data.map((poolData, i) => {
-        poolData.token.icon = icons[i];
+        poolData.mint.icon = icons[i];
         return poolData;
+      });
+      return Promise.all(data.map(({ cgk }) => {
+        if (cgk) return ssjs.symbolFromCGK(cgk);
+        return null;
+      }));
+    }).then(symbols => {
+      data = data.map((pool, i) => {
+        pool.mint.symbol = symbols[i];
+        return pool;
       });
       return this.setState({ data }, () => {
         return this.onSelect(0);
@@ -115,7 +124,7 @@ class PoolSelection extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderToken = (symbol, icon, email, verified) => {
+  renderMint = (symbol, icon, email, verified) => {
     const { classes } = this.props;
     return <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
       <Grid item>
@@ -141,7 +150,7 @@ class PoolSelection extends Component {
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{ssjs.toSymbol(symbol)}</Typography>
+        <Typography>{symbol}</Typography>
         <Typography className={classes.owner}>Created by {email || 'Unknown'}</Typography>
       </Grid>
     </Grid>
@@ -152,9 +161,9 @@ class PoolSelection extends Component {
     if (!data.length) return null;
     return <MenuList>
       {data.map((pool, index) => {
-        const { address, email, verified, token: { symbol, icon } } = pool;
+        const { address, email, verified, mint: { symbol, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect(index)}>
-          {this.renderToken(symbol, icon, email, verified)}
+          {this.renderMint(symbol, icon, email, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -165,14 +174,14 @@ class PoolSelection extends Component {
     const { anchorEl, index, data } = this.state;
 
     const verified = data[index] && data[index].verified;
-    const symbol = data[index] && data[index].token && data[index].token.symbol;
-    const icon = data[index] && data[index].token && data[index].token.icon;
+    const symbol = data[index] && data[index].mint && data[index].mint.symbol;
+    const icon = data[index] && data[index].mint && data[index].mint.icon;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          value={ssjs.toSymbol(symbol)}
+          value={symbol}
           onClick={this.onOpen}
           InputProps={{
             startAdornment: <Badge

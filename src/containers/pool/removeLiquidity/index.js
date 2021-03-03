@@ -96,10 +96,10 @@ class RemoveLiquidity extends Component {
     return this.setState({ dstAddress });
   }
 
-  onAutogenDestinationAddress = (tokenAddress, secretKey) => {
+  onAutogenDestinationAddress = (mintAddress, secretKey) => {
     return new Promise((resolve, reject) => {
       if (!secretKey) return reject('Cannot unlock account');
-      if (!tokenAddress) return reject('Unknown token');
+      if (!mintAddress) return reject('Unknown token');
       const {
         wallet: { user, accounts },
         updateWallet, syncWallet
@@ -108,13 +108,13 @@ class RemoveLiquidity extends Component {
       if (dstAddress) return resolve(dstAddress);
 
       let accountAddress = null;
-      return sol.newAccount(tokenAddress, secretKey).then(({ account }) => {
-        accountAddress = account.publicKey.toBase58();
-        const newTokens = [...user.tokens];
-        if (!newTokens.includes(tokenAddress)) newTokens.push(tokenAddress);
+      return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
+        accountAddress = address;
+        const newMints = [...user.mints];
+        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ user: { ...user, tokens: newTokens }, accounts: newAccounts });
+        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
       }).then(re => {
         return syncWallet();
       }).then(re => {
@@ -129,29 +129,31 @@ class RemoveLiquidity extends Component {
     const {
       amount, poolAddress,
       lptData: {
-        initialized,
+        is_initialized,
         address: lptAddress,
-        pool: { token, treasury }
+        pool: {
+          mint: { address: mintAddress, decimals },
+          treasury: { address: treasuryAddress }
+        }
       },
     } = this.state;
     const { setError, unlockWallet } = this.props;
-    if (!initialized) return setError('Please wait for data loaded');
+    if (!is_initialized) return setError('Please wait for data loaded');
     if (!amount || !parseFloat(amount)) return setError('Invalid amount');
     let secretKey = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
-        return this.onAutogenDestinationAddress(token.address, secretKey);
+        return this.onAutogenDestinationAddress(mintAddress, secretKey);
       }).then(dstAddress => {
-        const lpt = global.BigInt(parseFloat(amount) * 10 ** token.decimals);
+        const lpt = global.BigInt(parseFloat(amount) * 10 ** decimals);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.removeLiquidity(
           lpt,
           poolAddress,
-          treasury.address,
+          treasuryAddress,
           lptAddress,
           dstAddress,
-          token.address,
           payer
         );
       }).then(txId => {
@@ -169,9 +171,9 @@ class RemoveLiquidity extends Component {
     const {
       anchorEl, advance, loading, txId,
       amount, poolAddress,
-      lptData: { initialized, lpt, pool }
+      lptData: { is_initialized, lpt, pool }
     } = this.state;
-    const { token } = initialized ? pool : {};
+    const { mint } = is_initialized ? pool : {};
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -231,19 +233,19 @@ class RemoveLiquidity extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
-          helperText={`Your LPT: ${initialized ? utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** token.decimals))) : 0}`}
+          helperText={`Your LPT: ${is_initialized ? utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals))) : 0}`}
           fullWidth
         />
       </Grid>
       <Grid item xs={6}>
         <Typography variant="h5" align="center">
-          {initialized ? utils.prettyNumber(utils.div(pool.reserve, global.BigInt(10 ** token.decimals))) : 0}
+          {is_initialized ? utils.prettyNumber(utils.div(pool.reserve, global.BigInt(10 ** mint.decimals))) : 0}
         </Typography>
         <Typography variant="body2" align="center">Reserve</Typography>
       </Grid>
       <Grid item xs={6}>
         <Typography variant="h5" align="center">
-          {initialized ? utils.prettyNumber(utils.div(pool.lpt, global.BigInt(10 ** token.decimals))) : 0}</Typography>
+          {is_initialized ? utils.prettyNumber(utils.div(pool.lpt, global.BigInt(10 ** mint.decimals))) : 0}</Typography>
         <Typography variant="body2" align="center">In-pool LPT</Typography>
       </Grid>
       <Grid item xs={12}>
@@ -294,7 +296,7 @@ class RemoveLiquidity extends Component {
             color="primary"
             startIcon={loading ? <CircularProgress size={17} /> : <RemoveCircleOutlineRounded />}
             onClick={this.removeLiquidity}
-            disabled={loading || !initialized}
+            disabled={loading || !is_initialized}
             fullWidth
           >
             <Typography variant="body2">Remove</Typography>

@@ -11,6 +11,7 @@ import api from 'helpers/api';
  */
 const defaultState = {
   visible: false,
+  lamports: 0,
   user: {
     address: null,
     mints: [],

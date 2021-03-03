@@ -12,7 +12,7 @@ import TextField from '@material-ui/core/TextField';
 import Collapse from '@material-ui/core/Collapse';
 
 import Drain from 'components/drain';
-import TokenSelection from './tokenSelection';
+import MintSelection from './mintSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
@@ -93,7 +93,7 @@ class Ask extends Component {
         />
       </Grid>
       <Grid item xs={12} className={classes.opticalCorrection}>
-        <TokenSelection onChange={this.onPoolAddress} />
+        <MintSelection onChange={this.onPoolAddress} />
       </Grid>
       <Grid item xs={12}>
         <Collapse in={advance}>

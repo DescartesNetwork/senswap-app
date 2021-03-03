@@ -33,7 +33,7 @@ import { getPools, getPool } from 'modules/pool.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 
-class TokenSelection extends Component {
+class MintSelection extends Component {
   constructor() {
     super();
 
@@ -64,9 +64,9 @@ class TokenSelection extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { user: { tokens: prevTokens } } } = prevProps;
-    const { wallet: { user: { tokens } } } = this.props;
-    if (!isEqual(tokens, prevTokens)) {
+    const { wallet: { user: { mints: prevMints } } } = prevProps;
+    const { wallet: { user: { mints } } } = this.props;
+    if (!isEqual(mints, prevMints)) {
       this.fetchRecommendedPools();
       this.fetchNewPools();
     }
@@ -74,15 +74,15 @@ class TokenSelection extends Component {
 
   fetchPools = (typeOrCondition, limit, page) => {
     return new Promise((resolve, reject) => {
-      const { wallet: { user: { tokens } } } = this.props;
+      const { wallet: { user: { mints } } } = this.props;
       const { getPools, getPool } = this.props;
       let pools = [];
 
-      const recommendedCondition = { '$or': tokens.map(tokenAddress => ({ token: tokenAddress, verified: true })) }
-      const newCondition = !tokens.length ? {} : { '$and': tokens.map(tokenAddress => ({ '$or': [{ token: { '$ne': tokenAddress } }, { verified: false }] })) }
+      const recommendedCondition = { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
+      const newCondition = !mints.length ? {} : { '$and': mints.map(mintAddress => ({ '$or': [{ mint: { '$ne': mintAddress } }, { verified: false }] })) }
       let condition = typeOrCondition;
       if (typeOrCondition === 'recommended') {
-        if (!tokens.length) return resolve(pools);
+        if (!mints.length) return resolve(pools);
         condition = recommendedCondition;
       }
       if (typeOrCondition === 'new') condition = newCondition;
@@ -99,6 +99,15 @@ class TokenSelection extends Component {
       }).then(icons => {
         pools = pools.map((pool, i) => {
           pool.icon = icons[i];
+          return pool;
+        });
+        return Promise.all(pools.map(({ cgk }) => {
+          if (cgk) return ssjs.symbolFromCGK(cgk);
+          return null;
+        }));
+      }).then(symbols => {
+        pools = pools.map((pool, i) => {
+          pool.symbol = symbols[i];
           return pool;
         });
         return resolve(pools);
@@ -167,7 +176,7 @@ class TokenSelection extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderToken = (symbol, icon, email, verified) => {
+  renderMint = (symbol, icon, email, verified) => {
     const { classes } = this.props;
     return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
       <Grid item>
@@ -211,7 +220,7 @@ class TokenSelection extends Component {
       {pools.map((pool, index) => {
         const { address, email, verified, symbol, icon } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
-          {this.renderToken(symbol, icon, email, verified)}
+          {this.renderMint(symbol, icon, email, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -225,7 +234,7 @@ class TokenSelection extends Component {
       {pools.map((pool, index) => {
         const { address, email, verified, symbol, icon } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
-          {this.renderToken(symbol, icon, email, verified)}
+          {this.renderMint(symbol, icon, email, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -242,7 +251,7 @@ class TokenSelection extends Component {
       {pools.map((pool, index) => {
         const { address, email, verified, symbol, icon } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
-          {this.renderToken(symbol, icon, email, verified)}
+          {this.renderMint(symbol, icon, email, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -323,15 +332,15 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   getPoolData,
 }, dispatch);
 
-TokenSelection.defaultProps = {
+MintSelection.defaultProps = {
   onChange: () => { },
 }
 
-TokenSelection.propTypes = {
+MintSelection.propTypes = {
   onChange: PropTypes.func,
 }
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(TokenSelection)));
+)(withStyles(styles)(MintSelection)));
