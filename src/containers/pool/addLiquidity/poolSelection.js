@@ -73,21 +73,13 @@ class PoolSelection extends Component {
     }).then(data => {
       pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
       return Promise.all(pools.map(({ cgk }) => {
-        if (cgk) return ssjs.imgFromCGK(cgk);
+        if (cgk) return ssjs.parseCGK(cgk);
         return null;
       }));
-    }).then(icons => {
+    }).then(data => {
       pools = pools.map((pool, i) => {
-        pool.mint.icon = icons[i];
-        return pool;
-      });
-      return Promise.all(pools.map(({ cgk }) => {
-        if (cgk) return ssjs.symbolFromCGK(cgk);
-        return null;
-      }));
-    }).then(symbols => {
-      pools = pools.map((pool, i) => {
-        pool.mint.symbol = symbols[i];
+        pool.mint.icon = data[i].icon;
+        pool.mint.symbol = data[i].symbol;
         return pool;
       });
       return this.setState({ pools }, () => {
