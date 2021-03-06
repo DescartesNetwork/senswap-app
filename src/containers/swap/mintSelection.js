@@ -295,6 +295,7 @@ class MintSelection extends Component {
                     <SearchRounded />
                   </IconButton>
                 }}
+                onKeyDown={e => e.stopPropagation()}
                 fullWidth
               />
             </Grid>

@@ -11,6 +11,7 @@ import Tab from '@material-ui/core/Tab';
 import { BaseCard } from 'components/cards';
 import InitializeMint from './initialization';
 import RegisterMint from './register';
+import UpdateMint from './update';
 
 import styles from './styles';
 
@@ -68,7 +69,7 @@ class Issuer extends Component {
                     <Redirect exact from="/issuer" to="/issuer/initialize-token" />
                     <Route exact path='/issuer/initialize-token' component={InitializeMint} />
                     <Route exact path='/issuer/register-token' component={RegisterMint} />
-                    <Route exact path='/issuer/update-token' component={InitializeMint} />
+                    <Route exact path='/issuer/update-token' component={UpdateMint} />
                   </Switch>
                 </Grid>
               </Grid>

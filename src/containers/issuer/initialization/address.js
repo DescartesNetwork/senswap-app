@@ -39,9 +39,11 @@ class MintAddress extends Component {
   onAddress = () => {
     const { prefix } = this.state;
     const { setError, onChange } = this.props;
+    if (this.cancel) this.cancel();
     return this.setState({ loading: true }, () => {
       onChange(null); // Clear previous address
-      return ssjs.createPrefixedAccount(prefix, (address) => {
+      return ssjs.createPrefixedAccount(prefix, (address, cancel) => {
+        this.cancel = cancel;
         return this.setState({ address });
       }).then(account => {
         const address = account.publicKey.toBase58();

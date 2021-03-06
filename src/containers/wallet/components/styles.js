@@ -17,7 +17,17 @@ export default theme => ({
     background: 'linear-gradient(45deg, hsla(33, 100%, 53%, 1) 0%, hsla(58, 100%, 68%, 1) 100%)',
     cursor: 'pointer',
   },
+  mintIcon: {
+    width: theme.spacing(4),
+    height: theme.spacing(4),
+    background: 'linear-gradient(45deg, hsla(186, 33%, 94%, 1) 0%, hsla(216, 41%, 79%, 1) 100%)',
+    cursor: 'pointer',
+  },
   address: {
     fontSize: 10
-  }
+  },
+  tools: {
+    width: `calc(100% - ${theme.spacing(2)}px)`,
+    margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
+  },
 });

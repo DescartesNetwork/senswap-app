@@ -18,9 +18,11 @@ import { FlightTakeoffRounded, HelpOutlineRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
+import { addMint } from 'modules/mint.reducer';
 
 const EMPTY = {
   loading: false,
+  ok: false,
 }
 
 class RegisterMint extends Component {
@@ -36,7 +38,17 @@ class RegisterMint extends Component {
   }
 
   onSubmit = () => {
-
+    const { data } = this.state;
+    const { addMint, setError } = this.props;
+    return this.setState({ loading: true }, () => {
+      return addMint(data).then(re => {
+        return this.setState({ ...EMPTY, ok: true });
+      }).catch(er => {
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
+      });
+    });
   }
 
   onAddress = (e) => {
@@ -48,8 +60,8 @@ class RegisterMint extends Component {
   onName = (e) => {
     const { setError } = this.props;
     const name = e.target.value || '';
-    const cgk = 'https://api.coingecko.com/api/v3/coins/' + name;
-    return this.setState({ ...EMPTY, name, cgk }, () => {
+    const cgk = 'https://api.coingecko.com/api/v3/coins/' + name.toLowerCase();
+    return this.setState({ ...EMPTY, data: {}, name, cgk }, () => {
       if (this.timeoutId) clearTimeout(this.timeoutId);
       if (!name) return;
       this.timeoutId = setTimeout(() => {
@@ -68,7 +80,7 @@ class RegisterMint extends Component {
 
   render() {
     const { classes } = this.props;
-    const { loading, data, name, cgk } = this.state;
+    const { loading, data, name, cgk, ok } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -110,7 +122,10 @@ class RegisterMint extends Component {
         />
       </Grid>
       <Grid item xs={12}>
-        <Grid container spacing={2} justify="flex-end">
+        <Grid container spacing={2} className={classes.noWrap} alignItems="flex-end">
+          <Grid item className={classes.stretch}>
+            <Typography variant="body2">{ok ? 'Done!' : ''}</Typography>
+          </Grid>
           <Grid item>
             <Button
               variant="contained"
@@ -130,10 +145,12 @@ class RegisterMint extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  mint: state.mint,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
+  addMint,
 }, dispatch);
 
 export default withRouter(connect(
