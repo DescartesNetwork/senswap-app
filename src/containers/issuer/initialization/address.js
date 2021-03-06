@@ -36,6 +36,10 @@ class MintAddress extends Component {
     this.onAddress();
   }
 
+  componentWillUnmount() {
+    if (this.cancel) this.cancel();
+  }
+
   onAddress = () => {
     const { prefix } = this.state;
     const { setError, onChange } = this.props;

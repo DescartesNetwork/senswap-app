@@ -2,26 +2,21 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import Avatar from '@material-ui/core/Avatar';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { FlightTakeoffRounded } from '@material-ui/icons';
 
 import MintAvatar from 'containers/wallet/components/mintAvatar';
-import MintList from 'containers/wallet/components/mintList';
+import MintSelection from 'containers/wallet/components/mintSelection';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { getMint, getMints, updateMint } from 'modules/mint.reducer';
+import { updateMint } from 'modules/mint.reducer';
 
 const EMPTY = {
   loading: false,
@@ -34,28 +29,16 @@ class UpdateMint extends Component {
 
     this.state = {
       ...EMPTY,
-      condition: {},
-      limit: 5,
-      page: -1,
-      index: 0,
-      data: [],
+      data: {},
     }
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  fetchData = () => {
-    const { getMints, getMint, setError } = this.props;
-    let { condition, limit, page } = this.state;
+  onUpdate = () => {
+    const { updateMint, setError } = this.props;
+    const { data } = this.state;
     return this.setState({ loading: true }, () => {
-      return getMints(condition, limit, page + 1).then(mintIds => {
-        return Promise.all(mintIds.map(mintId => getMint(mintId)));
-      }).then(data => {
-        return this.setState({ ...EMPTY, data }, () => {
-          return this.onSelect(0);
-        });
+      return updateMint(data).then(re => {
+        return this.setState({ ...EMPTY, ok: true });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
@@ -64,37 +47,88 @@ class UpdateMint extends Component {
     });
   }
 
-  onUpdate = () => {
-
+  onAddress = (e) => {
+    const address = e.target.value || '';
+    const { data } = this.state;
+    const newData = { ...data, address }
+    return this.setState({ data: newData });
   }
 
-  onSelect = (index) => {
-    return this.setState({ index });
+  onName = (e) => {
+    const name = e.target.value || '';
+    const { data } = this.state;
+    const newData = { ...data, name }
+    return this.setState({ data: newData });
+  }
+
+  onSymbol = (e) => {
+    const symbol = e.target.value || '';
+    const { data } = this.state;
+    const newData = { ...data, symbol }
+    return this.setState({ data: newData });
+  }
+
+  onIcon = (e) => {
+    const icon = e.target.value || '';
+    const { data } = this.state;
+    const newData = { ...data, icon }
+    return this.setState({ data: newData });
+  }
+
+  onMint = (data) => {
+    return this.setState({ data });
   }
 
   render() {
     const { classes } = this.props;
-    const { loading, index, data, ok } = this.state;
-
-    const mint = data[index] || {};
+    const { loading, data, ok } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="body2">Token info</Typography>
+        <Typography variant="h6">Old info</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <MintSelection onChange={this.onMint} />
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="h6">New info</Typography>
+      </Grid>
+      <Grid item xs={6}>
+        <TextField
+          variant="outlined"
+          label="Name"
+          value={data.name || ''}
+          onChange={this.onName}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={6}>
+        <TextField
+          variant="outlined"
+          label="Symbol"
+          value={data.symbol || ''}
+          onChange={this.onSymbol}
+          fullWidth
+        />
       </Grid>
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          label={(mint.name || 'Unknown') + ' / ' + (mint.symbol || 'Unknown')}
+          label="Icon"
+          value={data.icon || ''}
+          onChange={this.onIcon}
           InputProps={{
-            startAdornment: <MintAvatar
-              icon={mint.icon}
-              title={mint.name}
-              marginRight
-            />,
-            endAdornment: <MintList />
+            startAdornment: <MintAvatar icon={data.icon} marginRight />
           }}
-          value={mint.address || ''}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <TextField
+          variant="outlined"
+          label="Address"
+          value={data.address || ''}
+          onChange={this.onAddress}
           fullWidth
         />
       </Grid>
@@ -127,7 +161,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getMint, getMints, updateMint,
+  updateMint,
 }, dispatch);
 
 export default withRouter(connect(

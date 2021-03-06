@@ -6,8 +6,7 @@ import api from 'helpers/api';
  * Documents
  * @default defaultData
  */
-const defaultState = {
-}
+const defaultState = {}
 
 /**
  * Get mint
@@ -16,19 +15,27 @@ export const GET_MINT = 'GET_MINT';
 export const GET_MINT_OK = 'GET_MINT_OK';
 export const GET_MINT_FAIL = 'GET_MINT_FAIL';
 
-export const getMint = (_id) => {
-  return dispatch => {
+export const getMint = (_id, force = false) => {
+  return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: GET_MINT });
 
-      const { api: { base } } = configs;
-      return api.get(base + '/mint', { _id }).then(({ data }) => {
-        dispatch({ type: GET_MINT_OK, data: {} });
-        return resolve(data);
-      }).catch(er => {
-        dispatch({ type: GET_MINT_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
+      let { mint: { [_id]: mintData } } = getState();
+      if (!mintData || force) {
+        const { api: { base } } = configs;
+        return api.get(base + '/mint', { _id }).then(({ data: mintData }) => {
+          const data = { [_id]: mintData }
+          dispatch({ type: GET_MINT_OK, data });
+          return resolve(mintData);
+        }).catch(er => {
+          dispatch({ type: GET_MINT_FAIL, reason: er.toString() });
+          return reject(er.toString());
+        });
+      } else {
+        const data = { [_id]: mintData }
+        dispatch({ type: GET_MINT_OK, data });
+        return resolve(mintData);
+      }
     });
   }
 }
@@ -94,9 +101,10 @@ export const updateMint = (mint) => {
       dispatch({ type: UPDATE_MINT });
 
       const { api: { base } } = configs;
-      return api.put(base + '/mint', { mint }).then(({ data }) => {
+      return api.put(base + '/mint', { mint }).then(({ data: mintData }) => {
+        const data = { [mintData._id]: mintData }
         dispatch({ type: UPDATE_MINT_OK, data });
-        return resolve(data);
+        return resolve(mintData);
       }).catch(er => {
         dispatch({ type: UPDATE_MINT_FAIL, reason: er.toString() });
         return reject(er.toString());

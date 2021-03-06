@@ -84,7 +84,7 @@ class RegisterMint extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="body2">CoinGecko Magic</Typography>
+        <Typography variant="h6">CoinGecko Magic</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField

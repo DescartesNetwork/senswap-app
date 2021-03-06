@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -23,7 +22,6 @@ import MintAvatar from './mintAvatar';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { openWallet } from 'modules/wallet.reducer';
 import { getMint, getMints } from 'modules/mint.reducer';
 
 
@@ -46,22 +44,16 @@ class MintList extends Component {
     this.fetchData(this.onSelect);
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { anchorEl: prevAnchorEl } = prevState;
-    const { anchorEl } = this.state;
-    if (!isEqual(prevAnchorEl, anchorEl)) {
-      if (Boolean(anchorEl)) this.fetchData();
-      else this.setState({ search: '' });
-    }
-  }
-
-  fetchData = (condition = {}) => {
+  fetchData = (callback) => {
     const { getMints, getMint, setError } = this.props;
+    const { search } = this.state;
+    let condition = {}
+    if (search) condition = { '$or': [{ name: { '$regex': search, '$options': 'gi' } }, { symbol: { '$regex': search, '$options': 'gi' } }] }
     return this.setState({ loading: true }, () => {
       return getMints(condition, 5, 0).then(mintIds => {
-        return Promise.all(mintIds.map(mintId => getMint(mintId)));
+        return Promise.all(mintIds.map(({ _id }) => getMint(_id)));
       }).then(data => {
-        return this.setState({ ...EMPTY, data });
+        return this.setState({ ...EMPTY, data }, callback);
       }).catch(er => {
         return this.setState({ ...EMPTY, data: [] }, () => {
           return setError(er);
@@ -73,35 +65,30 @@ class MintList extends Component {
   onSelect = (mintAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-    if (!data || !data.length) return onChange('');
+    let mintData = {}
+    if (!data || !data.length) return onChange(mintData);
     return this.setState({ anchorEl: null }, () => {
-      const address = mintAddress || data[0].address || '';
-      return onChange(address);
+      mintData = data.filter(({ address }) => address === mintAddress)[0] || data[0];
+      return onChange(mintData);
     });
   }
 
   onSearch = (e) => {
     const search = e.target.value || '';
-    return this.setState({ search }, () => {
-      const { search: value } = this.state;
-      if (!value) return this.fetchData();
-      if (value.length < 2) return this.setState({ data: [] });
-      const condition = { '$or': [{ name: { '$regex': value, '$options': 'gi' } }, { symbol: { '$regex': value, '$options': 'gi' } }] }
-      return this.fetchData(condition, 1000, 0);
-    });
+    return this.setState({ search }, this.fetchData);
   }
 
   onOpen = (e) => {
-    return this.setState({ anchorEl: e.target });
+    return this.setState({ anchorEl: e.target }, this.fetchData());
   }
 
   onClose = () => {
-    return this.setState({ anchorEl: null });
+    return this.setState({ anchorEl: null, search: '' });
   }
 
   render() {
     const { classes } = this.props;
-    const { icon, size, edge, openWallet } = this.props;
+    const { icon, size, edge } = this.props;
     const { anchorEl, data, search, loading } = this.state;
 
     return <Fragment>
@@ -155,7 +142,7 @@ class MintList extends Component {
             variant="contained"
             color="primary"
             startIcon={<EmojiObjectsRounded />}
-            onClick={openWallet}
+            to='/issuer/register-token'
             fullWidth
           >
             <Typography>Register tokens</Typography>
@@ -168,13 +155,11 @@ class MintList extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  wallet: state.wallet,
   mint: state.mint,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  openWallet,
   getMint, getMints
 }, dispatch);
 
