@@ -26,7 +26,7 @@ export const getMint = (_id, force = false) => {
         return api.get(base + '/mint', { _id }).then(({ data: mintData }) => {
           const data = { [_id]: mintData }
           dispatch({ type: GET_MINT_OK, data });
-          return resolve(mintData);
+          return resolve(JSON.parse(JSON.stringify(mintData)));
         }).catch(er => {
           dispatch({ type: GET_MINT_FAIL, reason: er.toString() });
           return reject(er.toString());
@@ -34,7 +34,7 @@ export const getMint = (_id, force = false) => {
       } else {
         const data = { [_id]: mintData }
         dispatch({ type: GET_MINT_OK, data });
-        return resolve(mintData);
+        return resolve(JSON.parse(JSON.stringify(mintData)));
       }
     });
   }

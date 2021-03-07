@@ -35,7 +35,6 @@ class Audit extends Component {
       ...EMPTY,
       poolAddress: '',
       email: '',
-      cgk: '',
     }
   }
 
@@ -60,23 +59,17 @@ class Audit extends Component {
     return this.setState({ poolAddress });
   }
 
-  onEmail = (e) => {
-    const email = e.target.value || '';
-    return this.setState({ email });
-  }
-
-  onCGK = (e) => {
-    const cgk = e.target.value || '';
-    return this.setState({ cgk });
+  onAuthor = (e) => {
+    const author = e.target.value || '';
+    return this.setState({ author });
   }
 
   onSubmit = () => {
-    const { poolAddress, email, cgk } = this.state;
+    const { poolAddress, author } = this.state;
     const { setError, addPool } = this.props;
     if (!ssjs.isAddress(poolAddress)) return setError('The pool address is invalid');
-    if (!email) return setError('The email is empty');
-    if (!cgk) return setError('The CoinGecko link is empty');
-    const pool = { address: poolAddress, email, cgk }
+    if (!author) return setError('The author is empty');
+    const pool = { address: poolAddress, author }
     return this.setState({ loading: true }, () => {
       return addPool(pool).then(re => {
         return this.setState({ ...EMPTY, done: true });
@@ -90,7 +83,7 @@ class Audit extends Component {
 
   render() {
     const { classes } = this.props;
-    const { poolAddress, email, cgk, loading, done } = this.state;
+    const { poolAddress, author, loading, done } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -113,22 +106,12 @@ class Audit extends Component {
                     fullWidth
                   />
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={12}>
                   <TextField
                     variant="outlined"
-                    label="Your email"
-                    value={email}
-                    onChange={this.onEmail}
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    variant="outlined"
-                    label="CoinGecko API"
-                    placeholder="Example: https://api.coingecko.com/api/v3/coins/01coin"
-                    value={cgk}
-                    onChange={this.onCGK}
+                    label="Author"
+                    value={author}
+                    onChange={this.onAuthor}
                     fullWidth
                   />
                 </Grid>

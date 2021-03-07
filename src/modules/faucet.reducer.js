@@ -26,7 +26,7 @@ export const getWhiteList = () => {
 
       const { api: { base } } = configs;
       return api.get(base + '/faucet').then(({ data }) => {
-        dispatch({ type: GET_WHITELIST_OK, data });
+        dispatch({ type: GET_WHITELIST_OK, data: { mints: data } });
         return resolve(data);
       }).catch(er => {
         dispatch({ type: GET_WHITELIST_FAIL, reason: er.toString() });

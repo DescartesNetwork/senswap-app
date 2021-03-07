@@ -25,6 +25,7 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, openWallet, syncWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getMintData, getAccountData } from 'modules/bucket.reducer';
 
 
@@ -39,16 +40,35 @@ class Faucet extends Component {
 
     this.state = {
       ...EMPTY,
-      data: {},
+      data: [],
       mintAddress: '',
     }
   }
 
   componentDidMount() {
-    const { setError, getWhiteList } = this.props;
-    return getWhiteList().then(({ mints }) => {
-      const pseudoEvent = { target: { value: mints[0] } };
-      return this.onSelect(pseudoEvent);
+    this.fetchData()
+  }
+
+  fetchData = () => {
+    const { setError, getWhiteList, getMints, getMint } = this.props;
+    return getWhiteList().then(re => {
+      return Promise.all(re.map(mintAddress => {
+        return getMints({ address: mintAddress });
+      }));
+    }).then(re => {
+      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
+      return Promise.all(mintIds.map(({ _id }) => {
+        return getMint(_id).then(data => {
+          return Promise.resolve(data);
+        }).catch(er => {
+          return Promise.resolve({});
+        });
+      }));
+    }).then(data => {
+      return this.setState({ data }, () => {
+        const pseudoEvent = { target: { value: data[0].address } };
+        return this.onSelect(pseudoEvent);
+      });
     }).catch(er => {
       return setError(er);
     });
@@ -56,16 +76,7 @@ class Faucet extends Component {
 
   onSelect = (e) => {
     const mintAddress = e.target.value || '';
-    const { setError, getMintData } = this.props;
-    return this.setState({ mintAddress }, () => {
-      if (mintAddress) return getMintData(mintAddress).then(data => {
-        return this.setState({ ...EMPTY, data });
-      }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
-      });
-    });
+    return this.setState({ mintAddress });
   }
 
   onAutogenDestinationAddress = (mintAddress, secretKey) => {
@@ -84,7 +95,6 @@ class Faucet extends Component {
         const accountData = data.find(({ mint: { address } }) => address === mintAddress);
         if (accountData && accountData.address) return resolve(accountData.address);
         let accountAddress = null;
-        console.log("Start")
         return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
           accountAddress = address;
           const newMints = [...user.mints];
@@ -135,7 +145,9 @@ class Faucet extends Component {
   render() {
     const { classes } = this.props;
     const { mintAddress, data, txId, loading } = this.state;
-    const { faucet: { mints }, openWallet } = this.props;
+    const { openWallet } = this.props;
+
+    const selectedData = data.filter(({ address }) => address === mintAddress)[0] || {};
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} md={10}>
@@ -154,13 +166,13 @@ class Faucet extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <FormControl variant="outlined" fullWidth>
-                    <InputLabel>{ssjs.toSymbol(data.symbol)}</InputLabel>
+                    <InputLabel>{selectedData.name || 'Unknown'}</InputLabel>
                     <Select
-                      label={ssjs.toSymbol(data.symbol)}
+                      label={selectedData.name || 'Unknown'}
                       value={mintAddress}
                       onChange={this.onSelect}
                     >
-                      {mints.map(mintAddress => <MenuItem key={mintAddress} value={mintAddress}>{mintAddress}</MenuItem>)}
+                      {data.map(({ address }) => <MenuItem key={address} value={address}>{address}</MenuItem>)}
                     </Select>
                   </FormControl>
                 </Grid>
@@ -202,6 +214,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   unlockWallet, updateWallet, openWallet, syncWallet,
   getWhiteList, airdropLamports, airdropTokens,
+  getMints, getMint,
   getMintData, getAccountData,
 }, dispatch);
 

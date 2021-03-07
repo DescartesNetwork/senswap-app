@@ -26,7 +26,7 @@ export const getPool = (_id, force = false) => {
         return api.get(base + '/pool', { _id }).then(({ data: poolData }) => {
           const data = { [_id]: poolData }
           dispatch({ type: GET_POOL_OK, data });
-          return resolve(poolData);
+          return resolve(JSON.parse(JSON.stringify(poolData)));
         }).catch(er => {
           dispatch({ type: GET_POOL_FAIL, reason: er.toString() });
           return reject(er.toString());
@@ -34,7 +34,7 @@ export const getPool = (_id, force = false) => {
       } else {
         const data = { [_id]: poolData }
         dispatch({ type: GET_POOL_OK, data });
-        return resolve(poolData);
+        return resolve(JSON.parse(JSON.stringify(poolData)));
       }
     });
   }

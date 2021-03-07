@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -22,6 +24,9 @@ import TokenSettings from './settings';
 
 import styles from './styles';
 import SEN_LOGO from 'static/images/sen-logo.svg';
+import { getMints, getMint } from 'modules/mint.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
+import { setError } from 'modules/ui.reducer';
 
 
 class Tokens extends Component {
@@ -29,8 +34,43 @@ class Tokens extends Component {
     super();
 
     this.state = {
+      data: {},
       advance: false,
     }
+  }
+
+  componentDidMount = () => {
+    this.fetchData();
+  }
+
+  componentDidUpdate = (prevProps) => {
+    const { wallet: { mainAccount: prevMainAccount } } = prevProps;
+    const { wallet: { mainAccount } } = this.props;
+    if (!isEqual(mainAccount, prevMainAccount)) this.fetchData();
+  }
+
+  fetchData = () => {
+    const {
+      wallet: { mainAccount },
+      getMints, getMint,
+      setError, getAccountData
+    } = this.props;
+    if (!ssjs.isAddress(mainAccount)) return this.setState({ data: {} });
+
+    let data = null;
+    return getAccountData(mainAccount).then(re => {
+      data = re;
+      return getMints({ address: data.mint.address });
+    }).then(re => {
+      if (!re.length) return this.setState({ data });
+      const [{ _id }] = re;
+      return getMint(_id);
+    }).then(re => {
+      data.mint = { ...data.mint, ...re }
+      return this.setState({ data });
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onAdvance = () => {
@@ -40,7 +80,8 @@ class Tokens extends Component {
 
   render() {
     const { classes } = this.props;
-    const { advance } = this.state;
+    const { advance, data: { mint } } = this.state;
+    const { icon } = mint || {}
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -53,7 +94,7 @@ class Tokens extends Component {
                 </Grid>
                 <Grid item style={{ width: 50 }}>
                   <Image
-                    src={SEN_LOGO}
+                    src={icon || SEN_LOGO}
                     color="#00000000"
                     loading={<CircularProgress size={17} />}
                   />
@@ -67,7 +108,7 @@ class Tokens extends Component {
               <TokenInfo />
             </Grid>
             <Grid item xs={12}>
-              <Drain small/>
+              <Drain small />
             </Grid>
             <Grid item xs={12}>
               <TokenTransfer />
@@ -100,10 +141,14 @@ class Tokens extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-
+  getMints, getMint,
+  getAccountData,
+  setError,
 }, dispatch);
 
 export default withRouter(connect(

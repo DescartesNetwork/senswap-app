@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
@@ -28,6 +27,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
 
 function Row(props) {
@@ -51,7 +51,6 @@ function Row(props) {
   const classes = makeStyles(styles)();
 
   if (!is_initialized) return null;
-  const symbol = ssjs.toSymbol(mint.symbol);
   const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
   const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
   const price = utils.div(poolLPT, poolReserve);
@@ -70,7 +69,7 @@ function Row(props) {
         <Typography>{lptAddress}</Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{symbol}</Typography>
+        <Typography>{mint.symbol || 'Unknow'}</Typography>
       </TableCell>
       <TableCell align="right">
         <Typography>{price}</Typography>
@@ -114,7 +113,7 @@ function Row(props) {
           </Grid>
           <Grid item xs={12}>
             <TextField
-              label={symbol}
+              label={mint.symbol || 'Unknown'}
               variant="outlined"
               value={mint.address}
               helperText={`Total supply: ${totalSupply} - Decimals: ${mint.decimals}`}
@@ -151,13 +150,30 @@ class Info extends Component {
     const {
       wallet: { lpts },
       setError,
+      getMints, getMint,
       getLPTData,
     } = this.props;
     if (!lpts.length) return;
 
+    let data = null;
     return Promise.all(lpts.map(lptAddress => {
       return getLPTData(lptAddress);
-    })).then(data => {
+    })).then(re => {
+      data = re;
+      return Promise.all(data.map(({ pool: { mint: { address } } }) => {
+        return getMints({ address });
+      }));
+    }).then(re => {
+      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
+      return Promise.all(mintIds.map(({ _id }) => {
+        return getMint(_id);
+      }));
+    }).then(re => {
+      data = data.map((lpt, i) => {
+        let newLPT = { ...lpt }
+        newLPT.pool.mint = { ...lpt.pool.mint, ...re[i] }
+        return newLPT;
+      });
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -213,6 +229,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
+  getMints, getMint,
   getLPTData,
 }, dispatch);
 

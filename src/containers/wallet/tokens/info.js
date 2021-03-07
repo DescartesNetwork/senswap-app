@@ -17,6 +17,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { setQRCode, setMainAccount } from 'modules/wallet.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -40,9 +41,23 @@ class TokenInfo extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { mainAccount }, setError, getAccountData } = this.props;
+    const {
+      wallet: { mainAccount },
+      getMints, getMint,
+      setError, getAccountData
+    } = this.props;
     if (!ssjs.isAddress(mainAccount)) return this.setState({ data: {} });
-    return getAccountData(mainAccount).then(data => {
+
+    let data = null;
+    return getAccountData(mainAccount).then(re => {
+      data = re;
+      return getMints({ address: data.mint.address });
+    }).then(re => {
+      if (!re.length) return this.setState({ data });
+      const [{ _id }] = re;
+      return getMint(_id);
+    }).then(re => {
+      data.mint = { ...data.mint, ...re }
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -63,7 +78,7 @@ class TokenInfo extends Component {
   render() {
     const { classes } = this.props;
     const { data: { address, amount, state, mint } } = this.state;
-    const symbol = state > 0 ? ssjs.toSymbol(mint.symbol) : 'UNKOWN';
+    const symbol = state > 0 ? mint.symbol : 'UNKOWN';
     const balance = state > 0 ? utils.prettyNumber(utils.div(amount, global.BigInt(10 ** mint.decimals))) : 0;
 
     return <Grid container spacing={2}>
@@ -94,6 +109,7 @@ class TokenInfo extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  mint: state.mint,
   wallet: state.wallet,
   bucket: state.bucket,
 });
@@ -101,6 +117,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   setQRCode, setMainAccount,
+  getMints, getMint,
   getAccountData,
 }, dispatch);
 

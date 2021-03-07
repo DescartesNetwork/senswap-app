@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -25,6 +24,7 @@ import {
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 
@@ -55,6 +55,7 @@ class PoolSelection extends Component {
       wallet: { user: { mints } },
       setError,
       getPools, getPool,
+      getMints, getMint,
       getPoolData,
     } = this.props;
     if (!mints.length) return;
@@ -72,15 +73,19 @@ class PoolSelection extends Component {
       }));
     }).then(data => {
       pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
-      return Promise.all(pools.map(({ cgk }) => {
-        if (cgk) return ssjs.parseCGK(cgk);
-        return null;
+      return Promise.all(pools.map(({ mint: { address } }) => {
+        return getMints({ address });
+      }));
+    }).then(data => {
+      const mintIds = data.map(([mintId]) => (mintId || { _id: null }));
+      return Promise.all(mintIds.map(({ _id }) => {
+        return getMint(_id);
       }));
     }).then(data => {
       pools = pools.map((pool, i) => {
-        pool.mint.icon = data[i].icon;
-        pool.mint.symbol = data[i].symbol;
-        return pool;
+        const newPool = { ...pool }
+        newPool.mint = { ...pool.mint, ...data[i] }
+        return newPool;
       });
       return this.setState({ pools }, () => {
         return this.onSelect(0);
@@ -107,7 +112,7 @@ class PoolSelection extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderMint = (symbol, icon, email, verified) => {
+  renderMint = (name, icon, author, verified) => {
     const { classes } = this.props;
     return <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
       <Grid item>
@@ -133,8 +138,8 @@ class PoolSelection extends Component {
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{symbol}</Typography>
-        <Typography className={classes.owner}>Created by {email || 'Unknown'}</Typography>
+        <Typography>{name}</Typography>
+        <Typography className={classes.owner}>Created by {author || 'Unknown'}</Typography>
       </Grid>
     </Grid>
   }
@@ -144,9 +149,9 @@ class PoolSelection extends Component {
     if (!pools.length) return null;
     return <MenuList>
       {pools.map((pool, index) => {
-        const { address, email, verified, mint: { symbol, icon } } = pool;
+        const { address, author, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect(index)}>
-          {this.renderMint(symbol, icon, email, verified)}
+          {this.renderMint(name, icon, author, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -164,7 +169,7 @@ class PoolSelection extends Component {
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          value={symbol}
+          value={symbol || 'Unkown'}
           onClick={this.onOpen}
           InputProps={{
             startAdornment: <Badge
@@ -202,6 +207,7 @@ class PoolSelection extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  mint: state.mint,
   pool: state.pool,
   bucket: state.bucket,
 });
@@ -209,6 +215,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
+  getMints, getMint,
   getPoolData,
 }, dispatch);
 
