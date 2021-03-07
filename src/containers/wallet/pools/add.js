@@ -21,6 +21,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
 
 
@@ -38,11 +39,25 @@ class Add extends Component {
 
   fetchData = () => {
     const { lptAddress } = this.state;
-    const { setError, getLPTData } = this.props;
+    const { setError, getLPTData, getMints, getMint } = this.props;
     return this.setState({ loading: true }, () => {
       if (!ssjs.isAddress(lptAddress)) return this.setState({ loading: false });
-      return getLPTData(lptAddress).then(data => {
-        return this.setState({ loading: false, data });
+
+      let data = null;
+      return getLPTData(lptAddress).then(re => {
+        data = re;
+        return getMints({ address: re.pool.mint.address });
+      }).then(([re]) => {
+        const { _id } = re || {}
+        return getMint(_id).then(data => {
+          return Promise.resolve(data);
+        }).catch(er => {
+          return Promise.resolve({});
+        });
+      }).then(re => {
+        const newData = { ...data }
+        newData.pool.mint = { ...data.pool.mint, ...re }
+        return this.setState({ loading: false, data: newData });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
           return setError(er);
@@ -94,7 +109,6 @@ class Add extends Component {
         }
       }
     } = this.state;
-    const symbol = ssjs.toSymbol(mint.symbol);
     const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
     const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
     const price = utils.div(poolLPT, poolReserve);
@@ -128,7 +142,7 @@ class Add extends Component {
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label={symbol}
+          label={mint.symbol}
           variant="outlined"
           value={mint.address}
           helperText={`Total supply: ${totalSupply} - Decimals: ${mint.decimals}`}
@@ -197,12 +211,14 @@ class Add extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  mint: state.mint,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
+  getMints, getMint,
   getLPTData,
 }, dispatch);
 

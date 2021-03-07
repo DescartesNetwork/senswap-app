@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -14,6 +13,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -40,11 +40,33 @@ class ListTokenAccount extends Component {
     const {
       wallet: { accounts },
       setError,
+      getMints, getMint,
       getAccountData,
     } = this.props;
+
+    let data = null;
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
-    })).then(data => {
+    })).then(re => {
+      data = re;
+      return Promise.all(data.map(({ mint: { address } }) => {
+        return getMints({ address });
+      }));
+    }).then(re => {
+      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
+      return Promise.all(mintIds.map(({ _id }) => {
+        return getMint(_id).then(data => {
+          return Promise.resolve(data);
+        }).catch(er => {
+          return Promise.resolve({});
+        });
+      }));
+    }).then(re => {
+      data = data.map((accountData, i) => {
+        const newAccountData = { ...accountData }
+        newAccountData.mint = { ...accountData.mint, ...re[i] }
+        return newAccountData;
+      });
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -60,7 +82,6 @@ class ListTokenAccount extends Component {
       </Grid>
       {data.map(({ address, amount, state, mint }) => {
         if (!state) return null;
-        const symbol = ssjs.toSymbol(mint.symbol);
         const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** mint.decimals)));
         const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
 
@@ -68,7 +89,7 @@ class ListTokenAccount extends Component {
           <Grid container spacing={2}>
             <Grid item xs={12} md={8}>
               <TextField
-                label={symbol}
+                label={mint.symbol}
                 variant="outlined"
                 color="primary"
                 value={address}
@@ -96,12 +117,14 @@ class ListTokenAccount extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  mint: state.mint,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getAccountData,
+  getMints, getMint,
   updateWallet,
 }, dispatch);
 

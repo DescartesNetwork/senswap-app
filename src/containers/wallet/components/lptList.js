@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -24,6 +23,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
 
 
@@ -52,13 +52,35 @@ class LPTList extends Component {
   }
 
   fetchData = (callback) => {
-    const { wallet: { lpts }, poolAddress, onChange, getLPTData } = this.props;
+    const { wallet: { lpts }, poolAddress,
+      getMints, getMint,
+      onChange, getLPTData } = this.props;
     if (!lpts.length) return onChange('');
 
+    let data = null;
     return Promise.all(lpts.map(lptAddress => {
       return getLPTData(lptAddress);
-    })).then(data => {
-      if (poolAddress) data = data.filter(({ pool: { address } }) => address === poolAddress);
+    })).then(re => {
+      if (poolAddress) data = re.filter(({ pool: { address } }) => address === poolAddress);
+      else data = re;
+      return Promise.all(data.map(({ pool: { mint: { address } } }) => {
+        return getMints({ address });
+      }));
+    }).then(re => {
+      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
+      return Promise.all(mintIds.map(({ _id }) => {
+        return getMint(_id).then(data => {
+          return Promise.resolve(data);
+        }).catch(er => {
+          return Promise.resolve({});
+        });
+      }));
+    }).then(re => {
+      data = data.map((lptData, i) => {
+        const newLPTData = { ...lptData }
+        newLPTData.pool.mint = { ...lptData.pool.mint, ...re[i] }
+        return newLPTData;
+      });
       return this.setState({ data }, callback);
     }).catch(er => {
       return setError(er);
@@ -87,9 +109,8 @@ class LPTList extends Component {
     const { data } = this.state;
     let groupedMintsData = {};
     data.forEach(({ address: lptAddress, pool: { mint } }) => {
-      const symbol = ssjs.toSymbol(mint.symbol);
       const mintAddress = mint.address.substring(0, 6);
-      const key = `${symbol} - ${mintAddress}`;
+      const key = `${mint.symbol} - ${mintAddress}`;
       if (!groupedMintsData[key]) groupedMintsData[key] = [];
       groupedMintsData[key].push(lptAddress);
     });
@@ -159,11 +180,14 @@ class LPTList extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  mint: state.mint,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   openWallet,
+  getMints, getMint,
   getLPTData,
 }, dispatch);
 

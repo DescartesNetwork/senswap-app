@@ -21,7 +21,6 @@ import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
-  txId: '',
   mintAddress: '',
 }
 
@@ -48,12 +47,10 @@ class CreateTokenAccount extends Component {
     const { mintAddress } = this.state;
     if (!ssjs.isAddress(mintAddress)) return setError('The token address cannot be empty');
 
-    let txId = null;
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(secretKey => {
         return sol.newAccount(mintAddress, secretKey);
-      }).then(({ address: accountAddress, txId: refTxId }) => {
-        txId = refTxId;
+      }).then(({ address: accountAddress }) => {
         const newMints = [...user.mints];
         if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
         const newAccounts = [...accounts];
@@ -62,7 +59,7 @@ class CreateTokenAccount extends Component {
       }).then(re => {
         return syncWallet();
       }).then(re => {
-        return this.setState({ ...EMPTY, txId });
+        return this.setState({ ...EMPTY });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
