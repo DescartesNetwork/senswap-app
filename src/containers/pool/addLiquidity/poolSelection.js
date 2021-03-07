@@ -24,7 +24,6 @@ import {
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 
@@ -55,7 +54,6 @@ class PoolSelection extends Component {
       wallet: { user: { mints } },
       setError,
       getPools, getPool,
-      getMints, getMint,
       getPoolData,
     } = this.props;
     if (!mints.length) return;
@@ -72,22 +70,7 @@ class PoolSelection extends Component {
         return getPoolData(address);
       }));
     }).then(data => {
-      pools = pools.map((pool, i) => ({ ...pool, ...data[i] }));
-      return Promise.all(pools.map(({ mint: { address } }) => {
-        return getMints({ address });
-      }));
-    }).then(data => {
-      const mintIds = data.map(([mintId]) => (mintId || { _id: null }));
-      return Promise.all(mintIds.map(({ _id }) => {
-        return getMint(_id);
-      }));
-    }).then(data => {
-      pools = pools.map((pool, i) => {
-        const newPool = { ...pool }
-        newPool.mint = { ...pool.mint, ...data[i] }
-        return newPool;
-      });
-      return this.setState({ pools }, () => {
+      return this.setState({ pools: data }, () => {
         return this.onSelect(0);
       });
     }).catch(er => {
@@ -207,7 +190,6 @@ class PoolSelection extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  mint: state.mint,
   pool: state.pool,
   bucket: state.bucket,
 });
@@ -215,7 +197,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
-  getMints, getMint,
   getPoolData,
 }, dispatch);
 

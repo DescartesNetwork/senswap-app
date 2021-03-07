@@ -23,8 +23,6 @@ import {
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { getPools, getPool } from 'modules/pool.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 
@@ -54,50 +52,13 @@ class PoolSelection extends Component {
     const {
       wallet: { user: { pools } },
       setError,
-      getPools, getPool,
-      getMints, getMint,
       getPoolData,
     } = this.props;
     if (!pools || !pools.length) return;
 
-    let data = null;
     return Promise.all(pools.map(poolAddress => {
       return getPoolData(poolAddress);
-    })).then(re => {
-      data = re;
-      const condition = { '$or': data.map(({ address }) => ({ address })) }
-      return getPools(condition, 1000, 0);
-    }).then(poolIds => {
-      return Promise.all(poolIds.map(({ _id }) => {
-        return getPool(_id);
-      }));
-    }).then(re => {
-      data = data.map(poolData => {
-        const { address: refAddress } = poolData;
-        for (let each of re) {
-          const { address } = each;
-          if (address === refAddress) return { ...each, ...poolData }
-        }
-        return { ...poolData }
-      });
-      return Promise.all(data.map(({ mint: { address } }) => {
-        return getMints({ address });
-      }));
-    }).then(re => {
-      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
-      return Promise.all(mintIds.map(({ _id }) => {
-        return getMint(_id).then(data => {
-          return Promise.resolve(data);
-        }).catch(er => {
-          return Promise.resolve({});
-        });
-      }));
-    }).then(re => {
-      data = data.map((pool, i) => {
-        const newPool = { ...pool }
-        newPool.mint = { ...pool.mint, ...re[i] }
-        return newPool;
-      });
+    })).then(data => {
       return this.setState({ data }, () => {
         return this.onSelect(0);
       });
@@ -221,15 +182,11 @@ class PoolSelection extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  pool: state.pool,
-  mint: state.mint,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getPools, getPool,
-  getMints, getMint,
   getPoolData,
 }, dispatch);
 

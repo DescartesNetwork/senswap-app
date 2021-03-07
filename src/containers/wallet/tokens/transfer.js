@@ -55,11 +55,7 @@ class TokenTransfer extends Component {
   }
 
   onMax = () => {
-    const {
-      wallet: { mainAccount },
-      getAccountData,
-      setError
-    } = this.props;
+    const { wallet: { mainAccount }, getAccountData, setError } = this.props;
     return getAccountData(mainAccount).then(data => {
       const { amount, mint } = data;
       return this.setState({ amount: utils.div(amount, global.BigInt(10 ** mint.decimals)).toString() });

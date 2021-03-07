@@ -30,7 +30,6 @@ import MintAvatar from 'containers/wallet/components/mintAvatar';
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 
@@ -76,14 +75,13 @@ class MintSelection extends Component {
   fetchPools = (typeOrCondition, limit, page) => {
     return new Promise((resolve, reject) => {
       const { wallet: { user: { mints } } } = this.props;
-      const { getPools, getPool, getMints, getMint } = this.props;
-      let pools = [];
+      const { getPools, getPool, getPoolData } = this.props;
 
       const recommendedCondition = { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
       const newCondition = { '$and': mints.map(mintAddress => ({ '$or': [{ mint: { '$ne': mintAddress } }, { verified: false }] })) }
       let condition = typeOrCondition;
       if (typeOrCondition === 'recommended') {
-        if (!mints.length) return resolve(pools);
+        if (!mints.length) return resolve([]);
         condition = recommendedCondition;
       }
       if (typeOrCondition === 'new') {
@@ -96,26 +94,11 @@ class MintSelection extends Component {
           return getPool(_id);
         }));
       }).then(data => {
-        pools = data;
-        return Promise.all(pools.map(({ mint }) => {
-          return getMints({ address: mint });
+        return Promise.all(data.map(({ address }) => {
+          return getPoolData(address);
         }));
       }).then(data => {
-        const mintIds = data.map(([mintId]) => mintId || { _id: null });
-        return Promise.all(mintIds.map(({ _id }) => {
-          return getMint(_id).then(data => {
-            return Promise.resolve(data);
-          }).catch(er => {
-            return Promise.resolve({});
-          });
-        }));
-      }).then(data => {
-        pools = pools.map((pool, i) => {
-          const newPool = { ...pool }
-          newPool.mint = { address: pool.mint, ...data[i] }
-          return newPool;
-        });
-        return resolve(pools);
+        return resolve(data);
       }).catch(er => {
         return reject(er);
       });
@@ -333,7 +316,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
-  getMints, getMint,
   getPoolData,
 }, dispatch);
 

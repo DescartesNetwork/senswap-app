@@ -34,7 +34,7 @@ export const getPool = (_id, force = false) => {
       } else {
         const data = { [_id]: poolData }
         dispatch({ type: GET_POOL_OK, data });
-        return resolve(JSON.parse(JSON.stringify(poolData)));
+        return resolve(poolData);
       }
     });
   }

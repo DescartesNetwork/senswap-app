@@ -31,7 +31,7 @@ SOL.scanAccount = (mintAddress, secretKey) => {
     const spltAddress = splt.spltProgramId.toBase58();
     const splataAddress = splt.splataProgramId.toBase58();
 
-    let data = {}
+    let data = { address: '', state: 0 }
     return ssjs.deriveAssociatedAddress(walletAddress, mintAddress, spltAddress, splataAddress).then(re => {
       data.address = re;
       return splt.getAccountData(data.address);
@@ -40,7 +40,7 @@ SOL.scanAccount = (mintAddress, secretKey) => {
       return resolve(data);
     }).catch(er => {
       if (data.address) return resolve(data);
-      return reject('Cannot parse data');
+      return reject('Cannot scan account');
     });
   });
 }

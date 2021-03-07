@@ -29,7 +29,6 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
-import { getPoolData } from 'modules/bucket.reducer';
 
 const EMPTY = {
   loading: false,
@@ -350,13 +349,11 @@ class Swap extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet, unlockWallet, syncWallet,
-  getPoolData,
 }, dispatch);
 
 export default withRouter(connect(

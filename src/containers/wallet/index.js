@@ -25,7 +25,7 @@ import storage from 'helpers/storage';
 import sol from 'helpers/sol';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { unlockWallet, setWallet, updateWallet, closeWallet } from 'modules/wallet.reducer';
-import { setItem } from 'modules/bucket.reducer';
+import { getAccountData, getMintData, getPoolData, getLPTData } from 'modules/bucket.reducer';
 
 
 /**
@@ -49,7 +49,10 @@ export const configSenWallet = () => {
 class Wallet extends Component {
 
   componentDidMount() {
-    const { setError, setWallet, updateWallet, setItem } = this.props;
+    const {
+      setError, setWallet, updateWallet,
+      getAccountData, getMintData, getPoolData, getLPTData
+    } = this.props;
     const address = storage.get('address');
     const keystore = storage.get('keystore');
     if (!address || !keystore) {
@@ -59,21 +62,21 @@ class Wallet extends Component {
     }
     return setWallet(address, keystore).then(re => {
       window.senwallet.splt.watch((er, re) => {
-        if (er) return setError(er);
+        if (er) return;
+        const { type, accountId: address } = re;
         const { wallet: { user: { mints }, accounts } } = this.props;
-        const address = re.address;
-        if (mints.includes(address)) return setItem(re);
-        if (accounts.includes(address)) return setItem(re);
+        if (type === 'mint' && mints.includes(address)) return getMintData(address, true);
+        if (type === 'account' && accounts.includes(address)) return getAccountData(address, true);
       });
       window.senwallet.swap.watch((er, re) => {
-        if (er) return setError(er);
+        if (er) return;
+        const { type, accountId: address } = re;
         const { wallet: { user: { pools }, lpts } } = this.props;
-        const address = re.address;
-        if (pools.includes(address)) return setItem(re);
-        if (lpts.includes(address)) return setItem(re);
+        if (type === 'pool' && pools.includes(address)) return getPoolData(address, true);
+        if (type === 'lpt' && lpts.includes(address)) return getLPTData(address, true);
       });
       window.senwallet.lamports.watch(address, (er, re) => {
-        if (er) return setError(er);
+        if (er) return;
         return updateWallet({ lamports: re });
       });
     }).catch(er => {
@@ -91,8 +94,8 @@ class Wallet extends Component {
     const {
       wallet: { user: { address, mints, pools }, accounts, lpts },
       setError, setLoading, unsetLoading,
+      getAccountData, getLPTData,
       unlockWallet, updateWallet,
-      setItem,
     } = this.props;
     if (!ssjs.isAddress(address)) return;
     let secretKey = null;
@@ -109,8 +112,8 @@ class Wallet extends Component {
       }));
     }).then(data => {
       data = data.filter(({ state }) => state > 0);
-      return Promise.all(data.map(accountData => {
-        return setItem(accountData);
+      return Promise.all(data.map(({ address }) => {
+        return getAccountData(address);
       }));
     }).then(data => {
       const newAccounts = [...accounts];
@@ -126,14 +129,13 @@ class Wallet extends Component {
       }));
     }).then(data => {
       data = data.map(({ data }) => data).flat();
-      return Promise.all(data.map(lptData => {
-        return setItem(lptData);
+      return Promise.all(data.map(({ address }) => {
+        return getLPTData(address);
       }));
     }).then(data => {
       const newLPTs = [...lpts];
       data.forEach(({ address: lptAddress }) => {
-        if (!newLPTs.includes(lptAddress))
-          return newLPTs.push(lptAddress);
+        if (!newLPTs.includes(lptAddress)) return newLPTs.push(lptAddress);
       });
       return updateWallet({ lpts: newLPTs });
     }).then(re => {
@@ -205,7 +207,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setLoading, unsetLoading,
   unlockWallet, setWallet, updateWallet, closeWallet,
-  setItem,
+  getAccountData, getMintData, getPoolData, getLPTData,
 }, dispatch);
 
 export default withRouter(connect(

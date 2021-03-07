@@ -21,7 +21,6 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
 
 
@@ -39,25 +38,11 @@ class Add extends Component {
 
   fetchData = () => {
     const { lptAddress } = this.state;
-    const { setError, getLPTData, getMints, getMint } = this.props;
+    const { setError, getLPTData, } = this.props;
     return this.setState({ loading: true }, () => {
       if (!ssjs.isAddress(lptAddress)) return this.setState({ loading: false });
-
-      let data = null;
-      return getLPTData(lptAddress).then(re => {
-        data = re;
-        return getMints({ address: re.pool.mint.address });
-      }).then(([re]) => {
-        const { _id } = re || {}
-        return getMint(_id).then(data => {
-          return Promise.resolve(data);
-        }).catch(er => {
-          return Promise.resolve({});
-        });
-      }).then(re => {
-        const newData = { ...data }
-        newData.pool.mint = { ...data.pool.mint, ...re }
-        return this.setState({ loading: false, data: newData });
+      return getLPTData(lptAddress).then(data => {
+        return this.setState({ loading: false, data });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
           return setError(er);
@@ -211,14 +196,12 @@ class Add extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  mint: state.mint,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
-  getMints, getMint,
   getLPTData,
 }, dispatch);
 

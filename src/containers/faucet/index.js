@@ -25,7 +25,6 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet, updateWallet, openWallet, syncWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getMintData, getAccountData } from 'modules/bucket.reducer';
 
 
@@ -50,19 +49,10 @@ class Faucet extends Component {
   }
 
   fetchData = () => {
-    const { setError, getWhiteList, getMints, getMint } = this.props;
+    const { setError, getWhiteList, getMintData } = this.props;
     return getWhiteList().then(re => {
       return Promise.all(re.map(mintAddress => {
-        return getMints({ address: mintAddress });
-      }));
-    }).then(re => {
-      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
-      return Promise.all(mintIds.map(({ _id }) => {
-        return getMint(_id).then(data => {
-          return Promise.resolve(data);
-        }).catch(er => {
-          return Promise.resolve({});
-        });
+        return getMintData(mintAddress);
       }));
     }).then(data => {
       return this.setState({ data }, () => {
@@ -214,7 +204,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   unlockWallet, updateWallet, openWallet, syncWallet,
   getWhiteList, airdropLamports, airdropTokens,
-  getMints, getMint,
   getMintData, getAccountData,
 }, dispatch);
 

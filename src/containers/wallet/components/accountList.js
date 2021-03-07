@@ -23,7 +23,6 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -54,38 +53,17 @@ class AccountList extends Component {
   fetchData = (callback) => {
     const {
       wallet: { accounts },
-      getMints, getMint,
       getAccountData,
       mintAddress, onChange,
     } = this.props;
     if (!accounts || !accounts.length) return onChange('');
 
-    let data = [];
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
-    })).then(re => {
-      if (mintAddress) data = re.filter(accountData => {
+    })).then(data => {
+      if (mintAddress) data = data.filter(accountData => {
         const { mint: { address } } = accountData;
         return address === mintAddress;
-      });
-      else data = re;
-      return Promise.all(data.map(({ mint: { address } }) => {
-        return getMints({ address });
-      }))
-    }).then(re => {
-      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
-      return Promise.all(mintIds.map(({ _id }) => {
-        return getMint(_id).then(re => {
-          return Promise.resolve(re);
-        }).catch(er => {
-          return Promise.resolve({});
-        });
-      }));
-    }).then(re => {
-      data = data.map((accountData, i) => {
-        const newAccountData = { ...accountData }
-        newAccountData.mint = { ...accountData.mint, ...re[i] }
-        return newAccountData;
       });
       return this.setState({ data }, callback);
     }).catch(er => {
@@ -187,14 +165,12 @@ class AccountList extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  mint: state.mint,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   openWallet,
-  getMints, getMint,
   getAccountData,
 }, dispatch);
 

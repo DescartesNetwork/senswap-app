@@ -34,7 +34,7 @@ export const getMint = (_id, force = false) => {
       } else {
         const data = { [_id]: mintData }
         dispatch({ type: GET_MINT_OK, data });
-        return resolve(JSON.parse(JSON.stringify(mintData)));
+        return resolve(mintData);
       }
     });
   }

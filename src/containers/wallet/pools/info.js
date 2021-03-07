@@ -20,14 +20,15 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
+import Tooltip from '@material-ui/core/Tooltip';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { VisibilityRounded, CloseRounded } from '@material-ui/icons';
+import { VisibilityRounded, CloseRounded, UpdateRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
 
 function Row(props) {
@@ -61,7 +62,7 @@ function Row(props) {
   return <Fragment>
     <TableRow>
       <TableCell>
-        <IconButton size="small" color="secondary" onClick={onOpen}>
+        <IconButton size="small" onClick={onOpen}>
           <VisibilityRounded />
         </IconButton>
       </TableCell>
@@ -132,6 +133,8 @@ class Info extends Component {
 
     this.state = {
       data: [],
+      loading: false,
+      lasttime: new Date()
     }
   }
 
@@ -146,43 +149,30 @@ class Info extends Component {
     if (!isEqual(bucket, prevBucket)) return this.fetchData();
   }
 
-  fetchData = () => {
-    const {
-      wallet: { lpts },
-      setError,
-      getMints, getMint,
-      getLPTData,
-    } = this.props;
-    if (!lpts.length) return;
+  onRefresh = () => {
+    return this.fetchData(true);
+  }
 
-    let data = null;
-    return Promise.all(lpts.map(lptAddress => {
-      return getLPTData(lptAddress);
-    })).then(re => {
-      data = re;
-      return Promise.all(data.map(({ pool: { mint: { address } } }) => {
-        return getMints({ address });
-      }));
-    }).then(re => {
-      const mintIds = re.map(([mintId]) => (mintId || { _id: null }));
-      return Promise.all(mintIds.map(({ _id }) => {
-        return getMint(_id);
-      }));
-    }).then(re => {
-      data = data.map((lpt, i) => {
-        let newLPT = { ...lpt }
-        newLPT.pool.mint = { ...lpt.pool.mint, ...re[i] }
-        return newLPT;
+  fetchData = (force = false) => {
+    const { wallet: { lpts }, setError, getLPTData } = this.props;
+    const { lasttime } = this.state;
+    return this.setState({ loading: true, lasttime: force ? new Date() : lasttime }, () => {
+      if (!lpts.length) return this.setState({ loading: false });
+      return Promise.all(lpts.map(lptAddress => {
+        return getLPTData(lptAddress, force);
+      })).then(data => {
+        return this.setState({ loading: false, data });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
       });
-      return this.setState({ data });
-    }).catch(er => {
-      return setError(er);
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { data } = this.state;
+    const { data, loading, lasttime } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -190,7 +180,11 @@ class Info extends Component {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell />
+                <TableCell>
+                  <IconButton size="small" color="primary" onClick={this.onRefresh} disabled={loading}>
+                    {loading ? <CircularProgress size={21} /> : <UpdateRounded />}
+                  </IconButton>
+                </TableCell>
                 <TableCell>
                   <Typography variant="body2">LPT Account</Typography>
                 </TableCell>
@@ -216,6 +210,13 @@ class Info extends Component {
           </Table>
         </TableContainer>
       </Grid>
+      <Grid item xs={12}>
+        <Grid container spacing={2} justify="flex-end">
+          <Grid item>
+            <Typography className={classes.subtitle}>Last updated on: {utils.prettyDatetime(lasttime)}</Typography>
+          </Grid>
+        </Grid>
+      </Grid>
     </Grid>
   }
 }
@@ -229,7 +230,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
-  getMints, getMint,
   getLPTData,
 }, dispatch);
 

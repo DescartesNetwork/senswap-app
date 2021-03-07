@@ -17,7 +17,6 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { setQRCode, setMainAccount } from 'modules/wallet.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -41,23 +40,9 @@ class TokenInfo extends Component {
   }
 
   fetchData = () => {
-    const {
-      wallet: { mainAccount },
-      getMints, getMint,
-      setError, getAccountData
-    } = this.props;
+    const { wallet: { mainAccount }, setError, getAccountData } = this.props;
     if (!ssjs.isAddress(mainAccount)) return this.setState({ data: {} });
-
-    let data = null;
-    return getAccountData(mainAccount).then(re => {
-      data = re;
-      return getMints({ address: data.mint.address });
-    }).then(re => {
-      if (!re.length) return this.setState({ data });
-      const [{ _id }] = re;
-      return getMint(_id);
-    }).then(re => {
-      data.mint = { ...data.mint, ...re }
+    return getAccountData(mainAccount).then(data => {
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -109,7 +94,6 @@ class TokenInfo extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  mint: state.mint,
   wallet: state.wallet,
   bucket: state.bucket,
 });
@@ -117,7 +101,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   setQRCode, setMainAccount,
-  getMints, getMint,
   getAccountData,
 }, dispatch);
 

@@ -1,5 +1,8 @@
 import ssjs from 'senswapjs';
 
+import configs from 'configs';
+import api from 'helpers/api';
+
 /**
  * Documents
  * @default defaultData
@@ -24,12 +27,21 @@ export const getAccountData = (accountAddress, force = false) => {
         return reject(er);
       }
 
-      const { bucket: { [accountAddress]: accountData } } = getState();
+      let { bucket: { [accountAddress]: accountData } } = getState();
       if (!accountData || force) {
+        const { api: { base } } = configs;
         return window.senwallet.splt.getAccountData(accountAddress).then(re => {
-          const data = { [accountAddress]: re }
+          accountData = { ...re }
+          const condition = { address: re.mint.address }
+          return api.get(base + '/mints', { condition });
+        }).then(({ data: [re] }) => {
+          if (!re) return Promise.resolve({ data: {} });
+          return api.get(base + '/mint', { _id: re._id });
+        }).then(({ data: re }) => {
+          accountData.mint = { ...accountData.mint, ...re }
+          const data = { [accountAddress]: accountData }
           dispatch({ type: GET_ACCOUNT_DATA_OK, data });
-          return resolve(re);
+          return resolve(accountData);
         }).catch(er => {
           dispatch({ type: GET_ACCOUNT_DATA_FAIL, reason: er.toString() });
           return reject(er);
@@ -61,12 +73,21 @@ export const getMintData = (mintAddress, force = false) => {
         return reject(er);
       }
 
-      const { bucket: { [mintAddress]: mintData } } = getState();
+      let { bucket: { [mintAddress]: mintData } } = getState();
       if (!mintData || force) {
+        const { api: { base } } = configs;
         return window.senwallet.splt.getMintData(mintAddress).then(re => {
-          const data = { [mintAddress]: re }
+          mintData = { ...re }
+          const condition = { address: re.address }
+          return api.get(base + '/mints', { condition });
+        }).then(({ data: [re] }) => {
+          if (!re) return Promise.resolve({ data: {} });
+          return api.get(base + '/mint', { _id: re._id });
+        }).then(({ data: re }) => {
+          mintData = { ...mintData, ...re }
+          const data = { [mintAddress]: mintData }
           dispatch({ type: GET_MINT_DATA_OK, data });
-          return resolve(re);
+          return resolve(mintData);
         }).catch(er => {
           dispatch({ type: GET_MINT_DATA_FAIL, reason: er.toString() });
           return reject(er);
@@ -98,12 +119,28 @@ export const getPoolData = (poolAddress, force = false) => {
         return reject(er);
       }
 
-      const { bucket: { [poolAddress]: poolData } } = getState();
+      let { bucket: { [poolAddress]: poolData } } = getState();
       if (!poolData || force) {
+        const { api: { base } } = configs;
         return window.senwallet.swap.getPoolData(poolAddress).then(re => {
-          const data = { [poolAddress]: re }
+          poolData = { ...re }
+          const condition = { address: re.address }
+          return api.get(base + '/pools', { condition });
+        }).then(({ data: [re] }) => {
+          if (!re) return Promise.resolve({ data: {} });
+          return api.get(base + '/pool', { _id: re._id });
+        }).then(({ data: re }) => {
+          poolData = { ...re, ...poolData }
+          const condition = { address: poolData.mint.address }
+          return api.get(base + '/mints', { condition });
+        }).then(({ data: [re] }) => {
+          if (!re) return Promise.resolve({ data: {} });
+          return api.get(base + '/mint', { _id: re._id });
+        }).then(({ data: re }) => {
+          poolData.mint = { ...poolData.mint, ...re }
+          const data = { [poolAddress]: poolData }
           dispatch({ type: GET_POOL_DATA_OK, data });
-          return resolve(re);
+          return resolve(poolData);
         }).catch(er => {
           dispatch({ type: GET_POOL_DATA_FAIL, reason: er.toString() });
           return reject(er);
@@ -135,12 +172,28 @@ export const getLPTData = (lptAddress, force = false) => {
         return reject(er);
       }
 
-      const { bucket: { [lptAddress]: lptData } } = getState();
+      let { bucket: { [lptAddress]: lptData } } = getState();
       if (!lptData || force) {
+        const { api: { base } } = configs;
         return window.senwallet.swap.getLPTData(lptAddress).then(re => {
-          const data = { [lptAddress]: re }
+          lptData = { ...re }
+          const condition = { address: re.pool.address }
+          return api.get(base + '/pools', { condition });
+        }).then(({ data: [re] }) => {
+          if (!re) return Promise.resolve({ data: {} });
+          return api.get(base + '/pool', { _id: re._id });
+        }).then(({ data: re }) => {
+          lptData.pool = { ...re, ...lptData.pool }
+          const condition = { address: lptData.pool.mint.address }
+          return api.get(base + '/mints', { condition });
+        }).then(({ data: [re] }) => {
+          if (!re) return Promise.resolve({ data: {} });
+          return api.get(base + '/mint', { _id: re._id });
+        }).then(({ data: re }) => {
+          lptData.pool.mint = { ...lptData.pool.mint, ...re }
+          const data = { [lptAddress]: lptData }
           dispatch({ type: GET_LPT_DATA_OK, data });
-          return resolve(re);
+          return resolve(lptData);
         }).catch(er => {
           dispatch({ type: GET_LPT_DATA_FAIL, reason: er.toString() });
           return reject(er);
