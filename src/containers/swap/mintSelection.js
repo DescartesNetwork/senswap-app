@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -22,14 +21,16 @@ import Chip from '@material-ui/core/Chip';
 
 import {
   CheckCircleOutlineRounded, ExpandMoreRounded,
-  HelpOutlineRounded, SearchRounded
+  HelpOutlineRounded, SearchRounded, SentimentVeryDissatisfiedRounded
 } from '@material-ui/icons';
 
 import PoolPrice from './poolPrice';
+import MintAvatar from 'containers/wallet/components/mintAvatar';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 
@@ -75,32 +76,44 @@ class MintSelection extends Component {
   fetchPools = (typeOrCondition, limit, page) => {
     return new Promise((resolve, reject) => {
       const { wallet: { user: { mints } } } = this.props;
-      const { getPools, getPool } = this.props;
+      const { getPools, getPool, getMints, getMint } = this.props;
       let pools = [];
 
       const recommendedCondition = { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
-      const newCondition = !mints.length ? {} : { '$and': mints.map(mintAddress => ({ '$or': [{ mint: { '$ne': mintAddress } }, { verified: false }] })) }
+      const newCondition = { '$and': mints.map(mintAddress => ({ '$or': [{ mint: { '$ne': mintAddress } }, { verified: false }] })) }
       let condition = typeOrCondition;
       if (typeOrCondition === 'recommended') {
         if (!mints.length) return resolve(pools);
         condition = recommendedCondition;
       }
-      if (typeOrCondition === 'new') condition = newCondition;
+      if (typeOrCondition === 'new') {
+        if (!mints.length) condition = {}
+        else condition = newCondition;
+      }
+
       return getPools(condition, limit, page).then(poolIds => {
         return Promise.all(poolIds.map(({ _id }) => {
           return getPool(_id);
         }));
       }).then(data => {
         pools = data;
-        return Promise.all(pools.map(({ cgk }) => {
-          if (cgk) return ssjs.parseCGK(cgk);
-          return null;
+        return Promise.all(pools.map(({ mint }) => {
+          return getMints({ address: mint });
+        }));
+      }).then(data => {
+        const mintIds = data.map(([mintId]) => mintId || { _id: null });
+        return Promise.all(mintIds.map(({ _id }) => {
+          return getMint(_id).then(data => {
+            return Promise.resolve(data);
+          }).catch(er => {
+            return Promise.resolve({});
+          });
         }));
       }).then(data => {
         pools = pools.map((pool, i) => {
-          pool.icon = data[i].icon;
-          pool.symbol = data[i].symbol;
-          return pool;
+          const newPool = { ...pool }
+          newPool.mint = { address: pool.mint, ...data[i] }
+          return newPool;
         });
         return resolve(pools);
       }).catch(er => {
@@ -168,7 +181,7 @@ class MintSelection extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderMint = (symbol, icon, email, verified) => {
+  renderMint = (name, icon, author, verified) => {
     const { classes } = this.props;
     return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
       <Grid item>
@@ -192,14 +205,12 @@ class MintSelection extends Component {
             horizontal: 'left'
           }}
         >
-          <Avatar src={icon} className={classes.icon}>
-            <HelpOutlineRounded />
-          </Avatar>
+          <MintAvatar icon={icon} />
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{symbol}</Typography>
-        <Typography className={classes.subtitle}>Created by {email || 'Unknown'}</Typography>
+        <Typography>{name}</Typography>
+        <Typography className={classes.subtitle}>Created by {author || 'Unknown'}</Typography>
       </Grid>
     </Grid>
   }
@@ -210,9 +221,9 @@ class MintSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>Recommended pools</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, email, verified, symbol, icon } = pool;
+        const { address, author, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
-          {this.renderMint(symbol, icon, email, verified)}
+          {this.renderMint(name || address, icon, author, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -224,9 +235,9 @@ class MintSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>New pools</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, email, verified, symbol, icon } = pool;
+        const { address, author, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
-          {this.renderMint(symbol, icon, email, verified)}
+          {this.renderMint(name || address, icon, author, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -234,16 +245,14 @@ class MintSelection extends Component {
 
   renderSearchedPools = () => {
     const { search, searched: { pools } } = this.state;
-    if (!pools.length) {
-      if (!search) return null;
-      return <ListSubheader disableSticky>No result</ListSubheader>
-    }
+    if (!search) return null;
+    if (!pools.length) return <ListSubheader disableSticky>No result</ListSubheader>
     return <MenuList>
       <ListSubheader disableSticky>Search</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, email, verified, symbol, icon } = pool;
+        const { address, author, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
-          {this.renderMint(symbol, icon, email, verified)}
+          {this.renderMint(name || address, icon, author, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -257,18 +266,20 @@ class MintSelection extends Component {
     const pool = pools[index] || {
       verified: false,
       address: '',
-      symbol: 'Unknown',
-      icon: '',
+      mint: {
+        symbol: 'Unknown',
+        icon: '',
+      }
     }
-    const { verified, address, symbol, icon } = pool;
+    const { verified, address, mint: { symbol, icon } } = pool;
 
     return <Grid container spacing={2} alignItems="flex-end" className={classes.noWrap}>
       <Grid item className={classes.stretch}>
         <Chip
-          avatar={<Avatar src={icon}>
-            <HelpOutlineRounded />
+          avatar={<Avatar src={icon} className={classes.icon}>
+            <SentimentVeryDissatisfiedRounded />
           </Avatar>}
-          label={symbol}
+          label={symbol || address.substring(0, 4) + '...' + address.substring(address.length - 4, address.lentgh)}
           onClick={this.onOpen}
           deleteIcon={<ExpandMoreRounded />}
           onDelete={this.onOpen}
@@ -322,6 +333,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
+  getMints, getMint,
   getPoolData,
 }, dispatch);
 

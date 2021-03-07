@@ -20,7 +20,8 @@ export default theme => ({
   mintIcon: {
     width: theme.spacing(4),
     height: theme.spacing(4),
-    background: 'linear-gradient(45deg, hsla(186, 33%, 94%, 1) 0%, hsla(216, 41%, 79%, 1) 100%)',
+    background: '#ffffff',
+    color: theme.palette.text.primary,
     cursor: 'pointer',
   },
   address: {

@@ -16,7 +16,11 @@ class MintAvatar extends Component {
     const { icon, title, marginRight, onClick } = this.props;
 
     return <Tooltip title={title}>
-      <Avatar className={classes.mintIcon} src={icon} onClick={onClick} style={{ marginRight: marginRight ? 8 : 0 }}>
+      <Avatar
+        className={classes.mintIcon}
+        src={icon} onClick={onClick}
+        style={{ marginRight: marginRight ? 8 : 0 }}
+      >
         <SentimentVeryDissatisfiedRounded />
       </Avatar>
     </Tooltip>

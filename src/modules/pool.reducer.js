@@ -6,8 +6,7 @@ import api from 'helpers/api';
  * Documents
  * @default defaultData
  */
-const defaultState = {
-}
+const defaultState = {}
 
 /**
  * Get pool
@@ -16,19 +15,27 @@ export const GET_POOL = 'GET_POOL';
 export const GET_POOL_OK = 'GET_POOL_OK';
 export const GET_POOL_FAIL = 'GET_POOL_FAIL';
 
-export const getPool = (_id) => {
-  return dispatch => {
+export const getPool = (_id, force = false) => {
+  return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: GET_POOL });
 
-      const { api: { base } } = configs;
-      return api.get(base + '/pool', { _id }).then(({ data }) => {
-        dispatch({ type: GET_POOL_OK, data: {} });
-        return resolve(data);
-      }).catch(er => {
-        dispatch({ type: GET_POOL_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
+      let { pool: { [_id]: poolData } } = getState();
+      if (!poolData || force) {
+        const { api: { base } } = configs;
+        return api.get(base + '/pool', { _id }).then(({ data: poolData }) => {
+          const data = { [_id]: poolData }
+          dispatch({ type: GET_POOL_OK, data });
+          return resolve(poolData);
+        }).catch(er => {
+          dispatch({ type: GET_POOL_FAIL, reason: er.toString() });
+          return reject(er.toString());
+        });
+      } else {
+        const data = { [_id]: poolData }
+        dispatch({ type: GET_POOL_OK, data });
+        return resolve(poolData);
+      }
     });
   }
 }

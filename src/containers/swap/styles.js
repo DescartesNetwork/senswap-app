@@ -6,8 +6,8 @@ export default theme => ({
     flex: '1 1 auto',
   },
   icon: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
+    backgroundColor: '#ffffff !important',
+    color: `${theme.palette.text.primary} !important`,
   },
   tools: {
     width: `calc(100% - ${theme.spacing(2)}px)`,
