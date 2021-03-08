@@ -124,7 +124,7 @@ class NewPool extends Component {
         if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
         return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
       }).then(re => {
-        return syncWallet();
+        return syncWallet(secretKey);
       }).then(re => {
         return this.setState({ ...EMPTY, txId, poolAddress });
       }).catch(er => {

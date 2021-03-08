@@ -18,6 +18,7 @@ import { FlightTakeoffRounded, HelpOutlineRounded } from '@material-ui/icons';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
+import { unlockWallet } from 'modules/wallet.reducer';
 import { addMint } from 'modules/mint.reducer';
 
 const EMPTY = {
@@ -39,9 +40,11 @@ class RegisterMint extends Component {
 
   onSubmit = () => {
     const { data } = this.state;
-    const { addMint, setError } = this.props;
+    const { addMint, unlockWallet, setError } = this.props;
     return this.setState({ loading: true }, () => {
-      return addMint(data).then(re => {
+      return unlockWallet().then(secretKey => {
+        return addMint(data, secretKey);
+      }).then(re => {
         return this.setState({ ...EMPTY, ok: true });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -145,11 +148,13 @@ class RegisterMint extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
   mint: state.mint,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
+  unlockWallet,
   addMint,
 }, dispatch);
 

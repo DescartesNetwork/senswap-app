@@ -185,21 +185,20 @@ export const SYNC_WALLET = 'SYNC_WALLET';
 export const SYNC_WALLET_OK = 'SYNC_WALLET_OK';
 export const SYNC_WALLET_FAIL = 'SYNC_WALLET_FAIL';
 
-export const syncWallet = () => {
+export const syncWallet = (secretKey) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SYNC_WALLET });
 
       const { wallet: { user } } = getState();
-
-      if (!user) {
+      if (!user || !secretKey) {
         const er = 'Invalid data';
         dispatch({ type: SYNC_WALLET_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.put(base + '/user', { user }).then(({ data: user }) => {
+      return api.put(base + '/user', { user }, secretKey).then(({ data: user }) => {
         const data = { user }
         dispatch({ type: SYNC_WALLET_OK, data });
         return resolve(data);

@@ -9,14 +9,15 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
-import { FlightTakeoffRounded } from '@material-ui/icons';
+import { FlightTakeoffRounded, DeleteForeverRounded } from '@material-ui/icons';
 
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 import MintSelection from 'containers/wallet/components/mintSelection';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { updateMint } from 'modules/mint.reducer';
+import { unlockWallet } from 'modules/wallet.reducer';
+import { updateMint, deleteMint } from 'modules/mint.reducer';
 
 const EMPTY = {
   loading: false,
@@ -34,10 +35,28 @@ class UpdateMint extends Component {
   }
 
   onUpdate = () => {
-    const { updateMint, setError } = this.props;
+    const { updateMint, unlockWallet, setError } = this.props;
     const { data } = this.state;
     return this.setState({ loading: true }, () => {
-      return updateMint(data).then(re => {
+      return unlockWallet().then(secretKey => {
+        return updateMint(data, secretKey);
+      }).then(re => {
+        return this.setState({ ...EMPTY, ok: true });
+      }).catch(er => {
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
+      });
+    });
+  }
+
+  onDelete = () => {
+    const { deleteMint, unlockWallet, setError } = this.props;
+    const { data } = this.state;
+    return this.setState({ loading: true }, () => {
+      return unlockWallet().then(secretKey => {
+        return deleteMint(data, secretKey);
+      }).then(re => {
         return this.setState({ ...EMPTY, ok: true });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -139,6 +158,15 @@ class UpdateMint extends Component {
           </Grid>
           <Grid item>
             <Button
+              onClick={this.onDelete}
+              endIcon={<DeleteForeverRounded />}
+              disabled={loading}
+            >
+              <Typography>Delete</Typography>
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button
               variant="contained"
               color="primary"
               onClick={this.onUpdate}
@@ -161,7 +189,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateMint,
+  unlockWallet,
+  updateMint, deleteMint,
 }, dispatch);
 
 export default withRouter(connect(

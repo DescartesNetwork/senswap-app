@@ -47,8 +47,10 @@ class CreateTokenAccount extends Component {
     const { mintAddress } = this.state;
     if (!ssjs.isAddress(mintAddress)) return setError('The token address cannot be empty');
 
+    let secretKey = null;
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(secretKey => {
+      return unlockWallet().then(re => {
+        secretKey = re;
         return sol.newAccount(mintAddress, secretKey);
       }).then(({ address: accountAddress }) => {
         const newMints = [...user.mints];
@@ -57,7 +59,7 @@ class CreateTokenAccount extends Component {
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
         return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
       }).then(re => {
-        return syncWallet();
+        return syncWallet(secretKey);
       }).then(re => {
         return this.setState({ ...EMPTY });
       }).catch(er => {

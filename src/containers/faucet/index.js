@@ -93,7 +93,7 @@ class Faucet extends Component {
           if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
           return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
         }).then(re => {
-          return syncWallet();
+          return syncWallet(secretKey);
         }).then(re => {
           return resolve(accountAddress);
         }).catch(er => {
