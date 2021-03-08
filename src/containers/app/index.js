@@ -51,7 +51,7 @@ class App extends Component {
             <Route path='/pool' component={Pool} />
             <Route exact path='/faucet' component={Faucet} />
             <Route path='/issuer' component={Issuer} />
-            <Route exact path='/audit/:poolAddress?' component={Audit} />
+            <Route path='/audit' component={Audit} />
             <Route exact path='*' component={NotFound} />
           </Switch>
         </Grid>

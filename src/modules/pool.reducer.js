@@ -26,7 +26,7 @@ export const getPool = (_id, force = false) => {
         return api.get(base + '/pool', { _id }).then(({ data: poolData }) => {
           const data = { [_id]: poolData }
           dispatch({ type: GET_POOL_OK, data });
-          return resolve(JSON.parse(JSON.stringify(poolData)));
+          return resolve(poolData);
         }).catch(er => {
           dispatch({ type: GET_POOL_FAIL, reason: er.toString() });
           return reject(er.toString());
@@ -80,9 +80,59 @@ export const addPool = (pool) => {
       return api.post(base + '/pool', { pool }).then(({ data: poolData }) => {
         const data = { [poolData._id]: poolData }
         dispatch({ type: ADD_POOL_OK, data });
-        return resolve(data);
+        return resolve(poolData);
       }).catch(er => {
         dispatch({ type: ADD_POOL_FAIL, reason: er.toString() });
+        return reject(er.toString());
+      });
+    });
+  }
+}
+
+/**
+ * Update a pool
+ */
+export const UPDATE_POOL = 'UPDATE_POOL';
+export const UPDATE_POOL_OK = 'UPDATE_POOL_OK';
+export const UPDATE_POOL_FAIL = 'UPDATE_POOL_FAIL';
+
+export const updatePool = (pool, secretKey) => {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: UPDATE_POOL });
+
+      const { api: { base } } = configs;
+      return api.put(base + '/pool', { pool }, secretKey).then(({ data: poolData }) => {
+        const data = { [poolData._id]: poolData }
+        dispatch({ type: UPDATE_POOL_OK, data });
+        return resolve(poolData);
+      }).catch(er => {
+        dispatch({ type: UPDATE_POOL_FAIL, reason: er.toString() });
+        return reject(er.toString());
+      });
+    });
+  }
+}
+
+/**
+ * Delete a pool
+ */
+export const DELETE_POOL = 'DELETE_POOL';
+export const DELETE_POOL_OK = 'DELETE_POOL_OK';
+export const DELETE_POOL_FAIL = 'DELETE_POOL_FAIL';
+
+export const deletePool = (pool, secretKey) => {
+  return dispatch => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: DELETE_POOL });
+
+      const { api: { base } } = configs;
+      return api.delete(base + '/pool', { pool }, secretKey).then(({ data: poolData }) => {
+        const data = { [poolData._id]: null }
+        dispatch({ type: DELETE_POOL_OK, data });
+        return resolve(poolData);
+      }).catch(er => {
+        dispatch({ type: DELETE_POOL_FAIL, reason: er.toString() });
         return reject(er.toString());
       });
     });
@@ -105,6 +155,14 @@ export default (state = defaultState, action) => {
     case ADD_POOL_OK:
       return { ...state, ...action.data };
     case ADD_POOL_FAIL:
+      return { ...state, ...action.data };
+    case UPDATE_POOL_OK:
+      return { ...state, ...action.data };
+    case UPDATE_POOL_FAIL:
+      return { ...state, ...action.data };
+    case DELETE_POOL_OK:
+      return { ...state, ...action.data };
+    case DELETE_POOL_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

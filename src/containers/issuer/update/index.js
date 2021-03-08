@@ -184,6 +184,7 @@ class UpdateMint extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
   mint: state.mint,
 });
 
