@@ -14,8 +14,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { FlightTakeoffRounded } from '@material-ui/icons';
 
-import Drain from 'components/drain';
-
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { addPool } from 'modules/pool.reducer';
@@ -86,7 +84,7 @@ class SubmitPool extends Component {
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Drain small />
+        <Typography variant="h6">Pool form</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
