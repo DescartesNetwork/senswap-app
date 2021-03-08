@@ -77,7 +77,8 @@ export const addPool = (pool) => {
       dispatch({ type: ADD_POOL });
 
       const { api: { base } } = configs;
-      return api.post(base + '/pool', { pool }).then(({ data }) => {
+      return api.post(base + '/pool', { pool }).then(({ data: poolData }) => {
+        const data = { [poolData._id]: poolData }
         dispatch({ type: ADD_POOL_OK, data });
         return resolve(data);
       }).catch(er => {
