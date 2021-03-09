@@ -23,21 +23,18 @@ class Ban extends Component {
         <Drain small />
       </Grid>
       <Grid item xs={12}>
-        <Grid container justify="center" alignItems="center" spacing={1}>
+        <Grid container justify="center" alignItems="center" spacing={0}>
           <Grid item>
             <IconButton size="small">
               <ErrorOutlineRounded color="primary" className={classes.icon} />
             </IconButton>
           </Grid>
-          <Grid item>
+          <Grid item xs={12}>
             <Typography align="center" variant="h4">Restricted zone</Typography>
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={12}>
-        <Drain small />
-      </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={11}>
         <Typography align="center">This function is for users with permission such as <strong>admin</strong> or <strong>operator</strong> only.</Typography>
       </Grid>
       <Grid item xs={12} >
