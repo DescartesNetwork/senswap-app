@@ -16,6 +16,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { FlightTakeoffRounded, HelpOutlineRounded } from '@material-ui/icons';
 
+import Ban from 'components/ban';
+
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
@@ -83,8 +85,10 @@ class RegisterMint extends Component {
 
   render() {
     const { classes } = this.props;
+    const { wallet: { user: { role } } } = this.props;
     const { loading, data, name, cgk, ok } = this.state;
 
+    if (!['admin', 'operator'].includes(role)) return <Ban />
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h6">CoinGecko Magic</Typography>

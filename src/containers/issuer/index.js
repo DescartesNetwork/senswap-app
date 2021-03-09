@@ -8,6 +8,8 @@ import Grid from '@material-ui/core/Grid';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
+import { LockRounded } from '@material-ui/icons';
+
 import { BaseCard } from 'components/cards';
 import InitializeMint from './initialization';
 import RegisterMint from './register';
@@ -53,6 +55,7 @@ class Issuer extends Component {
                       }}
                       label="Register Token"
                       value="/issuer/register-token"
+                      icon={<LockRounded fontSize="small" />}
                     />
                     <Tab
                       classes={{
@@ -61,6 +64,7 @@ class Issuer extends Component {
                       }}
                       label="Update Token"
                       value="/issuer/update-token"
+                      icon={<LockRounded fontSize="small" />}
                     />
                   </Tabs>
                 </Grid>

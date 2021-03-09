@@ -13,6 +13,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { DeleteForeverRounded, VerifiedUserRounded } from '@material-ui/icons';
 
+import Ban from 'components/ban';
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 import PoolList from './poolList';
 
@@ -84,9 +85,11 @@ class VerifyPool extends Component {
 
   render() {
     const { classes } = this.props;
+    const { wallet: { user: { role } } } = this.props;
     const { data, loading, done } = this.state;
     const mint = data.mint || {}
 
+    if (!['admin', 'operator'].includes(role)) return <Ban />
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h6">Pool selection</Typography>

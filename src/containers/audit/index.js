@@ -8,6 +8,8 @@ import Grid from '@material-ui/core/Grid';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
+import { LockRounded } from '@material-ui/icons';
+
 import { BaseCard } from 'components/cards';
 import SubmitPool from './submit';
 import VerifyPool from './verify';
@@ -55,6 +57,7 @@ class Audit extends Component {
                       }}
                       label="Verify Pool"
                       value="/audit/verify-pool"
+                      icon={<LockRounded fontSize="small" />}
                     />
                   </Tabs>
                 </Grid>
