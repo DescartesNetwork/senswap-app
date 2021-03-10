@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
@@ -38,8 +39,7 @@ function Row(props) {
       is_initialized,
       pool: {
         address: poolAddress,
-        fee_numerator,
-        fee_denominator,
+        fee: poolFee,
         reserve: poolReserve,
         lpt: poolLPT,
         mint,
@@ -54,7 +54,7 @@ function Row(props) {
   const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
   const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
   const price = utils.div(poolLPT, poolReserve);
-  const fee = utils.div(fee_numerator, fee_denominator) * 100;
+  const fee = ssjs.undecimalize(poolFee, 9) * 100;
   const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** mint.decimals)));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);

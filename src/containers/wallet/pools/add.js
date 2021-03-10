@@ -85,8 +85,7 @@ class Add extends Component {
         lpt,
         pool: {
           address: poolAddress,
-          fee_numerator,
-          fee_denominator,
+          fee: poolFee,
           reserve: poolReserve,
           lpt: poolLPT,
           mint,
@@ -97,7 +96,7 @@ class Add extends Component {
     const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
     const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
     const price = utils.div(poolLPT, poolReserve);
-    const fee = utils.div(fee_numerator, fee_denominator) * 100;
+    const fee = ssjs.undecimalize(poolFee, 9) * 100;
     const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** mint.decimals)));
 
     return <Grid container spacing={2}>

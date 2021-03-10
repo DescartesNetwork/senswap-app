@@ -102,8 +102,8 @@ class NewPool extends Component {
         return sol.scanLPT(poolAddress, secretKey);
       }).then(({ nextLPT }) => {
         lpt = nextLPT;
-        const reserve = global.BigInt(parseFloat(amount) * 10 ** mint.decimals);
-        const value = global.BigInt(parseFloat(price) * parseFloat(amount) * 10 ** mint.decimals);
+        const reserve = ssjs.decimalize(amount, mint.decimals);
+        const value = ssjs.decimalize(parseFloat(price) * parseFloat(amount), mint.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.initializePool(
           reserve,
@@ -194,7 +194,7 @@ class NewPool extends Component {
               variant="contained"
               color="primary"
               component={RouterLink}
-              to={`/audit/${poolAddress}`}
+              to={`/audit/submit-pool/${poolAddress}`}
               startIcon={<VerifiedUserRounded />}
               fullWidth
             >
@@ -226,17 +226,17 @@ class NewPool extends Component {
           </Grid>
         </Grid>
       </Grid> : <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={loading ? <CircularProgress size={17} /> : <CheckCircleOutlineRounded />}
-            onClick={this.newPool}
-            disabled={loading || !state}
-            fullWidth
-          >
-            <Typography variant="body2">Create</Typography>
-          </Button>
-        </Grid>}
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={loading ? <CircularProgress size={17} /> : <CheckCircleOutlineRounded />}
+          onClick={this.newPool}
+          disabled={loading || !state}
+          fullWidth
+        >
+          <Typography variant="body2">Create</Typography>
+        </Button>
+      </Grid>}
     </Grid>
   }
 }

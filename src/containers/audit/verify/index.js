@@ -18,6 +18,7 @@ import MintAvatar from 'containers/wallet/components/mintAvatar';
 import PoolList from './poolList';
 
 import styles from './styles';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
 import { updatePool, deletePool } from 'modules/pool.reducer';
@@ -80,7 +81,20 @@ class VerifyPool extends Component {
   }
 
   onDelete = () => {
-
+    const { deletePool, unlockWallet, setError } = this.props;
+    const { data } = this.state;
+    return this.setState({ loading: true }, () => {
+      return unlockWallet().then(secretKey => {
+        const pool = { _id: data._id }
+        return deletePool(pool, secretKey);
+      }).then(re => {
+        return this.setState({ ...EMPTY, done: true });
+      }).catch(er => {
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
+      });
+    });
   }
 
   render() {
@@ -122,7 +136,7 @@ class VerifyPool extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={4}>
         <TextField
           variant="outlined"
           label="Author"
@@ -131,7 +145,7 @@ class VerifyPool extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={4}>
         <TextField
           variant="outlined"
           label="Decimals"
@@ -139,11 +153,11 @@ class VerifyPool extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={4}>
         <TextField
           variant="outlined"
           label="Fee (%)"
-          value={ssjs.div(data.fee_numerator, data.fee_denominator) * 100}
+          value={ssjs.undecimalize(data.fee, mint.decimals) * 100}
           fullWidth
         />
       </Grid>
@@ -151,7 +165,7 @@ class VerifyPool extends Component {
         <TextField
           variant="outlined"
           label="Reserve"
-          value={(data.reserve || '').toString()}
+          value={utils.prettyNumber(ssjs.undecimalize(data.reserve, mint.decimals))}
           fullWidth
         />
       </Grid>
@@ -159,7 +173,7 @@ class VerifyPool extends Component {
         <TextField
           variant="outlined"
           label="LPT"
-          value={(data.lpt || '').toString()}
+          value={utils.prettyNumber(ssjs.undecimalize(data.lpt, mint.decimals))}
           fullWidth
         />
       </Grid>

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -53,6 +53,8 @@ class Swap extends Component {
       askAmount: 0,
       askAddress: '',
       askData: {},
+
+      ratio: 0,
     }
 
     this.swap = window.senwallet.swap;
@@ -89,28 +91,46 @@ class Swap extends Component {
         reserve: askReserve,
         lpt: askLPT,
         mint: askMint,
-        fee_numerator: askFeeNumerator,
-        fee_denominator: askFeeDenominator,
+        fee: askFee,
       }
     } = this.state;
-    if (!bidAmount || !bidInitialized || !askInitialized) return this.setState({ askAmount: 0 });
-    const _bidReserve = utils.div(bidReserve, global.BigInt(10 ** bidMint.decimals));
-    const _newBidReserve = _bidReserve + bidAmount;
-    const _bidLPT = utils.div(bidLPT, global.BigInt(10 ** bidMint.decimals));
-    const _askReserve = utils.div(askReserve, global.BigInt(10 ** askMint.decimals));
-    const _askLPT = utils.div(askLPT, global.BigInt(10 ** askMint.decimals));
+    if (!bidAmount || !bidInitialized || !askInitialized) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
+    const newBidReserve = bidReserve + ssjs.decimalize(bidAmount, bidMint.decimals);
+    const newAskReserve = ssjs.curve(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const paidAmountWithoutFee = askReserve - newAskReserve;
+    const paidAmountWithFee = paidAmountWithoutFee * (global.BigInt(10 ** 9) - askFee) / global.BigInt(10 ** 9);
+    const askAmount = ssjs.undecimalize(paidAmountWithFee, askMint.decimals);
+    return this.setState({ slippage, ratio, askAmount });
+  }
 
-    const alpha = _bidReserve / _newBidReserve;
-    const reversedAlpha = 1 / alpha;
-    const lambda = _bidLPT / _askLPT;
-    const b = (reversedAlpha - alpha) * lambda;
-    const sqrtDelta = Math.sqrt(b ** 2 + 4);
-    const beta = (sqrtDelta - b) / 2;
-
-    const newAskReserveWithoutFee = _askReserve * beta;
-    const paidAmountWithoutFee = _askReserve - newAskReserveWithoutFee;
-    const paidAmountWithFee = paidAmountWithoutFee * utils.div(askFeeDenominator - askFeeNumerator, askFeeDenominator);
-    return this.setState({ askAmount: paidAmountWithFee });
+  estimateReversedAmount = () => {
+    const {
+      bidData: {
+        is_initialized: bidInitialized,
+        reserve: bidReserve,
+        lpt: bidLPT,
+        mint: bidMint,
+      },
+      askAmount,
+      askData: {
+        is_initialized: askInitialized,
+        reserve: askReserve,
+        lpt: askLPT,
+        mint: askMint,
+        fee: askFee,
+      }
+    } = this.state;
+    if (!askAmount || !bidInitialized || !askInitialized) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
+    const askAmountWithFee = ssjs.decimalize(askAmount, bidMint.decimals);
+    const askAmountWithoutFee = askAmountWithFee * global.BigInt(10 ** 9) / (global.BigInt(10 ** 9) - askFee);
+    const newAskReserve = askReserve - askAmountWithoutFee;
+    const newBidReserve = ssjs.reversedCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const bidAmount = ssjs.undecimalize(newBidReserve - bidReserve, askMint.decimals);
+    return this.setState({ slippage, ratio, bidAmount });
   }
 
   onBid = ({ amount, poolData, accountAddress }) => {
@@ -126,7 +146,7 @@ class Swap extends Component {
       askAmount: amount,
       askData: poolData,
       dstAddress: accountAddress,
-    }, this.estimateAmount);
+    }, this.estimateReversedAmount);
   }
 
   onAutogenDestinationAddress = (mintAddress, secretKey) => {
@@ -207,19 +227,9 @@ class Swap extends Component {
   render() {
     const { classes } = this.props;
     const {
-      bidAmount,
-      bidData: {
-        is_initialized: bidInitialized,
-        reserve: bidReserve,
-        lpt: bidLPT,
-      },
-      askAmount,
-      askData: {
-        is_initialized: askInitialized,
-        reserve: askReserve,
-        lpt: askLPT
-      },
-      txId, loading, advance, anchorEl
+      bidAmount, bidData: { is_initialized: bidInitialized },
+      askAmount, askData: { is_initialized: askInitialized },
+      slippage, ratio, txId, loading, advance, anchorEl
     } = this.state;
 
     return <Grid container justify="center" spacing={2}>
@@ -287,16 +297,21 @@ class Swap extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container spacing={2} className={classes.action}>
-                    {bidInitialized && askInitialized ? <Grid item xs={12}>
-                      <Grid container justify="space-around" spacing={2}>
-                        <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> 0.25%</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Rate</span> {utils.prettyNumber(utils.div(bidLPT, bidReserve) / utils.div(askLPT, askReserve))}</Typography>
+                    {bidInitialized && askInitialized ? <Fragment>
+                      <Grid item xs={12}>
+                        <Grid container justify="space-around" spacing={2}>
+                          <Grid item>
+                            <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> 0.25%</Typography>
+                          </Grid>
+                          <Grid item>
+                            <Typography variant="h4" align="center"><span className={classes.subtitle}>Ratio</span> {utils.prettyNumber(ratio)}</Typography>
+                          </Grid>
+                          <Grid item>
+                            <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber(slippage)}</Typography>
+                          </Grid>
                         </Grid>
                       </Grid>
-                    </Grid> : null}
+                    </Fragment> : null}
                     {txId ? <Grid item xs={12}>
                       <Grid container spacing={2}>
                         <Grid item xs={8}>
@@ -324,17 +339,17 @@ class Swap extends Component {
                         </Grid>
                       </Grid>
                     </Grid> : <Grid item xs={12}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={this.onSwap}
-                          startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
-                          disabled={loading || !bidInitialized || !askInitialized}
-                          fullWidth
-                        >
-                          <Typography variant="body2">Swap</Typography>
-                        </Button>
-                      </Grid>}
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={this.onSwap}
+                        startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
+                        disabled={loading || !bidInitialized || !askInitialized}
+                        fullWidth
+                      >
+                        <Typography variant="body2">Swap</Typography>
+                      </Button>
+                    </Grid>}
                   </Grid>
                 </Grid>
               </Grid>

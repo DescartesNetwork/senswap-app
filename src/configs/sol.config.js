@@ -9,7 +9,7 @@ const configs = {}
 configs.development = {
   node: 'https://devnet.solana.com',
   tokenFactoryAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-  swapFactoryAddress: 'Ha2iWsVt8Y749zcYnfe6do3gzrrEWppcp5GBw4QDuimS',
+  swapFactoryAddress: '37rupXEq1uh1SjyjVLFUMnNSqzVgtH4wPwsB1gzZ6qmK',
   cluster: 'devnet',
 }
 
@@ -19,7 +19,7 @@ configs.development = {
 configs.staging = {
   node: 'https://devnet.solana.com',
   tokenFactoryAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-  swapFactoryAddress: 'Ha2iWsVt8Y749zcYnfe6do3gzrrEWppcp5GBw4QDuimS',
+  swapFactoryAddress: '37rupXEq1uh1SjyjVLFUMnNSqzVgtH4wPwsB1gzZ6qmK',
   cluster: 'devnet',
 }
 
