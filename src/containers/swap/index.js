@@ -105,7 +105,7 @@ class Swap extends Component {
     return this.setState({ slippage, ratio, askAmount });
   }
 
-  estimateReversedAmount = () => {
+  estimateInverseAmount = () => {
     const {
       bidData: {
         is_initialized: bidInitialized,
@@ -126,7 +126,7 @@ class Swap extends Component {
     const askAmountWithFee = ssjs.decimalize(askAmount, bidMint.decimals);
     const askAmountWithoutFee = askAmountWithFee * global.BigInt(10 ** 9) / (global.BigInt(10 ** 9) - askFee);
     const newAskReserve = askReserve - askAmountWithoutFee;
-    const newBidReserve = ssjs.reversedCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const newBidReserve = ssjs.inverseCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const bidAmount = ssjs.undecimalize(newBidReserve - bidReserve, askMint.decimals);
@@ -146,7 +146,7 @@ class Swap extends Component {
       askAmount: amount,
       askData: poolData,
       dstAddress: accountAddress,
-    }, this.estimateReversedAmount);
+    }, this.estimateInverseAmount);
   }
 
   onAutogenDestinationAddress = (mintAddress, secretKey) => {
