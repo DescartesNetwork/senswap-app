@@ -73,7 +73,7 @@ class Payer extends Component {
             </Grid>
             <Grid item xs={12}>
               <Collapse in={visible}>
-                <Typography>Hello 😚</Typography>
+                <Typography>🎁 Hooray! An easter egg.</Typography>
               </Collapse>
             </Grid>
             <Grid item xs={12}>

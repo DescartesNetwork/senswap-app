@@ -100,7 +100,7 @@ class Tokens extends Component {
             </Grid>
             <Grid item xs={12}>
               <Collapse in={advance}>
-                <Typography>Hello 😚</Typography>
+                <Typography>🎁 Hooray! An easter egg.</Typography>
               </Collapse>
             </Grid>
             <Grid item xs={12}>
