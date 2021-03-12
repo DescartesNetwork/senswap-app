@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -84,24 +84,21 @@ class Swap extends Component {
         is_initialized: bidInitialized,
         reserve: bidReserve,
         lpt: bidLPT,
-        mint: bidMint,
       },
       askData: {
         is_initialized: askInitialized,
         reserve: askReserve,
         lpt: askLPT,
-        mint: askMint,
         fee: askFee,
       }
     } = this.state;
     if (!bidAmount || !bidInitialized || !askInitialized) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
-    const newBidReserve = bidReserve + ssjs.decimalize(bidAmount, bidMint.decimals);
+    const newBidReserve = bidReserve + bidAmount;
     const newAskReserve = ssjs.curve(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const paidAmountWithoutFee = askReserve - newAskReserve;
-    const paidAmountWithFee = paidAmountWithoutFee * (global.BigInt(10 ** 9) - askFee) / global.BigInt(10 ** 9);
-    const askAmount = ssjs.undecimalize(paidAmountWithFee, askMint.decimals);
+    const askAmount = paidAmountWithoutFee * (global.BigInt(10 ** 9) - askFee) / global.BigInt(10 ** 9);
     return this.setState({ slippage, ratio, askAmount });
   }
 
@@ -111,25 +108,22 @@ class Swap extends Component {
         is_initialized: bidInitialized,
         reserve: bidReserve,
         lpt: bidLPT,
-        mint: bidMint,
       },
       askAmount,
       askData: {
         is_initialized: askInitialized,
         reserve: askReserve,
         lpt: askLPT,
-        mint: askMint,
         fee: askFee,
       }
     } = this.state;
     if (!askAmount || !bidInitialized || !askInitialized) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
-    const askAmountWithFee = ssjs.decimalize(askAmount, bidMint.decimals);
-    const askAmountWithoutFee = askAmountWithFee * global.BigInt(10 ** 9) / (global.BigInt(10 ** 9) - askFee);
+    const askAmountWithoutFee = askAmount * global.BigInt(10 ** 9) / (global.BigInt(10 ** 9) - askFee);
     const newAskReserve = askReserve - askAmountWithoutFee;
     const newBidReserve = ssjs.inverseCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const bidAmount = ssjs.undecimalize(newBidReserve - bidReserve, askMint.decimals);
+    const bidAmount = newBidReserve - bidReserve;
     return this.setState({ slippage, ratio, bidAmount });
   }
 
@@ -202,10 +196,9 @@ class Swap extends Component {
         secretKey = re;
         return this.onAutogenDestinationAddress(askMint.address, secretKey);
       }).then(dstAddress => {
-        const amount = global.BigInt(bidAmount * 10 ** bidMint.decimals);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.swap(
-          amount,
+          bidAmount,
           bidAddress,
           bidTreasury.address,
           srcAddress,
@@ -231,8 +224,8 @@ class Swap extends Component {
       askAmount, askData: { is_initialized: askInitialized, mint: askMint, fee },
       slippage, ratio, txId, loading, advance, anchorEl
     } = this.state;
-    const { bidDecimals } = bidMint || {}
-    const { askDecimals } = askMint || {}
+    const { decimals: bidDecimals, symbol: bidSymbol } = bidMint || {}
+    const { decimals: askDecimals, symbol: askSymbol } = askMint || {}
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} lg={8}>
@@ -302,13 +295,13 @@ class Swap extends Component {
                     <Grid item xs={12}>
                       <Grid container justify="space-around" spacing={2}>
                         <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> {ssjs.undecimalize(fee, 9)}</Typography>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> {ssjs.undecimalize(fee, 9) * 100}%</Typography>
                         </Grid>
                         <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Ratio</span> {utils.prettyNumber(ratio)}</Typography>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>{askSymbol}/{bidSymbol}</span> {utils.prettyNumber(ratio)}</Typography>
                         </Grid>
                         <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber(slippage)}</Typography>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber((1 - slippage) * 100)}%</Typography>
                         </Grid>
                       </Grid>
                     </Grid>

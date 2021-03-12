@@ -16,9 +16,10 @@ import MintSelection from './mintSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
-import { getPoolData } from 'modules/bucket.reducer';
+import { getAccountData, getPoolData } from 'modules/bucket.reducer';
 
 
 class Ask extends Component {
@@ -26,9 +27,9 @@ class Ask extends Component {
     super();
 
     this.state = {
-      accountAddress: '',
       value: '0',
       amount: 0,
+      accountData: {},
       poolAddress: '',
       poolData: {},
     }
@@ -45,7 +46,8 @@ class Ask extends Component {
 
   onAmount = (e) => {
     const value = e.target.value || '';
-    const amount = parseFloat(value) || 0;
+    const { accountData: { mint: { decimals } } } = this.state;
+    const amount = ssjs.decimalize(parseFloat(value) || 0, decimals);
     return this.setState({ value, amount }, this.returnData);
   }
 
@@ -65,24 +67,36 @@ class Ask extends Component {
   }
 
   onAccountAddress = (accountAddress) => {
-    return this.setState({ accountAddress }, this.returnData);
+    const { getAccountData, setError } = this.props;
+    return getAccountData(accountAddress).then(accountData => {
+      return this.setState({ accountData }, this.returnData);
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   returnData = () => {
-    const { amount, poolData, accountAddress } = this.state;
     const { onChange } = this.props;
+    const { amount, poolData, accountData: { address: accountAddress } } = this.state;
     return onChange({ amount, poolData, accountAddress });
   }
 
   render() {
     const { classes } = this.props;
     const { advance } = this.props;
-    const { value, poolData: { address } } = this.state;
+    const {
+      value,
+      accountData: { amount: accountAmount, mint },
+      poolData: { address }
+    } = this.state;
+
+    const { decimals, symbol } = mint || {};
+    const balance = utils.prettyNumber(ssjs.undecimalize(accountAmount, decimals));
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
-          label="To"
+          label={<span>Available {symbol}: <strong>{balance}</strong></span>}
           variant="outlined"
           value={value}
           onChange={this.onAmount}
@@ -115,7 +129,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
-  getPoolData,
+  getAccountData, getPoolData,
 }, dispatch);
 
 Ask.defaultProps = {

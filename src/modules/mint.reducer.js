@@ -119,7 +119,6 @@ export const updateMint = (mint, secretKey) => {
         dispatch({ type: UPDATE_MINT_OK, data });
         return resolve(mintData);
       }).catch(er => {
-        console.log(er)
         dispatch({ type: UPDATE_MINT_FAIL, reason: er.toString() });
         return reject(er.toString());
       });

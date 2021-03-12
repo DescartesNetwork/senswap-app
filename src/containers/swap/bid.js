@@ -35,7 +35,6 @@ class Bid extends Component {
     this.state = {
       value: '0',
       amount: 0,
-      accountAddress: '',
       accountData: {},
       poolAddress: '',
       poolData: {},
@@ -92,8 +91,8 @@ class Bid extends Component {
   }
 
   returnData = () => {
-    const { amount, poolData, accountData: { address: accountAddress } } = this.state;
     const { onChange } = this.props;
+    const { amount, poolData, accountData: { address: accountAddress } } = this.state;
     return onChange({ amount, poolData, accountAddress });
   }
 
