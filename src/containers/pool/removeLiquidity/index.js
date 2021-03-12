@@ -18,7 +18,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
   HelpOutlineRounded, RemoveCircleOutlineRounded, SettingsRounded,
-  PublicRounded, ArrowForwardRounded,
+  PublicRounded, ArrowForwardRounded, OfflineBoltRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -74,6 +74,14 @@ class RemoveLiquidity extends Component {
     return this.setState({ amount });
   }
 
+  onMax = () => {
+    const { lptData: { lpt, pool } } = this.state;
+    const { mint } = pool || {}
+    const { decimals } = mint || {}
+    const amount = ssjs.undecimalize(lpt, decimals);
+    return this.setState({ amount });
+  }
+
   onClear = () => {
     return this.setState({ ...EMPTY });
   }
@@ -126,18 +134,14 @@ class RemoveLiquidity extends Component {
   }
 
   removeLiquidity = () => {
+    const { setError, unlockWallet } = this.props;
     const {
       amount, poolAddress,
-      lptData: {
-        is_initialized,
-        address: lptAddress,
-        pool: {
-          mint: { address: mintAddress, decimals },
-          treasury: { address: treasuryAddress }
-        }
-      },
+      lptData: { is_initialized, address: lptAddress, pool }
     } = this.state;
-    const { setError, unlockWallet } = this.props;
+    const { mint, treasury } = pool || {}
+    const { address: mintAddress, decimals } = mint || {}
+    const { address: treasuryAddress } = treasury || {}
     if (!is_initialized) return setError('Please wait for data loaded');
     if (!amount || !parseFloat(amount)) return setError('Invalid amount');
     let secretKey = null;
@@ -173,7 +177,8 @@ class RemoveLiquidity extends Component {
       amount, poolAddress,
       lptData: { is_initialized, lpt, pool }
     } = this.state;
-    const { mint } = is_initialized ? pool : {};
+    const { reserve, lpt: value, mint } = pool || {}
+    const { decimals } = mint || {}
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -233,20 +238,17 @@ class RemoveLiquidity extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
-          helperText={`Your LPT: ${is_initialized ? utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals))) : 0}`}
+          disabled={!is_initialized}
+          InputProps={{
+            endAdornment: <Tooltip title="Maximum amount">
+              <IconButton edge="end" onClick={this.onMax}>
+                <OfflineBoltRounded />
+              </IconButton>
+            </Tooltip>
+          }}
+          helperText={<span>Available LPT: <strong>{utils.prettyNumber(ssjs.undecimalize(lpt, decimals))}</strong></span>}
           fullWidth
         />
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="h5" align="center">
-          {is_initialized ? utils.prettyNumber(utils.div(pool.reserve, global.BigInt(10 ** mint.decimals))) : 0}
-        </Typography>
-        <Typography variant="body2" align="center">Reserve</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="h5" align="center">
-          {is_initialized ? utils.prettyNumber(utils.div(pool.lpt, global.BigInt(10 ** mint.decimals))) : 0}</Typography>
-        <Typography variant="body2" align="center">In-pool LPT</Typography>
       </Grid>
       <Grid item xs={12}>
         <Collapse in={advance}>
@@ -264,44 +266,58 @@ class RemoveLiquidity extends Component {
           </Grid>
         </Collapse>
       </Grid>
-      {txId ? <Grid item xs={12}>
-        <Grid container spacing={2}>
-          <Grid item xs={8}>
+      <Grid item xs={12}>
+        <Grid container spacing={2} className={classes.action}>
+          <Grid item xs={12}>
+            <Grid container justify="space-around" spacing={2}>
+              <Grid item>
+                <Typography variant="h4" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant="h4" align="center"><span className={classes.subtitle}>Value</span> {utils.prettyNumber(ssjs.undecimalize(value, decimals))}</Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+          {txId ? <Grid item xs={12}>
+            <Grid container spacing={2}>
+              <Grid item xs={8}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  href={utils.explorer(txId)}
+                  target="_blank"
+                  rel="noopener"
+                  startIcon={<PublicRounded />}
+                  fullWidth
+                >
+                  <Typography>Explore</Typography>
+                </Button>
+              </Grid>
+              <Grid item xs={4}>
+                <Button
+                  color="secondary"
+                  onClick={this.onClear}
+                  endIcon={<ArrowForwardRounded />}
+                  fullWidth
+                >
+                  <Typography>Done</Typography>
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid> : <Grid item xs={12}>
             <Button
               variant="contained"
-              color="secondary"
-              href={utils.explorer(txId)}
-              target="_blank"
-              rel="noopener"
-              startIcon={<PublicRounded />}
+              color="primary"
+              startIcon={loading ? <CircularProgress size={17} /> : <RemoveCircleOutlineRounded />}
+              onClick={this.removeLiquidity}
+              disabled={loading || !is_initialized}
               fullWidth
             >
-              <Typography>Explore</Typography>
+              <Typography variant="body2">Remove</Typography>
             </Button>
-          </Grid>
-          <Grid item xs={4}>
-            <Button
-              color="secondary"
-              onClick={this.onClear}
-              endIcon={<ArrowForwardRounded />}
-              fullWidth
-            >
-              <Typography>Done</Typography>
-            </Button>
-          </Grid>
+          </Grid>}
         </Grid>
-      </Grid> : <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={loading ? <CircularProgress size={17} /> : <RemoveCircleOutlineRounded />}
-            onClick={this.removeLiquidity}
-            disabled={loading || !is_initialized}
-            fullWidth
-          >
-            <Typography variant="body2">Remove</Typography>
-          </Button>
-        </Grid>}
+      </Grid>
     </Grid>
   }
 }

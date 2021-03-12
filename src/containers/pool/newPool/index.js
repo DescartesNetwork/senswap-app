@@ -15,7 +15,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
   CheckCircleOutlineRounded, HelpOutlineRounded, VerifiedUserRounded,
-  PublicRounded, ArrowForwardRounded,
+  PublicRounded, ArrowForwardRounded, OfflineBoltRounded,
 } from '@material-ui/icons';
 
 import AccountSelection from 'containers/wallet/components/accountSelection';
@@ -67,21 +67,26 @@ class NewPool extends Component {
     return this.setState({ amount });
   }
 
+  onMax = () => {
+    const { accountData: { amount: balance, mint } } = this.state;
+    const { decimals } = mint || {};
+    const amount = ssjs.undecimalize(balance, decimals);
+    return this.setState({ amount });
+  }
+
   onPrice = (e) => {
     const price = e.target.value || '';
     return this.setState({ price });
   }
 
   newPool = () => {
-    const {
-      accountData: { address, state, mint },
-      amount, price
-    } = this.state;
+    const { accountData: { address, state, mint }, amount, price } = this.state;
     const {
       wallet: { user, lpts },
       setError,
       updateWallet, unlockWallet, syncWallet
     } = this.props;
+    const { address: mintAddress, decimals } = mint || {};
     if (!state) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
     if (!price) return setError('Invalid price');
@@ -102,19 +107,10 @@ class NewPool extends Component {
         return sol.scanLPT(poolAddress, secretKey);
       }).then(({ nextLPT }) => {
         lpt = nextLPT;
-        const reserve = ssjs.decimalize(amount, mint.decimals);
-        const value = ssjs.decimalize(parseFloat(price) * parseFloat(amount), mint.decimals);
+        const reserve = ssjs.decimalize(amount, decimals);
+        const value = ssjs.decimalize(parseFloat(price) * parseFloat(amount), decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.initializePool(
-          reserve,
-          value,
-          address,
-          mint.address,
-          pool,
-          treasury,
-          lpt,
-          payer
-        );
+        return this.swap.initializePool(reserve, value, address, mintAddress, pool, treasury, lpt, payer);
       }).then(re => {
         txId = re;
         const lptAddress = lpt.publicKey.toBase58();
@@ -140,8 +136,9 @@ class NewPool extends Component {
     const {
       amount, price,
       loading, txId, poolAddress,
-      accountData: { state }
+      accountData: { amount: balance, state, mint }
     } = this.state;
+    const { decimals, symbol } = mint || {}
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -171,6 +168,14 @@ class NewPool extends Component {
           value={amount}
           onChange={this.onAmount}
           disabled={!state}
+          InputProps={{
+            endAdornment: <Tooltip title="Maximum amount">
+              <IconButton edge="end" onClick={this.onMax}>
+                <OfflineBoltRounded />
+              </IconButton>
+            </Tooltip>
+          }}
+          helperText={<span>Available {symbol}: <strong>{utils.prettyNumber(ssjs.undecimalize(balance, decimals))}</strong></span>}
           fullWidth
         />
       </Grid>

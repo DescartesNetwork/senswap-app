@@ -32,4 +32,14 @@ export default theme => ({
   badgeIcon: {
     fontSize: '1rem'
   },
+  subtitle: {
+    fontSize: 10,
+    fontWeight: theme.typography.fontWeightLight,
+    color: theme.palette.text.secondary
+  },
+  action: {
+    backgroundColor: '#F2F3F5',
+    borderRadius: theme.shape.borderRadius,
+    paddingTop: theme.spacing(2)
+  },
 });

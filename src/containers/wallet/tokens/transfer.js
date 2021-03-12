@@ -15,7 +15,7 @@ import Link from '@material-ui/core/Link';
 import Collapse from '@material-ui/core/Collapse';
 import Tooltip from '@material-ui/core/Tooltip';
 
-import { SendRounded, CloseRounded, EcoRounded } from '@material-ui/icons';
+import { SendRounded, CloseRounded, OfflineBoltRounded } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
 
@@ -143,7 +143,7 @@ class TokenTransfer extends Component {
                   color="secondary"
                   size="small"
                   onClick={this.onMax}>
-                  <EcoRounded />
+                  <OfflineBoltRounded />
                 </IconButton>
               </Tooltip>
             </Grid>

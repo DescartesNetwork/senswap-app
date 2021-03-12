@@ -37,9 +37,9 @@ class Ask extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { bucket: prevBucket, amount: prevAmount } = prevProps;
-    const { bucket, amount } = this.props;
-    if (!isEqual(amount, prevAmount)) this.setState({ value: amount.toString() });
+    const { bucket: prevBucket, value: prevValue } = prevProps;
+    const { bucket, value } = this.props;
+    if (!isEqual(value, prevValue)) this.setState({ value });
     if (!isEqual(bucket, prevBucket)) this.fetchData();
   }
 
@@ -119,13 +119,13 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 Ask.defaultProps = {
-  amount: 0,
+  value: 0,
   advance: false,
   onChange: () => { },
 }
 
 Ask.propTypes = {
-  amount: PropTypes.number,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   advance: PropTypes.bool,
   onChange: PropTypes.func,
 }

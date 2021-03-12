@@ -227,10 +227,12 @@ class Swap extends Component {
   render() {
     const { classes } = this.props;
     const {
-      bidAmount, bidData: { is_initialized: bidInitialized },
-      askAmount, askData: { is_initialized: askInitialized },
+      bidAmount, bidData: { is_initialized: bidInitialized, mint: bidMint },
+      askAmount, askData: { is_initialized: askInitialized, mint: askMint, fee },
       slippage, ratio, txId, loading, advance, anchorEl
     } = this.state;
+    const { bidDecimals } = bidMint || {}
+    const { askDecimals } = askMint || {}
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} lg={8}>
@@ -290,28 +292,26 @@ class Swap extends Component {
                   <Drain small />
                 </Grid>
                 <Grid item xs={12}>
-                  <Bid advance={advance} amount={bidAmount} onChange={this.onBid} />
+                  <Bid advance={advance} value={ssjs.undecimalize(bidAmount, bidDecimals)} onChange={this.onBid} />
                 </Grid>
                 <Grid item xs={12}>
-                  <Ask advance={advance} amount={askAmount} onChange={this.onAsk} />
+                  <Ask advance={advance} value={ssjs.undecimalize(askAmount, askDecimals)} onChange={this.onAsk} />
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container spacing={2} className={classes.action}>
-                    {bidInitialized && askInitialized ? <Fragment>
-                      <Grid item xs={12}>
-                        <Grid container justify="space-around" spacing={2}>
-                          <Grid item>
-                            <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> 0.25%</Typography>
-                          </Grid>
-                          <Grid item>
-                            <Typography variant="h4" align="center"><span className={classes.subtitle}>Ratio</span> {utils.prettyNumber(ratio)}</Typography>
-                          </Grid>
-                          <Grid item>
-                            <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber(slippage)}</Typography>
-                          </Grid>
+                    <Grid item xs={12}>
+                      <Grid container justify="space-around" spacing={2}>
+                        <Grid item>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> {ssjs.undecimalize(fee, 9)}</Typography>
+                        </Grid>
+                        <Grid item>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Ratio</span> {utils.prettyNumber(ratio)}</Typography>
+                        </Grid>
+                        <Grid item>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber(slippage)}</Typography>
                         </Grid>
                       </Grid>
-                    </Fragment> : null}
+                    </Grid>
                     {txId ? <Grid item xs={12}>
                       <Grid container spacing={2}>
                         <Grid item xs={8}>

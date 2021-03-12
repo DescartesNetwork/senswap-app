@@ -18,7 +18,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
   HelpOutlineRounded, AddCircleOutlineRounded, SettingsRounded,
-  PublicRounded, ArrowForwardRounded,
+  PublicRounded, ArrowForwardRounded, OfflineBoltRounded,
 } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
@@ -31,6 +31,7 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -47,6 +48,7 @@ class AddLiquidity extends Component {
       ...EMPTY,
       poolData: {},
       srcAddress: '',
+      srcData: {},
       lptAddress: '',
       amount: 0,
       advance: false,
@@ -73,6 +75,13 @@ class AddLiquidity extends Component {
     return this.setState({ amount });
   }
 
+  onMax = () => {
+    const { srcData: { amount: balance, mint } } = this.state;
+    const { decimals } = mint || {};
+    const amount = ssjs.undecimalize(balance, decimals);
+    return this.setState({ amount });
+  }
+
   onClear = () => {
     return this.setState({ ...EMPTY });
   }
@@ -82,7 +91,12 @@ class AddLiquidity extends Component {
   }
 
   onSourceAddress = (srcAddress) => {
-    return this.setState({ srcAddress });
+    const { getAccountData, setError } = this.props;
+    return getAccountData(srcAddress).then(srcData => {
+      return this.setState({ srcAddress, srcData });
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onLPTAddress = (lptAddress) => {
@@ -119,15 +133,11 @@ class AddLiquidity extends Component {
   addLiquidity = () => {
     const { setError, unlockWallet } = this.props;
     const {
-      amount,
-      poolData: {
-        is_initialized,
-        address: poolAddress,
-        mint: { decimals },
-        treasury: { address: treasuryAddress }
-      },
-      srcAddress,
+      amount, srcAddress,
+      poolData: { is_initialized, address: poolAddress, mint, treasury },
     } = this.state;
+    const { decimals } = mint || {}
+    const { address: treasuryAddress } = treasury || {}
     if (!is_initialized) return setError('Please wait for data loaded');
     if (!amount || !parseFloat(amount)) return setError('Invalid amount');
 
@@ -139,18 +149,10 @@ class AddLiquidity extends Component {
       }).then(lptAddress => {
         const reserve = global.BigInt(parseFloat(amount) * 10 ** decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.addLiquidity(
-          reserve,
-          poolAddress,
-          treasuryAddress,
-          lptAddress,
-          srcAddress,
-          payer
-        );
+        return this.swap.addLiquidity(reserve, poolAddress, treasuryAddress, lptAddress, srcAddress, payer);
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
@@ -161,10 +163,11 @@ class AddLiquidity extends Component {
   render() {
     const { classes } = this.props;
     const {
-      anchorEl, advance, loading, txId,
-      amount,
-      poolData: { is_initialized, address: poolAddress, lpt, reserve, mint },
+      anchorEl, advance, loading, txId, amount,
+      poolData: { is_initialized, address: poolAddress, lpt, reserve },
+      srcData: { amount: balance, mint }
     } = this.state;
+    const { symbol, decimals } = mint || {};
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -224,20 +227,16 @@ class AddLiquidity extends Component {
           variant="outlined"
           value={amount}
           onChange={this.onAmount}
+          InputProps={{
+            endAdornment: <Tooltip title="Maximum amount">
+              <IconButton edge="end" onClick={this.onMax}>
+                <OfflineBoltRounded />
+              </IconButton>
+            </Tooltip>
+          }}
+          helperText={<span>Available {symbol}: <strong>{utils.prettyNumber(ssjs.undecimalize(balance, decimals))}</strong></span>}
           fullWidth
         />
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="h5" align="center">
-          {is_initialized ? utils.prettyNumber(utils.div(reserve, global.BigInt(10 ** mint.decimals))) : 0}
-        </Typography>
-        <Typography variant="body2" align="center">Reserve</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <Typography variant="h5" align="center">
-          $ {is_initialized ? utils.prettyNumber(utils.div(lpt, reserve)) : 0}
-        </Typography>
-        <Typography variant="body2" align="center">Price</Typography>
       </Grid>
       <Grid item xs={12}>
         <Collapse in={advance}>
@@ -255,44 +254,58 @@ class AddLiquidity extends Component {
           </Grid>
         </Collapse>
       </Grid>
-      {txId ? <Grid item xs={12}>
-        <Grid container spacing={2}>
-          <Grid item xs={8}>
+      <Grid item xs={12}>
+        <Grid container spacing={2} className={classes.action}>
+          <Grid item xs={12}>
+            <Grid container justify="space-around" spacing={2}>
+              <Grid item>
+                <Typography variant="h4" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant="h4" align="center"><span className={classes.subtitle}>Price</span> {utils.prettyNumber(ssjs.div(lpt, reserve))}</Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+          {txId ? <Grid item xs={12}>
+            <Grid container spacing={2}>
+              <Grid item xs={8}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  href={utils.explorer(txId)}
+                  target="_blank"
+                  rel="noopener"
+                  startIcon={<PublicRounded />}
+                  fullWidth
+                >
+                  <Typography>Explore</Typography>
+                </Button>
+              </Grid>
+              <Grid item xs={4}>
+                <Button
+                  color="secondary"
+                  onClick={this.onClear}
+                  endIcon={<ArrowForwardRounded />}
+                  fullWidth
+                >
+                  <Typography>Done</Typography>
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid> : <Grid item xs={12}>
             <Button
               variant="contained"
-              color="secondary"
-              href={utils.explorer(txId)}
-              target="_blank"
-              rel="noopener"
-              startIcon={<PublicRounded />}
+              color="primary"
+              startIcon={loading ? <CircularProgress size={17} /> : <AddCircleOutlineRounded />}
+              onClick={this.addLiquidity}
+              disabled={loading || !is_initialized}
               fullWidth
             >
-              <Typography>Explore</Typography>
+              <Typography variant="body2">Add</Typography>
             </Button>
-          </Grid>
-          <Grid item xs={4}>
-            <Button
-              color="secondary"
-              onClick={this.onClear}
-              endIcon={<ArrowForwardRounded />}
-              fullWidth
-            >
-              <Typography>Done</Typography>
-            </Button>
-          </Grid>
+          </Grid>}
         </Grid>
-      </Grid> : <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={loading ? <CircularProgress size={17} /> : <AddCircleOutlineRounded />}
-            onClick={this.addLiquidity}
-            disabled={loading || !is_initialized}
-            fullWidth
-          >
-            <Typography variant="body2">Add</Typography>
-          </Button>
-        </Grid>}
+      </Grid>
     </Grid>
   }
 }
@@ -306,6 +319,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet, unlockWallet, syncWallet,
+  getAccountData,
 }, dispatch);
 
 export default withRouter(connect(
