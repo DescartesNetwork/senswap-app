@@ -175,7 +175,6 @@ class Swap extends Component {
       bidData: {
         is_initialized: bidInitialized,
         address: bidAddress,
-        mint: bidMint,
         treasury: bidTreasury
       },
       askData: {

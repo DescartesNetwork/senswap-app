@@ -96,7 +96,7 @@ class Ask extends Component {
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
-          label={<span>Available {symbol}: <strong>{balance}</strong></span>}
+          label={<span>To / Available {symbol}: <strong>{balance}</strong></span>}
           variant="outlined"
           value={value}
           onChange={this.onAmount}
