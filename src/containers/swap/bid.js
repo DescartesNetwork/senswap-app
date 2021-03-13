@@ -75,7 +75,11 @@ class Bid extends Component {
     const { poolAddress } = this.state;
     if (!ssjs.isAddress(poolAddress)) return this.setState({ poolData: {} }, this.returnData);
     return getPoolData(poolAddress).then(data => {
-      return this.setState({ poolData: { ...data } }, this.returnData);
+      return this.setState({ poolData: { ...data } }, () => {
+        const { accountData: { address: accountAddress } } = this.state;
+        if (!ssjs.isAddress(accountAddress)) return this.returnData();
+        return this.onAccountAddress(accountAddress);
+      });
     }).catch(er => {
       return setError(er);
     });
@@ -83,6 +87,7 @@ class Bid extends Component {
 
   onAccountAddress = (accountAddress) => {
     const { getAccountData, setError } = this.props;
+    if (!ssjs.isAddress(accountAddress)) return;
     return getAccountData(accountAddress).then(accountData => {
       return this.setState({ accountData }, this.returnData);
     }).catch(er => {

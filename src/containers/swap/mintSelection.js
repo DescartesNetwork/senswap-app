@@ -59,36 +59,62 @@ class MintSelection extends Component {
   }
 
   componentDidMount() {
-    this.fetchRecommendedPools();
-    this.fetchNewPools();
+    this.fectData();
   }
 
   componentDidUpdate(prevProps) {
     const { wallet: { user: { mints: prevMints } } } = prevProps;
     const { wallet: { user: { mints } } } = this.props;
-    if (!isEqual(mints, prevMints)) {
-      this.fetchRecommendedPools();
-      this.fetchNewPools();
-    }
+    if (!isEqual(mints, prevMints)) this.fectData();
   }
 
-  fetchPools = (typeOrCondition, limit, page) => {
+  fectData = () => {
+    const { setError } = this.props;
+    return this.fetchRecommendedPools().then(() => {
+      return this.fetchNewPools();
+    }).then(() => {
+      // Nothing
+    }).catch(er => {
+      return setError(er);
+    });
+  }
+
+  fetchRecommendedPools = () => {
     return new Promise((resolve, reject) => {
       const { wallet: { user: { mints } } } = this.props;
+      const { recommended: { limit, page } } = this.state;
+      if (!mints.length) return resolve();
+      const condition = { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
+      return this.fetchPools(condition, limit, page + 1).then(pools => {
+        return this.setState({ recommended: { pools, limit, page: page + 1 } }, () => {
+          if (pools.length) this.onSelect('recommended', 0);
+          return resolve();
+        });
+      }).catch(er => {
+        return reject(er);
+      });
+    });
+  }
+
+  fetchNewPools = () => {
+    return new Promise((resolve, reject) => {
+      const { wallet: { user: { mints } } } = this.props;
+      const { new: { limit, page } } = this.state;
+      const condition = !mints.length ? {} : { '$and': mints.map(mintAddress => ({ '$or': [{ mint: { '$ne': mintAddress } }, { verified: false }] })) }
+      return this.fetchPools(condition, limit, page + 1).then(pools => {
+        return this.setState({ new: { pools, limit, page: page + 1 } }, () => {
+          if (pools.length) this.onSelect('new', 0);
+          return resolve();
+        });
+      }).catch(er => {
+        return reject(er);
+      });
+    });
+  }
+
+  fetchPools = (condition, limit, page) => {
+    return new Promise((resolve, reject) => {
       const { getPools, getPool, getPoolData } = this.props;
-
-      const recommendedCondition = { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
-      const newCondition = { '$and': mints.map(mintAddress => ({ '$or': [{ mint: { '$ne': mintAddress } }, { verified: false }] })) }
-      let condition = typeOrCondition;
-      if (typeOrCondition === 'recommended') {
-        if (!mints.length) return resolve([]);
-        condition = recommendedCondition;
-      }
-      if (typeOrCondition === 'new') {
-        if (!mints.length) condition = {}
-        else condition = newCondition;
-      }
-
       return getPools(condition, limit, page).then(poolIds => {
         return Promise.all(poolIds.map(({ _id }) => {
           return getPool(_id);
@@ -102,32 +128,6 @@ class MintSelection extends Component {
       }).catch(er => {
         return reject(er);
       });
-    });
-  }
-
-  fetchRecommendedPools = () => {
-    const { setError } = this.props;
-    const { recommended: { limit, page } } = this.state;
-    return this.fetchPools('recommended', limit, page + 1).then(pools => {
-      if (!pools.length) return;
-      return this.setState({ recommended: { pools, limit, page: page + 1 } }, () => {
-        return this.onSelect('recommended', 0);
-      });
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  fetchNewPools = () => {
-    const { setError } = this.props;
-    const { new: { limit, page } } = this.state;
-    return this.fetchPools('new', limit, page + 1).then(pools => {
-      if (!pools.length) return;
-      return this.setState({ new: { pools, limit, page: page + 1 } }, () => {
-        return this.onSelect('new', 0);
-      });
-    }).catch(er => {
-      return setError(er);
     });
   }
 
@@ -173,8 +173,8 @@ class MintSelection extends Component {
             verified ? <Tooltip title="This pool is verified by SenSwap">
               <CheckCircleOutlineRounded className={classes.badgeIcon} />
             </Tooltip> : <Tooltip title="This pool is NOT verified by SenSwap">
-                <HelpOutlineRounded className={classes.badgeIcon} />
-              </Tooltip>
+              <HelpOutlineRounded className={classes.badgeIcon} />
+            </Tooltip>
           }
           overlap="circle"
           color={verified ? 'primary' : 'secondary'}

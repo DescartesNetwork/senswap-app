@@ -20,7 +20,7 @@ import Divider from '@material-ui/core/Divider';
 import Image from 'material-ui-image';
 
 import {
-  SwapCallsRounded, LocalGasStationRounded,
+  SwapCallsRounded, LocalGasStationRounded, DonutLargeRounded,
   WidgetsRounded, ColorizeRounded,
   AccountBalanceRounded, VerifiedUserRounded, DescriptionRounded,
 } from '@material-ui/icons';
@@ -28,6 +28,7 @@ import {
 import AccountAvatar from 'containers/wallet/components/accountAvatar';
 
 import styles from './styles';
+import configs from 'configs';
 import SEN_LOGO from 'static/images/sen-logo.svg';
 import WHITEPAPER from 'static/docs/senswap_whitepaper.pdf';
 import { openWallet } from 'modules/wallet.reducer';
@@ -79,6 +80,7 @@ class Header extends Component {
   render() {
     const { classes } = this.props;
     const { ui: { width } } = this.props;
+    const { sol: { cluster } } = configs;
     const { anchorEl } = this.state;
     const currentRoute = this.parseRoute();
 
@@ -97,6 +99,7 @@ class Header extends Component {
                   />
                 </Grid>
                 <Grid item>
+                  <Typography className={classes.subtitle}>{cluster === 'devnet' ? 'Testnet' : 'Beta'}</Typography>
                   <Typography variant="h6" noWrap>SenSwap</Typography>
                 </Grid>
               </Grid>
@@ -170,6 +173,12 @@ class Header extends Component {
                       <ListItemText primary="SenAudit" />
                     </ListItem>
                     <Divider />
+                    <ListItem button component={RouterLink} to={'/tokenomic'} target="_blank" rel="noopener" disabled>
+                      <ListItemIcon>
+                        <DonutLargeRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="Tokenomic" />
+                    </ListItem>
                     <ListItem button component={RouterLink} to={WHITEPAPER} target="_blank" rel="noopener">
                       <ListItemIcon>
                         <DescriptionRounded color="secondary" />

@@ -8,4 +8,10 @@ export default theme => ({
   logo: {
     cursor: 'pointer'
   },
+  subtitle: {
+    fontSize: 9,
+    marginBottom: -7,
+    fontWeight: theme.typography.fontWeightLight,
+    color: theme.palette.text.secondary
+  },
 });

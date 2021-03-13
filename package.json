@@ -35,6 +35,7 @@
   },
   "scripts": {
     "start": "REACT_APP_ENV=development react-scripts start",
+    "build": "REACT_APP_ENV=development react-scripts build",
     "stag": "REACT_APP_ENV=staging react-scripts build",
     "prod": "REACT_APP_ENV=production react-scripts build",
     "publish": "sh ./build-docker.sh",
