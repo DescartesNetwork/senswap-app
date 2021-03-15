@@ -184,7 +184,7 @@ class InitializeMint extends Component {
       <Grid item xs={12}>
         <MintAddress onChange={this.onMint} />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={4}>
         <TextField
           label="Decimals"
           variant="outlined"
@@ -193,7 +193,7 @@ class InitializeMint extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={8}>
         <TextField
           label="Supply"
           variant="outlined"
