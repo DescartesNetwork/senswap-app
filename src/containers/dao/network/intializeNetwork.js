@@ -12,7 +12,6 @@ import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Chip from '@material-ui/core/Chip';
-import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 
 import {
@@ -219,9 +218,9 @@ class InitializeNetwork extends Component {
           fullWidth
         />
       </Grid>
-      {mints.map((mint, index) => <Grid item key={index}>
+      {mints.map(({ address }, index) => <Grid item key={index}>
         <Token
-          data={mint}
+          address={address}
           onDelete={() => this.onDeleteMint(index)}
           readOnly={index === 0}
         />
@@ -255,7 +254,7 @@ class InitializeNetwork extends Component {
       </Grid>
       {signers.map((signer, index) => <Grid item key={index}>
         <Chip
-          color={index === 0 ? 'primary' : 'secondary'}
+          color="secondary"
           icon={index === 0 ? <PersonRounded /> : <PersonOutlineRounded />}
           label={signer}
           onDelete={index === 0 ? null : () => this.onDeleteSigner(index)}
@@ -263,11 +262,8 @@ class InitializeNetwork extends Component {
       </Grid>)}
       <Grid item xs={12}>
         <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-          {done ? <Grid item>
-            <Typography variant="body2">Done! You need to reload the application to see the changes</Typography>
-          </Grid> : null}
           <Grid item className={classes.stretch}>
-            <Divider />
+            {done ? <Typography variant="body2">Done! You need to reload the application to see the changes</Typography> : null}
           </Grid>
           <Grid item>
             <Button
@@ -281,6 +277,9 @@ class InitializeNetwork extends Component {
             </Button>
           </Grid>
         </Grid>
+      </Grid>
+      <Grid item xs={12} >
+        <Drain />
       </Grid>
     </Grid>
   }

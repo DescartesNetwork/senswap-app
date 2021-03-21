@@ -31,6 +31,7 @@ export const getNetworkData = (networkAddress, force = false) => {
       let { bucket: { [networkAddress]: networkData } } = getState();
       if (!networkData || force) {
         return window.senwallet.swap.getNetworkData(networkAddress).then(re => {
+          networkData = { ...re }
           const data = { [networkAddress]: networkData }
           dispatch({ type: GET_NETWORK_DATA_OK, data });
           return resolve(networkData);
@@ -68,6 +69,7 @@ export const getDAOData = (daoAddress, force = false) => {
       let { bucket: { [daoAddress]: daoData } } = getState();
       if (!daoData || force) {
         return window.senwallet.swap.getDAOData(daoAddress).then(re => {
+          daoData = { ...re }
           const data = { [daoAddress]: daoData }
           dispatch({ type: GET_DAO_DATA_OK, data });
           return resolve(daoData);

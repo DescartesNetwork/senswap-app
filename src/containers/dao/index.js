@@ -11,6 +11,7 @@ import { } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 import Network from './network';
+import Foundation from './foundation';
 
 import styles from './styles';
 
@@ -20,7 +21,7 @@ class DAO extends Component {
     const { classes } = this.props;
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} lg={8}>
+      <Grid item xs={11}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Typography variant="h2" align="center" className={classes.headerText}>Welcome to SenDAO</Typography>
@@ -32,6 +33,12 @@ class DAO extends Component {
           <Grid item xs={12}>
             <Network />
           </Grid>
+          <Grid item xs={12}>
+            <Drain />
+          </Grid>
+          <Grid item xs={12}>
+            <Foundation />
+          </Grid>
         </Grid>
       </Grid>
     </Grid>
@@ -40,6 +47,7 @@ class DAO extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

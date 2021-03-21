@@ -20,8 +20,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Chip from '@material-ui/core/Chip';
 
 import {
-  CheckCircleOutlineRounded, ExpandMoreRounded,
-  HelpOutlineRounded, SearchRounded, SentimentVeryDissatisfiedRounded
+  CheckCircleOutlineRounded, ExpandMoreRounded, HelpOutlineRounded,
+  SearchRounded
 } from '@material-ui/icons';
 
 import PoolPrice from './poolPrice';
@@ -260,7 +260,7 @@ class MintSelection extends Component {
       <Grid item className={classes.stretch}>
         <Chip
           avatar={<Avatar src={icon} className={classes.icon}>
-            <SentimentVeryDissatisfiedRounded />
+            <HelpOutlineRounded />
           </Avatar>}
           label={symbol || address.substring(0, 4) + '...' + address.substring(address.length - 4, address.lentgh)}
           onClick={this.onOpen}

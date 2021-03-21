@@ -12,16 +12,38 @@ import Collapse from '@material-ui/core/Collapse';
 import { LanguageRounded } from '@material-ui/icons';
 
 import InitializeNetwork from './intializeNetwork';
+import NetworkInfo from './info';
 
 import styles from './styles';
+import { getNetworks, getNetwork } from 'modules/network.reducer';
+import { setError } from 'modules/ui.reducer';
+
 
 class Network extends Component {
   constructor() {
     super();
 
     this.state = {
+      data: [],
       advance: false,
     }
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData = () => {
+    const { getNetworks, getNetwork, setError } = this.props;
+    return getNetworks({}, 1000, 0).then(data => {
+      return Promise.all(data.map(({ _id }) => {
+        return getNetwork(_id);
+      }));
+    }).then(data => {
+      return this.setState({ data });
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onAdvance = () => {
@@ -32,7 +54,7 @@ class Network extends Component {
 
   render() {
     const { classes } = this.props;
-    const { advance } = this.state;
+    const { data, advance } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -43,29 +65,31 @@ class Network extends Component {
             </IconButton>
           </Grid>
           <Grid item>
-            <Typography variant="h6">Network</Typography>
+            <Typography variant="h6" color="primary">Networks</Typography>
           </Grid>
         </Grid>
       </Grid>
       <Grid item xs={12}>
         <Collapse in={advance}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <InitializeNetwork />
-            </Grid>
-          </Grid>
+          <InitializeNetwork />
         </Collapse>
       </Grid>
+      {data.map(({ address }, index) => <Grid item xs={12} key={index}>
+        <NetworkInfo address={address} />
+      </Grid>)}
     </Grid>
   }
 }
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  wallet: state.wallet
+  network: state.network,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getNetworks, getNetwork,
+  setError,
 }, dispatch);
 
 export default withRouter(connect(
