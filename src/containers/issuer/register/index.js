@@ -122,6 +122,7 @@ class RegisterMint extends Component {
               <HelpOutlineRounded />
             </Avatar>
           }}
+          placeholder="Token Address"
           onChange={this.onAddress}
           value={data.address || ''}
           helperText={`Parsing from ${cgk}`}

@@ -7,6 +7,7 @@ import faucet from './faucet.reducer';
 import pool from './pool.reducer';
 import bucket from './bucket.reducer';
 import mint from './mint.reducer';
+import network from './network.reducer';
 
 export default (history) => combineReducers({
   router: connectRouter(history),
@@ -16,4 +17,5 @@ export default (history) => combineReducers({
   pool,
   bucket,
   mint,
+  network,
 });

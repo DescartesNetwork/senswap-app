@@ -9,6 +9,81 @@ import api from 'helpers/api';
  */
 const defaultState = {}
 
+
+/**
+ * Get network data
+ */
+export const GET_NETWORK_DATA = 'GET_NETWORK_DATA';
+export const GET_NETWORK_DATA_OK = 'GET_NETWORK_DATA_OK';
+export const GET_NETWORK_DATA_FAIL = 'GET_NETWORK_DATA_FAIL';
+
+export const getNetworkData = (networkAddress, force = false) => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: GET_NETWORK_DATA });
+
+      if (!ssjs.isAddress(networkAddress)) {
+        const er = 'Invalid network address';
+        dispatch({ type: GET_NETWORK_DATA_FAIL, reason: er });
+        return reject(er);
+      }
+
+      let { bucket: { [networkAddress]: networkData } } = getState();
+      if (!networkData || force) {
+        return window.senwallet.swap.getNetworkData(networkAddress).then(re => {
+          const data = { [networkAddress]: networkData }
+          dispatch({ type: GET_NETWORK_DATA_OK, data });
+          return resolve(networkData);
+        }).catch(er => {
+          dispatch({ type: GET_NETWORK_DATA_FAIL, reason: er.toString() });
+          return reject(er);
+        });
+      } else {
+        const data = { [networkAddress]: networkData }
+        dispatch({ type: GET_NETWORK_DATA_OK, data });
+        return resolve(networkData);
+      }
+    });
+  }
+}
+
+/**
+ * Get DAO data
+ */
+export const GET_DAO_DATA = 'GET_DAO_DATA';
+export const GET_DAO_DATA_OK = 'GET_DAO_DATA_OK';
+export const GET_DAO_DATA_FAIL = 'GET_DAO_DATA_FAIL';
+
+export const getDAOData = (daoAddress, force = false) => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: GET_DAO_DATA });
+
+      if (!ssjs.isAddress(daoAddress)) {
+        const er = 'Invalid DAO address';
+        dispatch({ type: GET_DAO_DATA_FAIL, reason: er });
+        return reject(er);
+      }
+
+      let { bucket: { [daoAddress]: daoData } } = getState();
+      if (!daoData || force) {
+        return window.senwallet.swap.getDAOData(daoAddress).then(re => {
+          const data = { [daoAddress]: daoData }
+          dispatch({ type: GET_DAO_DATA_OK, data });
+          return resolve(daoData);
+        }).catch(er => {
+          dispatch({ type: GET_DAO_DATA_FAIL, reason: er.toString() });
+          return reject(er);
+        });
+      } else {
+        const data = { [daoAddress]: daoData }
+        dispatch({ type: GET_DAO_DATA_OK, data });
+        return resolve(daoData);
+      }
+    });
+  }
+}
+
 /**
  * Get account data
  */
@@ -239,6 +314,14 @@ export const setItem = (value) => {
  */
 export default (state = defaultState, action) => {
   switch (action.type) {
+    case GET_NETWORK_DATA_OK:
+      return { ...state, ...action.data };
+    case GET_NETWORK_DATA_FAIL:
+      return { ...state, ...action.data };
+    case GET_DAO_DATA_OK:
+      return { ...state, ...action.data };
+    case GET_DAO_DATA_FAIL:
+      return { ...state, ...action.data };
     case GET_ACCOUNT_DATA_OK:
       return { ...state, ...action.data };
     case GET_ACCOUNT_DATA_FAIL:

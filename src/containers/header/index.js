@@ -21,7 +21,7 @@ import Image from 'material-ui-image';
 
 import {
   SwapCallsRounded, LocalGasStationRounded, DonutLargeRounded,
-  WidgetsRounded, ColorizeRounded,
+  WidgetsRounded, ColorizeRounded, GroupWorkRounded,
   AccountBalanceRounded, VerifiedUserRounded, DescriptionRounded,
 } from '@material-ui/icons';
 
@@ -30,7 +30,7 @@ import AccountAvatar from 'containers/wallet/components/accountAvatar';
 import styles from './styles';
 import configs from 'configs';
 import SEN_LOGO from 'static/images/sen-logo.svg';
-import WHITEPAPER from 'static/docs/senswap_whitepaper.pdf';
+import YELLOWPAPER from 'static/docs/senswap_yellowpaper.pdf';
 import { openWallet } from 'modules/wallet.reducer';
 
 
@@ -99,7 +99,7 @@ class Header extends Component {
                   />
                 </Grid>
                 <Grid item>
-                  <Typography className={classes.subtitle}>{cluster === 'devnet' ? 'Testnet' : 'Beta'}</Typography>
+                  <Typography className={classes.subtitle}>{cluster === 'devnet' ? 'Devnet' : 'Beta'}</Typography>
                   <Typography variant="h6" noWrap>SenSwap</Typography>
                 </Grid>
               </Grid>
@@ -154,11 +154,17 @@ class Header extends Component {
                   transformOrigin={{ vertical: 'top', horizontal: 'center' }}
                 >
                   <List>
+                    <ListItem button component={RouterLink} to={'/dao'}>
+                      <ListItemIcon>
+                        <GroupWorkRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="SenDAO" />
+                    </ListItem>
                     <ListItem button component={RouterLink} to={'/faucet'}>
                       <ListItemIcon>
                         <ColorizeRounded color="secondary" />
                       </ListItemIcon>
-                      <ListItemText primary="SenFaucet" />
+                      <ListItemText primary="SenFaucet" secondary="Devnet only" />
                     </ListItem>
                     <ListItem button component={RouterLink} to={'/issuer'}>
                       <ListItemIcon>
@@ -177,13 +183,13 @@ class Header extends Component {
                       <ListItemIcon>
                         <DonutLargeRounded color="secondary" />
                       </ListItemIcon>
-                      <ListItemText primary="Tokenomic" />
+                      <ListItemText primary="Whitepaper & Tokenomic" secondary="Comming soon" />
                     </ListItem>
-                    <ListItem button component={RouterLink} to={WHITEPAPER} target="_blank" rel="noopener">
+                    <ListItem button component={RouterLink} to={YELLOWPAPER} target="_blank" rel="noopener">
                       <ListItemIcon>
                         <DescriptionRounded color="secondary" />
                       </ListItemIcon>
-                      <ListItemText primary="Whitepaper" />
+                      <ListItemText primary="Yellowpaper" />
                     </ListItem>
                   </List>
                 </Popover>

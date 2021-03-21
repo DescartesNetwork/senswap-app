@@ -20,6 +20,7 @@ import Pool from 'containers/pool';
 import Faucet from 'containers/faucet';
 import Issuer from 'containers/issuer';
 import Audit from 'containers/audit';
+import DAO from 'containers/dao';
 
 // CSS
 import theme from 'static/styles/theme';
@@ -52,6 +53,7 @@ class App extends Component {
             <Route exact path='/faucet' component={Faucet} />
             <Route path='/issuer' component={Issuer} />
             <Route path='/audit' component={Audit} />
+            <Route path='/dao' component={DAO} />
             <Route exact path='*' component={NotFound} />
           </Switch>
         </Grid>
