@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
 
-import { SentimentVeryDissatisfiedRounded } from '@material-ui/icons';
+import { HelpOutlineRounded } from '@material-ui/icons';
 
 import styles from './styles';
 
@@ -21,7 +21,7 @@ class MintAvatar extends Component {
         src={icon} onClick={onClick}
         style={{ marginRight: marginRight ? 8 : 0 }}
       >
-        <SentimentVeryDissatisfiedRounded />
+        <HelpOutlineRounded />
       </Avatar>
     </Tooltip>
   }
