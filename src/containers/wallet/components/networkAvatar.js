@@ -12,7 +12,7 @@ import Avatar from '@material-ui/core/Avatar';
 import AvatarGroup from '@material-ui/lab/AvatarGroup';
 
 import styles from './styles';
-import { getMintData, getNetworkData } from 'modules/bucket.reducer';
+import { getMintData } from 'modules/bucket.reducer';
 import { setError } from 'modules/ui.reducer';
 
 
@@ -32,22 +32,19 @@ class NetworkAvatar extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { address: prevAddress } = prevProps;
-    const { address } = this.props;
-    if (!isEqual(address, prevAddress)) this.fetchData();
+    const { mintAddresses: prevMintAddresses } = prevProps;
+    const { mintAddresses } = this.props;
+    if (!isEqual(mintAddresses, prevMintAddresses)) this.fetchData();
   }
 
   fetchData = () => {
-    const { address, getNetworkData, getMintData, setError } = this.props;
-    if (!ssjs.isAddress(address)) return;
-    return getNetworkData(address).then(({ mints }) => {
-      const mintAddresses = mints.filter(mint => {
-        return ssjs.isAddress(mint) && mint !== EMPTY_ADDRESS;
-      });
-      return Promise.all(mintAddresses.map(mintAddress => {
-        return getMintData(mintAddress);
-      }));
-    }).then(data => {
+    const { mintAddresses, getMintData, setError } = this.props;
+    const addresses = mintAddresses.filter(mintAddress => {
+      return ssjs.isAddress(mintAddress) && mintAddress !== EMPTY_ADDRESS;
+    });
+    return Promise.all(addresses.map(mintAddress => {
+      return getMintData(mintAddress);
+    })).then(data => {
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -73,19 +70,19 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getMintData, getNetworkData,
+  getMintData,
   setError,
 }, dispatch);
 
 NetworkAvatar.defaultProps = {
-  address: '',
+  mintAddresses: [],
   title: '',
   marginRight: false,
   onClick: () => { },
 }
 
 NetworkAvatar.propTypes = {
-  address: PropTypes.string,
+  mintAddresses: PropTypes.array,
   title: PropTypes.string,
   marginRight: PropTypes.bool,
   onClick: PropTypes.func,

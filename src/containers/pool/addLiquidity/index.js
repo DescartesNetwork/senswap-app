@@ -134,11 +134,11 @@ class AddLiquidity extends Component {
     const { setError, unlockWallet } = this.props;
     const {
       amount, srcAddress,
-      poolData: { is_initialized, address: poolAddress, mint, treasury },
+      poolData: { state, address: poolAddress, mint, treasury },
     } = this.state;
     const { decimals } = mint || {}
     const { address: treasuryAddress } = treasury || {}
-    if (!is_initialized) return setError('Please wait for data loaded');
+    if (state !== 1) return setError('The pool is uninitilized or frozen');
     if (!amount || !parseFloat(amount)) return setError('Invalid amount');
 
     let secretKey = null;
@@ -149,7 +149,14 @@ class AddLiquidity extends Component {
       }).then(lptAddress => {
         const reserve = global.BigInt(parseFloat(amount) * 10 ** decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.addLiquidity(reserve, poolAddress, treasuryAddress, lptAddress, srcAddress, payer);
+        return this.swap.addLiquidity(
+          reserve,
+          poolAddress,
+          treasuryAddress,
+          lptAddress,
+          srcAddress,
+          payer
+        );
       }).then(txId => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
@@ -164,7 +171,7 @@ class AddLiquidity extends Component {
     const { classes } = this.props;
     const {
       anchorEl, advance, loading, txId, amount,
-      poolData: { is_initialized, address: poolAddress, lpt, reserve },
+      poolData: { state, address: poolAddress, lpt, reserve },
       srcData: { amount: balance, mint }
     } = this.state;
     const { symbol, decimals } = mint || {};
@@ -298,7 +305,7 @@ class AddLiquidity extends Component {
               color="primary"
               startIcon={loading ? <CircularProgress size={17} /> : <AddCircleOutlineRounded />}
               onClick={this.addLiquidity}
-              disabled={loading || !is_initialized}
+              disabled={loading || state !== 1}
               fullWidth
             >
               <Typography variant="body2">Add</Typography>

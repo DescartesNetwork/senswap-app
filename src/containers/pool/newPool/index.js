@@ -24,6 +24,7 @@ import {
 
 import { BaseCard } from 'components/cards';
 import AccountSelection from 'containers/wallet/components/accountSelection';
+import NetworkSelection from 'containers/wallet/components/networkSelection';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -49,6 +50,7 @@ class NewPool extends Component {
     this.state = {
       ...EMPTY,
       accountData: {},
+      networkData: {},
       advance: false,
     }
 
@@ -72,7 +74,7 @@ class NewPool extends Component {
     return this.setState({ ...EMPTY });
   }
 
-  onAddress = (accountAddress) => {
+  onAccountAddress = (accountAddress) => {
     const { getAccountData, setError } = this.props;
     if (!ssjs.isAddress(accountAddress)) return;
     return getAccountData(accountAddress).then(accountData => {
@@ -80,6 +82,10 @@ class NewPool extends Component {
     }).catch(er => {
       return setError(er);
     });
+  }
+
+  onNetworkData = (networkData) => {
+    return this.setState({ networkData });
   }
 
   onAmount = (e) => {
@@ -100,7 +106,10 @@ class NewPool extends Component {
   }
 
   newPool = () => {
-    const { accountData: { address, state, mint }, amount, price } = this.state;
+    const {
+      accountData: { address: srcAddress, state, mint },
+      networkData: { address: networkAddress },
+      amount, price } = this.state;
     const {
       wallet: { user, lpts },
       setError,
@@ -130,7 +139,17 @@ class NewPool extends Component {
         const reserve = ssjs.decimalize(amount, decimals);
         const value = ssjs.decimalize(parseFloat(price) * parseFloat(amount), decimals);
         const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.initializePool(reserve, value, address, mintAddress, pool, treasury, lpt, payer);
+        return this.swap.initializePool(
+          reserve,
+          value,
+          networkAddress,
+          pool,
+          treasury,
+          lpt,
+          srcAddress,
+          mintAddress,
+          payer
+        );
       }).then(re => {
         txId = re;
         const lptAddress = lpt.publicKey.toBase58();
@@ -158,7 +177,7 @@ class NewPool extends Component {
       loading, txId, poolAddress,
       accountData: { amount: balance, state, mint }
     } = this.state;
-    const { decimals, symbol } = mint || {}
+    const { address, decimals, symbol } = mint || {}
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -210,13 +229,13 @@ class NewPool extends Component {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <AccountSelection onChange={this.onAddress} />
+        <AccountSelection onChange={this.onAccountAddress} />
       </Grid>
       <Grid item xs={12}>
         <Collapse in={advance}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography>Network selection</Typography>
+              <NetworkSelection mintAddress={address} onChange={this.onNetworkData} />
             </Grid>
           </Grid>
         </Collapse>

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -36,13 +37,18 @@ class NetworkList extends Component {
     this.fetchData(this.onSelect);
   }
 
+  componentDidUpdate(prevProps) {
+    const { mintAddress: prevMintAddress } = prevProps;
+    const { mintAddress } = this.props;
+    if (!isEqual(mintAddress, prevMintAddress)) return this.fetchData(this.onSelect);
+  }
+
   fetchData = (callback) => {
-    const { getNetworks, getNetwork, setError } = this.props;
-    const { data } = this.state;
-    if (data.length) return;
+    const { mintAddress, getNetworks, getNetwork, setError } = this.props;
     return getNetworks({}, 1000, 0).then(networkIds => {
       return Promise.all(networkIds.map(({ _id }) => getNetwork(_id)));
     }).then(data => {
+      if (mintAddress) data = data.filter(({ mints }) => mints.includes(mintAddress));
       return this.setState({ data }, callback);
     }).catch(er => {
       return this.setState({ data: [] }, () => {
@@ -54,10 +60,9 @@ class NetworkList extends Component {
   onSelect = (networkAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-    let networkData = {}
-    if (!data || !data.length) return onChange(networkData);
+    if (!data || !data.length) return onChange({});
     return this.setState({ anchorEl: null }, () => {
-      networkData = data.filter(({ address }) => address === networkAddress)[0] || data[0];
+      const networkData = data.filter(({ address }) => address === networkAddress)[0] || data[0];
       return onChange(networkData);
     });
   }
@@ -82,11 +87,11 @@ class NetworkList extends Component {
         </IconButton>
       </Tooltip>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={this.onClose}>
-        {data.map(({ address }) => {
+        {data.map(({ address, mints }) => {
           return <MenuItem key={address} onClick={() => this.onSelect(address)}>
             <Grid container spacing={1} className={classes.noWrap} alignItems="center">
               <Grid item>
-                <NetworkAvatar address={address} />
+                <NetworkAvatar mintAddresses={mints} />
               </Grid>
               <Grid item className={classes.stretch}>
                 <Typography className={classes.address}>{address}</Typography>
@@ -114,6 +119,7 @@ NetworkList.defaultProps = {
   icon: <UnfoldMoreRounded />,
   size: 'small',
   edge: false,
+  mintAddress: '',
   onChange: () => { },
 }
 
@@ -121,6 +127,7 @@ NetworkList.propTypes = {
   icon: PropTypes.object,
   size: PropTypes.string,
   edge: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
+  mintAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
 

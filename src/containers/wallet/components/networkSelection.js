@@ -32,20 +32,21 @@ class NetworkSelection extends Component {
 
   render() {
     // const { classes } = this.props;
-    const { data: { address } } = this.state;
+    const { label, mintAddress } = this.props;
+    const { data: { address, mints } } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          label="Network"
+          label={label}
           InputProps={{
             startAdornment: <NetworkAvatar
-              address={address}
+              mintAddresses={mints}
               title={address}
               marginRight
             />,
-            endAdornment: <NetworkList onChange={this.onData} />
+            endAdornment: <NetworkList onChange={this.onData} mintAddress={mintAddress} />
           }}
           value={address || ''}
           fullWidth
@@ -63,10 +64,14 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 NetworkSelection.defaultProps = {
+  label: 'Network',
+  mintAddress: '',
   onChange: () => { },
 }
 
 NetworkSelection.propTypes = {
+  label: PropTypes.string,
+  mintAddress: PropTypes.string,
   onChange: PropTypes.func,
 }
 
