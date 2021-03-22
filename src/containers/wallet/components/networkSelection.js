@@ -8,12 +8,13 @@ import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
-import MintList from 'containers/wallet/components/mintList';
+import NetworkAvatar from 'containers/wallet/components/networkAvatar';
+import NetworkList from 'containers/wallet/components/networkList';
 
 import styles from './styles';
 
-class MintSelection extends Component {
+
+class NetworkSelection extends Component {
   constructor() {
     super();
 
@@ -31,22 +32,22 @@ class MintSelection extends Component {
 
   render() {
     // const { classes } = this.props;
-    const { data } = this.state;
+    const { data: { address } } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          label={(data.name || 'Unknown') + ' / ' + (data.symbol || 'Unknown')}
+          label="Network"
           InputProps={{
-            startAdornment: <MintAvatar
-              icon={data.icon}
-              title={data.name}
+            startAdornment: <NetworkAvatar
+              address={address}
+              title={address}
               marginRight
             />,
-            endAdornment: <MintList onChange={this.onData} />
+            endAdornment: <NetworkList onChange={this.onData} />
           }}
-          value={data.address || ''}
+          value={address || ''}
           fullWidth
         />
       </Grid>
@@ -61,15 +62,15 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
-MintSelection.defaultProps = {
+NetworkSelection.defaultProps = {
   onChange: () => { },
 }
 
-MintSelection.propTypes = {
+NetworkSelection.propTypes = {
   onChange: PropTypes.func,
 }
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(MintSelection)));
+)(withStyles(styles)(NetworkSelection)));

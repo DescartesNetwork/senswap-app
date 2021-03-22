@@ -60,8 +60,6 @@ class PoolAction extends Component {
     const { classes } = this.props;
     const { data } = this.state;
 
-    console.log(data)
-
     return <Grid container spacing={2}>
       <Grid item xs={12}>
 

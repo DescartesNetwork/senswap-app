@@ -34,9 +34,6 @@ class DAO extends Component {
             <Network />
           </Grid>
           <Grid item xs={12}>
-            <Drain />
-          </Grid>
-          <Grid item xs={12}>
             <Foundation />
           </Grid>
         </Grid>

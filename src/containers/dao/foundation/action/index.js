@@ -11,13 +11,11 @@ import Grid from '@material-ui/core/Grid';
 import PoolAction from './pool';
 
 import styles from '../styles';
-import { getNetworkData } from 'modules/bucket.reducer';
-import { setError } from 'modules/ui.reducer';
 
 
 class FoundationAction extends Component {
   render() {
-    const { classes } = this.props;
+    // const { classes } = this.props;
     const { network } = this.props;
 
     if (!ssjs.isAddress(network)) return null;
@@ -31,13 +29,14 @@ class FoundationAction extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getNetworkData,
-  setError,
 }, dispatch);
+
+FoundationAction.defaultProps = {
+  network: '',
+}
 
 FoundationAction.propTypes = {
   network: PropTypes.string.isRequired,

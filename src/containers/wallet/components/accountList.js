@@ -40,14 +40,11 @@ class AccountList extends Component {
     this.fetchData(this.onSelect);
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     const { wallet: { accounts: prevAccounts }, mintAddress: prevMintAddress } = prevProps;
     const { wallet: { accounts }, mintAddress } = this.props;
-    const { anchorEl: prevAnchorEl } = prevState;
-    const { anchorEl } = this.state;
     if (!isEqual(mintAddress, prevMintAddress)) return this.fetchData(this.onSelect);
     if (!isEqual(accounts, prevAccounts)) return this.fetchData(this.onSelect);
-    if (!isEqual(prevAnchorEl, anchorEl) && Boolean(anchorEl)) return this.fetchData();
   }
 
   fetchData = (callback) => {
@@ -122,7 +119,7 @@ class AccountList extends Component {
   }
 
   onOpen = (e) => {
-    return this.setState({ anchorEl: e.target });
+    return this.setState({ anchorEl: e.target }, this.fetchData);
   }
 
   onClose = () => {

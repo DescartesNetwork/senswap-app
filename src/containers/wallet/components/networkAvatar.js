@@ -7,8 +7,9 @@ import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
-import AvatarGroup from '@material-ui/lab/AvatarGroup';
+import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
+import AvatarGroup from '@material-ui/lab/AvatarGroup';
 
 import styles from './styles';
 import { getMintData, getNetworkData } from 'modules/bucket.reducer';
@@ -17,7 +18,7 @@ import { setError } from 'modules/ui.reducer';
 
 const EMPTY_ADDRESS = '11111111111111111111111111111111';
 
-class GroupTokens extends Component {
+class NetworkAvatar extends Component {
   constructor() {
     super();
 
@@ -31,19 +32,20 @@ class GroupTokens extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { mints: prevMints } = prevProps;
-    const { mints } = this.props;
-    if (!isEqual(mints, prevMints)) this.fetchData();
+    const { address: prevAddress } = prevProps;
+    const { address } = this.props;
+    if (!isEqual(address, prevAddress)) this.fetchData();
   }
 
   fetchData = () => {
-    const { network, getNetworkData, getMintData, setError } = this.props;
-    return getNetworkData(network).then(({ mints }) => {
-      const addresses = mints.filter(mintAddress => {
-        return ssjs.isAddress(mintAddress) && mintAddress !== EMPTY_ADDRESS;
+    const { address, getNetworkData, getMintData, setError } = this.props;
+    if (!ssjs.isAddress(address)) return;
+    return getNetworkData(address).then(({ mints }) => {
+      const mintAddresses = mints.filter(mint => {
+        return ssjs.isAddress(mint) && mint !== EMPTY_ADDRESS;
       });
-      return Promise.all(addresses.map(address => {
-        return getMintData(address);
+      return Promise.all(mintAddresses.map(mintAddress => {
+        return getMintData(mintAddress);
       }));
     }).then(data => {
       return this.setState({ data });
@@ -54,11 +56,14 @@ class GroupTokens extends Component {
 
   render() {
     const { classes } = this.props;
+    const { title, marginRight, onClick } = this.props;
     const { data } = this.state;
 
-    return <AvatarGroup max={3}>
-      {data.map(({ address, icon }) => <Avatar key={address} src={icon} alt={address} className={classes.icon} />)}
-    </AvatarGroup>
+    return <Tooltip title={title}>
+      <AvatarGroup max={3} onClick={onClick} style={{ marginRight: marginRight ? 8 : 0 }}>
+        {data.map(({ icon }, index) => <Avatar key={index} src={icon} className={classes.networkIcon} />)}
+      </AvatarGroup>
+    </Tooltip>
   }
 }
 
@@ -72,11 +77,21 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
 }, dispatch);
 
-GroupTokens.propTypes = {
-  network: PropTypes.string.isRequired,
+NetworkAvatar.defaultProps = {
+  address: '',
+  title: '',
+  marginRight: false,
+  onClick: () => { },
+}
+
+NetworkAvatar.propTypes = {
+  address: PropTypes.string,
+  title: PropTypes.string,
+  marginRight: PropTypes.bool,
+  onClick: PropTypes.func,
 }
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(GroupTokens)));
+)(withStyles(styles)(NetworkAvatar)));

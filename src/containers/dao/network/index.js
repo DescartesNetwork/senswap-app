@@ -75,7 +75,7 @@ class Network extends Component {
         </Collapse>
       </Grid>
       {data.map(({ address }, index) => <Grid item xs={12} key={index}>
-        <NetworkInfo address={address} />
+        <NetworkInfo address={address} index={index} />
       </Grid>)}
     </Grid>
   }

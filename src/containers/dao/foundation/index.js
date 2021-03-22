@@ -8,12 +8,10 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import Divider from '@material-ui/core/Divider';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
 
-import { GroupRounded, ExpandMoreRounded } from '@material-ui/icons';
+import { GroupRounded } from '@material-ui/icons';
 
-import GroupTokens from './groupTokens';
+import NetworkSelection from 'containers/wallet/components/networkSelection';
 import FoundationAction from './action';
 
 import styles from './styles';
@@ -26,50 +24,17 @@ class Foundation extends Component {
     super();
 
     this.state = {
-      address: '',
-      networkAddresses: [],
       data: {},
-      anchorEl: null,
     }
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  fetchData = () => {
-    const { getNetworks, getNetwork, setError } = this.props;
-    return getNetworks({}, 1000, 0).then(data => {
-      return Promise.all(data.map(({ _id }) => {
-        return getNetwork(_id);
-      }));
-    }).then(data => {
-      const networkAddresses = data.map(({ address }) => address);
-      return this.setState({ networkAddresses }, () => {
-        return this.onSelect(0);
-      });
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  onOpen = (e) => {
-    return this.setState({ anchorEl: e.target });
-  }
-
-  onClose = () => {
-    return this.setState({ anchorEl: null });
-  }
-
-  onSelect = (index) => {
-    const { networkAddresses } = this.state;
-    if (index >= networkAddresses.length) return;
-    return this.setState({ address: networkAddresses[index] }, this.onClose);
+  onData = (data) => {
+    return this.setState({ data });
   }
 
   render() {
     const { classes } = this.props;
-    const { anchorEl, networkAddresses, address } = this.state;
+    const { data: { address } } = this.state;
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
@@ -85,39 +50,7 @@ class Foundation extends Component {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Divider />
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container spacing={2} className={classes.noWrap} alignItems="center">
-          <Grid item>
-            <IconButton size="small" color="secondary" onClick={this.onOpen}>
-              <ExpandMoreRounded />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={this.onClose}
-            >
-              {networkAddresses.map((networkAddress, index) => <MenuItem key={index} onClick={() => this.onSelect(index)}>
-                <Grid container spacing={1} className={classes.noWrap} alignItems="center">
-                  <Grid item>
-                    <GroupTokens network={networkAddress} />
-                  </Grid>
-                  <Grid item>
-                    <Typography className={classes.subtitle}>{networkAddress}</Typography>
-                  </Grid>
-                </Grid>
-              </MenuItem>)}
-            </Menu>
-          </Grid>
-          <Grid item className={classes.stretch}>
-            <Typography variant="body2" align="right">Network Address</Typography>
-            <Typography className={classes.subtitle} align="right">{address}</Typography>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={12}>
-        <Divider />
+        <NetworkSelection onChange={this.onData} />
       </Grid>
       <Grid item xs={12}>
         <FoundationAction network={address} />

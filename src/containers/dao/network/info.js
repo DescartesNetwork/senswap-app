@@ -14,6 +14,7 @@ import Divider from '@material-ui/core/Divider';
 
 import { PersonOutlineRounded } from '@material-ui/icons';
 
+import Drain from 'components/drain'
 import Token from './token';
 
 import styles from './styles';
@@ -46,7 +47,6 @@ class NetworkInfo extends Component {
     const { address, getNetworkData, setError } = this.props;
     if (!ssjs.isAddress(address)) return;
     return getNetworkData(address).then(data => {
-
       return this.setState({ data });
     }).catch(er => {
       return setError(er);
@@ -55,24 +55,30 @@ class NetworkInfo extends Component {
 
   render() {
     const { classes } = this.props;
+    const { index } = this.props;
     const { data } = this.state;
     const mints = data.mints || [];
     const dao = data.dao || {};
     const signers = dao.signers || [];
+    const i = index + 1;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Divider />
-      </Grid>
-      <Grid item xs={12}>
-        <Typography variant="body2" align="right">Network Address</Typography>
-        <Typography className={classes.subtitle} align="right">{data.address}</Typography>
+        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+          <Grid item className={classes.stretch}>
+            <Typography variant="body2" align="right">Network Address</Typography>
+            <Typography className={classes.subtitle} align="right">{data.address}</Typography>
+          </Grid>
+          {i ? <Grid item>
+            <Typography variant="h3">#{i}</Typography>
+          </Grid> : null}
+        </Grid>
       </Grid>
       <Grid item xs={12}>
         <Divider />
       </Grid>
       <Grid item xs={12} >
-        <Typography>Signers list</Typography>
+        <Typography variant="body2">Signers list</Typography>
       </Grid>
       {signers.map((signer, index) => {
         if (signer === EMPTY_ADDRESS) return null;
@@ -81,11 +87,14 @@ class NetworkInfo extends Component {
         </Grid>
       })}
       <Grid item xs={12} >
-        <Typography>Tokens list</Typography>
+        <Typography variant="body2">Tokens list</Typography>
       </Grid>
       {mints.map((address, index) => <Grid item key={index}>
         <Token address={address} readOnly />
       </Grid>)}
+      <Grid item xs={12}>
+        <Drain />
+      </Grid>
     </Grid>
   }
 }
@@ -100,8 +109,13 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   getNetworkData,
 }, dispatch);
 
+NetworkInfo.defaultProps = {
+  index: -1
+}
+
 NetworkInfo.propTypes = {
   address: PropTypes.string.isRequired,
+  index: PropTypes.number,
 }
 
 export default withRouter(connect(

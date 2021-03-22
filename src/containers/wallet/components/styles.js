@@ -24,6 +24,13 @@ export default theme => ({
     color: theme.palette.text.primary,
     cursor: 'pointer',
   },
+  networkIcon: {
+    width: theme.spacing(2),
+    height: theme.spacing(2),
+    background: '#ffffff',
+    color: theme.palette.text.primary,
+    cursor: 'pointer',
+  },
   address: {
     fontSize: 10
   },
