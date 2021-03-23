@@ -11,13 +11,9 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import Chip from '@material-ui/core/Chip';
 import Typography from '@material-ui/core/Typography';
 
-import {
-  AddRounded, FlightTakeoffRounded, PersonRounded,
-  PersonOutlineRounded
-} from '@material-ui/icons';
+import { AddRounded, FlightTakeoffRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 import MintAvatar from 'containers/wallet/components/mintAvatar';
@@ -41,8 +37,6 @@ class InitializeNetwork extends Component {
       mint: '',
       data: {},
       mints: [],
-      signer: '',
-      signers: [],
     }
 
     this.swap = window.senwallet.swap;
@@ -60,12 +54,11 @@ class InitializeNetwork extends Component {
 
   fetchData = () => {
     const { sol: { senAddress } } = configs;
-    const { wallet: { user: { address } }, getMintData } = this.props;
+    const { getMintData } = this.props;
     return this.setState({ loading: true }, () => {
       return getMintData(senAddress).then(data => {
         const mints = [data];
-        const signers = [address];
-        return this.setState({ loading: false, mints, signers });
+        return this.setState({ loading: false, mints });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
           return setError(er);
@@ -114,40 +107,13 @@ class InitializeNetwork extends Component {
     return this.setState({ mints: newMints });
   }
 
-  onSigner = (e) => {
-    const signer = e.target.value || '';
-    return this.setState({ signer }, this.onData);
-  }
-
-  onAddSigner = () => {
-    const { signer, signers } = this.state;
-    let existing = false;
-    signers.forEach(address => {
-      if (address === signer) return existing = true;
-    });
-    if (existing) return this.setState({ signer: '' });
-    const newSigners = [...signers];
-    newSigners.push(signer);
-    return this.setState({ signer: '', signers: newSigners });
-  }
-
-  onDeleteSigner = (index) => {
-    const { signers } = this.state;
-    const newSigners = [...signers];
-    newSigners.splice(index, 1);
-    return this.setState({ signers: newSigners });
-  }
-
   newNetwork = () => {
     const { addNetwork, unlockWallet, setError } = this.props;
-    const { mints, signers } = this.state;
+    const { mints } = this.state;
     const mintAddresses = mints.map(mint => mint.address);
-    const signerAddresses = signers.map(signer => signer);
 
     const network = ssjs.createAccount();
-    const dao = ssjs.createAccount();
     const primaryAddress = mintAddresses.shift();
-    signerAddresses.shift();
     let vault = null;
     let secretKey = null;
 
@@ -162,8 +128,6 @@ class InitializeNetwork extends Component {
           network,
           primaryAddress,
           vault,
-          dao,
-          signerAddresses,
           mintAddresses,
           payer
         );
@@ -182,7 +146,7 @@ class InitializeNetwork extends Component {
     const { classes } = this.props;
     const {
       mint, data: { name, icon, symbol }, mints,
-      signer, signers, done, loading
+      done, loading
     } = this.state;
 
     return <Grid container spacing={2}>
@@ -228,38 +192,6 @@ class InitializeNetwork extends Component {
       <Grid item xs={12} >
         <Drain small />
       </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label={'Member Address of DAO'}
-          variant="outlined"
-          color="secondary"
-          value={signer}
-          onChange={this.onSigner}
-          InputProps={{
-            endAdornment: <IconButton
-              edge="end"
-              color="secondary"
-              onClick={this.onAddSigner}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={17} /> : <AddRounded />}
-            </IconButton>
-          }}
-          onKeyPress={e => {
-            if (e.key === 'Enter') return this.onAddSigner();
-          }}
-          helperText="You can add maximum 11 members including you to a network"
-          fullWidth
-        />
-      </Grid>
-      {signers.map((signer, index) => <Grid item key={index}>
-        <Chip
-          color="secondary"
-          icon={index === 0 ? <PersonRounded /> : <PersonOutlineRounded />}
-          label={signer}
-          onDelete={index === 0 ? null : () => this.onDeleteSigner(index)}
-        />
-      </Grid>)}
       <Grid item xs={12}>
         <Grid container spacing={2} className={classes.noWrap} alignItems="center">
           <Grid item className={classes.stretch}>

@@ -9,10 +9,7 @@ import ssjs from 'senswapjs';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import Chip from '@material-ui/core/Chip';
 import Divider from '@material-ui/core/Divider';
-
-import { PersonOutlineRounded } from '@material-ui/icons';
 
 import Drain from 'components/drain'
 import Token from './token';
@@ -21,8 +18,6 @@ import styles from './styles';
 import { getNetworkData } from 'modules/bucket.reducer';
 import { setError } from 'modules/ui.reducer';
 
-
-const EMPTY_ADDRESS = '11111111111111111111111111111111';
 
 class NetworkInfo extends Component {
   constructor() {
@@ -58,8 +53,6 @@ class NetworkInfo extends Component {
     const { index } = this.props;
     const { data } = this.state;
     const mints = data.mints || [];
-    const dao = data.dao || {};
-    const signers = dao.signers || [];
     const i = index + 1;
 
     return <Grid container spacing={2}>
@@ -76,18 +69,6 @@ class NetworkInfo extends Component {
       </Grid>
       <Grid item xs={12}>
         <Divider />
-      </Grid>
-      <Grid item xs={12} >
-        <Typography variant="body2">Signers list</Typography>
-      </Grid>
-      {signers.map((signer, index) => {
-        if (signer === EMPTY_ADDRESS) return null;
-        return <Grid item key={index}>
-          <Chip color="secondary" icon={<PersonOutlineRounded />} label={signer} />
-        </Grid>
-      })}
-      <Grid item xs={12} >
-        <Typography variant="body2">Tokens list</Typography>
       </Grid>
       {mints.map((address, index) => <Grid item key={index}>
         <Token address={address} readOnly />
