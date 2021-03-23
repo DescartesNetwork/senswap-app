@@ -1,21 +1,24 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
+import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 
-import Drain from 'components/drain'
+import { EcoRounded, MonetizationOnRounded, LocalGasStation } from '@material-ui/icons';
+
+import Drain from 'components/drain';
+import NetworkSelection from 'containers/wallet/components/networkSelection';
 import Token from './token';
+import Pools from './pools';
 
 import styles from './styles';
-import { getNetworkData } from 'modules/bucket.reducer';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 
 
@@ -28,53 +31,82 @@ class NetworkInfo extends Component {
     }
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { address: prevAddress } = prevProps;
-    const { address } = this.props;
-    if (!isEqual(prevAddress, address)) this.fetchData()
-  }
-
-  fetchData = () => {
-    const { address, getNetworkData, setError } = this.props;
-    if (!ssjs.isAddress(address)) return;
-    return getNetworkData(address).then(data => {
-      return this.setState({ data });
-    }).catch(er => {
-      return setError(er);
-    });
+  onData = (data) => {
+    return this.setState({ data });
   }
 
   render() {
     const { classes } = this.props;
-    const { index } = this.props;
+    const { wallet: { user: { role } } } = this.props;
     const { data } = this.state;
     const mints = data.mints || [];
-    const i = index + 1;
+    const vault = data.vault || {};
+    const primary = data.primary || {};
+    const sen = utils.prettyNumber(ssjs.undecimalize(vault.amount, primary.decimals));
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-          <Grid item className={classes.stretch}>
-            <Typography variant="body2" align="right">Network Address</Typography>
-            <Typography className={classes.subtitle} align="right">{data.address}</Typography>
+        <NetworkSelection onChange={this.onData} />
+      </Grid>
+      <Grid item xs={12}>
+        <Drain small />
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container spacing={2} justify="center">
+          <Grid item>
+            <Typography variant="h1">{sen}<span className={classes.subtitle}> 𑁍 SEN</span></Typography>
           </Grid>
-          {i ? <Grid item>
-            <Typography variant="h3">#{i}</Typography>
-          </Grid> : null}
+          <Grid item xs={12} />
+          <Grid item>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<EcoRounded />}
+            >
+              <Typography>Earn</Typography>
+            </Button>
+          </Grid>
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Divider />
+        <Drain small />
       </Grid>
-      {mints.map((address, index) => <Grid item key={index}>
-        <Token address={address} readOnly />
-      </Grid>)}
       <Grid item xs={12}>
-        <Drain />
+        <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+          <Grid item className={classes.stretch}>
+            <Typography variant="body2" align="right">Tokens listed in Network</Typography>
+          </Grid>
+          <Grid item>
+            <IconButton size="small" color="secondary">
+              <MonetizationOnRounded fontSize="small" />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid item xs={12} className={classes.network}>
+        <Grid container spacing={1}>
+          {mints.map((address, index) => <Grid item key={index}>
+            <Token address={address} readOnly />
+          </Grid>)}
+        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Drain small />
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+          <Grid item className={classes.stretch}>
+            <Typography variant="body2" align="right">Pools in Network</Typography>
+          </Grid>
+          <Grid item>
+            <IconButton size="small" color="secondary">
+              <LocalGasStation fontSize="small" />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Pools networkAddress={data.address} readOnly={role !== 'admin'} />
       </Grid>
     </Grid>
   }
@@ -83,21 +115,12 @@ class NetworkInfo extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   bucket: state.bucket,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getNetworkData,
 }, dispatch);
-
-NetworkInfo.defaultProps = {
-  index: -1
-}
-
-NetworkInfo.propTypes = {
-  address: PropTypes.string.isRequired,
-  index: PropTypes.number,
-}
 
 export default withRouter(connect(
   mapStateToProps,

@@ -27,6 +27,7 @@ import Ask from './ask';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 
@@ -54,6 +55,7 @@ class Swap extends Component {
       askAddress: '',
       askData: {},
 
+      fee: global.BigInt(3000000),
       ratio: 0,
     }
 
@@ -81,44 +83,44 @@ class Swap extends Component {
     const {
       bidAmount,
       bidData: {
-        is_initialized: bidInitialized,
+        state: bidState,
         reserve: bidReserve,
         lpt: bidLPT,
       },
       askData: {
-        is_initialized: askInitialized,
+        state: askState,
         reserve: askReserve,
         lpt: askLPT,
-        fee: askFee,
-      }
+      },
+      fee
     } = this.state;
-    if (!bidAmount || !bidInitialized || !askInitialized) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
+    if (!bidAmount || bidState !== 1 || askState !== 1) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
     const newBidReserve = bidReserve + bidAmount;
     const newAskReserve = ssjs.curve(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const paidAmountWithoutFee = askReserve - newAskReserve;
-    const askAmount = paidAmountWithoutFee * (global.BigInt(10 ** 9) - askFee) / global.BigInt(10 ** 9);
+    const askAmount = paidAmountWithoutFee * (global.BigInt(10 ** 9) - fee) / global.BigInt(10 ** 9);
     return this.setState({ slippage, ratio, askAmount });
   }
 
   estimateInverseAmount = () => {
     const {
       bidData: {
-        is_initialized: bidInitialized,
+        state: bidState,
         reserve: bidReserve,
         lpt: bidLPT,
       },
       askAmount,
       askData: {
-        is_initialized: askInitialized,
+        state: askState,
         reserve: askReserve,
         lpt: askLPT,
-        fee: askFee,
-      }
+      },
+      fee
     } = this.state;
-    if (!askAmount || !bidInitialized || !askInitialized) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
-    const askAmountWithoutFee = askAmount * global.BigInt(10 ** 9) / (global.BigInt(10 ** 9) - askFee);
+    if (!askAmount || bidState !== 1 || askState !== 1) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
+    const askAmountWithoutFee = askAmount * global.BigInt(10 ** 9) / (global.BigInt(10 ** 9) - fee);
     const newAskReserve = askReserve - askAmountWithoutFee;
     const newBidReserve = ssjs.inverseCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
@@ -136,10 +138,17 @@ class Swap extends Component {
   }
 
   onAsk = ({ amount, poolData, accountAddress }) => {
+    const { sol: { senAddress } } = configs;
+    const { mint } = poolData;
+    const { address: mintAddress } = mint || {}
+    let { fee } = this.state;
+    if (mintAddress === senAddress) fee = global.BigInt(2500000);
+    else fee = global.BigInt(3000000);
     return this.setState({
       askAmount: amount,
       askData: poolData,
       dstAddress: accountAddress,
+      fee
     }, this.estimateInverseAmount);
   }
 
@@ -173,19 +182,19 @@ class Swap extends Component {
     const {
       bidAmount, srcAddress,
       bidData: {
-        is_initialized: bidInitialized,
+        state: bidState,
         address: bidAddress,
         treasury: bidTreasury
       },
       askData: {
-        is_initialized: askInitialized,
+        state: askState,
         address: askAddress,
         mint: askMint,
         treasury: askTreasury
       }
     } = this.state;
 
-    if (!bidInitialized || !askInitialized) return setError('Please wait for data loaded');
+    if (bidState !== 1 || askState !== 1) return setError('Please wait for data loaded');
     if (!bidAmount) return setError('Invalid bid amount');
     if (!ssjs.isAddress(srcAddress)) return setError('Invalid source address');
 
@@ -219,9 +228,9 @@ class Swap extends Component {
   render() {
     const { classes } = this.props;
     const {
-      bidAmount, bidData: { is_initialized: bidInitialized, mint: bidMint },
-      askAmount, askData: { is_initialized: askInitialized, mint: askMint, fee },
-      slippage, ratio, txId, loading, advance, anchorEl
+      bidAmount, bidData: { state: bidState, mint: bidMint },
+      askAmount, askData: { state: askState, mint: askMint },
+      slippage, ratio, fee, txId, loading, advance, anchorEl
     } = this.state;
     const { decimals: bidDecimals, symbol: bidSymbol } = bidMint || {}
     const { decimals: askDecimals, symbol: askSymbol } = askMint || {}
@@ -300,7 +309,7 @@ class Swap extends Component {
                           <Typography variant="h4" align="center"><span className={classes.subtitle}>{askSymbol}/{bidSymbol}</span> {utils.prettyNumber(ratio)}</Typography>
                         </Grid>
                         <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber((1 - slippage) * 100)}%</Typography>
+                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber(slippage * 100)}%</Typography>
                         </Grid>
                       </Grid>
                     </Grid>
@@ -336,7 +345,7 @@ class Swap extends Component {
                         color="primary"
                         onClick={this.onSwap}
                         startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
-                        disabled={loading || !bidInitialized || !askInitialized}
+                        disabled={loading || bidState !== 1 || askState !== 1}
                         fullWidth
                       >
                         <Typography variant="body2">Swap</Typography>

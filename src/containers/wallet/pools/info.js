@@ -69,7 +69,7 @@ function Row(props) {
         <Typography>{lptAddress}</Typography>
       </TableCell>
       <TableCell align="right">
-        <Typography>{mint.symbol || 'Unknow'}</Typography>
+        <Typography>{mint.symbol || 'Unknown'}</Typography>
       </TableCell>
       <TableCell align="right">
         <Typography>{price}</Typography>

@@ -21,6 +21,7 @@ import NetworkAvatar from './networkAvatar';
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getNetwork, getNetworks } from 'modules/network.reducer';
+import { getNetworkData } from 'modules/bucket.reducer';
 
 
 class NetworkList extends Component {
@@ -44,11 +45,13 @@ class NetworkList extends Component {
   }
 
   fetchData = (callback) => {
-    const { mintAddress, getNetworks, getNetwork, setError } = this.props;
+    const { mintAddress, getNetworks, getNetwork, getNetworkData, setError } = this.props;
     return getNetworks({}, 1000, 0).then(networkIds => {
       return Promise.all(networkIds.map(({ _id }) => getNetwork(_id)));
     }).then(data => {
       if (mintAddress) data = data.filter(({ mints }) => mints.includes(mintAddress));
+      return Promise.all(data.map(({ address }) => getNetworkData(address)));
+    }).then(data => {
       return this.setState({ data }, callback);
     }).catch(er => {
       return this.setState({ data: [] }, () => {
@@ -108,11 +111,13 @@ class NetworkList extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   network: state.network,
+  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getNetwork, getNetworks
+  getNetwork, getNetworks,
+  getNetworkData
 }, dispatch);
 
 NetworkList.defaultProps = {

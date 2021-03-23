@@ -11,7 +11,6 @@ import { } from '@material-ui/icons';
 
 import Drain from 'components/drain';
 import Network from './network';
-import Foundation from './foundation';
 
 import styles from './styles';
 
@@ -32,9 +31,6 @@ class DAO extends Component {
           </Grid>
           <Grid item xs={12}>
             <Network />
-          </Grid>
-          <Grid item xs={12}>
-            <Foundation />
           </Grid>
         </Grid>
       </Grid>
