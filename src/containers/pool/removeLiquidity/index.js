@@ -10,18 +10,15 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Popover from '@material-ui/core/Popover';
-import Switch from '@material-ui/core/Switch';
 import Tooltip from '@material-ui/core/Tooltip';
 import Collapse from '@material-ui/core/Collapse';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
-  HelpOutlineRounded, RemoveCircleOutlineRounded, SettingsRounded,
-  PublicRounded, ArrowForwardRounded, OfflineBoltRounded,
+  RemoveCircleOutlineRounded, PublicRounded, ArrowForwardRounded,
+  OfflineBoltRounded,
 } from '@material-ui/icons';
 
-import { BaseCard } from 'components/cards';
 import PoolSelection from './poolSelection';
 import LPTSelection from 'containers/wallet/components/lptSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';
@@ -37,7 +34,6 @@ import { getLPTData } from 'modules/bucket.reducer';
 const EMPTY = {
   loading: false,
   txId: '',
-  anchorEl: null,
 }
 
 class RemoveLiquidity extends Component {
@@ -50,23 +46,9 @@ class RemoveLiquidity extends Component {
       dstAddress: '',
       lptData: {},
       amount: 0,
-      advance: false,
     }
 
     this.swap = window.senwallet.swap;
-  }
-
-  onOpen = (e) => {
-    return this.setState({ anchorEl: e.target });
-  }
-
-  onClose = () => {
-    return this.setState({ anchorEl: null });
-  }
-
-  onAdvance = (e) => {
-    const advance = e.target.checked || false;
-    return this.setState({ advance });
   }
 
   onAmount = (e) => {
@@ -172,8 +154,9 @@ class RemoveLiquidity extends Component {
 
   render() {
     const { classes } = this.props;
+    const { ui: { advance } } = this.props;
     const {
-      anchorEl, advance, loading, txId,
+      loading, txId,
       amount, poolAddress,
       lptData: { is_initialized, lpt, pool }
     } = this.state;
@@ -182,52 +165,7 @@ class RemoveLiquidity extends Component {
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-          <Grid item className={classes.stretch}>
-            <Typography variant="h6">Pool info</Typography>
-          </Grid>
-          <Grid item>
-            <IconButton onClick={this.onOpen}>
-              <SettingsRounded color="secondary" fontSize="small" />
-            </IconButton>
-            <Popover
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={this.onClose}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-              <BaseCard>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <Typography variant="body2">Interface Settings</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-                      <Grid item>
-                        <Typography>Expert mode</Typography>
-                      </Grid>
-                      <Grid item className={classes.stretch}>
-                        <Tooltip title="The LPT account will be selected, or generated automatically by default. By enabling expert mode, you can controll it by hands.">
-                          <IconButton size="small">
-                            <HelpOutlineRounded fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </Grid>
-                      <Grid item>
-                        <Switch
-                          color="primary"
-                          checked={advance}
-                          onChange={this.onAdvance}
-                        />
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                </Grid>
-              </BaseCard>
-            </Popover>
-          </Grid>
-        </Grid>
+        <Typography variant="h6">Pool info</Typography>
       </Grid>
       <Grid item xs={6}>
         <PoolSelection onChange={this.onPoolAddress} />

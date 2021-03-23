@@ -34,7 +34,6 @@ import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 const EMPTY = {
   loading: false,
   txId: '',
-  anchorEl: null,
 }
 
 class Swap extends Component {
@@ -43,7 +42,6 @@ class Swap extends Component {
 
     this.state = {
       ...EMPTY,
-      advance: false,
 
       srcAddress: '',
       bidAmount: 0,
@@ -60,19 +58,6 @@ class Swap extends Component {
     }
 
     this.swap = window.senwallet.swap;
-  }
-
-  onOpen = (e) => {
-    return this.setState({ anchorEl: e.target });
-  }
-
-  onClose = () => {
-    return this.setState({ anchorEl: null });
-  }
-
-  onAdvance = (e) => {
-    const advance = e.target.checked || false;
-    return this.setState({ advance });
   }
 
   onClear = () => {
@@ -230,7 +215,7 @@ class Swap extends Component {
     const {
       bidAmount, bidData: { state: bidState, mint: bidMint },
       askAmount, askData: { state: askState, mint: askMint },
-      slippage, ratio, fee, txId, loading, advance, anchorEl
+      slippage, ratio, fee, txId, loading
     } = this.state;
     const { decimals: bidDecimals, symbol: bidSymbol } = bidMint || {}
     const { decimals: askDecimals, symbol: askSymbol } = askMint || {}
@@ -242,61 +227,16 @@ class Swap extends Component {
             <BaseCard>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-                    <Grid item className={classes.stretch}>
-                      <Typography variant="h4">Swap</Typography>
-                    </Grid>
-                    <Grid item>
-                      <IconButton onClick={this.onOpen}>
-                        <SettingsRounded color="secondary" fontSize="small" />
-                      </IconButton>
-                      <Popover
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl)}
-                        onClose={this.onClose}
-                        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-                      >
-                        <BaseCard>
-                          <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                              <Typography variant="body2">Interface Settings</Typography>
-                            </Grid>
-                            <Grid item xs={12}>
-                              <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-                                <Grid item>
-                                  <Typography>Expert mode</Typography>
-                                </Grid>
-                                <Grid item className={classes.stretch}>
-                                  <Tooltip title="The token account will be selected, or generated automatically by default. By enabling expert mode, you can controll it by hands.">
-                                    <IconButton size="small">
-                                      <HelpOutlineRounded fontSize="small" />
-                                    </IconButton>
-                                  </Tooltip>
-                                </Grid>
-                                <Grid item>
-                                  <Switch
-                                    color="primary"
-                                    checked={advance}
-                                    onChange={this.onAdvance}
-                                  />
-                                </Grid>
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                        </BaseCard>
-                      </Popover>
-                    </Grid>
-                  </Grid>
+                  <Typography variant="h4">Swap</Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Drain small />
                 </Grid>
                 <Grid item xs={12}>
-                  <Bid advance={advance} value={ssjs.undecimalize(bidAmount, bidDecimals)} onChange={this.onBid} />
+                  <Bid value={ssjs.undecimalize(bidAmount, bidDecimals)} onChange={this.onBid} />
                 </Grid>
                 <Grid item xs={12}>
-                  <Ask advance={advance} value={ssjs.undecimalize(askAmount, askDecimals)} onChange={this.onAsk} />
+                  <Ask value={ssjs.undecimalize(askAmount, askDecimals)} onChange={this.onAsk} />
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container spacing={2} className={classes.action}>

@@ -9,6 +9,7 @@ const defaultState = {
   error: '',
   visible: false,
   loading: false,
+  advance: false,
 }
 
 
@@ -185,6 +186,58 @@ export const unsetLoading = () => {
 }
 
 /**
+ * Advance
+ */
+export const SET_ADVANCE = 'SET_ADVANCE';
+export const SET_ADVANCE_OK = 'SET_ADVANCE_OK';
+export const SET_ADVANCE_FAIL = 'SET_ADVANCE_FAIL';
+
+export const setAdvance = () => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: SET_ADVANCE });
+
+      const { ui: { advance: prevAdvance } } = getState();
+      if (prevAdvance) {
+        const er = 'Already advance';
+        dispatch({ type: SET_ADVANCE_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const data = { advance: true }
+      dispatch({ type: SET_ADVANCE_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
+ * Unadvance
+ */
+export const UNSET_ADVANCE = 'UNSET_ADVANCE';
+export const UNSET_ADVANCE_OK = 'UNSET_ADVANCE_OK';
+export const UNSET_ADVANCE_FAIL = 'UNSET_ADVANCE_FAIL';
+
+export const unsetAdvance = () => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: UNSET_ADVANCE });
+
+      const { ui: { advance: prevAdvance } } = getState();
+      if (!prevAdvance) {
+        const er = 'Already unadvance';
+        dispatch({ type: UNSET_ADVANCE_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const data = { advance: false }
+      dispatch({ type: UNSET_ADVANCE_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
  * Reducder
  */
 export default (state = defaultState, action) => {
@@ -212,6 +265,14 @@ export default (state = defaultState, action) => {
     case UNSET_LOADING_OK:
       return { ...state, ...action.data };
     case UNSET_LOADING_FAIL:
+      return { ...state, ...action.data };
+    case SET_ADVANCE_OK:
+      return { ...state, ...action.data };
+    case SET_ADVANCE_FAIL:
+      return { ...state, ...action.data };
+    case UNSET_ADVANCE_OK:
+      return { ...state, ...action.data };
+    case UNSET_ADVANCE_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

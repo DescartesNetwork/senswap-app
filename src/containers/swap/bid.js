@@ -103,7 +103,7 @@ class Bid extends Component {
 
   render() {
     const { classes } = this.props;
-    const { advance } = this.props;
+    const { ui: { advance } } = this.props;
     const {
       value, percentage,
       accountData: { amount: accountAmount, mint },
@@ -178,13 +178,11 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 Bid.defaultProps = {
   value: 0,
-  advance: false,
   onChange: () => { },
 }
 
 Bid.propTypes = {
   value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  advance: PropTypes.bool,
   onChange: PropTypes.func,
 }
 

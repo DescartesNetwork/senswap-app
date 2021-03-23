@@ -16,13 +16,16 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Divider from '@material-ui/core/Divider';
+import Switch from '@material-ui/core/Switch';
 import Image from 'material-ui-image';
 
 import {
   SwapCallsRounded, LocalGasStationRounded, DonutLargeRounded,
   WidgetsRounded, ColorizeRounded, GroupWorkRounded,
   AccountBalanceRounded, VerifiedUserRounded, DescriptionRounded,
+  HelpOutlineRounded
 } from '@material-ui/icons';
 
 import AccountAvatar from 'containers/wallet/components/accountAvatar';
@@ -32,6 +35,7 @@ import configs from 'configs';
 import SEN_LOGO from 'static/images/sen-logo.svg';
 import YELLOWPAPER from 'static/docs/senswap_yellowpaper.pdf';
 import { openWallet } from 'modules/wallet.reducer';
+import { setAdvance, unsetAdvance } from 'modules/ui.reducer';
 
 
 class Header extends Component {
@@ -77,9 +81,16 @@ class Header extends Component {
     return this.setState({ anchorEl: null });
   }
 
+  onAdvance = (e) => {
+    const { setAdvance, unsetAdvance } = this.props;
+    const advance = e.target.checked || false;
+    if (advance) return setAdvance();
+    return unsetAdvance();
+  }
+
   render() {
     const { classes } = this.props;
-    const { ui: { width } } = this.props;
+    const { ui: { width, advance } } = this.props;
     const { sol: { cluster } } = configs;
     const { anchorEl } = this.state;
     const currentRoute = this.parseRoute();
@@ -191,6 +202,26 @@ class Header extends Component {
                       </ListItemIcon>
                       <ListItemText primary="Yellowpaper" />
                     </ListItem>
+                    <Divider />
+                    <ListItem >
+                      <ListItemIcon>
+                        <Tooltip title="The needed accounts will be selected, or generated automatically by default. By enabling expert mode, you have to manage it by hands.">
+                          <IconButton size="small" color="secondary">
+                            <HelpOutlineRounded />
+                          </IconButton>
+                        </Tooltip>
+                      </ListItemIcon>
+                      <ListItemText primary="Interface settings" secondary="Expert mode" />
+                      <ListItemSecondaryAction>
+                        <Switch
+                          edge="end"
+                          color="primary"
+                          size="small"
+                          onChange={this.onAdvance}
+                          checked={advance}
+                          onClick={e => e.stopPropagation()} />
+                      </ListItemSecondaryAction>
+                    </ListItem>
                   </List>
                 </Popover>
               </Grid>
@@ -210,6 +241,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setAdvance, unsetAdvance,
   openWallet,
 }, dispatch);
 
