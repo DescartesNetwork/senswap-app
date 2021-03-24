@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Link as RouterLink, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -15,8 +15,8 @@ import Collapse from '@material-ui/core/Collapse';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
-  CheckCircleOutlineRounded, HelpOutlineRounded, VerifiedUserRounded,
-  PublicRounded, ArrowForwardRounded, OfflineBoltRounded,
+  CheckCircleOutlineRounded, HelpOutlineRounded, PublicRounded,
+  ArrowForwardRounded, OfflineBoltRounded,
 } from '@material-ui/icons';
 
 import AccountSelection from 'containers/wallet/components/accountSelection';
@@ -26,13 +26,13 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
+import { addPool } from 'modules/pool.reducer';
 import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
   txId: '',
-  poolAddress: '',
   loading: false,
   amount: 0,
   price: 0,
@@ -90,11 +90,12 @@ class NewPool extends Component {
     const {
       accountData: { address: srcAddress, state, mint },
       networkData: { address: networkAddress },
-      amount, price } = this.state;
+      amount, price
+    } = this.state;
     const {
       wallet: { user, lpts },
       setError,
-      updateWallet, unlockWallet, syncWallet
+      updateWallet, unlockWallet, syncWallet, addPool
     } = this.props;
     const { address: mintAddress, decimals } = mint || {};
     if (!state) return setError('Please wait for data loaded');
@@ -142,7 +143,9 @@ class NewPool extends Component {
       }).then(re => {
         return syncWallet(secretKey);
       }).then(re => {
-        return this.setState({ ...EMPTY, txId, poolAddress });
+        return addPool({ address: poolAddress });
+      }).then(re => {
+        return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
@@ -155,8 +158,7 @@ class NewPool extends Component {
     const { classes } = this.props;
     const { ui: { advance } } = this.props;
     const {
-      amount, price,
-      loading, txId, poolAddress,
+      amount, price, loading, txId,
       accountData: { amount: balance, state, mint }
     } = this.state;
     const { address, decimals, symbol } = mint || {}
@@ -222,21 +224,9 @@ class NewPool extends Component {
       {txId ? <Grid item xs={12}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography variant="body2">Done! However, your pool is still unknown by people. You can click the audit button for SenSwap verification that will advertise your pools on SenSwap platform.</Typography>
+            <Typography variant="body2">Done! The pool has been created.</Typography>
           </Grid>
-          <Grid item xs={4}>
-            <Button
-              variant="contained"
-              color="primary"
-              component={RouterLink}
-              to={`/audit/submit-pool/${poolAddress}`}
-              startIcon={<VerifiedUserRounded />}
-              fullWidth
-            >
-              <Typography>Audit</Typography>
-            </Button>
-          </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={8}>
             <Button
               variant="contained"
               color="secondary"
@@ -278,12 +268,14 @@ class NewPool extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  pool: state.pool,
   wallet: state.wallet,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
+  addPool,
   updateWallet, unlockWallet, syncWallet,
   getAccountData,
 }, dispatch);

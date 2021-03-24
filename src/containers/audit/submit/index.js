@@ -31,7 +31,6 @@ class SubmitPool extends Component {
     this.state = {
       ...EMPTY,
       poolAddress: '',
-      email: '',
     }
   }
 
@@ -56,17 +55,11 @@ class SubmitPool extends Component {
     return this.setState({ poolAddress });
   }
 
-  onAuthor = (e) => {
-    const author = e.target.value || '';
-    return this.setState({ author });
-  }
-
   onSubmit = () => {
-    const { poolAddress, author } = this.state;
+    const { poolAddress } = this.state;
     const { setError, addPool } = this.props;
     if (!ssjs.isAddress(poolAddress)) return setError('The pool address is invalid');
-    if (!author) return setError('The author is empty');
-    const pool = { address: poolAddress, author }
+    const pool = { address: poolAddress }
     return this.setState({ loading: true }, () => {
       return addPool(pool).then(re => {
         return this.setState({ ...EMPTY, done: true });
@@ -80,11 +73,11 @@ class SubmitPool extends Component {
 
   render() {
     const { classes } = this.props;
-    const { poolAddress, author, loading, done } = this.state;
+    const { poolAddress, loading, done } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h6">Pool form</Typography>
+        <Typography variant="h6">Request info</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
@@ -92,15 +85,6 @@ class SubmitPool extends Component {
           label="Pool address"
           value={poolAddress}
           onChange={this.onPool}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          variant="outlined"
-          label="Author"
-          value={author}
-          onChange={this.onAuthor}
           fullWidth
         />
       </Grid>

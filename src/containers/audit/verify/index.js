@@ -50,12 +50,6 @@ class VerifyPool extends Component {
     return this.setState({ data: { ...data, address } });
   }
 
-  onAuthor = (e) => {
-    const author = e.target.value || '';
-    const { data } = this.state;
-    return this.setState({ data: { ...data, author } });
-  }
-
   onUpdate = () => {
     const { updatePool, unlockWallet, getPoolData, setError } = this.props;
     const { data } = this.state;
@@ -64,7 +58,6 @@ class VerifyPool extends Component {
         const pool = {
           _id: data._id,
           address: data.address,
-          author: data.author,
           verified: !data.verified,
         }
         return updatePool(pool, secretKey);
@@ -136,16 +129,7 @@ class VerifyPool extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={4}>
-        <TextField
-          variant="outlined"
-          label="Author"
-          value={data.author || ''}
-          onChange={this.onAuthor}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
+      <Grid item xs={6}>
         <TextField
           variant="outlined"
           label="Decimals"
@@ -153,7 +137,7 @@ class VerifyPool extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs={6}>
         <TextField
           variant="outlined"
           label="Fee (%)"

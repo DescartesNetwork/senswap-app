@@ -95,7 +95,7 @@ class PoolSelection extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderMint = (name, icon, author, verified) => {
+  renderMint = (name, icon, address, verified) => {
     const { classes } = this.props;
     return <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
       <Grid item>
@@ -104,8 +104,8 @@ class PoolSelection extends Component {
             !verified ? <Tooltip title="This pool is NOT verified by SenSwap">
               <HelpOutlineRounded className={classes.badgeIcon} />
             </Tooltip> : <Tooltip title="This pool is verified by SenSwap">
-                <CheckCircleOutlineRounded className={classes.badgeIcon} />
-              </Tooltip>
+              <CheckCircleOutlineRounded className={classes.badgeIcon} />
+            </Tooltip>
           }
           overlap="circle"
           color="primary"
@@ -121,8 +121,8 @@ class PoolSelection extends Component {
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{name}</Typography>
-        <Typography className={classes.owner}>Created by {author || 'Unknown'}</Typography>
+        <Typography variant="body2">{name}</Typography>
+        <Typography className={classes.subtitle}>{address}</Typography>
       </Grid>
     </Grid>
   }
@@ -132,9 +132,9 @@ class PoolSelection extends Component {
     if (!pools.length) return null;
     return <MenuList>
       {pools.map((pool, index) => {
-        const { address, author, verified, mint: { name, icon } } = pool;
+        const { address, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect(index)}>
-          {this.renderMint(name, icon, author, verified)}
+          {this.renderMint(name, icon, address, verified)}
         </MenuItem>
       })}
     </MenuList>

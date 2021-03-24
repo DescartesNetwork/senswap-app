@@ -164,7 +164,7 @@ class MintSelection extends Component {
     return this.setState({ anchorEl: null });
   }
 
-  renderMint = (name, icon, author, verified) => {
+  renderMint = (name, icon, address, verified) => {
     const { classes } = this.props;
     return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
       <Grid item>
@@ -192,8 +192,8 @@ class MintSelection extends Component {
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
-        <Typography>{name}</Typography>
-        <Typography className={classes.subtitle}>Created by {author || 'Unknown'}</Typography>
+        <Typography variant="body2">{name}</Typography>
+        <Typography className={classes.subtitle}>{address}</Typography>
       </Grid>
     </Grid>
   }
@@ -204,9 +204,9 @@ class MintSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>Recommended pools</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, author, verified, mint: { name, icon } } = pool;
+        const { address, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
-          {this.renderMint(name || address, icon, author, verified)}
+          {this.renderMint(name || address, icon, address, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -218,9 +218,9 @@ class MintSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>New pools</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, author, verified, mint: { name, icon } } = pool;
+        const { address, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
-          {this.renderMint(name || address, icon, author, verified)}
+          {this.renderMint(name || address, icon, address, verified)}
         </MenuItem>
       })}
     </MenuList>
@@ -233,9 +233,9 @@ class MintSelection extends Component {
     return <MenuList>
       <ListSubheader disableSticky>Search</ListSubheader>
       {pools.map((pool, index) => {
-        const { address, author, verified, mint: { name, icon } } = pool;
+        const { address, verified, mint: { name, icon } } = pool;
         return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
-          {this.renderMint(name || address, icon, author, verified)}
+          {this.renderMint(name || address, icon, address, verified)}
         </MenuItem>
       })}
     </MenuList>

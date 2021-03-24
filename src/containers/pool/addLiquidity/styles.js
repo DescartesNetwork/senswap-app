@@ -14,9 +14,6 @@ export default theme => ({
     height: theme.spacing(4),
     marginRight: theme.spacing(1),
   },
-  owner: {
-    fontSize: 9
-  },
   verified: {
     padding: 0,
     backgroundColor: theme.palette.info.main

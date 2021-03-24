@@ -23,13 +23,17 @@ import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { VisibilityRounded, CloseRounded, UpdateRounded } from '@material-ui/icons';
+import {
+  VisibilityRounded, CloseRounded, UpdateRounded,
+  EcoRounded,
+} from '@material-ui/icons';
 
 import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet } from 'modules/wallet.reducer';
+import { unlockWallet, updateWallet } from 'modules/wallet.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
+
 
 function Row(props) {
   const {
@@ -39,13 +43,13 @@ function Row(props) {
       is_initialized,
       pool: {
         address: poolAddress,
-        fee: poolFee,
         reserve: poolReserve,
         lpt: poolLPT,
         mint,
         treasury
       }
     },
+    onCloseLPT
   } = props;
   const [visible, onVisible] = useState(false);
   const classes = makeStyles(styles)();
@@ -53,8 +57,7 @@ function Row(props) {
   if (!is_initialized) return null;
   const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
   const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
-  const price = utils.div(poolLPT, poolReserve);
-  const fee = ssjs.undecimalize(poolFee, 9) * 100;
+  const price = ssjs.div(poolLPT, poolReserve);
   const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** mint.decimals)));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);
@@ -76,6 +79,11 @@ function Row(props) {
       </TableCell>
       <TableCell align="right">
         <Typography>{lptAmount}</Typography>
+      </TableCell>
+      <TableCell align="right">
+        <IconButton size="small" color="secondary" onClick={onCloseLPT}>
+          <EcoRounded />
+        </IconButton>
       </TableCell>
     </TableRow>
     <Dialog open={visible} onClose={onClose}>
@@ -100,7 +108,7 @@ function Row(props) {
             <TextField label="Pool Address" variant="outlined" value={poolAddress} fullWidth />
           </Grid>
           <Grid item xs={4}>
-            <TextField label="Fee %" variant="outlined" value={fee} fullWidth />
+            <TextField label="LPT" variant="outlined" value={lptAmount} fullWidth />
           </Grid>
           <Grid item xs={8}>
             <TextField label="Treasury Address" variant="outlined" value={treasury.address} fullWidth />
@@ -135,6 +143,8 @@ class Info extends Component {
       loading: false,
       lasttime: new Date()
     }
+
+    this.swap = window.senwallet.swap;
   }
 
   componentDidMount() {
@@ -169,6 +179,22 @@ class Info extends Component {
     });
   }
 
+  onCloseLPT = ({ address: lptAddress }) => {
+    const { unlockWallet, updateWallet, setError, wallet: { lpts } } = this.props;
+    return unlockWallet().then(secretKey => {
+      const payer = ssjs.fromSecretKey(secretKey);
+      const dstAddress = payer.publicKey.toBase58();
+      return this.swap.closeLPT(lptAddress, dstAddress, payer);
+    }).then(txId => {
+      const newLPTs = lpts.filter(lpt => (lpt !== lptAddress));
+      return updateWallet({ lpts: newLPTs });
+    }).then(re => {
+      // Nothing
+    }).catch(er => {
+      return setError(er);
+    })
+  }
+
   render() {
     const { classes } = this.props;
     const { data, loading, lasttime } = this.state;
@@ -196,6 +222,9 @@ class Info extends Component {
                 <TableCell align="right">
                   <Typography variant="body2">LPT</Typography>
                 </TableCell>
+                <TableCell align="right">
+                  <Typography variant="body2">Cleaner</Typography>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -204,7 +233,11 @@ class Info extends Component {
                   <Typography className={classes.subtitle}>No data</Typography>
                 </TableCell>
               </TableRow> : null}
-              {data.map(data => <Row key={data.address} data={data} />)}
+              {data.map(data => <Row
+                key={data.address}
+                data={data}
+                onCloseLPT={() => this.onCloseLPT(data)}
+              />)}
             </TableBody>
           </Table>
         </TableContainer>
@@ -228,7 +261,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet,
+  unlockWallet, updateWallet,
   getLPTData,
 }, dispatch);
 

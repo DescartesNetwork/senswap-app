@@ -128,7 +128,7 @@ class PoolList extends Component {
           </Grid>
           <Grid item xs={12} />
         </Grid>
-        {data.map(({ address, verified, author, mint: { icon } }) => {
+        {data.map(({ address, verified, mint: { icon, name } }) => {
           return <MenuItem key={address} onClick={() => this.onSelect(address)}>
             <Grid container spacing={1} className={classes.noWrap} alignItems="center">
               <Grid item>
@@ -137,8 +137,8 @@ class PoolList extends Component {
                     verified ? <Tooltip title="This pool is verified by SenSwap">
                       <CheckCircleOutlineRounded className={classes.badgeIcon} />
                     </Tooltip> : <Tooltip title="This pool is NOT verified by SenSwap">
-                        <HelpOutlineRounded className={classes.badgeIcon} />
-                      </Tooltip>
+                      <HelpOutlineRounded className={classes.badgeIcon} />
+                    </Tooltip>
                   }
                   overlap="circle"
                   color={verified ? 'primary' : 'secondary'}
@@ -156,8 +156,8 @@ class PoolList extends Component {
                 </Badge>
               </Grid>
               <Grid item className={classes.stretch}>
-                <Typography variant="body2">{author}</Typography>
-                <Typography className={classes.subtitle}>{address || 'Unknown'}</Typography>
+                <Typography variant="body2">{name}</Typography>
+                <Typography className={classes.subtitle}>{address}</Typography>
               </Grid>
             </Grid>
           </MenuItem>
