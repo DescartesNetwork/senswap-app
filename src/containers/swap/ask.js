@@ -46,7 +46,8 @@ class Ask extends Component {
 
   onAmount = (e) => {
     const value = e.target.value || '';
-    const { accountData: { mint: { decimals } } } = this.state;
+    const { accountData: { mint } } = this.state;
+    const { decimals } = mint || {}
     const amount = ssjs.decimalize(parseFloat(value) || 0, decimals);
     return this.setState({ value, amount }, this.returnData);
   }

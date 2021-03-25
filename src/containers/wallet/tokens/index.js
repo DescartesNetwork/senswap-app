@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -24,8 +22,6 @@ import TokenSettings from './settings';
 
 import styles from './styles';
 import SEN_LOGO from 'static/images/sen-logo.svg';
-import { getAccountData } from 'modules/bucket.reducer';
-import { setError } from 'modules/ui.reducer';
 
 
 class Tokens extends Component {
@@ -38,26 +34,6 @@ class Tokens extends Component {
     }
   }
 
-  componentDidMount = () => {
-    this.fetchData();
-  }
-
-  componentDidUpdate = (prevProps) => {
-    const { wallet: { mainAccount: prevMainAccount } } = prevProps;
-    const { wallet: { mainAccount } } = this.props;
-    if (!isEqual(mainAccount, prevMainAccount)) this.fetchData();
-  }
-
-  fetchData = () => {
-    const { wallet: { mainAccount }, setError, getAccountData } = this.props;
-    if (!ssjs.isAddress(mainAccount)) return this.setState({ data: {} });
-    return getAccountData(mainAccount).then(data => {
-      return this.setState({ data });
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
   onAdvance = () => {
     const { advance } = this.state;
     return this.setState({ advance: !advance });
@@ -65,8 +41,7 @@ class Tokens extends Component {
 
   render() {
     const { classes } = this.props;
-    const { advance, data: { mint } } = this.state;
-    const { icon } = mint || {}
+    const { advance } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -79,7 +54,7 @@ class Tokens extends Component {
                 </Grid>
                 <Grid item style={{ width: 50 }}>
                   <Image
-                    src={icon || SEN_LOGO}
+                    src={SEN_LOGO}
                     color="#00000000"
                     loading={<CircularProgress size={17} />}
                   />
@@ -126,13 +101,9 @@ class Tokens extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  wallet: state.wallet,
-  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getAccountData,
-  setError,
 }, dispatch);
 
 export default withRouter(connect(

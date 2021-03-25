@@ -169,7 +169,7 @@ class Header extends Component {
                       <ListItemIcon>
                         <GroupWorkRounded color="secondary" />
                       </ListItemIcon>
-                      <ListItemText primary="SenDAO" />
+                      <ListItemText primary="SenDAO" secondary="Permission required" />
                     </ListItem>
                     <ListItem button component={RouterLink} to={'/faucet'}>
                       <ListItemIcon>

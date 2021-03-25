@@ -30,6 +30,7 @@ import MintAvatar from 'containers/wallet/components/mintAvatar';
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 
 
@@ -143,12 +144,18 @@ class MintSelection extends Component {
 
   onSearch = (e) => {
     const search = e.target.value || '';
-    if (search.length > 4) return;
+    if (search.length > 20) return;
     return this.setState({ search }, () => {
       const { search: value } = this.state;
       if (value.length < 2) return this.setState({ searched: { pools: [] } });
-      const condition = { symbol: { '$regex': value, '$options': 'gi' } }
-      return this.fetchPools(condition, 1000, 0).then(pools => {
+      const condition = { '$or': [{ symbol: { '$regex': value, '$options': 'gi' } }, { name: { '$regex': value, '$options': 'gi' } }] }
+      const { getMints, getMint } = this.props;
+      return getMints(condition, 1000, 0).then(data => {
+        return Promise.all(data.map(({ _id }) => getMint(_id)));
+      }).then(mints => {
+        const condition = { '$or': mints.map(({ address: mintAddress }) => ({ mint: mintAddress })) }
+        return this.fetchPools(condition, 1000, 0);
+      }).then(pools => {
         return this.setState({ searched: { pools } });
       }).catch(er => {
         return this.setState({ searched: { pools: [] } });
@@ -166,7 +173,7 @@ class MintSelection extends Component {
 
   renderMint = (name, icon, address, verified) => {
     const { classes } = this.props;
-    return <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+    return <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
       <Grid item>
         <Badge
           badgeContent={
@@ -178,15 +185,8 @@ class MintSelection extends Component {
           }
           overlap="circle"
           color={verified ? 'primary' : 'secondary'}
-          classes={{
-            badge: classes.badge,
-            colorPrimary: classes.verified,
-            colorSecondary: classes.unverified,
-          }}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left'
-          }}
+          classes={{ badge: classes.badge, colorPrimary: classes.verified, colorSecondary: classes.unverified }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
           <MintAvatar icon={icon} />
         </Badge>
@@ -310,12 +310,14 @@ const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
   pool: state.pool,
+  mint: state.mint,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPools, getPool,
+  getMints, getMint,
   getPoolData,
 }, dispatch);
 

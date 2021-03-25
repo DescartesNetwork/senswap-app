@@ -13,13 +13,14 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
-import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import {
   CheckCircleOutlineRounded, UnfoldMoreRounded, HelpOutlineRounded,
 } from '@material-ui/icons';
+
+import MintAvatar from 'containers/wallet/components/mintAvatar';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -108,16 +109,11 @@ class PoolSelection extends Component {
             </Tooltip>
           }
           overlap="circle"
-          color="primary"
-          classes={{ colorPrimary: !verified ? classes.unverified : classes.verified }}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left'
-          }}
+          color={verified ? 'primary' : 'secondary'}
+          classes={{ badge: classes.badge, colorPrimary: classes.verified, colorSecondary: classes.unverified }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
-          <Avatar src={icon} className={classes.icon}>
-            <HelpOutlineRounded />
-          </Avatar>
+          <MintAvatar icon={icon} />
         </Badge>
       </Grid>
       <Grid item className={classes.stretch}>
@@ -144,9 +140,8 @@ class PoolSelection extends Component {
     const { classes } = this.props;
     const { anchorEl, index, pools } = this.state;
 
-    const verified = pools[index] && pools[index].verified;
-    const symbol = pools[index] && pools[index].mint && pools[index].mint.symbol;
-    const icon = pools[index] && pools[index].mint && pools[index].mint.icon;
+    const { verified, mint } = pools[index] || {};
+    const { symbol, icon } = mint || {};
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -164,9 +159,7 @@ class PoolSelection extends Component {
                 horizontal: 'left'
               }}
             >
-              <Avatar src={icon} className={classes.iconWithMarginRight}>
-                <HelpOutlineRounded />
-              </Avatar>
+              <MintAvatar icon={icon} marginRight />
             </Badge>,
             endAdornment: <IconButton onClick={this.onOpen} edge="end">
               <UnfoldMoreRounded />

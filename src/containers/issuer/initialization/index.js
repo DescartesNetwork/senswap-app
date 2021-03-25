@@ -34,8 +34,8 @@ class InitializeMint extends Component {
 
     this.state = {
       ...EMPTY,
-      supply: 5000000000,
-      decimals: 9,
+      supply: '5000000000',
+      decimals: '9',
     }
 
     this.splt = window.senwallet.splt;

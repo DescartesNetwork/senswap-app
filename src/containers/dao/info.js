@@ -19,7 +19,6 @@ import Pools from './pools';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import { setError } from 'modules/ui.reducer';
 
 
 class NetworkInfo extends Component {
@@ -114,12 +113,10 @@ class NetworkInfo extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  bucket: state.bucket,
   wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
 }, dispatch);
 
 export default withRouter(connect(

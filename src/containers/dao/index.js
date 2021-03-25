@@ -6,11 +6,14 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
 
-import { } from '@material-ui/icons';
+import { LanguageRounded, DirectionsBoatRounded } from '@material-ui/icons';
 
+import Ban from 'components/ban';
 import Drain from 'components/drain';
-import Network from './network';
+import InitializeNetwork from './intializeNetwork';
+import NetworkInfo from './info';
 
 import styles from './styles';
 
@@ -18,7 +21,13 @@ class DAO extends Component {
 
   render() {
     const { classes } = this.props;
+    const { wallet: { user: { role } } } = this.props;
 
+    if (!['admin', 'operator'].includes(role)) return <Grid container justify="center" spacing={2}>
+      <Grid item xs={11}>
+        <Ban />
+      </Grid>
+    </Grid>
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11}>
         <Grid container spacing={2}>
@@ -28,9 +37,38 @@ class DAO extends Component {
           </Grid>
           <Grid item xs={12}>
             <Drain />
+          </Grid><Grid item xs={12}>
+            <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+              <Grid item>
+                <IconButton color="secondary" onClick={this.onAdvance}>
+                  <LanguageRounded />
+                </IconButton>
+              </Grid>
+              <Grid item>
+                <Typography variant="h6" color="primary">Current Networks</Typography>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={12}>
-            <Network />
+            <NetworkInfo />
+          </Grid>
+          <Grid item xs={12}>
+            <Drain />
+          </Grid>
+          <Grid item xs={12}>
+            <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+              <Grid item>
+                <IconButton color="secondary" onClick={this.onAdvance}>
+                  <DirectionsBoatRounded />
+                </IconButton>
+              </Grid>
+              <Grid item>
+                <Typography variant="h6" color="primary">New Network</Typography>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <InitializeNetwork />
           </Grid>
         </Grid>
       </Grid>

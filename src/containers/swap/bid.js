@@ -53,7 +53,8 @@ class Bid extends Component {
 
   onAmount = (e) => {
     const value = e.target.value || '';
-    const { accountData: { mint: { decimals } } } = this.state;
+    const { accountData: { mint } } = this.state;
+    const { decimals } = mint || {}
     const amount = ssjs.decimalize(parseFloat(value) || 0, decimals);
     return this.setState({ value, amount, percentage: 0 }, this.returnData);
   }
@@ -63,8 +64,11 @@ class Bid extends Component {
   }
 
   onPercentage = (e, v) => {
+    const { setError } = this.props;
     const percentage = v || 0;
-    const { accountData: { amount: accountAmount, mint: { decimals } } } = this.state;
+    const { accountData: { amount: accountAmount, mint } } = this.state;
+    const { decimals } = mint || {}
+    if (!accountAmount) return setError('Your balance is zero');
     const amount = accountAmount * global.BigInt(percentage) / global.BigInt(100);
     const value = ssjs.undecimalize(amount, decimals);
     return this.setState({ percentage, amount, value }, this.returnData);

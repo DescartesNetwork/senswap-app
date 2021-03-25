@@ -23,7 +23,7 @@ class AccountSelection extends Component {
 
     this.state = {
       mintAddress: '',
-      accountAddress: '',
+      accountData: {},
     }
   }
 
@@ -49,9 +49,10 @@ class AccountSelection extends Component {
     });
   }
 
-  onAddress = (accountAddress) => {
+  onData = (accountData = {}) => {
     const { onChange } = this.props;
-    return this.setState({ accountAddress }, () => {
+    return this.setState({ accountData }, () => {
+      const { address: accountAddress } = accountData;
       return onChange(accountAddress);
     });
   }
@@ -59,20 +60,21 @@ class AccountSelection extends Component {
   render() {
     // const { classes } = this.props;
     const { label } = this.props;
-    const { accountAddress, mintAddress } = this.state;
+    const { accountData: { address, mint }, mintAddress } = this.state;
+    const { icon } = mint || {};
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
           label={label}
           variant="outlined"
-          value={accountAddress || ''}
+          value={address || ''}
           InputProps={{
-            startAdornment: <AccountAvatar address={accountAddress} marginRight />,
+            startAdornment: <AccountAvatar address={address} icon={icon} marginRight />,
             endAdornment: <AccountList
               mintAddress={mintAddress}
               size="medium"
-              onChange={this.onAddress}
+              onChange={this.onData}
               edge="end"
             />,
             readOnly: true

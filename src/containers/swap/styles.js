@@ -15,9 +15,13 @@ export default theme => ({
   },
   badge: {
     padding: 0,
+    height: 14,
+    width: 14,
+    minHeight: 14,
+    minWidth: 14,
   },
   badgeIcon: {
-    fontSize: '1rem'
+    fontSize: 10
   },
   verified: {
     background: 'linear-gradient(45deg, hsla(217, 100%, 50%, 1) 0%, hsla(186, 100%, 69%, 1) 100%)'
@@ -34,7 +38,7 @@ export default theme => ({
     paddingTop: `0px !important`
   },
   action: {
-    backgroundColor: '#F2F3F5',
+    backgroundColor: theme.palette.grey[200],
     borderRadius: theme.shape.borderRadius,
     paddingTop: theme.spacing(2)
   },

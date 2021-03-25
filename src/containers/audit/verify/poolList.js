@@ -142,15 +142,8 @@ class PoolList extends Component {
                   }
                   overlap="circle"
                   color={verified ? 'primary' : 'secondary'}
-                  classes={{
-                    badge: classes.badge,
-                    colorPrimary: classes.verified,
-                    colorSecondary: classes.unverified,
-                  }}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
+                  classes={{ badge: classes.badge, colorPrimary: classes.verified, colorSecondary: classes.unverified }}
+                  anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
                 >
                   <MintAvatar icon={icon} />
                 </Badge>

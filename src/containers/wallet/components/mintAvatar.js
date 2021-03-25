@@ -18,7 +18,8 @@ class MintAvatar extends Component {
     return <Tooltip title={title}>
       <Avatar
         className={classes.mintIcon}
-        src={icon} onClick={onClick}
+        src={icon}
+        onClick={onClick}
         style={{ marginRight: marginRight ? 8 : 0 }}
       >
         <HelpOutlineRounded />

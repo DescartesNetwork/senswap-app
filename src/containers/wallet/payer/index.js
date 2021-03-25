@@ -79,7 +79,7 @@ class Payer extends Component {
             <Grid item xs={12}>
               <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
                 <Grid item className={classes.stretch}>
-                  <Tooltip title="Account List">
+                  <Tooltip title="Multiple accounts (Coming soon)">
                     <IconButton color="secondary" size="small" onClick={this.onOpen}>
                       <MenuRounded />
                     </IconButton>

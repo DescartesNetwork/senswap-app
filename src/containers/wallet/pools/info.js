@@ -28,6 +28,8 @@ import {
   EcoRounded,
 } from '@material-ui/icons';
 
+import LPTAvatar from 'containers/wallet/components/lptAvatar';
+
 import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
@@ -67,6 +69,9 @@ function Row(props) {
         <IconButton size="small" onClick={onOpen}>
           <VisibilityRounded />
         </IconButton>
+      </TableCell>
+      <TableCell>
+        <LPTAvatar address={lptAddress} />
       </TableCell>
       <TableCell>
         <Typography>{lptAddress}</Typography>
@@ -210,6 +215,7 @@ class Info extends Component {
                     {loading ? <CircularProgress size={21} /> : <UpdateRounded />}
                   </IconButton>
                 </TableCell>
+                <TableCell />
                 <TableCell>
                   <Typography variant="body2">LPT Account</Typography>
                 </TableCell>

@@ -55,8 +55,9 @@ class TokenInfo extends Component {
     return setQRCode(true, address);
   }
 
-  onAddress = (accountAddress) => {
+  onData = (data = {}) => {
     const { setMainAccount } = this.props;
+    const { address: accountAddress } = data;
     return setMainAccount(accountAddress);
   }
 
@@ -64,6 +65,7 @@ class TokenInfo extends Component {
     const { classes } = this.props;
     const { data: { address, amount, state, mint } } = this.state;
     const symbol = state > 0 ? mint.symbol : 'UNKOWN';
+    const icon = state > 0 ? mint.icon : '';
     const balance = state > 0 ? utils.prettyNumber(utils.div(amount, global.BigInt(10 ** mint.decimals))) : 0;
 
     return <Grid container spacing={2}>
@@ -73,7 +75,7 @@ class TokenInfo extends Component {
       <Grid item xs={12}>
         <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
           <Grid item>
-            <AccountAvatar title="QR Code" address={address} onClick={this.onQRCode} />
+            <AccountAvatar title="QR Code" address={address} icon={icon} onClick={this.onQRCode} />
           </Grid>
           <Grid item className={classes.stretch}>
             <InputBase
@@ -84,7 +86,7 @@ class TokenInfo extends Component {
             />
           </Grid>
           <Grid item>
-            <AccountList onChange={this.onAddress} />
+            <AccountList onChange={this.onData} />
           </Grid>
         </Grid>
       </Grid>

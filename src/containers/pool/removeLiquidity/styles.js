@@ -5,29 +5,25 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
-  icon: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
+  badge: {
+    padding: 0,
+    height: 14,
+    width: 14,
+    minHeight: 14,
+    minWidth: 14,
   },
-  iconWithMarginRight: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
-    marginRight: theme.spacing(1),
+  badgeIcon: {
+    fontSize: 10
   },
   verified: {
-    padding: 0,
-    backgroundColor: theme.palette.info.main
+    background: 'linear-gradient(45deg, hsla(217, 100%, 50%, 1) 0%, hsla(186, 100%, 69%, 1) 100%)'
   },
   unverified: {
-    padding: 0,
-    backgroundColor: theme.palette.error.main
+    background: 'linear-gradient(45deg, hsla(333, 100%, 53%, 1) 0%, hsla(33, 94%, 57%, 1) 100%)'
   },
   tools: {
     width: `calc(100% - ${theme.spacing(2)}px)`,
     margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
-  },
-  badgeIcon: {
-    fontSize: '1rem'
   },
   subtitle: {
     fontSize: 10,
@@ -35,7 +31,7 @@ export default theme => ({
     color: theme.palette.text.secondary
   },
   action: {
-    backgroundColor: '#F2F3F5',
+    backgroundColor: theme.palette.grey[200],
     borderRadius: theme.shape.borderRadius,
     paddingTop: theme.spacing(2)
   },

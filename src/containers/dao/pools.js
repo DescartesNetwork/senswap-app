@@ -199,11 +199,12 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 Pools.defaultProps = {
+  networkAddress: '',
   readOnly: false,
 }
 
 Pools.propTypes = {
-  networkAddress: PropTypes.string.isRequired,
+  networkAddress: PropTypes.string,
   readOnly: PropTypes.bool,
 }
 

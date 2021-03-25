@@ -15,7 +15,6 @@ import Typography from '@material-ui/core/Typography';
 
 import { AddRounded, FlightTakeoffRounded } from '@material-ui/icons';
 
-import Drain from 'components/drain';
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 import Token from './token';
 
@@ -150,9 +149,6 @@ class InitializeNetwork extends Component {
     } = this.state;
 
     return <Grid container spacing={2}>
-      <Grid item xs={12} >
-        <Drain small />
-      </Grid>
       <Grid item xs={12}>
         <TextField
           label={name || 'Token'}
@@ -189,9 +185,6 @@ class InitializeNetwork extends Component {
           readOnly={index === 0}
         />
       </Grid>)}
-      <Grid item xs={12} >
-        <Drain small />
-      </Grid>
       <Grid item xs={12}>
         <Grid container spacing={2} className={classes.noWrap} alignItems="center">
           <Grid item className={classes.stretch}>
@@ -209,9 +202,6 @@ class InitializeNetwork extends Component {
             </Button>
           </Grid>
         </Grid>
-      </Grid>
-      <Grid item xs={12} >
-        <Drain />
       </Grid>
     </Grid>
   }

@@ -43,7 +43,6 @@ class AddLiquidity extends Component {
     this.state = {
       ...EMPTY,
       poolData: {},
-      srcAddress: '',
       srcData: {},
       lptAddress: '',
       amount: 0,
@@ -74,8 +73,9 @@ class AddLiquidity extends Component {
 
   onSourceAddress = (srcAddress) => {
     const { getAccountData, setError } = this.props;
+    if (!ssjs.isAddress(srcAddress)) return this.setState({ srcData: {} });
     return getAccountData(srcAddress).then(srcData => {
-      return this.setState({ srcAddress, srcData });
+      return this.setState({ srcData });
     }).catch(er => {
       return setError(er);
     });
@@ -115,7 +115,7 @@ class AddLiquidity extends Component {
   addLiquidity = () => {
     const { setError, unlockWallet } = this.props;
     const {
-      amount, srcAddress,
+      amount, srcData: { address: srcAddress },
       poolData: { state, address: poolAddress, mint, treasury },
     } = this.state;
     const { decimals } = mint || {}
@@ -129,7 +129,7 @@ class AddLiquidity extends Component {
         secretKey = re;
         return this.onAutogenLPTAddress(poolAddress, secretKey);
       }).then(lptAddress => {
-        const reserve = global.BigInt(parseFloat(amount) * 10 ** decimals);
+        const reserve = ssjs.decimalize(parseFloat(amount), decimals);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.addLiquidity(
           reserve,

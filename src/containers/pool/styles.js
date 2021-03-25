@@ -13,7 +13,7 @@ export default theme => ({
     fontWeight: 700,
   },
   navigation: {
-    background: 'linear-gradient(45deg, hsla(332, 53%, 82%, 1) 0%, hsla(176, 57%, 89%, 1) 100%)',
+    background: theme.palette.grey[100],
     borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0px 0px`,
     margin: `${-theme.spacing(2)}px ${-theme.spacing(2)}px 0px ${-theme.spacing(2)}px`
   }

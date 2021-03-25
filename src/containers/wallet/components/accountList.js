@@ -68,13 +68,13 @@ class AccountList extends Component {
     });
   }
 
-  onSelect = (accountAddress) => {
+  onSelect = (index = 0) => {
     const { onChange } = this.props;
     const { data } = this.state;
     if (!data || !data.length) return onChange('');
     return this.setState({ anchorEl: null }, () => {
-      const address = accountAddress || data[0].address || '';
-      return onChange(address);
+      const accountData = data[index] || {};
+      return onChange(accountData);
     });
   }
 
@@ -91,20 +91,21 @@ class AccountList extends Component {
     let groupedMintsData = {};
     data.forEach(({ address: accountAddress, mint }) => {
       const symbol = mint.symbol || 'Unknown';
+      const icon = mint.icon;
       const mintAddress = mint.address.substring(0, 6);
       const key = `${symbol} - ${mintAddress}`;
       if (!groupedMintsData[key]) groupedMintsData[key] = [];
-      groupedMintsData[key].push(accountAddress);
+      groupedMintsData[key].push({ accountAddress, icon });
     });
 
     let render = [];
     for (let key in groupedMintsData) {
       render.push(<ListSubheader key={key} disableSticky>{key}</ListSubheader>)
-      groupedMintsData[key].forEach(accountAddress => {
+      groupedMintsData[key].forEach(({ accountAddress, icon }) => {
         render.push(<MenuItem key={accountAddress} onClick={() => this.onSelect(accountAddress)}>
           <Grid container spacing={1} className={classes.noWrap} alignItems="center">
             <Grid item>
-              <AccountAvatar address={accountAddress} />
+              <AccountAvatar address={accountAddress} icon={icon} />
             </Grid>
             <Grid item className={classes.stretch}>
               <Typography className={classes.address}>{accountAddress}</Typography>
