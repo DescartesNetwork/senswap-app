@@ -68,13 +68,13 @@ class AccountList extends Component {
     });
   }
 
-  onSelect = (index = 0) => {
+  onSelect = (accountAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
     if (!data || !data.length) return onChange('');
     return this.setState({ anchorEl: null }, () => {
-      const accountData = data[index] || {};
-      return onChange(accountData);
+      const [accountData] = data.filter(({ address }) => address === accountAddress);
+      return onChange(accountData || {});
     });
   }
 
