@@ -281,7 +281,7 @@ class MintSelection extends Component {
           <Grid container spacing={2} className={classes.tools}>
             <Grid item xs={12}>
               <TextField
-                placeholder="Symbol"
+                placeholder="Symbol or Name"
                 value={search}
                 onChange={this.onSearch}
                 InputProps={{

@@ -62,24 +62,29 @@ class Swap extends Component {
 
   onBid = ({ amount: bidAmount, poolData: bidData, accountAddress: srcAddress }) => {
     return this.setState({ bidAmount, bidData, srcAddress }, () => {
-      const { setError } = this.props;
+      const { setError, getPoolData } = this.props;
       const { bidAmount, bidData, askData } = this.state;
       if (!bidAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
-      const { error, data } = oracle.curve(bidAmount, bidData, askData);
-      if (error) return setError(error);
-      const { slippage, ratio, amount: askAmount, fee } = data;
-      return this.setState({ slippage, ratio, askAmount, fee });
+      return oracle.curve(bidAmount, bidData, askData, getPoolData).then(data => {
+        const [{ slippage, ratio, amount: askAmount, fee }] = data;
+        return this.setState({ slippage, ratio, askAmount, fee });
+      }).catch(er => {
+        return setError(er);
+      });
     });
   }
 
   onAsk = ({ amount: askAmount, poolData: askData, accountAddress: dstAddress }) => {
     return this.setState({ askAmount, askData, dstAddress }, () => {
+      const { setError, getPoolData } = this.props;
       const { askAmount, bidData, askData } = this.state;
-      if (!askAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
-      const { error, data } = oracle.inverseCurve(askAmount, bidData, askData);
-      if (error) return setError(error);
-      const { slippage, ratio, amount: bidAmount, fee } = data;
-      return this.setState({ slippage, ratio, bidAmount, fee });
+      if (!askAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ slippage: 0, ratio: 0, bidAmount: 0 });
+      return oracle.inverseCurve(askAmount, bidData, askData, getPoolData).then(data => {
+        const [{ slippage, ratio, amount: bidAmount, fee }] = data;
+        return this.setState({ slippage, ratio, bidAmount, fee });
+      }).catch(er => {
+        return setError(er);
+      });
     });
   }
 
@@ -137,7 +142,7 @@ class Swap extends Component {
     let secretKey = null;
     let senPoolAddress = null;
     let senTreasuryAddress = null;
-    return this.setState({ loading: false }, () => {
+    return this.setState({ loading: true }, () => {
       return getPools({ mint: senAddress }).then(data => {
         return Promise.all(data.map(({ _id }) => getPool(_id)));
       }).then(([{ address }]) => {
