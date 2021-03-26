@@ -20,6 +20,9 @@ Oracle.curve = (bidAmount, bidData, askData) => {
     reserve: askReserve, lpt: askLPT
   } = askData;
 
+  if (!bidReserve || !bidLPT) return { error: 'Outdated bid pool', data: null };
+  if (!askReserve || !askLPT) return { error: 'Outdated ask pool', data: null };
+
   // Fee
   if (bidAddressNetwork !== askAddressNetwork) return { error: 'Unsupported routing', data: null };
   const fee = askPrimaryAddress === askMintAddress ? global.BigInt(2500000) : global.BigInt(3000000);
@@ -50,6 +53,9 @@ Oracle.inverseCurve = (askAmount, bidData, askData) => {
     mint: { address: askMintAddress },
     reserve: askReserve, lpt: askLPT
   } = askData;
+
+  if (!bidReserve || !bidLPT) return { error: 'Outdated bid pool', data: null };
+  if (!askReserve || !askLPT) return { error: 'Outdated ask pool', data: null };
 
   // Fee
   if (bidAddressNetwork !== askAddressNetwork) return { error: 'Unsupported routing', data: null };

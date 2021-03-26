@@ -2,6 +2,7 @@ import ssjs from 'senswapjs';
 
 import configs from 'configs';
 import storage from 'helpers/storage';
+import session from 'helpers/session';
 import api from 'helpers/api';
 
 
@@ -26,6 +27,7 @@ const defaultState = {
   },
   unlock: {
     visible: false,
+    remembered: '',
     callback: (er, re) => { },
   }
 }
@@ -282,7 +284,7 @@ export const unlockWallet = () => {
     return new Promise((resolve, reject) => {
       dispatch({ type: UNLOCK_WALLET });
 
-      const { wallet: { unlock: { visible: prevVisible } } } = getState();
+      const { wallet: { unlock: { visible: prevVisible }, remembered } } = getState();
       if (prevVisible) {
         const er = 'There is another pending request';
         dispatch({ type: UNLOCK_WALLET_FAIL, reason: er });
@@ -311,6 +313,13 @@ export const unlockWallet = () => {
         dispatch({ type: UNLOCK_WALLET_OK, data: { ...EMPTY_DATA } });
         return resolve(secretKey);
       }
+
+      // Remember me?
+      if (remembered) {
+        const password = session.get(remembered);
+        return callback(null, password);
+      }
+
       const data = { unlock: { visible: true, callback } }
       return dispatch({ type: UNLOCK_WALLET_PENDING, data });
     });
@@ -338,6 +347,47 @@ export const setMainAccount = (accountAddress) => {
 
       const data = { mainAccount: accountAddress };
       dispatch({ type: SET_MAIN_ACCOUNT_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
+ * Set remembered
+ */
+export const SET_REMEMBERED = 'SET_REMEMBERED';
+export const SET_REMEMBERED_OK = 'SET_REMEMBERED_OK';
+export const SET_REMEMBERED_FAIL = 'SET_REMEMBERED_FAIL';
+
+export const setRemembered = (password) => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: SET_REMEMBERED });
+
+      const { wallet: { remembered } } = getState();
+      if (remembered && password) {
+        const er = 'Already remembered';
+        dispatch({ type: SET_REMEMBERED_FAIL, reason: er });
+        return reject(er);
+      }
+      if (!remembered && !password) {
+        const er = 'Not yet remembered';
+        dispatch({ type: SET_REMEMBERED_FAIL, reason: er });
+        return reject(er);
+      }
+
+      // Forget
+      if (!password) {
+        const data = { remembered: '' };
+        dispatch({ type: SET_REMEMBERED_OK, data });
+        return resolve(data);
+      }
+      // Store to sessionStorage
+      const key = ssjs.salt();
+      session.set(key, password);
+      // Remember key
+      const data = { remembered: key };
+      dispatch({ type: SET_REMEMBERED_OK, data });
       return resolve(data);
     });
   }
@@ -389,6 +439,10 @@ export default (state = defaultState, action) => {
     case SET_MAIN_ACCOUNT_OK:
       return { ...state, ...action.data };
     case SET_MAIN_ACCOUNT_FAIL:
+      return { ...state, ...action.data };
+    case SET_REMEMBERED_OK:
+      return { ...state, ...action.data };
+    case SET_REMEMBERED_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

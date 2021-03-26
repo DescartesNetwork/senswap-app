@@ -74,7 +74,7 @@ class AccountList extends Component {
     if (!data || !data.length) return onChange('');
     return this.setState({ anchorEl: null }, () => {
       const [accountData] = data.filter(({ address }) => address === accountAddress);
-      return onChange(accountData || {});
+      return onChange(accountData || data[0]);
     });
   }
 

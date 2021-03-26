@@ -12,10 +12,12 @@ import DialogContent from '@material-ui/core/DialogContent';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
+import Switch from '@material-ui/core/Switch';
 
 import { CloseRounded, VisibilityRounded, VisibilityOffRounded } from '@material-ui/icons';
 
 import styles from './styles';
+import { setRemembered } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -24,11 +26,13 @@ const EMPTY = {
 }
 
 class Unlock extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
+    const { wallet: { unlock: { remembered } } } = props;
     this.state = {
-      ...EMPTY
+      ...EMPTY,
+      remembered: Boolean(remembered),
     }
   }
 
@@ -50,18 +54,28 @@ class Unlock extends Component {
   }
 
   onSubmit = () => {
-    const { wallet: { unlock: { callback } } } = this.props;
-    let { password } = this.state;
+    const { wallet: { unlock: { callback, remembered } }, setRemembered } = this.props;
+    const { password, remembered: newRemembered } = this.state;
     if (!password) return;
+
     return this.setState({ ...EMPTY }, () => {
+      if (Boolean(remembered) !== newRemembered) {
+        if (!newRemembered) setRemembered();
+        else setRemembered(password);
+      };
       return callback(null, password);
     });
+  }
+
+  onRemembered = (e) => {
+    const remembered = e.target.checked;
+    return this.setState({ remembered });
   }
 
   render() {
     const { classes } = this.props;
     const { wallet: { unlock: { visible } } } = this.props;
-    const { visiblePassword, password } = this.state;
+    const { visiblePassword, password, remembered } = this.state;
 
     return <Dialog open={visible} onClose={this.onClose}>
       <DialogTitle>
@@ -98,7 +112,31 @@ class Unlock extends Component {
             />
           </Grid>
           <Grid item xs={12}>
-            <Grid container spacing={2} justify="flex-end">
+            <Grid container spacing={2} className={classes.noWrap} alignItems="center">
+              <Grid item className={classes.stretch}>
+                <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+                  <Grid item>
+                    <Switch
+                      size="small"
+                      color="primary"
+                      checked={remembered}
+                      onChange={this.onRemembered}
+                    />
+                  </Grid>
+                  <Grid item>
+                    <Typography className={classes.subtitle}>Remember me?</Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item>
+                <Button
+                  color="secondary"
+                  onClick={this.onClose}
+                  fullWidth
+                >
+                  <Typography>Cancel</Typography>
+                </Button>
+              </Grid>
               <Grid item>
                 <Button
                   color="primary"
@@ -107,16 +145,6 @@ class Unlock extends Component {
                   fullWidth
                 >
                   <Typography>OK</Typography>
-                </Button>
-              </Grid>
-              <Grid item>
-                <Button
-                  color="secondary"
-                  variant="contained"
-                  onClick={this.onClose}
-                  fullWidth
-                >
-                  <Typography>Cancel</Typography>
                 </Button>
               </Grid>
             </Grid>
@@ -134,6 +162,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setRemembered,
 }, dispatch);
 
 export default withRouter(connect(
