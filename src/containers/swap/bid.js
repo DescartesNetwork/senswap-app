@@ -47,7 +47,10 @@ class Bid extends Component {
   componentDidUpdate(prevProps) {
     const { bucket: prevBucket, value: prevValue } = prevProps;
     const { bucket, value } = this.props;
-    if (!isEqual(value, prevValue)) this.setState({ value });
+    if (!isEqual(value, prevValue)) {
+      const pseudoEvent = { target: { value: value || '0' } }
+      this.onAmount(pseudoEvent);
+    }
     if (!isEqual(bucket, prevBucket)) this.fetchData();
   }
 

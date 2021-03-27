@@ -103,7 +103,7 @@ Oracle.pureInverseCurve = (askAmount, bidData, askData) => {
     const newBidReserve = ssjs.inverseCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const amount = newBidReserve - bidReserve;
+    const amount = newBidReserve - bidReserve + global.BigInt(1);
     return resolve([{ slippage, ratio, amount, fee }]);
   });
 }

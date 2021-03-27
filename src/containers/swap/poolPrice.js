@@ -54,7 +54,8 @@ class PoolPrice extends Component {
 
   unwatch = () => {
     if (!this.watchId) return;
-    return this.swap.connection.removeAccountChangeListener(this.watchId);
+    this.swap.connection.removeAccountChangeListener(this.watchId);
+    return this.watchId = null;
   }
 
   fetchData = () => {

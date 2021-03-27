@@ -28,6 +28,8 @@ import { getPoolData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
+  bidAmount: 0,
+  askAmount: 0,
   loading: false,
   txId: '',
 }
@@ -38,17 +40,10 @@ class Swap extends Component {
 
     this.state = {
       ...EMPTY,
-
       srcAddress: '',
-      bidAmount: 0,
-      bidAddress: '',
       bidData: {},
-
       dstAddress: '',
-      askAmount: 0,
-      askAddress: '',
       askData: {},
-
       fee: global.BigInt(3000000),
       ratio: 0,
     }
@@ -64,7 +59,7 @@ class Swap extends Component {
     return this.setState({ bidAmount, bidData, srcAddress }, () => {
       const { setError, getPoolData } = this.props;
       const { bidAmount, bidData, askData } = this.state;
-      if (!bidAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
+      if (!bidAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ ratio: 0, askAmount: 0 });
       return oracle.curve(bidAmount, bidData, askData, getPoolData).then(data => {
         const [{ slippage, ratio, amount: askAmount, fee }] = data;
         return this.setState({ slippage, ratio, askAmount, fee });
@@ -78,7 +73,7 @@ class Swap extends Component {
     return this.setState({ askAmount, askData, dstAddress }, () => {
       const { setError, getPoolData } = this.props;
       const { askAmount, bidData, askData } = this.state;
-      if (!askAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ slippage: 0, ratio: 0, bidAmount: 0 });
+      if (!askAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ ratio: 0, bidAmount: 0 });
       return oracle.inverseCurve(askAmount, bidData, askData, getPoolData).then(data => {
         const [{ slippage, ratio, amount: bidAmount, fee }] = data;
         return this.setState({ slippage, ratio, bidAmount, fee });
@@ -185,7 +180,7 @@ class Swap extends Component {
     const {
       bidAmount, bidData: { state: bidState, mint: bidMint },
       askAmount, askData: { state: askState, mint: askMint },
-      slippage, ratio, fee, txId, loading
+      ratio, fee, txId, loading
     } = this.state;
     const { decimals: bidDecimals, symbol: bidSymbol } = bidMint || {}
     const { decimals: askDecimals, symbol: askSymbol } = askMint || {}
@@ -217,9 +212,6 @@ class Swap extends Component {
                         </Grid>
                         <Grid item>
                           <Typography variant="h4" align="center"><span className={classes.subtitle}>{askSymbol}/{bidSymbol}</span> {utils.prettyNumber(ratio)}</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber(slippage * 100)}%</Typography>
                         </Grid>
                       </Grid>
                     </Grid>

@@ -45,8 +45,11 @@ Utils.prettyNumber = (num, type = 'long') => {
       return a;
     }).reverse().join('');
     if (!fraction) return separateNumber;
-    if (fraction.length > 4) fraction = fraction.substring(0, 4);
-    return separateNumber + '.' + fraction;
+    const precision = 6;
+    if (fraction.length > precision) fraction = fraction.substring(0, precision);
+    let re = separateNumber + '.' + fraction;
+    if (re === '0.' + '0'.repeat(precision)) re = '>0.' + '0'.repeat(precision - 1) + '1';
+    return re;
   }
 }
 
