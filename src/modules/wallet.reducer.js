@@ -306,8 +306,8 @@ export const unlockWallet = () => {
         const keystore = storage.get('keystore');
         const account = ssjs.fromKeystore(keystore, password);
         if (!account) {
-          er = 'Corrupted keystore / Incorrect password';
-          dispatch({ type: UNLOCK_WALLET_FAIL, data: { ...EMPTY_DATA }, reason: er });
+          er = 'Incorrect password';
+          dispatch({ type: UNLOCK_WALLET_FAIL, reason: er });
           return reject(er);
         }
         const secretKey = Buffer.from(account.secretKey).toString('hex');

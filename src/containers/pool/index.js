@@ -63,7 +63,7 @@ class Pool extends Component {
                         root: classes.tab,
                         selected: classes.selectedTab,
                       }}
-                      label="Deposit Liquidity"
+                      label="Add Liquidity"
                       value="/pool/add-liquidity"
                     />
                     <Tab

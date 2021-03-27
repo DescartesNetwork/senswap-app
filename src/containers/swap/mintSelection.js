@@ -101,7 +101,7 @@ class MintSelection extends Component {
     return new Promise((resolve, reject) => {
       const { wallet: { user: { mints } } } = this.props;
       const { new: { limit, page } } = this.state;
-      const condition = !mints.length ? {} : { '$and': mints.map(mintAddress => ({ '$or': [{ mint: { '$ne': mintAddress } }, { verified: false }] })) }
+      const condition = !mints.length ? {} : { '$and': mints.map(mintAddress => ({ mint: { '$ne': mintAddress }, verified: true })) }
       return this.fetchPools(condition, limit, page + 1).then(pools => {
         return this.setState({ new: { pools, limit, page: page + 1 } }, () => {
           if (pools.length) this.onSelect('new', 0);
