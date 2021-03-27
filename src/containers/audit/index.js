@@ -8,13 +8,13 @@ import Grid from '@material-ui/core/Grid';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-import { LockRounded } from '@material-ui/icons';
-
 import { BaseCard } from 'components/cards';
+import Ban from 'components/ban';
 import SubmitPool from './submit';
 import VerifyPool from './verify';
 
 import styles from './styles';
+import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { addPool } from 'modules/pool.reducer';
 
@@ -27,8 +27,14 @@ class Audit extends Component {
 
   render() {
     const { classes } = this.props;
-    const { location: { pathname } } = this.props;
+    const { location: { pathname }, wallet: { user: { role } } } = this.props;
+    const { basics: { permission } } = configs;
 
+    if (!permission.includes(role)) return <Grid container justify="center" spacing={2}>
+      <Grid item xs={11} lg={8}>
+        <Ban />
+      </Grid>
+    </Grid>
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} lg={8}>
         <Grid container justify="center" spacing={2}>
@@ -57,7 +63,6 @@ class Audit extends Component {
                       }}
                       label="Verify Pool"
                       value="/audit/verify-pool"
-                      icon={<LockRounded fontSize="small" />}
                     />
                   </Tabs>
                 </Grid>

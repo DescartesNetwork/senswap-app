@@ -15,6 +15,7 @@ const defaultState = {
   lamports: 0,
   user: {
     address: null,
+    role: 'user',
     mints: [],
     pools: [],
   },

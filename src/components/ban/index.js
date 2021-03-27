@@ -35,7 +35,7 @@ class Ban extends Component {
         </Grid>
       </Grid>
       <Grid item xs={11}>
-        <Typography align="center">This function is for users with permission such as <strong>admin</strong> or <strong>operator</strong> only.</Typography>
+        <Typography align="center">This function is for users with permission only.</Typography>
       </Grid>
       <Grid item xs={12} >
         <Drain small />

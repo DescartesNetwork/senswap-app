@@ -16,6 +16,7 @@ import MintAvatar from 'containers/wallet/components/mintAvatar';
 import MintSelection from 'containers/wallet/components/mintSelection';
 
 import styles from './styles';
+import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
 import { updateMint, deleteMint } from 'modules/mint.reducer';
@@ -101,10 +102,11 @@ class UpdateMint extends Component {
 
   render() {
     const { classes } = this.props;
+    const { basics: { permission } } = configs;
     const { wallet: { user: { role } } } = this.props;
     const { loading, data, ok } = this.state;
 
-    if (!['admin', 'operator'].includes(role)) return <Ban />
+    if (!permission.includes(role)) return <Ban />
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h6">Old info</Typography>

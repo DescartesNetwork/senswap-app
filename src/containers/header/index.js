@@ -47,21 +47,12 @@ class Header extends Component {
     }
   }
 
-  parseRoute = () => {
-    const { location: { pathname } } = this.props;
-    const route = pathname.split('/')[1];
-    return route;
-  }
-
   connectWallet = () => {
     return this.props.openWallet();
   }
 
   walletConnectionButton = () => {
-    const {
-      ui: { width },
-      wallet: { user: { address } },
-    } = this.props;
+    const { ui: { width }, wallet: { user: { address } } } = this.props;
     const text = address ? address.substring(0, 3) + '...' + address.substring(address.length - 3, address.length) : 'Connect Wallet';
     if (width >= 600) return <Grid item>
       <Button onClick={this.connectWallet} startIcon={<AccountAvatar address={address} title={address || text} />} >
@@ -90,10 +81,9 @@ class Header extends Component {
 
   render() {
     const { classes } = this.props;
-    const { ui: { width, advance } } = this.props;
-    const { sol: { cluster } } = configs;
+    const { sol: { cluster }, basics: { permission } } = configs;
+    const { ui: { advance }, wallet: { user: { role } } } = this.props;
     const { anchorEl } = this.state;
-    const currentRoute = this.parseRoute();
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11}>
@@ -118,44 +108,16 @@ class Header extends Component {
           </Grid>
           {/* Menu */}
           <Grid item className={classes.stretch}>
-            <Grid container alignItems="center" justify="flex-end" spacing={width >= 600 ? 5 : 2}>
-              {/* Pool */}
+            <Grid container alignItems="center" justify="flex-end" spacing={3}>
               <Grid item>
-                <Tooltip title="Pool">
-                  <IconButton
-                    size="small"
-                    color={currentRoute === 'pool' ? 'primary' : 'secondary'}
-                    component={RouterLink}
-                    to={'/pool'}
-                  >
-                    <LocalGasStationRounded />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-              {/* Swap */}
-              <Grid item>
-                <Tooltip title="Swap">
-                  <IconButton
-                    size="small"
-                    color={currentRoute === 'swap' ? 'primary' : 'secondary'}
-                    component={RouterLink}
-                    to={'/swap'}
-                  >
-                    <SwapCallsRounded />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
-              {/* Others */}
-              <Grid item>
-                <Tooltip title="Others">
-                  <IconButton
-                    color={currentRoute !== 'pool' && currentRoute !== 'swap' ? 'primary' : 'secondary'}
-                    size="small"
-                    onClick={this.onOpenOthers}
-                  >
-                    <WidgetsRounded />
-                  </IconButton>
-                </Tooltip>
+                <Button
+                  variant="contained"
+                  onClick={this.onOpenOthers}
+                  color="secondary"
+                  startIcon={<WidgetsRounded />}
+                >
+                  <Typography>Menu</Typography>
+                </Button>
                 <Popover
                   anchorEl={anchorEl}
                   open={Boolean(anchorEl)}
@@ -165,17 +127,17 @@ class Header extends Component {
                   transformOrigin={{ vertical: 'top', horizontal: 'center' }}
                 >
                   <List>
-                    <ListItem button component={RouterLink} to={'/dao'}>
+                    <ListItem button component={RouterLink} to={'/swap'}>
                       <ListItemIcon>
-                        <GroupWorkRounded color="secondary" />
+                        <SwapCallsRounded color="secondary" />
                       </ListItemIcon>
-                      <ListItemText primary="SenDAO" secondary="Permission required" />
+                      <ListItemText primary="Swap" />
                     </ListItem>
-                    <ListItem button component={RouterLink} to={'/faucet'}>
+                    <ListItem button component={RouterLink} to={'/pool/add-liquidity'}>
                       <ListItemIcon>
-                        <ColorizeRounded color="secondary" />
+                        <LocalGasStationRounded color="secondary" />
                       </ListItemIcon>
-                      <ListItemText primary="SenFaucet" secondary="Devnet only" />
+                      <ListItemText primary="Liquidity Provision" />
                     </ListItem>
                     <ListItem button component={RouterLink} to={'/issuer'}>
                       <ListItemIcon>
@@ -183,12 +145,24 @@ class Header extends Component {
                       </ListItemIcon>
                       <ListItemText primary="SenIssuer" />
                     </ListItem>
-                    <ListItem button component={RouterLink} to={'/audit'}>
+                    <ListItem button component={RouterLink} to={'/faucet'} disabled={cluster !== 'devnet'}>
+                      <ListItemIcon>
+                        <ColorizeRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="SenFaucet" secondary="Devnet only" />
+                    </ListItem>
+                    {permission.includes(role) ? <ListItem button component={RouterLink} to={'/dao'}>
+                      <ListItemIcon>
+                        <GroupWorkRounded color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText primary="SenDAO" secondary="Permission required" />
+                    </ListItem> : null}
+                    {permission.includes(role) ? <ListItem button component={RouterLink} to={'/audit'}>
                       <ListItemIcon>
                         <VerifiedUserRounded color="secondary" />
                       </ListItemIcon>
-                      <ListItemText primary="SenAudit" />
-                    </ListItem>
+                      <ListItemText primary="SenAudit" secondary="Permission required" />
+                    </ListItem> : null}
                     <Divider />
                     <ListItem button component={RouterLink} to={'/tokenomic'} target="_blank" rel="noopener" disabled>
                       <ListItemIcon>

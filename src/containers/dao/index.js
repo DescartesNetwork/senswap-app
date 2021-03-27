@@ -16,15 +16,17 @@ import InitializeNetwork from './intializeNetwork';
 import NetworkInfo from './info';
 
 import styles from './styles';
+import configs from 'configs';
 
 class DAO extends Component {
 
   render() {
     const { classes } = this.props;
     const { wallet: { user: { role } } } = this.props;
+    const { basics: { permission } } = configs;
 
-    if (!['admin', 'operator'].includes(role)) return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11}>
+    if (!permission.includes(role)) return <Grid container justify="center" spacing={2}>
+      <Grid item xs={11} lg={8}>
         <Ban />
       </Grid>
     </Grid>

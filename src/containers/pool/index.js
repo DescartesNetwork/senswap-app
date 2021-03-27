@@ -63,7 +63,7 @@ class Pool extends Component {
                         root: classes.tab,
                         selected: classes.selectedTab,
                       }}
-                      label="Add Liquidity"
+                      label="Deposit Liquidity"
                       value="/pool/add-liquidity"
                     />
                     <Tab
@@ -71,7 +71,7 @@ class Pool extends Component {
                         root: classes.tab,
                         selected: classes.selectedTab,
                       }}
-                      label="Remove Liquidity"
+                      label="Withdraw Liquidity"
                       value="/pool/remove-liquidity"
                     />
                   </Tabs>
