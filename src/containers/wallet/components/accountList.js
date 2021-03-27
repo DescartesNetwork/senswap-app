@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -82,7 +83,7 @@ class AccountList extends Component {
     const { data } = this.state;
     const accountData = data.find(({ address }) => address === accountAddress);
     const { amount, mint: { decimals } } = accountData;
-    return utils.prettyNumber(utils.div(amount, global.BigInt(10 ** decimals)));
+    return utils.prettyNumber(ssjs.undecimalize(amount, decimals));
   }
 
   renderGroupedMintsData = () => {

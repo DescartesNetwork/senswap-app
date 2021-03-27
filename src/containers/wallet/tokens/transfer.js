@@ -58,7 +58,7 @@ class TokenTransfer extends Component {
     const { wallet: { mainAccount }, getAccountData, setError } = this.props;
     return getAccountData(mainAccount).then(data => {
       const { amount, mint } = data;
-      return this.setState({ amount: utils.div(amount, global.BigInt(10 ** mint.decimals)).toString() });
+      return this.setState({ amount: ssjs.undecimalize(amount, mint.decimals) });
     }).catch(er => {
       return setError(er);
     });

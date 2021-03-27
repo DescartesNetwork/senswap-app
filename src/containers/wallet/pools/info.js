@@ -57,10 +57,10 @@ function Row(props) {
   const classes = makeStyles(styles)();
 
   if (!is_initialized) return null;
-  const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
-  const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
-  const price = ssjs.div(poolLPT, poolReserve);
-  const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** mint.decimals)));
+  const totalSupply = utils.prettyNumber(ssjs.undecimalize(mint.supply, mint.decimals));
+  const lptAmount = utils.prettyNumber(ssjs.undecimalize(lpt, mint.decimals));
+  const price = utils.prettyNumber(ssjs.div(poolLPT, poolReserve));
+  const reserve = utils.prettyNumber(ssjs.undecimalize(poolReserve, mint.decimals));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);
   return <Fragment>
