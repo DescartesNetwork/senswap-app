@@ -25,7 +25,7 @@ class SwapInfo extends Component {
     const { data } = this.props;
 
     return <Grid container spacing={2} justify="center" alignItems="center">
-      {data.map(({ bidData, askData, fee, ratio }) => <Grid item xs={11}>
+      {data.map(({ bidData, askData, fee, ratio }, index) => <Grid key={index} item xs={11}>
         <Zoom in={true}>
           <Grid container spacing={2} className={classes.noWrap} alignItems="center">
             <Grid item>
