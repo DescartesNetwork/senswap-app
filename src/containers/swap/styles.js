@@ -49,4 +49,7 @@ export default theme => ({
       boxShadow: theme.shadows[4],
     },
   },
+  buttonGroup: {
+    marginRight: -6
+  }
 });

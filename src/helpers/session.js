@@ -10,14 +10,14 @@ const session = {}
 
 session.set = (key, value) => {
   const hash = ssjs.crypto.hash(key);
-  const cypher = ssjs.crypto.encrypt(hash, value + hash);
+  const cypher = ssjs.crypto.encrypt(key, value + hash);
   return db.setItem(hash, cypher);
 }
 
 session.get = (key) => {
   const hash = ssjs.crypto.hash(key);
   const cypher = db.getItem(hash);
-  const plain = ssjs.crypto.decrypt(hash, cypher);
+  const plain = ssjs.crypto.decrypt(key, cypher);
   const data = plain.replace(hash, '');
   return data;
 }
