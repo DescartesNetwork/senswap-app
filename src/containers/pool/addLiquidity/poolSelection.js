@@ -11,8 +11,8 @@ import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
 import Badge from '@material-ui/core/Badge';
 import Tooltip from '@material-ui/core/Tooltip';
 
@@ -34,7 +34,7 @@ class PoolSelection extends Component {
 
     this.state = {
       anchorEl: null,
-      index: 0,
+      selected: '',
       pools: [],
     }
   }
@@ -72,19 +72,18 @@ class PoolSelection extends Component {
       }));
     }).then(data => {
       return this.setState({ pools: data }, () => {
-        return this.onSelect(0);
+        return this.onSelect(data[0].address);
       });
     }).catch(er => {
       return setError(er);
     });
   }
 
-  onSelect = (index) => {
-    return this.setState({ index }, () => {
-      const { pools } = this.state;
-      if (!pools.length) return;
-      this.onClose();
-      return this.props.onChange(pools[index]);
+  onSelect = (poolAddress) => {
+    const { onChange } = this.props;
+    return this.setState({ selected: poolAddress }, () => {
+      onChange(poolAddress);
+      return this.onClose();
     });
   }
 
@@ -123,31 +122,45 @@ class PoolSelection extends Component {
     </Grid>
   }
 
-  renderPools = () => {
+  renderGroupedPoolsData = () => {
     const { pools } = this.state;
-    if (!pools.length) return null;
-    return <MenuList>
-      {pools.map((pool, index) => {
-        const { address, verified, mint: { name, icon } } = pool;
-        return <MenuItem key={address} onClick={() => this.onSelect(index)}>
-          {this.renderMint(name, icon, address, verified)}
-        </MenuItem>
-      })}
-    </MenuList>
+    if (!pools.length) return <ListSubheader disableSticky>No data</ListSubheader>
+
+    let groupedPoolsData = {};
+    pools.forEach(({ address, verified, network, mint }) => {
+      const networkAddress = network.address.substring(0, 6);
+      const key = `Network: ${networkAddress}`;
+      if (!groupedPoolsData[key]) groupedPoolsData[key] = [];
+      groupedPoolsData[key].push({ address, verified, mint });
+    });
+
+    let render = [];
+    for (let key in groupedPoolsData) {
+      render.push(<ListSubheader key={key} disableSticky>{key}</ListSubheader>)
+      groupedPoolsData[key].forEach(({ address, verified, mint: { name, icon } }) => {
+        render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
+          {this.renderMint(name || 'Unknown', icon, address, verified)}
+        </MenuItem>);
+      });
+    }
+
+    return render;
   }
 
   render() {
     const { classes } = this.props;
-    const { anchorEl, index, pools } = this.state;
+    const { anchorEl, selected, pools } = this.state;
 
-    const { verified, mint } = pools[index] || {};
-    const { symbol, icon } = mint || {};
+    const { verified, mint: { symbol, icon } } = pools.filter(({ address }) => (address === selected))[0] || {
+      verified: false,
+      mint: { symbol: 'Unknown', icon: '' }
+    }
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <TextField
           variant="outlined"
-          value={symbol || 'Unkown'}
+          value={symbol}
           onClick={this.onOpen}
           InputProps={{
             startAdornment: <Badge
@@ -168,12 +181,8 @@ class PoolSelection extends Component {
           }}
           fullWidth
         />
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={this.onClose}
-        >
-          {this.renderPools()}
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={this.onClose}>
+          {this.renderGroupedPoolsData()}
         </Menu>
       </Grid>
     </Grid>

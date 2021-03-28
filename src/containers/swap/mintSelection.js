@@ -41,8 +41,6 @@ class MintSelection extends Component {
       anchorEl: null,
       selected: '',
       pools: [],
-      limit: 5,
-      page: -1,
       search: '',
       searched: {
         pools: [],
@@ -51,21 +49,20 @@ class MintSelection extends Component {
   }
 
   componentDidMount() {
-    this.fectData();
+    this.fetchData();
   }
 
   componentDidUpdate(prevProps) {
     const { wallet: { user: { mints: prevMints } } } = prevProps;
     const { wallet: { user: { mints } } } = this.props;
-    if (!isEqual(mints, prevMints)) this.fectData();
+    if (!isEqual(mints, prevMints)) this.fetchData();
   }
 
-  fectData = () => {
+  fetchData = () => {
     const { wallet: { user: { mints } }, setError } = this.props;
-    const { limit, page } = this.state;
     const condition = !mints.length ? { verified: true } : { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
-    return this.fetchPools(condition, limit, page + 1).then(pools => {
-      return this.setState({ pools, limit, page: page + 1 }, () => {
+    return this.fetchPools(condition, mints.length, 0).then(pools => {
+      return this.setState({ pools }, () => {
         if (pools.length) this.onSelect(pools[0].address);
       });
     }).catch(er => {
@@ -104,7 +101,7 @@ class MintSelection extends Component {
     const search = e.target.value || '';
     if (search.length > 20) return;
     return this.setState({ search }, () => {
-      if (!search) return this.fectData();
+      if (!search) return this.fetchData();
       if (search.length < 2) return this.setState({ pools: [] });
       const condition = {
         '$or': [

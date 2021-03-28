@@ -209,10 +209,10 @@ class RemoveLiquidity extends Component {
           <Grid item xs={12}>
             <Grid container justify="space-around" spacing={2}>
               <Grid item>
-                <Typography variant="h4" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
+                <Typography variant="h6" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
               </Grid>
               <Grid item>
-                <Typography variant="h4" align="center"><span className={classes.subtitle}>Value</span> {utils.prettyNumber(ssjs.undecimalize(value, decimals))}</Typography>
+                <Typography variant="h6" align="center"><span className={classes.subtitle}>Value</span> {utils.prettyNumber(ssjs.undecimalize(value, decimals))}</Typography>
               </Grid>
             </Grid>
           </Grid>
