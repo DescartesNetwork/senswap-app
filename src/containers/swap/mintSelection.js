@@ -61,7 +61,7 @@ class MintSelection extends Component {
   fetchData = () => {
     const { wallet: { user: { mints } }, setError } = this.props;
     const condition = !mints.length ? { verified: true } : { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
-    return this.fetchPools(condition, mints.length, 0).then(pools => {
+    return this.fetchPools(condition, 10, 0).then(pools => {
       return this.setState({ pools }, () => {
         if (pools.length) this.onSelect(pools[0].address);
       });

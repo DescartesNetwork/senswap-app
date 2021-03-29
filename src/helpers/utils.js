@@ -38,7 +38,7 @@ Utils.prettyNumber = (num, type = 'long') => {
   }
 
   if (type === 'long') {
-    num = String(num)
+    num = num.toFixed(9);
     let [decimal, fraction] = num.split('.');
     let separateNumber = decimal.split('').reverse().map((a, i) => {
       if (i > 1 && i % 3 === 0) return a + ',';
@@ -48,7 +48,7 @@ Utils.prettyNumber = (num, type = 'long') => {
     const precision = 6;
     if (fraction.length > precision) fraction = fraction.substring(0, precision);
     let re = separateNumber + '.' + fraction;
-    if (re === '0.' + '0'.repeat(precision)) re = '>0.' + '0'.repeat(precision - 1) + '1';
+    if (re === '0.' + '0'.repeat(precision)) re = '<0.' + '0'.repeat(precision - 1) + '1';
     return re;
   }
 }
