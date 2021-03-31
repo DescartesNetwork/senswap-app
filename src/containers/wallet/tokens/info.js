@@ -66,11 +66,11 @@ class TokenInfo extends Component {
     const { data: { address, amount, state, mint } } = this.state;
     const symbol = state > 0 ? mint.symbol : 'UNKOWN';
     const icon = state > 0 ? mint.icon : '';
-    const balance = state > 0 ? utils.prettyNumber(utils.div(amount, global.BigInt(10 ** mint.decimals))) : 0;
+    const balance = state > 0 ? ssjs.undecimalize(amount, mint.decimals) : '0';
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="h4">{balance} {symbol}</Typography>
+        <Typography variant="h4">{utils.prettyNumber(balance)} {symbol}</Typography>
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={1} alignItems="center" className={classes.noWrap}>

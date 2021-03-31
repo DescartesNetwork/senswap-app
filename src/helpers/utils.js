@@ -14,8 +14,8 @@ Utils.scrollTop = () => {
 
 Utils.prettyNumber = (num, type = 'long') => {
   if (num === 0) return 0;
+  if (typeof num !== 'number') num = parseFloat(num);
   if (!num) return null;
-  if (typeof num !== 'number') return null;
   if (num > 1e19) return null;
   if (num < -1e19) return null;
 
@@ -38,15 +38,18 @@ Utils.prettyNumber = (num, type = 'long') => {
   }
 
   if (type === 'long') {
-    num = String(num)
+    num = num.toFixed(9);
     let [decimal, fraction] = num.split('.');
     let separateNumber = decimal.split('').reverse().map((a, i) => {
       if (i > 1 && i % 3 === 0) return a + ',';
       return a;
     }).reverse().join('');
     if (!fraction) return separateNumber;
-    if (fraction.length > 4) fraction = fraction.substring(0, 4);
-    return separateNumber + '.' + fraction;
+    const precision = 6;
+    if (fraction.length > precision) fraction = fraction.substring(0, precision);
+    let re = separateNumber + '.' + fraction;
+    if (re === '0.' + '0'.repeat(precision)) re = '<0.' + '0'.repeat(precision - 1) + '1';
+    return re;
   }
 }
 
@@ -80,19 +83,6 @@ Utils.isEmail = (email) => {
   const domainParts = address.split('.');
   if (domainParts.some(p => p.length > 63)) return false;
   return true;
-}
-
-Utils.div = (a, b) => {
-  if (!a) return 0;
-  if (!b) throw new Error('Divided by zero');
-  let floor = Number(a / b);
-  let decimals = 0n;
-  for (let i = 0; i < 9; i++) {
-    a = (a % b) * 10n;
-    decimals = decimals * 10n + a / b;
-  }
-  decimals = Number(decimals) / (10 ** 9);
-  return floor + decimals;
 }
 
 Utils.explorer = (addressOrTxId) => {

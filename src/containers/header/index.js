@@ -106,9 +106,10 @@ class Header extends Component {
               </Grid>
             </Link>
           </Grid>
-          {/* Menu */}
+          {/* Action */}
           <Grid item className={classes.stretch}>
             <Grid container alignItems="center" justify="flex-end" spacing={3}>
+              {/* Menu */}
               <Grid item>
                 <Button
                   variant="contained"

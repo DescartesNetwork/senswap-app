@@ -54,7 +54,8 @@ class PoolPrice extends Component {
 
   unwatch = () => {
     if (!this.watchId) return;
-    return this.swap.connection.removeAccountChangeListener(this.watchId);
+    this.swap.connection.removeAccountChangeListener(this.watchId);
+    return this.watchId = null;
   }
 
   fetchData = () => {
@@ -62,7 +63,7 @@ class PoolPrice extends Component {
     if (!ssjs.isAddress(address)) return this.setState({ price: 0 });
     return getPoolData(address, true).then(data => {
       const { lpt, reserve } = data;
-      const price = ssjs.div(lpt, reserve);
+      const price = utils.prettyNumber(ssjs.div(lpt, reserve));
       return this.setState({ price });
     }).catch(er => {
       return setError(er);
@@ -72,7 +73,7 @@ class PoolPrice extends Component {
   render() {
     const { classes } = this.props;
     const { price } = this.state;
-    return <Typography variant="h5" noWrap><span className={classes.subtitle}>Price</span> ${utils.prettyNumber(price)}</Typography>
+    return <Typography variant="h5" noWrap><span className={classes.subtitle}>Price</span> ${price}</Typography>
   }
 }
 

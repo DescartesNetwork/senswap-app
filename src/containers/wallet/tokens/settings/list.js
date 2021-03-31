@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -55,8 +56,8 @@ class ListTokenAccount extends Component {
       </Grid>
       {data.map(({ address, amount, state, mint }) => {
         if (!state) return null;
-        const balance = utils.prettyNumber(utils.div(amount, global.BigInt(10 ** mint.decimals)));
-        const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
+        const balance = utils.prettyNumber(ssjs.undecimalize(amount, mint.decimals));
+        const totalSupply = utils.prettyNumber(ssjs.undecimalize(mint.supply, mint.decimals));
 
         return <Grid key={address} item xs={12}>
           <Grid container spacing={2}>

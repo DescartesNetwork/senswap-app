@@ -204,10 +204,10 @@ class AddLiquidity extends Component {
           <Grid item xs={12}>
             <Grid container justify="space-around" spacing={2}>
               <Grid item>
-                <Typography variant="h4" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
+                <Typography variant="h6" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
               </Grid>
               <Grid item>
-                <Typography variant="h4" align="center"><span className={classes.subtitle}>Price</span> {utils.prettyNumber(ssjs.div(lpt, reserve))}</Typography>
+                <Typography variant="h6" align="center"><span className={classes.subtitle}>Price</span> {utils.prettyNumber(ssjs.div(lpt, reserve))}</Typography>
               </Grid>
             </Grid>
           </Grid>

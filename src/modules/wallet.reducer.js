@@ -384,7 +384,7 @@ export const setRemembered = (password) => {
         return resolve(data);
       }
       // Store to sessionStorage
-      const key = ssjs.salt();
+      const key = ssjs.crypto.hash(ssjs.salt());
       session.set(key, password);
       // Remember key
       const data = { remembered: key };

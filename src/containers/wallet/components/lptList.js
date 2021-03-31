@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
@@ -77,7 +78,7 @@ class LPTList extends Component {
     const { data } = this.state;
     const lptData = data.find(({ address }) => address === lptAddress);
     const { lpt, pool: { mint: { decimals } } } = lptData;
-    return utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** decimals)));
+    return utils.prettyNumber(ssjs.undecimalize(lpt, decimals));
   }
 
   renderGroupedMintsData = () => {

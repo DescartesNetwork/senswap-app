@@ -25,6 +25,7 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
+import { getPool, getPools } from 'modules/pool.reducer';
 import { getAccountData, getPoolData } from 'modules/bucket.reducer';
 
 
@@ -38,6 +39,7 @@ class Bid extends Component {
       accountData: {},
       poolAddress: '',
       poolData: {},
+      primaryPoolData: {},
       percentage: 0,
     }
 
@@ -47,7 +49,10 @@ class Bid extends Component {
   componentDidUpdate(prevProps) {
     const { bucket: prevBucket, value: prevValue } = prevProps;
     const { bucket, value } = this.props;
-    if (!isEqual(value, prevValue)) this.setState({ value });
+    if (!isEqual(value, prevValue)) {
+      const pseudoEvent = { target: { value: value || '0' } }
+      this.onAmount(pseudoEvent);
+    }
     if (!isEqual(bucket, prevBucket)) this.fetchData();
   }
 
@@ -75,11 +80,22 @@ class Bid extends Component {
   }
 
   fetchData = () => {
-    const { setError, getPoolData } = this.props;
+    const { setError, getPoolData, getPool, getPools } = this.props;
     const { poolAddress } = this.state;
     if (!ssjs.isAddress(poolAddress)) return this.setState({ poolData: {} }, this.returnData);
+
+    let poolData = {}
     return getPoolData(poolAddress).then(data => {
-      return this.setState({ poolData: { ...data } }, () => {
+      poolData = data;
+      const { network: { address: networkAddress, primary: { address: primaryAddress } } } = data;
+      const condition = { network: networkAddress, mint: primaryAddress }
+      return getPools(condition, 1, 0);
+    }).then(([{ _id }]) => {
+      return getPool(_id);
+    }).then(({ address: primaryPoolAddress }) => {
+      return getPoolData(primaryPoolAddress);
+    }).then(primaryPoolData => {
+      return this.setState({ poolData, primaryPoolData }, () => {
         const { accountData: { address: accountAddress } } = this.state;
         if (!ssjs.isAddress(accountAddress)) return this.returnData();
         return this.onAccountAddress(accountAddress);
@@ -101,8 +117,8 @@ class Bid extends Component {
 
   returnData = () => {
     const { onChange } = this.props;
-    const { amount, poolData, accountData: { address: accountAddress } } = this.state;
-    return onChange({ amount, poolData, accountAddress });
+    const { amount, poolData, primaryPoolData, accountData: { address: accountAddress } } = this.state;
+    return onChange({ amount, poolData, primaryPoolData, accountAddress });
   }
 
   render() {
@@ -125,7 +141,13 @@ class Bid extends Component {
           value={value}
           onChange={this.onAmount}
           InputProps={{
-            endAdornment: <ToggleButtonGroup size="small" value={percentage} onChange={this.onPercentage} exclusive>
+            endAdornment: <ToggleButtonGroup
+              size="small"
+              value={percentage}
+              onChange={this.onPercentage}
+              className={classes.buttonGroup}
+              exclusive
+            >
               <ToggleButton value={25}>
                 <Tooltip title="Use 25% of the available balance">
                   <Typography className={classes.subtitle}>25%</Typography>
@@ -171,12 +193,14 @@ class Bid extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
+  pool: state.pool,
   bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
+  getPool, getPools,
   getAccountData, getPoolData,
 }, dispatch);
 

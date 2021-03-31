@@ -13,7 +13,6 @@ import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -40,18 +39,8 @@ class MintSelection extends Component {
 
     this.state = {
       anchorEl: null,
-      type: 'recommended',
-      index: 0,
-      recommended: {
-        pools: [],
-        limit: 5,
-        page: -1
-      },
-      new: {
-        pools: [],
-        limit: 5,
-        page: -1
-      },
+      selected: '',
+      pools: [],
       search: '',
       searched: {
         pools: [],
@@ -60,56 +49,24 @@ class MintSelection extends Component {
   }
 
   componentDidMount() {
-    this.fectData();
+    this.fetchData();
   }
 
   componentDidUpdate(prevProps) {
     const { wallet: { user: { mints: prevMints } } } = prevProps;
     const { wallet: { user: { mints } } } = this.props;
-    if (!isEqual(mints, prevMints)) this.fectData();
+    if (!isEqual(mints, prevMints)) this.fetchData();
   }
 
-  fectData = () => {
-    const { setError } = this.props;
-    return this.fetchRecommendedPools().then(() => {
-      return this.fetchNewPools();
-    }).then(() => {
-      // Nothing
+  fetchData = () => {
+    const { wallet: { user: { mints } }, setError } = this.props;
+    const condition = !mints.length ? { verified: true } : { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
+    return this.fetchPools(condition, 10, 0).then(pools => {
+      return this.setState({ pools }, () => {
+        if (pools.length) this.onSelect(pools[0].address);
+      });
     }).catch(er => {
       return setError(er);
-    });
-  }
-
-  fetchRecommendedPools = () => {
-    return new Promise((resolve, reject) => {
-      const { wallet: { user: { mints } } } = this.props;
-      const { recommended: { limit, page } } = this.state;
-      if (!mints.length) return resolve();
-      const condition = { '$or': mints.map(mintAddress => ({ mint: mintAddress, verified: true })) }
-      return this.fetchPools(condition, limit, page + 1).then(pools => {
-        return this.setState({ recommended: { pools, limit, page: page + 1 } }, () => {
-          if (pools.length) this.onSelect('recommended', 0);
-          return resolve();
-        });
-      }).catch(er => {
-        return reject(er);
-      });
-    });
-  }
-
-  fetchNewPools = () => {
-    return new Promise((resolve, reject) => {
-      const { wallet: { user: { mints } } } = this.props;
-      const { new: { limit, page } } = this.state;
-      const condition = !mints.length ? {} : { '$and': mints.map(mintAddress => ({ mint: { '$ne': mintAddress }, verified: true })) }
-      return this.fetchPools(condition, limit, page + 1).then(pools => {
-        return this.setState({ new: { pools, limit, page: page + 1 } }, () => {
-          if (pools.length) this.onSelect('new', 0);
-          return resolve();
-        });
-      }).catch(er => {
-        return reject(er);
-      });
     });
   }
 
@@ -132,12 +89,10 @@ class MintSelection extends Component {
     });
   }
 
-  onSelect = (type, index) => {
+  onSelect = (poolAddress) => {
     const { onChange } = this.props;
-    const { [type]: { pools } } = this.state;
-    return this.setState({ type, index }, () => {
-      const { address } = pools[index];
-      onChange(address);
+    return this.setState({ selected: poolAddress }, () => {
+      onChange(poolAddress);
       return this.onClose();
     });
   }
@@ -146,19 +101,24 @@ class MintSelection extends Component {
     const search = e.target.value || '';
     if (search.length > 20) return;
     return this.setState({ search }, () => {
-      const { search: value } = this.state;
-      if (value.length < 2) return this.setState({ searched: { pools: [] } });
-      const condition = { '$or': [{ symbol: { '$regex': value, '$options': 'gi' } }, { name: { '$regex': value, '$options': 'gi' } }] }
+      if (!search) return this.fetchData();
+      if (search.length < 2) return this.setState({ pools: [] });
+      const condition = {
+        '$or': [
+          { symbol: { '$regex': search, '$options': 'gi' } },
+          { name: { '$regex': search, '$options': 'gi' } }
+        ]
+      }
       const { getMints, getMint } = this.props;
       return getMints(condition, 1000, 0).then(data => {
         return Promise.all(data.map(({ _id }) => getMint(_id)));
       }).then(mints => {
-        const condition = { '$or': mints.map(({ address: mintAddress }) => ({ mint: mintAddress })) }
+        const condition = { '$or': mints.map(({ address: mintAddress }) => ({ mint: mintAddress, verified: true })) }
         return this.fetchPools(condition, 1000, 0);
       }).then(pools => {
-        return this.setState({ searched: { pools } });
+        return this.setState({ pools });
       }).catch(er => {
-        return this.setState({ searched: { pools: [] } });
+        return this.setState({ pools: [] });
       });
     });
   }
@@ -198,63 +158,41 @@ class MintSelection extends Component {
     </Grid>
   }
 
-  renderRecommendedPools = () => {
-    const { recommended: { pools }, search } = this.state;
-    if (!pools.length || search) return null;
-    return <MenuList>
-      <ListSubheader disableSticky>Recommended pools</ListSubheader>
-      {pools.map((pool, index) => {
-        const { address, verified, mint: { name, icon } } = pool;
-        return <MenuItem key={address} onClick={() => this.onSelect('recommended', index)}>
-          {this.renderMint(name || address, icon, address, verified)}
-        </MenuItem>
-      })}
-    </MenuList>
-  }
+  renderGroupedPoolsData = () => {
+    const { pools } = this.state;
+    if (!pools.length) return <ListSubheader disableSticky>No data</ListSubheader>
 
-  renderNewPools = () => {
-    const { new: { pools }, search } = this.state;
-    if (!pools.length || search) return null;
-    return <MenuList>
-      <ListSubheader disableSticky>New pools</ListSubheader>
-      {pools.map((pool, index) => {
-        const { address, verified, mint: { name, icon } } = pool;
-        return <MenuItem key={address} onClick={() => this.onSelect('new', index)}>
-          {this.renderMint(name || address, icon, address, verified)}
-        </MenuItem>
-      })}
-    </MenuList>
-  }
+    let groupedPoolsData = {};
+    pools.forEach(({ address, verified, network, mint }) => {
+      const networkAddress = network.address.substring(0, 6);
+      const key = `Network: ${networkAddress}`;
+      if (!groupedPoolsData[key]) groupedPoolsData[key] = [];
+      groupedPoolsData[key].push({ address, verified, mint });
+    });
 
-  renderSearchedPools = () => {
-    const { search, searched: { pools } } = this.state;
-    if (!search) return null;
-    if (!pools.length) return <ListSubheader disableSticky>No result</ListSubheader>
-    return <MenuList>
-      <ListSubheader disableSticky>Search</ListSubheader>
-      {pools.map((pool, index) => {
-        const { address, verified, mint: { name, icon } } = pool;
-        return <MenuItem key={address} onClick={() => this.onSelect('searched', index)}>
-          {this.renderMint(name || address, icon, address, verified)}
-        </MenuItem>
-      })}
-    </MenuList>
+    let render = [];
+    for (let key in groupedPoolsData) {
+      render.push(<ListSubheader key={key} disableSticky>{key}</ListSubheader>)
+      groupedPoolsData[key].forEach(({ address, verified, mint: { name, icon } }) => {
+        render.push(<MenuItem key={address} onClick={() => this.onSelect(address)}>
+          {this.renderMint(name || 'Unknown', icon, address, verified)}
+        </MenuItem>);
+      });
+    }
+
+    return render;
   }
 
   render() {
     const { classes } = this.props;
-    const { anchorEl, index, type, search } = this.state;
-    const { [type]: { pools } } = this.state;
+    const { anchorEl, selected, search } = this.state;
+    const { pools } = this.state;
 
-    const pool = pools[index] || {
+    const { verified, address, mint: { symbol, icon } } = pools.filter(({ address }) => (address === selected))[0] || {
       verified: false,
       address: '',
-      mint: {
-        symbol: 'Unknown',
-        icon: '',
-      }
+      mint: { symbol: 'Unknown', icon: '' }
     }
-    const { verified, address, mint: { symbol, icon } } = pool;
 
     return <Grid container spacing={2} alignItems="flex-end" className={classes.noWrap}>
       <Grid item className={classes.stretch}>
@@ -273,11 +211,7 @@ class MintSelection extends Component {
             colorSecondary: classes.unverified,
           }}
         />
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={this.onClose}
-        >
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={this.onClose} >
           <Grid container spacing={2} className={classes.tools}>
             <Grid item xs={12}>
               <TextField
@@ -294,9 +228,7 @@ class MintSelection extends Component {
               />
             </Grid>
           </Grid>
-          {this.renderSearchedPools()}
-          {this.renderRecommendedPools()}
-          {this.renderNewPools()}
+          {this.renderGroupedPoolsData()}
         </Menu>
       </Grid>
       <Grid item>

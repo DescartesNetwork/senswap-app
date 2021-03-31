@@ -16,6 +16,7 @@ import { BaseCard } from 'components/cards';
 import Drain from 'components/drain';
 import Bid from './bid';
 import Ask from './ask';
+import SwapInfo from './info';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -23,11 +24,11 @@ import utils from 'helpers/utils';
 import oracle from 'helpers/oracle';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
-import { getPools, getPool } from 'modules/pool.reducer';
-import { getPoolData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
+  bidAmount: global.BigInt(0),
+  askAmount: global.BigInt(0),
   loading: false,
   txId: '',
 }
@@ -40,48 +41,54 @@ class Swap extends Component {
       ...EMPTY,
 
       srcAddress: '',
-      bidAmount: 0,
-      bidAddress: '',
       bidData: {},
-
+      bidPrimaryData: {},
       dstAddress: '',
-      askAmount: 0,
-      askAddress: '',
       askData: {},
+      askPrimaryData: {},
 
-      fee: global.BigInt(3000000),
-      ratio: 0,
+      data: [],
     }
 
     this.swap = window.senwallet.swap;
   }
 
   onClear = () => {
-    return this.setState({ txId: '' });
+    return this.setState({ ...EMPTY, txId: '' });
   }
 
-  onBid = ({ amount: bidAmount, poolData: bidData, accountAddress: srcAddress }) => {
-    return this.setState({ bidAmount, bidData, srcAddress }, () => {
-      const { setError, getPoolData } = this.props;
-      const { bidAmount, bidData, askData } = this.state;
-      if (!bidAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ slippage: 0, ratio: 0, askAmount: 0 });
-      return oracle.curve(bidAmount, bidData, askData, getPoolData).then(data => {
-        const [{ slippage, ratio, amount: askAmount, fee }] = data;
-        return this.setState({ slippage, ratio, askAmount, fee });
+  onBid = ({
+    amount: bidAmount,
+    poolData: bidData,
+    primaryPoolData: bidPrimaryData,
+    accountAddress: srcAddress
+  }) => {
+    return this.setState({ bidAmount, bidData, bidPrimaryData, srcAddress }, () => {
+      const { setError } = this.props;
+      const { bidAmount, bidData, bidPrimaryData, askData, askPrimaryData } = this.state;
+      if (bidData.state !== 1 || askData.state !== 1) return this.setState({ data: [] });
+      return oracle.curve(bidAmount, bidData, askData, bidPrimaryData, askPrimaryData).then(data => {
+        const { askAmount } = data[data.length - 1];
+        return this.setState({ data, askAmount });
       }).catch(er => {
         return setError(er);
       });
     });
   }
 
-  onAsk = ({ amount: askAmount, poolData: askData, accountAddress: dstAddress }) => {
-    return this.setState({ askAmount, askData, dstAddress }, () => {
-      const { setError, getPoolData } = this.props;
-      const { askAmount, bidData, askData } = this.state;
-      if (!askAmount || bidData.state !== 1 || askData.state !== 1) return this.setState({ slippage: 0, ratio: 0, bidAmount: 0 });
-      return oracle.inverseCurve(askAmount, bidData, askData, getPoolData).then(data => {
-        const [{ slippage, ratio, amount: bidAmount, fee }] = data;
-        return this.setState({ slippage, ratio, bidAmount, fee });
+  onAsk = ({
+    amount: askAmount,
+    poolData: askData,
+    primaryPoolData: askPrimaryData,
+    accountAddress: dstAddress
+  }) => {
+    return this.setState({ askAmount, askData, askPrimaryData, dstAddress }, () => {
+      const { setError } = this.props;
+      const { askAmount, bidData, bidPrimaryData, askData, askPrimaryData } = this.state;
+      if (bidData.state !== 1 || askData.state !== 1) return this.setState({ data: [] });
+      return oracle.inverseCurve(askAmount, bidData, askData, bidPrimaryData, askPrimaryData).then(data => {
+        const { bidAmount } = data[0];
+        return this.setState({ data, bidAmount });
       }).catch(er => {
         return setError(er);
       });
@@ -90,16 +97,15 @@ class Swap extends Component {
 
   onAutogenDestinationAddress = (mintAddress, secretKey) => {
     return new Promise((resolve, reject) => {
-      const { dstAddress } = this.state;
       const { wallet: { user, accounts }, updateWallet, syncWallet } = this.props;
       if (!ssjs.isAddress(mintAddress) || !secretKey) return reject('Invalid input');
-      if (ssjs.isAddress(dstAddress)) return resolve(dstAddress);
 
       let accountAddress = null;
       return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
         accountAddress = address;
         const newMints = [...user.mints];
-        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
+        if (newMints.includes(mintAddress)) return resolve(accountAddress);
+        newMints.push(mintAddress);
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
         return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
@@ -114,56 +120,74 @@ class Swap extends Component {
   }
 
   onSwap = () => {
-    const { setError, unlockWallet, getPools, getPool, getPoolData } = this.props;
-    const {
-      bidAmount, srcAddress,
-      bidData: {
-        state: bidState,
-        address: bidPoolAddress,
-        treasury: bidTreasury,
-        network: {
-          address: networkAddress,
-          primary: { address: senAddress },
-          vault: { address: vaultAddress }
-        },
-      },
-      askData: {
-        state: askState,
-        address: askPoolAddress,
-        mint: askMint,
-        treasury: askTreasury
-      }
-    } = this.state;
-
-    if (bidState !== 1 || askState !== 1) return setError('Please wait for data loaded');
-    if (!bidAmount) return setError('Invalid bid amount');
-    if (!ssjs.isAddress(srcAddress)) return setError('Invalid source address');
+    const { setError, unlockWallet } = this.props;
+    const { srcAddress, data } = this.state;
 
     let secretKey = null;
-    let senPoolAddress = null;
-    let senTreasuryAddress = null;
     return this.setState({ loading: true }, () => {
-      return getPools({ mint: senAddress }).then(data => {
-        return Promise.all(data.map(({ _id }) => getPool(_id)));
-      }).then(([{ address }]) => {
-        return getPoolData(address);
-      }).then(({ address: poolAddress, treasury: { address: treasuryAddress } }) => {
-        senPoolAddress = poolAddress;
-        senTreasuryAddress = treasuryAddress;
-        return unlockWallet();
-      }).then(re => {
+      return unlockWallet().then(re => {
         secretKey = re;
-        return this.onAutogenDestinationAddress(askMint.address, secretKey);
-      }).then(dstAddress => {
+        return this._onSwap(srcAddress, data[0], secretKey);
+      }).then(({ txId, dstAddress: nextSrcAddress }) => {
+        if (data[1]) return this._onSwap(nextSrcAddress, data[1], secretKey);
+        else return Promise.resolve({ txId });
+      }).then(({ txId }) => {
+        return this.setState({ loading: false, txId });
+      }).catch(er => {
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
+      });
+    });
+  }
+
+  _onSwap = (srcAddress, data, secretKey) => {
+    return new Promise((resolve, reject) => {
+      const {
+        bidAmount,
+        bidData: {
+          state: bidState,
+          address: bidPoolAddress,
+          treasury: { address: bidTreasuryAddress },
+        },
+        askData: {
+          state: askState,
+          address: askPoolAddress,
+          mint: { address: askMintAddress },
+          treasury: { address: askTreasuryAddress }
+        },
+        primaryData: {
+          state: senState,
+          address: senPoolAddress,
+          treasury: { address: senTreasuryAddress },
+          network: {
+            address: networkAddress,
+            vault: { address: vaultAddress }
+          },
+        }
+      } = data;
+
+      if (bidState === 0) return reject('Uninitialized bid pool');
+      if (askState === 0) return reject('Uninitialized ask pool');
+      if (senState === 0) return reject('Uninitialized sen pool');
+      if (bidState === 2) return reject('Frozen bid pool');
+      if (askState === 2) return reject('Frozen ask pool');
+      if (senState === 2) return reject('Frozen sen pool');
+      if (!bidAmount) return reject('Invalid bid amount');
+      if (!ssjs.isAddress(srcAddress)) return reject('Invalid source address');
+
+      let dstAddress = null;
+      return this.onAutogenDestinationAddress(askMintAddress, secretKey).then(re => {
+        dstAddress = re;
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.swap(
           bidAmount,
           networkAddress,
           bidPoolAddress,
-          bidTreasury.address,
+          bidTreasuryAddress,
           srcAddress,
           askPoolAddress,
-          askTreasury.address,
+          askTreasuryAddress,
           dstAddress,
           senPoolAddress,
           senTreasuryAddress,
@@ -171,11 +195,9 @@ class Swap extends Component {
           payer
         );
       }).then(txId => {
-        return this.setState({ ...EMPTY, txId });
+        return resolve({ txId, dstAddress });
       }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
+        return reject(er);
       });
     });
   }
@@ -185,10 +207,10 @@ class Swap extends Component {
     const {
       bidAmount, bidData: { state: bidState, mint: bidMint },
       askAmount, askData: { state: askState, mint: askMint },
-      slippage, ratio, fee, txId, loading
+      data, txId, loading
     } = this.state;
-    const { decimals: bidDecimals, symbol: bidSymbol } = bidMint || {}
-    const { decimals: askDecimals, symbol: askSymbol } = askMint || {}
+    const { decimals: bidDecimals } = bidMint || {}
+    const { decimals: askDecimals } = askMint || {}
 
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11} lg={8}>
@@ -211,17 +233,7 @@ class Swap extends Component {
                 <Grid item xs={12}>
                   <Grid container spacing={2} className={classes.action}>
                     <Grid item xs={12}>
-                      <Grid container justify="space-around" spacing={2}>
-                        <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Fee</span> {ssjs.undecimalize(fee, 9) * 100}%</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>{askSymbol}/{bidSymbol}</span> {utils.prettyNumber(ratio)}</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography variant="h4" align="center"><span className={classes.subtitle}>Slippage</span> {utils.prettyNumber(slippage * 100)}%</Typography>
-                        </Grid>
-                      </Grid>
+                      <SwapInfo data={data} />
                     </Grid>
                     {txId ? <Grid item xs={12}>
                       <Grid container spacing={2}>
@@ -281,9 +293,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getPools, getPool,
   updateWallet, unlockWallet, syncWallet,
-  getPoolData,
 }, dispatch);
 
 export default withRouter(connect(

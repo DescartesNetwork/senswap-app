@@ -93,11 +93,11 @@ class Add extends Component {
         }
       }
     } = this.state;
-    const totalSupply = utils.prettyNumber(utils.div(mint.supply, global.BigInt(10 ** mint.decimals)));
-    const lptAmount = utils.prettyNumber(utils.div(lpt, global.BigInt(10 ** mint.decimals)));
-    const price = utils.div(poolLPT, poolReserve);
+    const totalSupply = utils.prettyNumber(ssjs.undecimalize(mint.supply, mint.decimals));
+    const lptAmount = utils.prettyNumber(ssjs.undecimalize(lpt, mint.decimals));
+    const price = utils.prettyNumber(ssjs.div(poolLPT, poolReserve));
     const fee = ssjs.undecimalize(poolFee, 9) * 100;
-    const reserve = utils.prettyNumber(utils.div(poolReserve, global.BigInt(10 ** mint.decimals)));
+    const reserve = utils.prettyNumber(ssjs.undecimalize(poolReserve, mint.decimals));
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
