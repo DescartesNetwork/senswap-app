@@ -27,9 +27,9 @@ jobs:
       - name: Run docker
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATEKEY }}
+          host: ${{ secrets.SSH_HOST_MAINNET }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATEKEY_MAINNET }}
           script: |
             sudo docker stop app
             sudo docker rm app
