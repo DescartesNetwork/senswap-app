@@ -11,8 +11,6 @@ const configs = {
   basics: basics[env],
 }
 
-console.log(configs);
-
 /**
  * Module exports
  */
