@@ -5,14 +5,6 @@ import configs from 'configs';
 
 const SOL = {}
 
-SOL.tokenPath = (tokenAddress, index) => {
-  if (!ssjs.isAddress(tokenAddress)) return null;
-  const { sol: { spltAddress } } = configs;
-  const indexAddress = ssjs.toPathAddress(index.toString());
-  const path = `m/${spltAddress}/${tokenAddress}/${indexAddress}`;
-  return path;
-}
-
 SOL.poolPath = (poolAddress, index) => {
   if (!ssjs.isAddress(poolAddress)) return null;
   const { sol: { swapAddress } } = configs;
