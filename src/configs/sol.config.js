@@ -8,8 +8,9 @@ const configs = {}
  */
 configs.development = {
   node: 'https://devnet.solana.com',
-  tokenFactoryAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-  swapFactoryAddress: '66dobV8x9LMYt12XSCmFFZ9LpaomyeDXaCKVP56ujz2R',
+  spltAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  splataAddress: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+  swapAddress: '66dobV8x9LMYt12XSCmFFZ9LpaomyeDXaCKVP56ujz2R',
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   cluster: 'devnet',
 }
@@ -19,8 +20,9 @@ configs.development = {
  */
 configs.staging = {
   node: 'https://devnet.solana.com',
-  tokenFactoryAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
-  swapFactoryAddress: '66dobV8x9LMYt12XSCmFFZ9LpaomyeDXaCKVP56ujz2R',
+  spltAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  splataAddress: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+  swapAddress: '66dobV8x9LMYt12XSCmFFZ9LpaomyeDXaCKVP56ujz2R',
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   cluster: 'devnet',
 }
@@ -29,9 +31,10 @@ configs.staging = {
  * Production configurations
  */
 configs.production = {
-  node: '',
-  tokenFactoryAddress: '',
-  swapFactoryAddress: '',
+  node: 'https://api.mainnet-beta.solana.com',
+  spltAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+  splataAddress: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
+  swapAddress: 'SenTTyY6aynBEQ6ZKTF4ex16Bq9E2R5zhm7yjzXjTeX',
   senAddress: '',
   cluster: 'mainnet',
 }

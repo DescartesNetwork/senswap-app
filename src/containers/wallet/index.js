@@ -21,6 +21,7 @@ import QRCode from './qrcode';
 import Unlock from './unlock';
 
 import styles from './styles';
+import configs from 'configs';
 import storage from 'helpers/storage';
 import sol from 'helpers/sol';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
@@ -37,10 +38,12 @@ export const configSenWallet = () => {
   global.BigInt.prototype.toJSON = function () {
     return this.toString();
   }
+  // Configs
+  const { sol: { node, spltAddress, splataAddress, swapAddress } } = configs;
   // Global access
   window.senwallet = {
-    splt: new ssjs.SPLT(),
-    swap: new ssjs.Swap(),
+    splt: new ssjs.SPLT(spltAddress, splataAddress, node),
+    swap: new ssjs.Swap(swapAddress, spltAddress, node),
     lamports: new ssjs.Lamports(),
   }
 }

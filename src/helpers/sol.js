@@ -7,17 +7,17 @@ const SOL = {}
 
 SOL.tokenPath = (tokenAddress, index) => {
   if (!ssjs.isAddress(tokenAddress)) return null;
-  const { sol: { tokenFactoryAddress } } = configs;
+  const { sol: { spltAddress } } = configs;
   const indexAddress = ssjs.toPathAddress(index.toString());
-  const path = `m/${tokenFactoryAddress}/${tokenAddress}/${indexAddress}`;
+  const path = `m/${spltAddress}/${tokenAddress}/${indexAddress}`;
   return path;
 }
 
 SOL.poolPath = (poolAddress, index) => {
   if (!ssjs.isAddress(poolAddress)) return null;
-  const { sol: { swapFactoryAddress } } = configs;
+  const { sol: { swapAddress } } = configs;
   const indexAddress = ssjs.toPathAddress(index.toString());
-  const path = `m/${swapFactoryAddress}/${poolAddress}/${indexAddress}`;
+  const path = `m/${swapAddress}/${poolAddress}/${indexAddress}`;
   return path;
 }
 
