@@ -44,7 +44,7 @@ export const configSenWallet = () => {
   window.senwallet = {
     splt: new ssjs.SPLT(spltAddress, splataAddress, node),
     swap: new ssjs.Swap(swapAddress, spltAddress, node),
-    lamports: new ssjs.Lamports(),
+    lamports: new ssjs.Lamports(node),
   }
 }
 
