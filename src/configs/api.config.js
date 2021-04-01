@@ -21,7 +21,7 @@ configs.staging = {
  * Production configurations
  */
 configs.production = {
-  base: 'https://api.senswap.io',
+  base: 'https://api.senswap.com',
 }
 
 /**
