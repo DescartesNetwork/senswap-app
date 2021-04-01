@@ -10,7 +10,7 @@ configs.development = {
   node: 'https://devnet.solana.com',
   spltAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
   splataAddress: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
-  swapAddress: '66dobV8x9LMYt12XSCmFFZ9LpaomyeDXaCKVP56ujz2R',
+  swapAddress: 'DV9TWNbaN8nabswzdDT1PYqqcP8eKvBtGGXShKj5E5ya',
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   cluster: 'devnet',
 }
@@ -22,7 +22,7 @@ configs.staging = {
   node: 'https://devnet.solana.com',
   spltAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
   splataAddress: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
-  swapAddress: '66dobV8x9LMYt12XSCmFFZ9LpaomyeDXaCKVP56ujz2R',
+  swapAddress: 'DV9TWNbaN8nabswzdDT1PYqqcP8eKvBtGGXShKj5E5ya',
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   cluster: 'devnet',
 }
