@@ -207,7 +207,7 @@ class AddLiquidity extends Component {
                 <Typography variant="h6" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
               </Grid>
               <Grid item>
-                <Typography variant="h6" align="center"><span className={classes.subtitle}>Price</span> {utils.prettyNumber(ssjs.div(lpt, reserve))}</Typography>
+                <Typography variant="h6" align="center"><span className={classes.subtitle}>Price</span> {utils.prettyNumber(ssjs.div(ssjs.decimalize(lpt, decimals), ssjs.decimalize(reserve, 9)))}</Typography>
               </Grid>
             </Grid>
           </Grid>

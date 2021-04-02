@@ -62,11 +62,12 @@ Oracle.pureCurve = (bidAmount, bidData, askData, primaryData) => {
   return new Promise((resolve, reject) => {
     const {
       network: { address: bidNetworkAddress },
+      mint: { decimals: bidDecimals },
       reserve: bidReserve, lpt: bidLPT
     } = bidData;
     const {
       network: { address: askNetworkAddress, primary: { address: primaryAddress } },
-      mint: { address: askMintAddress },
+      mint: { address: askMintAddress, decimals: askDecimals },
       reserve: askReserve, lpt: askLPT
     } = askData;
     const { reserve: primaryReserve, lpt: primaryLPT } = primaryData;
@@ -81,7 +82,10 @@ Oracle.pureCurve = (bidAmount, bidData, askData, primaryData) => {
 
     if (!bidAmount) {
       const slippage = '1';
-      const ratio = ssjs.div(bidLPT * askReserve, askLPT * bidReserve);
+      const ratio = ssjs.div(
+        ssjs.decimalize(bidLPT * askReserve, bidDecimals),
+        ssjs.decimalize(askLPT * bidReserve, askDecimals)
+      );
       return resolve([{
         slippage, ratio, fee,
         bidAmount: global.BigInt(0), askAmount: global.BigInt(0),
@@ -94,7 +98,11 @@ Oracle.pureCurve = (bidAmount, bidData, askData, primaryData) => {
     const newBidReserve = bidReserve + bidAmount;
     const newAskReserve = ssjs.curve(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const ratio = ssjs.undecimalize(
+      ssjs.decimalize(
+        ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT)
+        , bidDecimals)
+      , askDecimals);
     const paidAmountWithoutFee = askReserve - newAskReserve;
     const askAmount = paidAmountWithoutFee * (global.BigInt(10 ** 9) - fee) / global.BigInt(10 ** 9);
     return resolve([{
@@ -109,11 +117,12 @@ Oracle.pureInverseCurve = (askAmount, bidData, askData, primaryData) => {
   return new Promise((resolve, reject) => {
     const {
       network: { address: bidNetworkAddress },
+      mint: { decimals: bidDecimals },
       reserve: bidReserve, lpt: bidLPT
     } = bidData;
     const {
       network: { address: askNetworkAddress, primary: { address: primaryAddress } },
-      mint: { address: askMintAddress },
+      mint: { address: askMintAddress, decimals: askDecimals },
       reserve: askReserve, lpt: askLPT
     } = askData;
     const { reserve: primaryReserve, lpt: primaryLPT } = primaryData;
@@ -128,7 +137,10 @@ Oracle.pureInverseCurve = (askAmount, bidData, askData, primaryData) => {
 
     if (!askAmount) {
       const slippage = '1';
-      const ratio = ssjs.div(bidLPT * askReserve, askLPT * bidReserve);
+      const ratio = ssjs.div(
+        ssjs.decimalize(bidLPT * askReserve, bidDecimals),
+        ssjs.decimalize(askLPT * bidReserve, askDecimals)
+      );
       return resolve([{
         slippage, ratio, fee,
         bidAmount: global.BigInt(0), askAmount: global.BigInt(0),
@@ -142,7 +154,11 @@ Oracle.pureInverseCurve = (askAmount, bidData, askData, primaryData) => {
     const newAskReserve = askReserve - askAmountWithoutFee;
     const newBidReserve = ssjs.inverseCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
     const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const ratio = ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
+    const ratio = ssjs.undecimalize(
+      ssjs.decimalize(
+        ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT)
+        , bidDecimals)
+      , askDecimals);
     const bidAmount = newBidReserve - bidReserve + global.BigInt(1);
     return resolve([{
       slippage, ratio, fee,

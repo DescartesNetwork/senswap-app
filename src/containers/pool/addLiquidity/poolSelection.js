@@ -81,8 +81,10 @@ class PoolSelection extends Component {
 
   onSelect = (poolAddress) => {
     const { onChange } = this.props;
+    const { pools } = this.state;
     return this.setState({ selected: poolAddress }, () => {
-      onChange(poolAddress);
+      const [data] = pools.filter(({ address }) => address === poolAddress) || [{}];
+      onChange(data);
       return this.onClose();
     });
   }

@@ -77,8 +77,8 @@ class LPTList extends Component {
   parseLPT = (lptAddress) => {
     const { data } = this.state;
     const lptData = data.find(({ address }) => address === lptAddress);
-    const { lpt, pool: { mint: { decimals } } } = lptData;
-    return utils.prettyNumber(ssjs.undecimalize(lpt, decimals));
+    const { lpt } = lptData;
+    return utils.prettyNumber(ssjs.undecimalize(lpt, 9));
   }
 
   renderGroupedMintsData = () => {

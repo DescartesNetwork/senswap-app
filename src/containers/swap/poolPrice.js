@@ -62,8 +62,8 @@ class PoolPrice extends Component {
     const { address, getPoolData, setError } = this.props;
     if (!ssjs.isAddress(address)) return this.setState({ price: 0 });
     return getPoolData(address, true).then(data => {
-      const { lpt, reserve } = data;
-      const price = utils.prettyNumber(ssjs.div(lpt, reserve));
+      const { lpt, reserve, mint: { decimals } } = data;
+      const price = ssjs.div(ssjs.decimalize(lpt, decimals), ssjs.decimalize(reserve, 9));
       return this.setState({ price });
     }).catch(er => {
       return setError(er);
@@ -73,7 +73,7 @@ class PoolPrice extends Component {
   render() {
     const { classes } = this.props;
     const { price } = this.state;
-    return <Typography variant="h5" noWrap><span className={classes.subtitle}>Price</span> ${price}</Typography>
+    return <Typography variant="h5" noWrap><span className={classes.subtitle}>Price</span> ${utils.prettyNumber(price)}</Typography>
   }
 }
 

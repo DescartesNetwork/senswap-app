@@ -58,8 +58,8 @@ function Row(props) {
 
   if (!is_initialized) return null;
   const totalSupply = utils.prettyNumber(ssjs.undecimalize(mint.supply, mint.decimals));
-  const lptAmount = utils.prettyNumber(ssjs.undecimalize(lpt, mint.decimals));
-  const price = utils.prettyNumber(ssjs.div(poolLPT, poolReserve));
+  const lptAmount = utils.prettyNumber(ssjs.undecimalize(lpt, 9));
+  const price = utils.prettyNumber(ssjs.div(ssjs.decimalize(poolLPT, mint.decimals), ssjs.decimalize(poolReserve, 9)));
   const reserve = utils.prettyNumber(ssjs.undecimalize(poolReserve, mint.decimals));
   const onOpen = () => onVisible(true);
   const onClose = () => onVisible(false);

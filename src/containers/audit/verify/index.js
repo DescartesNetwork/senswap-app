@@ -154,7 +154,7 @@ class VerifyPool extends Component {
         <TextField
           variant="outlined"
           label="LPT"
-          value={utils.prettyNumber(ssjs.undecimalize(data.lpt, mint.decimals))}
+          value={utils.prettyNumber(ssjs.undecimalize(data.lpt, 9))}
           fullWidth
         />
       </Grid>

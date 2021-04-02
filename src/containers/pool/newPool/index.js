@@ -119,7 +119,7 @@ class NewPool extends Component {
       }).then(({ nextLPT }) => {
         lpt = nextLPT;
         const reserve = ssjs.decimalize(amount, decimals);
-        const value = ssjs.decimalize(parseFloat(price) * parseFloat(amount), decimals);
+        const value = ssjs.decimalize(parseFloat(price) * parseFloat(amount), 9);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.initializePool(
           reserve,

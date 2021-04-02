@@ -42,8 +42,8 @@ function Row(props) {
 
   if (!state) return null;
   const poolReserve = utils.prettyNumber(ssjs.undecimalize(reserve, mint.decimals));
-  const poolLPT = utils.prettyNumber(ssjs.undecimalize(lpt, mint.decimals));
-  const price = utils.prettyNumber(ssjs.div(lpt, reserve));
+  const poolLPT = utils.prettyNumber(ssjs.undecimalize(lpt, 9));
+  const price = utils.prettyNumber(ssjs.div(ssjs.decimalize(lpt, mint.decimals), ssjs.decimalize(reserve, 9)));
 
   return <TableRow>
     <TableCell align="center">

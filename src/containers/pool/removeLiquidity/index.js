@@ -42,7 +42,7 @@ class RemoveLiquidity extends Component {
 
     this.state = {
       ...EMPTY,
-      poolAddress: '',
+      poolData: {},
       dstAddress: '',
       lptData: {},
       amount: 0,
@@ -68,8 +68,8 @@ class RemoveLiquidity extends Component {
     return this.setState({ ...EMPTY });
   }
 
-  onPoolAddress = (poolAddress) => {
-    return this.setState({ poolAddress });
+  onPoolData = (poolData = {}) => {
+    return this.setState({ poolData });
   }
 
   onLPTAddress = (lptAddress) => {
@@ -118,11 +118,10 @@ class RemoveLiquidity extends Component {
   removeLiquidity = () => {
     const { setError, unlockWallet } = this.props;
     const {
-      amount, poolAddress,
-      lptData: { is_initialized, address: lptAddress, pool }
+      amount, poolData: { address: poolAddress, mint, treasury },
+      lptData: { is_initialized, address: lptAddress }
     } = this.state;
-    const { mint, treasury } = pool || {}
-    const { address: mintAddress, decimals } = mint || {}
+    const { address: mintAddress } = mint || {}
     const { address: treasuryAddress } = treasury || {}
     if (!is_initialized) return setError('Please wait for data loaded');
     if (!amount || !parseFloat(amount)) return setError('Invalid amount');
@@ -132,7 +131,7 @@ class RemoveLiquidity extends Component {
         secretKey = re;
         return this.onAutogenDestinationAddress(mintAddress, secretKey);
       }).then(dstAddress => {
-        const lpt = global.BigInt(parseFloat(amount) * 10 ** decimals);
+        const lpt = ssjs.decimalize(parseFloat(amount), 9);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.removeLiquidity(
           lpt,
@@ -157,10 +156,9 @@ class RemoveLiquidity extends Component {
     const { ui: { advance } } = this.props;
     const {
       loading, txId,
-      amount, poolAddress,
-      lptData: { is_initialized, lpt, pool }
+      amount, poolData: { address: poolAddress, reserve, lpt: value, mint },
+      lptData: { is_initialized, lpt }
     } = this.state;
-    const { reserve, lpt: value, mint } = pool || {}
     const { decimals } = mint || {}
 
     return <Grid container justify="center" spacing={2}>
@@ -168,7 +166,7 @@ class RemoveLiquidity extends Component {
         <Typography variant="h6">Pool info</Typography>
       </Grid>
       <Grid item xs={6}>
-        <PoolSelection onChange={this.onPoolAddress} />
+        <PoolSelection onChange={this.onPoolData} />
       </Grid>
       <Grid item xs={6}>
         <TextField
@@ -184,7 +182,7 @@ class RemoveLiquidity extends Component {
               </IconButton>
             </Tooltip>
           }}
-          helperText={<span>Available LPT: <strong>{utils.prettyNumber(ssjs.undecimalize(lpt, decimals))}</strong></span>}
+          helperText={<span>Available LPT: <strong>{utils.prettyNumber(ssjs.undecimalize(lpt, 9))}</strong></span>}
           fullWidth
         />
       </Grid>
@@ -212,7 +210,7 @@ class RemoveLiquidity extends Component {
                 <Typography variant="h6" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
               </Grid>
               <Grid item>
-                <Typography variant="h6" align="center"><span className={classes.subtitle}>Value</span> {utils.prettyNumber(ssjs.undecimalize(value, decimals))}</Typography>
+                <Typography variant="h6" align="center"><span className={classes.subtitle}>Value</span> {utils.prettyNumber(ssjs.undecimalize(value, 9))}</Typography>
               </Grid>
             </Grid>
           </Grid>
