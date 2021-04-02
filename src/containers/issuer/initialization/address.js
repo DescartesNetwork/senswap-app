@@ -79,7 +79,7 @@ class MintAddress extends Component {
     const secretKey = e.target.value || '';
     const account = ssjs.fromSecretKey(secretKey);
     const address = account ? account.publicKey.toBase58() : 'Invalid secret key';
-    return this.setState({ address, secretKey });
+    return this.setState({ address, secretKey }, this.onAddress);
   }
 
   render() {
