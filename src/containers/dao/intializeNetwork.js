@@ -174,7 +174,7 @@ class InitializeNetwork extends Component {
           onKeyPress={e => {
             if (e.key === 'Enter') return this.onAddMint();
           }}
-          helperText="You can add maximum 11 token including SEN to a network"
+          helperText="You can add maximum 21 token including SEN to a network"
           fullWidth
         />
       </Grid>
