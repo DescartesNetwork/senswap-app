@@ -119,6 +119,7 @@ class InitializeNetwork extends Component {
     return this.setState({ loading: true }, () => {
       return unlockWallet().then(re => {
         secretKey = re;
+        console.log(secretKey);
         return ssjs.createStrictAccount(this.swap.swapProgramId);
       }).then(re => {
         vault = re;
