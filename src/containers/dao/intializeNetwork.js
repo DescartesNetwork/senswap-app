@@ -132,6 +132,7 @@ class InitializeNetwork extends Component {
           payer
         );
       }).then(txId => {
+        console.log(txId);
         const data = { address: network.publicKey.toBase58() }
         return addNetwork(data, secretKey);
       }).then(re => {
