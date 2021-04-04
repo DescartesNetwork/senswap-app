@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 export default theme => ({
   noWrap: {
     flexWrap: 'noWrap',

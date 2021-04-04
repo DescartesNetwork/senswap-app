@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 export default theme => {
   console.log(theme);
   return {

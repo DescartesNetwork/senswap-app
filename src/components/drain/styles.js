@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 export default theme => ({
   large: {
     minHeight: theme.spacing(14),

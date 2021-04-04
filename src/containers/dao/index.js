@@ -12,7 +12,7 @@ import { LanguageRounded, DirectionsBoatRounded } from '@material-ui/icons';
 
 import Ban from 'components/ban';
 import Drain from 'components/drain';
-import InitializeNetwork from './intializeNetwork';
+import InitializeNetwork from './initializeNetwork';
 import NetworkInfo from './info';
 
 import styles from './styles';

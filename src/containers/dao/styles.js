@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 export default theme => ({
   noWrap: {
     flexWrap: 'noWrap',
@@ -26,4 +27,7 @@ export default theme => ({
       boxShadow: theme.shadows[6],
     },
   },
+  earn: {
+    marginRight: -10
+  }
 });

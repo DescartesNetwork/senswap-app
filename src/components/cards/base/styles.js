@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 export default theme => ({
   materialPaper: {
     padding: theme.spacing(2),
