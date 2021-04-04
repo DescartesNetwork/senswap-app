@@ -121,8 +121,7 @@ class InitializeNetwork extends Component {
         secretKey = re;
         return ssjs.createStrictAccount(this.swap.swapProgramId);
       }).then(re => {
-        vault = ssjs.fromSecretKey('33692179ccacd36f7f5fc4e393c009f8089e71e3688ba148ca2a6e9ccf9a5ca98e3655d345ba3441bd5fc032a7cf40000e8a5b46c66d52422b18662cfe214c82');
-        console.log(Buffer.from(vault.secretKey).toString('hex'));
+        vault = re;
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.initializeNetwork(
           network,
@@ -132,7 +131,6 @@ class InitializeNetwork extends Component {
           payer
         );
       }).then(txId => {
-        console.log(txId);
         const data = { address: network.publicKey.toBase58() }
         return addNetwork(data, secretKey);
       }).then(re => {
