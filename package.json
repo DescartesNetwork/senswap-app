@@ -6,12 +6,13 @@
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
-    "@solana/web3.js": "^0.78.4",
+    "@solana/web3.js": "^1.2.6",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.2.2",
     "async": "^3.2.0",
     "axios": "^0.21.0",
+    "bs58": "^4.0.1",
     "connected-react-router": "^6.9.1",
     "dateformat": "^4.3.1",
     "history": "^4.10.1",
@@ -30,8 +31,7 @@
     "redux-thunk": "^2.3.0",
     "senswapjs": "0.0.70",
     "serve": "^11.3.2",
-    "soprox-abi": "0.0.10",
-    "swiper": "^6.3.0"
+    "soprox-abi": "0.0.10"
   },
   "scripts": {
     "start": "REACT_APP_ENV=development react-scripts start",
