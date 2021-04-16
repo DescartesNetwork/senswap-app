@@ -14,7 +14,7 @@ configs.development = {
  * Staging configurations
  */
 configs.staging = {
-  base: 'https://testnet-api.senswap.com',
+  base: 'https://api.senswap.xyz',
 }
 
 /**
