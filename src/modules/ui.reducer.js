@@ -240,6 +240,7 @@ export const unsetAdvance = () => {
 /**
  * Reducder
  */
+// eslint-disable-next-line
 export default (state = defaultState, action) => {
   switch (action.type) {
     case SET_SCREEN_OK:

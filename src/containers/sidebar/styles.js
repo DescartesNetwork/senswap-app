@@ -9,5 +9,13 @@ export default theme => ({
   listItem: {
     color: '#808191',
     borderRadius: theme.shape.borderRadius
+  },
+  listItemActive: {
+    color: theme.palette.primary.main,
+    borderRadius: theme.shape.borderRadius
+  },
+  listItemIcon: {
+    color: 'inherit',
+    minWidth: theme.spacing(5),
   }
 });

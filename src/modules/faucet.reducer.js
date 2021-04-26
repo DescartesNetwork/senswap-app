@@ -99,6 +99,7 @@ export const airdropTokens = (dstAddress, mintAddress) => {
 /**
  * Reducder
  */
+// eslint-disable-next-line
 export default (state = defaultState, action) => {
   switch (action.type) {
     case GET_WHITELIST_OK:

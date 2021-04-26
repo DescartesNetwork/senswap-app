@@ -397,6 +397,7 @@ export const setRemembered = (password) => {
 /**
  * Reducder
  */
+// eslint-disable-next-line
 export default (state = defaultState, action) => {
   switch (action.type) {
     case OPEN_WALLET_OK:

@@ -35,20 +35,22 @@ class App extends Component {
     const { classes } = this.props;
     return <ThemeProvider>
       <Grid container justify="center">
+        {/* Safe space */}
+        <Grid item xs={12} />
         {/* Views */}
         <Grid item xs={12}>
           <Grid container className={classes.noWrap}>
             <Sidebar />
             <Grid item className={classes.stretch}>
-              <Grid container>
-                <Grid item xs={12}>
+              <Grid container justify="center" >
+                <Grid item xs={11}>
                   <Header />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={11}>
                   <Drain />
                 </Grid>
                 {/* Pages */}
-                <Grid item xs={12}>
+                <Grid item xs={11}>
                   <Switch>
                     <Redirect exact from="/" to="/swap" />
                     <Route exact path='/swap' component={Swap} />

@@ -160,6 +160,7 @@ export const deleteMint = (mint, secretKey) => {
 /**
  * Reducder
  */
+// eslint-disable-next-line
 export default (state = defaultState, action) => {
   switch (action.type) {
     case GET_MINT_OK:

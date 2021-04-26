@@ -2,11 +2,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
 import Tooltip from '@material-ui/core/Tooltip';
-import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
+
+import { withStyles } from 'senswap-ui/styles';
+import Typography from 'senswap-ui/typography';
+import Avatar from 'senswap-ui/avatar';
 
 import styles from './styles';
 
@@ -23,7 +24,12 @@ class AccountAvatar extends Component {
       invisible={!icon}
     >
       <Tooltip title={title}>
-        <Avatar className={classes.accountIcon} onClick={onClick} style={{ marginRight: marginRight ? 8 : 0 }}>
+        <Avatar
+          className={classes.accountIcon}
+          onClick={onClick}
+          style={{ marginRight: marginRight ? 8 : 0 }}
+          size="medium"
+        >
           <Typography variant="h5">{ssjs.randEmoji(address)}</Typography>
         </Avatar>
       </Tooltip>

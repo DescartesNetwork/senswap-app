@@ -4,9 +4,9 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import {
-  Connection, Transaction, SystemProgram,
-} from '@solana/web3.js';
+// import {
+//   Connection, Transaction, SystemProgram,
+// } from '@solana/web3.js';
 
 import { withStyles } from '@material-ui/core/styles';
 import { Grid } from '@material-ui/core';
@@ -24,7 +24,7 @@ import {
   ErrorRounded, HelpOutlineRounded,
 } from '@material-ui/icons';
 
-import Coin98Wallet from '../../core/coin98Wallet';
+// import Coin98Wallet from '../../core/coin98Wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -36,8 +36,8 @@ class SecretKey extends Component {
     super();
 
     this.state = {
-      secretKey: 'e06a1a17cf400f6c322e32377a9a7653eecf58f3eb0061023b743c689b43a5fa491573553e4afdcdcd1c94692a138dd2fd0dc0f6946ef798ba34ac1ad00b3720',
-      password: '123',
+      secretKey: '',
+      password: '',
       advance: true,
     }
   }
@@ -64,41 +64,41 @@ class SecretKey extends Component {
     const keystore = ssjs.encrypt(secretKey, password);
     if (!keystore) return setError('The secret key is incorrect');
 
-    const connection = new Connection('https://devnet.solana.com', 'recent');
-    const wallet = new Coin98Wallet();
-    let recentBlockhash = '';
-    let txId = ''
-    return connection.getRecentBlockhash('recent').then(({ blockhash }) => {
-      recentBlockhash = blockhash;
-      return wallet.getAccount();
-    }).then(address => {
-      const publicKey = ssjs.fromAddress(address);
-      const instruction = SystemProgram.transfer({
-        fromPubkey: publicKey,
-        toPubkey: publicKey,
-        lamports: 1000
-      });
-      const transaction = new Transaction();
-      transaction.add(instruction);
-      transaction.recentBlockhash = recentBlockhash;
-      return wallet.sign(transaction);
-    }).then(({ transaction }) => {
-      const tx = transaction.serialize();
-      return connection.sendRawTransaction(tx, { skipPreflight: true, commitment: 'recent' });
-    }).then(signature => {
-      txId = signature;
-      return connection.confirmTransaction(txId, 'recent');
-    }).then(re => {
-      console.log(txId)
-    }).catch(er => {
-      console.log(er);
-    });
-
-    // return setWallet(keystore.publicKey, keystore).then(re => {
-    //   // Do nothing
+    // const connection = new Connection('https://devnet.solana.com', 'recent');
+    // const wallet = new Coin98Wallet();
+    // let recentBlockhash = '';
+    // let txId = ''
+    // return connection.getRecentBlockhash('recent').then(({ blockhash }) => {
+    //   recentBlockhash = blockhash;
+    //   return wallet.getAccount();
+    // }).then(address => {
+    //   const publicKey = ssjs.fromAddress(address);
+    //   const instruction = SystemProgram.transfer({
+    //     fromPubkey: publicKey,
+    //     toPubkey: publicKey,
+    //     lamports: 1000
+    //   });
+    //   const transaction = new Transaction();
+    //   transaction.add(instruction);
+    //   transaction.recentBlockhash = recentBlockhash;
+    //   return wallet.sign(transaction);
+    // }).then(({ transaction }) => {
+    //   const tx = transaction.serialize();
+    //   return connection.sendRawTransaction(tx, { skipPreflight: true, commitment: 'recent' });
+    // }).then(signature => {
+    //   txId = signature;
+    //   return connection.confirmTransaction(txId, 'recent');
+    // }).then(re => {
+    //   console.log(txId)
     // }).catch(er => {
-    //   return setError(er);
+    //   console.log(er);
     // });
+
+    return setWallet(keystore.publicKey, keystore).then(re => {
+      // Do nothing
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onGen = () => {

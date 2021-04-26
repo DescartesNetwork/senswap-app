@@ -142,6 +142,7 @@ export const deletePool = (pool, secretKey) => {
 /**
  * Reducder
  */
+// eslint-disable-next-line
 export default (state = defaultState, action) => {
   switch (action.type) {
     case GET_POOL_OK:

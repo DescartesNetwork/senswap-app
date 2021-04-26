@@ -276,6 +276,7 @@ export const setItem = (value) => {
 /**
  * Reducder
  */
+// eslint-disable-next-line
 export default (state = defaultState, action) => {
   switch (action.type) {
     case GET_NETWORK_DATA_OK:
