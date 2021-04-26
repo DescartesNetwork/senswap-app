@@ -6,7 +6,8 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
-  logo: {
-    cursor: 'pointer'
-  },
+  listItem: {
+    color: '#808191',
+    borderRadius: theme.shape.borderRadius
+  }
 });

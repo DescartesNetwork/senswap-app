@@ -29,7 +29,7 @@
     "react-scripts": "4.0.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "senswap-ui": "^0.2.9",
+    "senswap-ui": "^0.2.12",
     "senswapjs": "0.0.70",
     "serve": "^11.3.2",
     "soprox-abi": "0.0.10"
