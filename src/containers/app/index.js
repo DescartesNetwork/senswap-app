@@ -3,13 +3,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import { ThemeProvider } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+import { ThemeProvider, withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Drain from 'senswap-ui/drain';
 
-import Drain from 'components/drain';
 
 // Static component
+import Sidebar from 'containers/sidebar';
 import Header from 'containers/header';
 import UiUx from 'containers/uiux';
 import Wallet, { configSenWallet } from 'containers/wallet';
@@ -23,8 +23,6 @@ import Audit from 'containers/audit';
 import DAO from 'containers/dao';
 
 // CSS
-import theme from 'static/styles/theme';
-import 'static/styles/index.css';
 import styles from './styles';
 
 // Correctly initialize wallet
@@ -35,27 +33,36 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
-    return <ThemeProvider theme={theme}>
-      <Grid container justify="center" spacing={2}>
-        <Grid item xs={12} className={classes.safe} /> {/* Safe space */}
+    return <ThemeProvider>
+      <Grid container justify="center">
+        {/* Views */}
         <Grid item xs={12}>
-          <Header />
-        </Grid>
-        <Grid item xs={12}>
-          <Drain />
-        </Grid>
-        {/* Pages */}
-        <Grid item xs={12}>
-          <Switch>
-            <Redirect exact from="/" to="/swap" />
-            <Route exact path='/swap' component={Swap} />
-            <Route path='/pool' component={Pool} />
-            <Route exact path='/faucet' component={Faucet} />
-            <Route path='/issuer' component={Issuer} />
-            <Route path='/audit' component={Audit} />
-            <Route path='/dao' component={DAO} />
-            <Route exact path='*' component={NotFound} />
-          </Switch>
+          <Grid container className={classes.noWrap}>
+            <Sidebar />
+            <Grid item className={classes.stretch}>
+              <Grid container>
+                <Grid item xs={12}>
+                  <Header />
+                </Grid>
+                <Grid item xs={12}>
+                  <Drain />
+                </Grid>
+                {/* Pages */}
+                <Grid item xs={12}>
+                  <Switch>
+                    <Redirect exact from="/" to="/swap" />
+                    <Route exact path='/swap' component={Swap} />
+                    <Route path='/pool' component={Pool} />
+                    <Route exact path='/faucet' component={Faucet} />
+                    <Route path='/issuer' component={Issuer} />
+                    <Route path='/audit' component={Audit} />
+                    <Route path='/dao' component={DAO} />
+                    <Route exact path='*' component={NotFound} />
+                  </Switch>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
         </Grid>
         {/* Application */}
         <Grid item xs={12} >
