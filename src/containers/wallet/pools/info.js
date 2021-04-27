@@ -5,22 +5,16 @@ import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
-import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import IconButton from '@material-ui/core/IconButton';
+import { makeStyles, withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
+import { IconButton } from 'senswap-ui/button';
+
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
@@ -201,12 +195,12 @@ class Info extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    // const { classes } = this.props;
     const { data, loading, lasttime } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <TableContainer component={Paper} className={classes.card} elevation={3}>
+        <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
@@ -217,27 +211,33 @@ class Info extends Component {
                 </TableCell>
                 <TableCell />
                 <TableCell>
-                  <Typography variant="body2">LPT Account</Typography>
+                  <Typography variant="caption">LPT Account</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">Token</Typography>
+                  <Typography variant="caption">Token</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">Price</Typography>
+                  <Typography variant="caption">Price</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">LPT</Typography>
+                  <Typography variant="caption">LPT</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">Cleaner</Typography>
+                  <Typography variant="caption">Cleaner</Typography>
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {!data.length ? <TableRow>
                 <TableCell>
-                  <Typography className={classes.subtitle}>No data</Typography>
+                  <Typography variant="caption">No data</Typography>
                 </TableCell>
+                <TableCell />
+                <TableCell />
+                <TableCell />
+                <TableCell />
+                <TableCell />
+                <TableCell />
               </TableRow> : null}
               {data.map(data => <Row
                 key={data.address}
@@ -251,7 +251,7 @@ class Info extends Component {
       <Grid item xs={12}>
         <Grid container spacing={2} justify="flex-end">
           <Grid item>
-            <Typography className={classes.subtitle}>Last updated on: {utils.prettyDatetime(lasttime)}</Typography>
+            <Typography variant="caption">Last updated on: {utils.prettyDatetime(lasttime)}</Typography>
           </Grid>
         </Grid>
       </Grid>

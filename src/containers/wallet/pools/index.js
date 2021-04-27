@@ -21,14 +21,13 @@ class Pools extends Component {
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
           <Grid item className={classes.stretch}>
-            <Typography variant="h4">Swap Accounts</Typography>
+            <Typography variant="subtitle1">Swap Accounts</Typography>
           </Grid>
           <Grid item>
             <Add />
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={12} /> {/* Safe space */}
       <Grid item xs={12}>
         <Info />
       </Grid>

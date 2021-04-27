@@ -5,14 +5,9 @@ import { withRouter } from 'react-router-dom';
 
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-import Collapse from '@material-ui/core/Collapse';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Image from 'material-ui-image';
-
-import { ExpandLessRounded, ExpandMoreRounded } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
 import Drain from 'components/drain';
@@ -30,18 +25,11 @@ class Tokens extends Component {
 
     this.state = {
       data: {},
-      advance: false,
     }
-  }
-
-  onAdvance = () => {
-    const { advance } = this.state;
-    return this.setState({ advance: !advance });
   }
 
   render() {
     const { classes } = this.props;
-    const { advance } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -74,23 +62,7 @@ class Tokens extends Component {
               <TokenTransfer />
             </Grid>
             <Grid item xs={12}>
-              <Collapse in={advance}>
-                <Typography>🎁 Hooray! An easter egg.</Typography>
-              </Collapse>
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-                <Grid item className={classes.stretch}>
-                  <TokenSettings />
-                </Grid>
-                <Grid item>
-                  <Tooltip title="Advanced Functions">
-                    <IconButton color="secondary" size="small" onClick={this.onAdvance}>
-                      {advance ? <ExpandLessRounded /> : <ExpandMoreRounded />}
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-              </Grid>
+              <TokenSettings />
             </Grid>
           </Grid>
         </BaseCard>

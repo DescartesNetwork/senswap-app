@@ -7,7 +7,7 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
-import IconButton from 'senswap-ui/iconButton';
+import { IconButton } from 'senswap-ui/button';
 
 import {
   AccountBalanceWalletRounded, NotificationsRounded, ExpandMoreRounded

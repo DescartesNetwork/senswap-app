@@ -11,15 +11,4 @@ export default theme => ({
     marginLeft: 14,
     fontSize: 10
   },
-  card: {
-    transition: theme.transitions.create(),
-    '&:hover': {
-      boxShadow: theme.shadows[6],
-    },
-  },
-  subtitle: {
-    fontSize: 10,
-    fontWeight: theme.typography.fontWeightLight,
-    color: theme.palette.text.secondary
-  }
 });

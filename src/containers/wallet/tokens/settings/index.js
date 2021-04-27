@@ -45,7 +45,7 @@ class TokenSettings extends Component {
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Tooltip title="Settings">
-          <IconButton color="secondary" size="small" onClick={this.onOpen} >
+          <IconButton size="small" onClick={this.onOpen} >
             <SettingsRounded />
           </IconButton>
         </Tooltip>

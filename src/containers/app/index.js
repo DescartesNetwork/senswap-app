@@ -5,7 +5,6 @@ import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 
 import { ThemeProvider, withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
-import Drain from 'senswap-ui/drain';
 
 
 // Static component
@@ -46,9 +45,6 @@ class App extends Component {
                 <Grid item xs={11}>
                   <Header />
                 </Grid>
-                <Grid item xs={11}>
-                  <Drain />
-                </Grid>
                 {/* Pages */}
                 <Grid item xs={11}>
                   <Switch>
@@ -59,6 +55,7 @@ class App extends Component {
                     <Route path='/issuer' component={Issuer} />
                     <Route path='/audit' component={Audit} />
                     <Route path='/dao' component={DAO} />
+                    <Route path='/wallet' component={Wallet} />
                     <Route exact path='*' component={NotFound} />
                   </Switch>
                 </Grid>
@@ -69,7 +66,6 @@ class App extends Component {
         {/* Application */}
         <Grid item xs={12} >
           <UiUx />
-          <Wallet />
         </Grid>
       </Grid>
     </ThemeProvider>

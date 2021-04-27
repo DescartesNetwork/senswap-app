@@ -134,7 +134,7 @@ class AccountList extends Component {
 
     return <Fragment>
       <Tooltip title="Token List">
-        <IconButton color="secondary" size={size} onClick={this.onOpen} edge={edge}>
+        <IconButton size={size} onClick={this.onOpen} edge={edge}>
           {icon}
         </IconButton>
       </Tooltip>

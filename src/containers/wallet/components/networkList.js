@@ -85,7 +85,7 @@ class NetworkList extends Component {
 
     return <Fragment>
       <Tooltip title="Network List">
-        <IconButton color="secondary" size={size} onClick={this.onOpen} edge={edge}>
+        <IconButton size={size} onClick={this.onOpen} edge={edge}>
           {icon}
         </IconButton>
       </Tooltip>

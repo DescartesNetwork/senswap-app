@@ -139,10 +139,7 @@ class TokenTransfer extends Component {
             </Grid>
             <Grid item>
               <Tooltip title="Maximum amount">
-                <IconButton
-                  color="secondary"
-                  size="small"
-                  onClick={this.onMax}>
+                <IconButton size="small" onClick={this.onMax}>
                   <OfflineBoltRounded />
                 </IconButton>
               </Tooltip>
@@ -162,10 +159,7 @@ class TokenTransfer extends Component {
               />
             </Grid>
             <Grid item>
-              <IconButton
-                color="secondary"
-                size="small"
-                onClick={this.onTransfer}>
+              <IconButton size="small" onClick={this.onTransfer}>
                 {loading ? <CircularProgress size={17} /> : <SendRounded />}
               </IconButton>
             </Grid>

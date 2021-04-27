@@ -37,7 +37,6 @@ class RegisterMint extends Component {
       ...EMPTY,
       data: {},
       name: '',
-      cgk: 'https://api.coingecko.com/api/v3/coins/',
     }
   }
 
@@ -66,13 +65,13 @@ class RegisterMint extends Component {
   onName = (e) => {
     const { setError } = this.props;
     const name = e.target.value || '';
-    const cgk = 'https://api.coingecko.com/api/v3/coins/' + name.toLowerCase();
-    return this.setState({ ...EMPTY, data: {}, name, cgk }, () => {
+    const ticket = name.toLowerCase();
+    return this.setState({ ...EMPTY, data: {}, name }, () => {
       if (this.timeoutId) clearTimeout(this.timeoutId);
       if (!name) return;
       this.timeoutId = setTimeout(() => {
         return this.setState({ loading: true }, () => {
-          return ssjs.parseCGK(cgk).then(data => {
+          return ssjs.parseCGK(ticket).then(data => {
             return this.setState({ ...EMPTY, data });
           }).catch(er => {
             return this.setState({ ...EMPTY }, () => {
@@ -88,7 +87,7 @@ class RegisterMint extends Component {
     const { classes } = this.props;
     const { basics: { permission } } = configs;
     const { wallet: { user: { role } } } = this.props;
-    const { loading, data, name, cgk, ok } = this.state;
+    const { loading, data, name, ok } = this.state;
 
     if (!permission.includes(role)) return <Ban />
     return <Grid container spacing={2}>
@@ -127,7 +126,6 @@ class RegisterMint extends Component {
           placeholder="Token Address"
           onChange={this.onAddress}
           value={data.address || ''}
-          helperText={`Parsing from ${cgk}`}
           fullWidth
         />
       </Grid>

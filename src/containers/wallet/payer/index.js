@@ -3,16 +3,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import { IconButton } from 'senswap-ui/button';
+import Typography from 'senswap-ui/typography';
+
 import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import Collapse from '@material-ui/core/Collapse';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Image from 'material-ui-image';
 
-import { ExpandLessRounded, ExpandMoreRounded, MenuRounded } from '@material-ui/icons';
+import { MenuRounded } from 'senswap-ui/icons';
 
 import { BaseCard } from 'components/cards';
 import Drain from 'components/drain';
@@ -24,29 +24,16 @@ import SOL_LOGO from 'static/images/solana-logo.svg';
 
 
 class Payer extends Component {
-  constructor() {
-    super();
-
-    this.state = {
-      visible: false,
-    }
-  }
-
-  onAdvanced = () => {
-    const { visible } = this.state;
-    return this.setState({ visible: !visible });
-  }
 
   render() {
     const { classes } = this.props;
-    const { visible } = this.state;
 
-    return <Grid container spacing={2}>
+    return <Grid container>
       <Grid item xs={12}>
         <BaseCard className={classes.card}>
-          <Grid container spacing={2}>
+          <Grid container>
             <Grid item xs={12}>
-              <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
+              <Grid container alignItems="center" className={classes.noWrap}>
                 <Grid item className={classes.stretch}>
                   <Typography variant="h6">Main Account</Typography>
                 </Grid>
@@ -72,27 +59,11 @@ class Payer extends Component {
               <PayerTransfer />
             </Grid>
             <Grid item xs={12}>
-              <Collapse in={visible}>
-                <Typography>🎁 Hooray! An easter egg.</Typography>
-              </Collapse>
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-                <Grid item className={classes.stretch}>
-                  <Tooltip title="Multiple accounts (Coming soon)">
-                    <IconButton color="secondary" size="small" onClick={this.onOpen}>
-                      <MenuRounded />
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-                <Grid item>
-                  <Tooltip title="Advanced Functions">
-                    <IconButton color="secondary" size="small" onClick={this.onAdvanced}>
-                      {visible ? <ExpandLessRounded /> : <ExpandMoreRounded />}
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-              </Grid>
+              <Tooltip title="Multiple accounts (Coming soon)">
+                <IconButton size="small">
+                  <MenuRounded />
+                </IconButton>
+              </Tooltip>
             </Grid>
           </Grid>
         </BaseCard>

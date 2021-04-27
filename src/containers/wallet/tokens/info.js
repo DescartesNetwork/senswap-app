@@ -5,9 +5,9 @@ import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
 import InputBase from '@material-ui/core/InputBase';
 
 import AccountList from 'containers/wallet/components/accountList';

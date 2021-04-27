@@ -5,13 +5,13 @@ import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Grid } from '@material-ui/core';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Drain from 'senswap-ui/drain';
 
-import { BottomDrawer } from 'components/drawers';
-import Drain from 'components/drain';
 // Main components
 import Header from './header';
+import Info from './info';
 import LogIn from './login';
 import Payer from './payer';
 import Tokens from './tokens';
@@ -168,30 +168,21 @@ class Wallet extends Component {
   }
 
   render() {
-    const { wallet: { visible }, closeWallet } = this.props;
-
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <BottomDrawer visible={visible} onClose={closeWallet}>
-          <Grid container spacing={2} justify="center">
-            <Grid item xs={11} md={10}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Header />
-                </Grid>
-                <Grid item xs={12}>
-                  <Drain />
-                </Grid>
-                <Grid item xs={12}>
-                  {this.renderComponents()}
-                </Grid>
-                <Grid item xs={12}>
-                  <Drain />
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </BottomDrawer>
+        <Header />
+      </Grid>
+      <Grid item xs={12}>
+        <Drain size={3} />
+      </Grid>
+      <Grid item xs={12}>
+        <Info />
+      </Grid>
+      <Grid item xs={12}>
+        {this.renderComponents()}
+      </Grid>
+      <Grid item xs={12}>
+        <Drain />
       </Grid>
       <Grid item xs={12}>
         <QRCode />

@@ -64,7 +64,6 @@ class PayerInfo extends Component {
           <Grid item>
             <Tooltip title="View on explorer">
               <IconButton
-                color="secondary"
                 size="small"
                 href={utils.explorer(address)}
                 target="_blank"
