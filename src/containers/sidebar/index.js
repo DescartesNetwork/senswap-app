@@ -9,10 +9,7 @@ import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 import Brand from 'senswap-ui/brand';
 import Drawer from 'senswap-ui/drawer';
-import List from 'senswap-ui/list';
-import ListItem from 'senswap-ui/listItem';
-import ListItemIcon from 'senswap-ui/listItemIcon';
-import ListItemText from 'senswap-ui/listItemText';
+import List, { ListItem, ListItemIcon, ListItemText } from 'senswap-ui/list';
 
 import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,

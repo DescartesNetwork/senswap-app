@@ -8,7 +8,6 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 import IconButton from 'senswap-ui/iconButton';
-import Badge from 'senswap-ui/badge';
 
 import {
   AccountBalanceWalletRounded, NotificationsRounded, ExpandMoreRounded
@@ -52,9 +51,7 @@ class Header extends Component {
     return <Fragment>
       <Grid item>
         <IconButton>
-          <Badge color="primary" variant="dot">
-            <NotificationsRounded />
-          </Badge>
+          <NotificationsRounded />
         </IconButton>
       </Grid>
       <Grid item>
