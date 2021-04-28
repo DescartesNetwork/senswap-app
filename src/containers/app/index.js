@@ -5,15 +5,16 @@ import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 
 import { ThemeProvider, withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
+import Drain from 'senswap-ui/drain';
 
 
 // Static component
 import Sidebar from 'containers/sidebar';
-import Header from 'containers/header';
 import UiUx from 'containers/uiux';
 import Wallet, { configSenWallet } from 'containers/wallet';
 // Pages
 import NotFound from 'containers/404';
+import Home from 'containers/home';
 import Swap from 'containers/swap';
 import Pool from 'containers/pool';
 import Faucet from 'containers/faucet';
@@ -33,22 +34,22 @@ class App extends Component {
   render() {
     const { classes } = this.props;
     return <ThemeProvider>
-      <Grid container justify="center">
-        {/* Safe space */}
-        <Grid item xs={12} />
+      <Grid container>
         {/* Views */}
         <Grid item xs={12}>
           <Grid container className={classes.noWrap}>
             <Sidebar />
             <Grid item className={classes.stretch}>
               <Grid container justify="center" >
-                <Grid item xs={11}>
-                  <Header />
+                {/* Safe space */}
+                <Grid item xs={12}>
+                  <Drain size={1} />
                 </Grid>
                 {/* Pages */}
                 <Grid item xs={11}>
                   <Switch>
-                    <Redirect exact from="/" to="/swap" />
+                    <Redirect exact from="/" to="/home" />
+                    <Route path='/home' component={Home} />
                     <Route exact path='/swap' component={Swap} />
                     <Route path='/pool' component={Pool} />
                     <Route exact path='/faucet' component={Faucet} />

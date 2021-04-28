@@ -19,14 +19,7 @@ import styles from './styles';
 import { openWallet } from 'modules/wallet.reducer';
 
 
-class Header extends Component {
-  constructor() {
-    super();
-
-    this.state = {
-      anchorEl: null,
-    }
-  }
+class WalletButton extends Component {
 
   connectWallet = () => {
     return this.props.openWallet();
@@ -71,12 +64,8 @@ class Header extends Component {
   render() {
     // const { classes } = this.props;
 
-    return <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Grid container alignItems="center" justify="flex-end" spacing={1}>
-          {this.wallet()}
-        </Grid>
-      </Grid>
+    return <Grid container alignItems="center" justify="flex-end" spacing={1}>
+      {this.wallet()}
     </Grid>
   }
 }
@@ -93,4 +82,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(Header)));
+)(withStyles(styles)(WalletButton)));
