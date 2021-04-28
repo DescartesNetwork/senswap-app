@@ -2,92 +2,142 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import Favorite from 'senswap-ui/favorite';
-import Avatar from 'senswap-ui/avatar';
 
 import { } from 'senswap-ui/icons';
 
+import MintAvatar from 'containers/wallet/components/mintAvatar';
+import Price from './price';
+import PriceChange from './priceChange';
+
 import styles from './styles';
+import { setError } from 'modules/ui.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 class Assets extends Component {
+  constructor() {
+    super();
 
-	render() {
-		const { classes } = this.props;
+    this.state = {
+      data: [],
+    }
+  }
 
-		return <Grid container>
-			<Grid item xs={12}>
-				<Typography variant="subtitle1">Asset Balances</Typography>
-			</Grid>
-			<Grid item xs={12}>
-				<TableContainer>
-					<Table>
-						<TableHead>
-							<TableRow>
-								<TableCell />
-								<TableCell>
-									<Typography variant="caption">ASSET</Typography>
-								</TableCell>
-								<TableCell>
-									<Typography variant="caption">SYMBOL</Typography>
-								</TableCell>
-								<TableCell>
-									<Typography variant="caption">24H MARKET</Typography>
-								</TableCell>
-								<TableCell>
-									<Typography variant="caption">TOTAL BALANCE</Typography>
-								</TableCell>
-							</TableRow>
-						</TableHead>
-						<TableBody>
-							<TableRow>
-								<TableCell >
-									<Favorite />
-								</TableCell>
-								<TableCell>
-									<Grid container className={classes.noWrap} alignItems="center">
-										<Grid item>
-											<Avatar />
-										</Grid>
-										<Grid item>
-											<Typography>Bitcoin</Typography>
-										</Grid>
-									</Grid>
-								</TableCell>
-								<TableCell>
-									<Typography>BTC</Typography>
-								</TableCell>
-								<TableCell>
-									<Typography>2.05</Typography>
-								</TableCell>
-								<TableCell>
-									<Typography>$123819273</Typography>
-									<Typography variant="body2" color="textSecondary">$123.12</Typography>
-								</TableCell>
-							</TableRow>
-						</TableBody>
-					</Table>
-				</TableContainer>
-			</Grid>
-		</Grid>
-	}
+  componentDidMount() {
+    this.fetchData(this.onSelect);
+  }
+
+  componentDidUpdate(prevProps) {
+    const { wallet: { accounts: prevAccounts }, mintAddress: prevMintAddress } = prevProps;
+    const { wallet: { accounts }, mintAddress } = this.props;
+    if (!isEqual(mintAddress, prevMintAddress)) return this.fetchData(this.onSelect);
+    if (!isEqual(accounts, prevAccounts)) return this.fetchData(this.onSelect);
+  }
+
+  fetchData = (callback) => {
+    const { wallet: { accounts }, getAccountData, mintAddress } = this.props;
+    if (!accounts || !accounts.length) return;;
+
+    return Promise.all(accounts.map(accountAddress => {
+      return getAccountData(accountAddress);
+    })).then(data => {
+      if (mintAddress) data = data.filter(accountData => {
+        const { mint: { address } } = accountData;
+        return address === mintAddress;
+      });
+      return this.setState({ data }, callback);
+    }).catch(er => {
+      return setError(er);
+    });
+  }
+
+  render() {
+    const { classes } = this.props;
+    const { data } = this.state;
+
+    return <Grid container>
+      <Grid item xs={12}>
+        <Typography variant="subtitle1">Asset Balances</Typography>
+      </Grid>
+      <Grid item xs={12}>
+        <TableContainer>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>
+                  <Typography variant="caption">ASSET</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="caption">SYMBOL</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="caption">24H MARKET</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="caption">TOTAL BALANCE</Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map(accountData => {
+                const {
+                  address, amount,
+                  mint: { ticket, icon, name, symbol }
+                } = accountData;
+                return <TableRow key={address}>
+                  <TableCell >
+                    <Favorite />
+                  </TableCell>
+                  <TableCell>
+                    <Grid container className={classes.noWrap} alignItems="center">
+                      <Grid item>
+                        <MintAvatar icon={icon} />
+                      </Grid>
+                      <Grid item>
+                        <Typography>{name}</Typography>
+                      </Grid>
+                    </Grid>
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{symbol}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <PriceChange ticket={ticket} />
+                  </TableCell>
+                  <TableCell>
+                    <Price amount={parseFloat(ssjs.undecimalize(amount, 9))} ticket={ticket} />
+                  </TableCell>
+                </TableRow>
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Grid>
+    </Grid>
+  }
 }
 
 const mapStateToProps = state => ({
-	ui: state.ui,
-	wallet: state.wallet,
+  ui: state.ui,
+  bucket: state.bucket,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-
+  setError,
+  getAccountData,
 }, dispatch);
 
 export default withRouter(connect(
-	mapStateToProps,
-	mapDispatchToProps
+  mapStateToProps,
+  mapDispatchToProps
 )(withStyles(styles)(Assets)));

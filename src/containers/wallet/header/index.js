@@ -3,12 +3,12 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Grid } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+// import Button from 'senswap-ui/button';
 
-import { PowerSettingsNewRounded } from '@material-ui/icons';
+// import { PowerSettingsNewRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
