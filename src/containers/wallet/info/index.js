@@ -20,9 +20,6 @@ import utils from 'helpers/utils';
 
 
 class Info extends Component {
-	constructor() {
-		super();
-	}
 
 	render() {
 		const { classes } = this.props;

@@ -12,6 +12,7 @@ import Drain from 'senswap-ui/drain';
 // Main components
 import Header from './header';
 import Info from './info';
+import Assets from './assets';
 import LogIn from './login';
 import Payer from './payer';
 import Tokens from './tokens';
@@ -178,6 +179,10 @@ class Wallet extends Component {
       <Grid item xs={12}>
         <Info />
       </Grid>
+      <Grid item xs={12}>
+        <Assets />
+      </Grid>
+
       <Grid item xs={12}>
         {this.renderComponents()}
       </Grid>
