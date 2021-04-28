@@ -7,10 +7,11 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
+import Badge from 'senswap-ui/badge';
 import { IconButton } from 'senswap-ui/button';
 
 import {
-  AccountBalanceWalletRounded, NotificationsRounded, ExpandMoreRounded
+  AccountBalanceWalletRounded, NotificationsOutlined, ExpandMoreRounded
 } from 'senswap-ui/icons';
 
 import AccountAvatar from 'containers/wallet/components/accountAvatar';
@@ -44,7 +45,9 @@ class WalletButton extends Component {
     return <Fragment>
       <Grid item>
         <IconButton>
-          <NotificationsRounded />
+          <Badge variant="dot" color="primary">
+            <NotificationsOutlined />
+          </Badge>
         </IconButton>
       </Grid>
       <Grid item>

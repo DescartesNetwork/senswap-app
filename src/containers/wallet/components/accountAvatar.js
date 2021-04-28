@@ -28,9 +28,8 @@ class AccountAvatar extends Component {
           className={classes.accountIcon}
           onClick={onClick}
           style={{ marginRight: marginRight ? 8 : 0 }}
-          size="medium"
         >
-          <Typography variant="h5">{ssjs.randEmoji(address)}</Typography>
+          <Typography variant="h6">{ssjs.randEmoji(address)}</Typography>
         </Avatar>
       </Tooltip>
     </Badge>

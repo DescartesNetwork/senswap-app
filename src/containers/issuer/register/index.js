@@ -72,7 +72,7 @@ class RegisterMint extends Component {
       this.timeoutId = setTimeout(() => {
         return this.setState({ loading: true }, () => {
           return ssjs.parseCGK(ticket).then(data => {
-            return this.setState({ ...EMPTY, data });
+            return this.setState({ ...EMPTY, data: { ...data, ticket } });
           }).catch(er => {
             return this.setState({ ...EMPTY }, () => {
               return setError('Cannot find data for the coin/token');

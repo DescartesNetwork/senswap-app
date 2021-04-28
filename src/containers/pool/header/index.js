@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -8,7 +8,9 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 
-import { PowerSettingsNewRounded } from 'senswap-ui/icons';
+import { QueueRounded, InputRounded, LaunchRounded } from 'senswap-ui/icons';
+
+import WalletButton from 'containers/wallet/components/walletButton';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -30,23 +32,49 @@ class Wallet extends Component {
     const { classes } = this.props;
     const { wallet: { user: { address } } } = this.props;
 
-    return <Grid container spacing={2}>
+    return <Grid container spacing={0}>
       <Grid item xs={12}>
         <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
-            <Typography variant="h4">Wallet</Typography>
+            <Typography>SenSwap</Typography>
           </Grid>
           {address ? <Grid item>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={this.disconnect}
-              startIcon={<PowerSettingsNewRounded />}
-              fullWidth
-            >
-              <Typography>Disconnect</Typography>
-            </Button>
+            <WalletButton />
           </Grid> : null}
+        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container spacing={2} alignItems="center" spacing={3}>
+          <Grid item>
+            <Typography variant="h4">Pools</Typography>
+          </Grid>
+          {!address ? <Grid item>
+            <WalletButton />
+          </Grid> : <Fragment>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<QueueRounded />}
+              >
+                <Typography>New Pool</Typography>
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                startIcon={<InputRounded />}
+              >
+                <Typography>Deposit</Typography>
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                startIcon={<LaunchRounded />}
+              >
+                <Typography>Withdraw</Typography>
+              </Button>
+            </Grid>
+          </Fragment>}
         </Grid>
       </Grid>
     </Grid>

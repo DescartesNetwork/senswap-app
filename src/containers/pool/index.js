@@ -3,17 +3,17 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Drain from 'senswap-ui/drain';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-import Drain from 'components/drain';
 import { BaseCard, NotiCard } from 'components/cards';
+import Header from './header';
 import NewPool from './newPool';
 import AddLiquidity from './addLiquidity';
 import RemoveLiquidity from './removeLiquidity';
-import Header from './header';
 
 import styles from './styles';
 
@@ -32,6 +32,9 @@ class Pool extends Component {
       <Grid item xs={12}>
         <Header />
       </Grid>
+      <Grid item xs={12}>
+        <Drain size={2} />
+      </Grid>
       <Grid item xs={12} sm={8} md={6}>
         <NotiCard
           title="Liquidity provider incentive"
@@ -40,7 +43,7 @@ class Pool extends Component {
         />
       </Grid>
       <Grid item xs={12}>
-        <Drain small />
+        <Drain size={1} />
       </Grid>
       <Grid item xs={12} sm={8} md={6}>
         <BaseCard >

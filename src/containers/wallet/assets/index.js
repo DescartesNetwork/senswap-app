@@ -32,26 +32,32 @@ class Assets extends Component {
   }
 
   componentDidMount() {
-    this.fetchData(this.onSelect);
+    this.fetchData();
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { accounts: prevAccounts }, mintAddress: prevMintAddress } = prevProps;
-    const { wallet: { accounts }, mintAddress } = this.props;
-    if (!isEqual(mintAddress, prevMintAddress)) return this.fetchData(this.onSelect);
-    if (!isEqual(accounts, prevAccounts)) return this.fetchData(this.onSelect);
+    const { wallet: { accounts: prevAccounts } } = prevProps;
+    const { wallet: { accounts } } = this.props;
+    if (!isEqual(accounts, prevAccounts)) this.fetchData();
   }
 
   fetchData = (callback) => {
-    const { wallet: { accounts }, getAccountData, mintAddress } = this.props;
+    const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
     if (!accounts || !accounts.length) return;;
 
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
     })).then(data => {
-      if (mintAddress) data = data.filter(accountData => {
-        const { mint: { address } } = accountData;
-        return address === mintAddress;
+      // Add SOL also
+      data.unshift({
+        address,
+        amount: parseFloat(ssjs.undecimalize(lamports, 9)),
+        mint: {
+          name: 'Solana',
+          symbol: 'SOL',
+          ticket: 'solana',
+          icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
+        }
       });
       return this.setState({ data }, callback);
     }).catch(er => {
