@@ -16,7 +16,7 @@ import * as solana from '../../../helpers/solana'
 class NewPools extends Component {
 
     componentDidMount() {
-        solana.getTokenAccountsByOwner("")
+        solana.getTokenAccountsByOwner("GHjB1mY6WinFHy6kz81boVBmGoaM5PN37r75TLJfcU3c", "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
     }
 
     render() {
