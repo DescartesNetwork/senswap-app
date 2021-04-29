@@ -95,10 +95,7 @@ class Assets extends Component {
             </TableHead>
             <TableBody>
               {data.map(accountData => {
-                const {
-                  address, amount,
-                  mint: { ticket, icon, name, symbol }
-                } = accountData;
+                const { address, amount, mint: { ticket, icon, name, symbol } } = accountData;
                 return <TableRow key={address}>
                   <TableCell >
                     <Favorite />

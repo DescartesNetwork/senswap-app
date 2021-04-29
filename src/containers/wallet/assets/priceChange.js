@@ -19,7 +19,7 @@ function PriceChange(props) {
   }, [ticket]);
 
   return <Grid container spacing={0}>
-    <Grid item>
+    <Grid item style={{ marginLeft: -8 }}> {/* Optical correction */}
       {priceChange < 0 ? < ArrowDropDownRounded
         style={{ color: priceChange < 0 ? '#FF7A68' : '#4FBF67' }}
       /> : <ArrowDropUpRounded

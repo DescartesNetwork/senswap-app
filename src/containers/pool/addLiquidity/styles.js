@@ -28,7 +28,7 @@ export default theme => ({
     color: theme.palette.text.secondary
   },
   action: {
-    backgroundColor: theme.palette.grey[200],
+    backgroundColor: theme.palette.background.secondary,
     borderRadius: theme.shape.borderRadius,
     paddingTop: theme.spacing(2)
   },

@@ -9,7 +9,7 @@ import Drain from 'senswap-ui/drain';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-import { BaseCard, NotiCard } from 'components/cards';
+import { BaseCard } from 'components/cards';
 import Header from './header';
 import NewPool from './newPool';
 import AddLiquidity from './addLiquidity';
@@ -28,26 +28,16 @@ class Pool extends Component {
     const { classes } = this.props;
     const { location: { pathname } } = this.props;
 
-    return <Grid container justify="center" spacing={2}>
+    return <Grid container justify="center">
       <Grid item xs={12}>
         <Header />
       </Grid>
       <Grid item xs={12}>
         <Drain size={2} />
       </Grid>
-      <Grid item xs={12} sm={8} md={6}>
-        <NotiCard
-          title="Liquidity provider incentive"
-          description="Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity."
-          source=""
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Drain size={1} />
-      </Grid>
-      <Grid item xs={12} sm={8} md={6}>
+      <Grid item xs={12} md={8} lg={6}>
         <BaseCard >
-          <Grid container spacing={2}>
+          <Grid container>
             <Grid item xs={12}>
               <Tabs
                 value={pathname}

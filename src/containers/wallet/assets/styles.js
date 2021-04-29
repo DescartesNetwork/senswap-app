@@ -17,5 +17,5 @@ export default theme => ({
     backgroundColor: '#00e5ff',
     padding: 6,
     fontSize: 16,
-  }
+  },
 });
