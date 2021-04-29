@@ -5,15 +5,16 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import Collapse from '@material-ui/core/Collapse';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import { IconButton } from 'senswap-ui/button';
+import Tooltip from 'senswap-ui/tooltip';
+import CircularProgress from 'senswap-ui/circularProgress';
 
-import { HelpOutlineRounded, VisibilityRounded } from '@material-ui/icons';
+import TextField from '@material-ui/core/TextField';
+import Collapse from '@material-ui/core/Collapse';
+
+import { HelpOutlineRounded, VisibilityRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

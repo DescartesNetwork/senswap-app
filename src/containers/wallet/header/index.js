@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Link as RouterLink, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -28,7 +29,7 @@ class Wallet extends Component {
 
   render() {
     const { classes } = this.props;
-    const { wallet: { user: { address, role } } } = this.props;
+    const { wallet: { user: { address } } } = this.props;
 
     return <Grid container>
       <Grid item xs={12}>
@@ -36,19 +37,8 @@ class Wallet extends Component {
           <Grid item className={classes.stretch}>
             <Typography variant="h4">Wallet</Typography>
           </Grid>
-          {['admin', 'operator'].includes(role) ? <Grid item>
+          {ssjs.isAddress(address) ? <Grid item>
             <Button
-              component={RouterLink}
-              to='/issuer'
-              variant="outlined"
-            >
-              <Typography>To Issuer</Typography>
-            </Button>
-          </Grid> : null}
-          {address ? <Grid item>
-            <Button
-              variant="contained"
-              color="primary"
               onClick={this.disconnect}
               startIcon={<PowerSettingsNewRounded />}
             >

@@ -4,22 +4,23 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
-import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Tooltip from 'senswap-ui/tooltip';
+import { IconButton } from 'senswap-ui/button';
+import Badge from 'senswap-ui/badge';
+import CircularProgress from 'senswap-ui/circularProgress';
+import { ListSubheader } from 'senswap-ui/list';
+
 import Menu from '@material-ui/core/Menu';
-import ListSubheader from '@material-ui/core/ListSubheader';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import Badge from '@material-ui/core/Badge';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
   CheckCircleOutlineRounded, UnfoldMoreRounded, SearchRounded,
   HelpOutlineRounded,
-} from '@material-ui/icons';
+} from 'senswap-ui/icons';
 
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 

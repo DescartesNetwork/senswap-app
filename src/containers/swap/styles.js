@@ -39,7 +39,7 @@ export default theme => ({
     paddingTop: `0px !important`
   },
   action: {
-    backgroundColor: theme.palette.grey[200],
+    backgroundColor: theme.palette.background.secondary,
     borderRadius: theme.shape.borderRadius,
     paddingTop: theme.spacing(2)
   },

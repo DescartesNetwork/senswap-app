@@ -9,6 +9,7 @@ import Drain from 'senswap-ui/drain';
 
 
 // Static component
+import PrivateRoute from 'containers/auth/privateRoute';
 import Sidebar from 'containers/sidebar';
 import UiUx from 'containers/uiux';
 import Wallet, { configSenWallet } from 'containers/wallet';
@@ -53,9 +54,9 @@ class App extends Component {
                     <Route exact path='/swap' component={Swap} />
                     <Route path='/pool' component={Pool} />
                     <Route exact path='/faucet' component={Faucet} />
-                    <Route path='/issuer' component={Issuer} />
-                    <Route path='/audit' component={Audit} />
-                    <Route path='/dao' component={DAO} />
+                    <PrivateRoute path='/issuer' component={Issuer} />
+                    <PrivateRoute path='/audit' component={Audit} />
+                    <PrivateRoute path='/dao' component={DAO} />
                     <Route path='/wallet' component={Wallet} />
                     <Route exact path='*' component={NotFound} />
                   </Switch>

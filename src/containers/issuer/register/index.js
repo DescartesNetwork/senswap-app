@@ -4,22 +4,19 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Tooltip from 'senswap-ui/tooltip';
+import Button, { IconButton } from 'senswap-ui/button';
+import Avatar from 'senswap-ui/avatar';
+import CircularProgress from 'senswap-ui/circularProgress';
+
 import TextField from '@material-ui/core/TextField';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import Avatar from '@material-ui/core/Avatar';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
-import { FlightTakeoffRounded, HelpOutlineRounded } from '@material-ui/icons';
-
-import Ban from 'components/ban';
+import { FlightTakeoffRounded, HelpOutlineRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
-import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
 import { addMint } from 'modules/mint.reducer';
@@ -85,11 +82,8 @@ class RegisterMint extends Component {
 
   render() {
     const { classes } = this.props;
-    const { basics: { permission } } = configs;
-    const { wallet: { user: { role } } } = this.props;
     const { loading, data, name, ok } = this.state;
 
-    if (!permission.includes(role)) return <Ban />
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h6">CoinGecko Magic</Typography>

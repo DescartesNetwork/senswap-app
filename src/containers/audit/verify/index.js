@@ -4,14 +4,15 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Button from 'senswap-ui/button';
+import CircularProgress from 'senswap-ui/circularProgress';
 
-import { DeleteForeverRounded, VerifiedUserRounded } from '@material-ui/icons';
+import TextField from '@material-ui/core/TextField';
+
+import { DeleteForeverRounded, VerifiedUserRounded } from 'senswap-ui/icons';
 
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 import PoolList from './poolList';

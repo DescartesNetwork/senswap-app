@@ -14,7 +14,7 @@ export default theme => ({
     fontWeight: 700,
   },
   navigation: {
-    background: theme.palette.grey[100],
+    background: theme.palette.background.secondary,
     borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0px 0px`,
     margin: `${-theme.spacing(2)}px ${-theme.spacing(2)}px 0px ${-theme.spacing(2)}px`
   }

@@ -4,16 +4,16 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Button from 'senswap-ui/button';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Drain from 'senswap-ui/drain';
 
-import { PublicRounded, ArrowForwardRounded, SwapHorizRounded } from '@material-ui/icons';
+import { PublicRounded, ArrowForwardRounded, SwapHorizRounded } from 'senswap-ui/icons';
 
 import { BaseCard } from 'components/cards';
-import Drain from 'components/drain';
 import Bid from './bid';
 import Ask from './ask';
 import SwapInfo from './info';
@@ -212,75 +212,71 @@ class Swap extends Component {
     const { decimals: bidDecimals } = bidMint || {}
     const { decimals: askDecimals } = askMint || {}
 
-    return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} lg={8}>
-        <Grid container spacing={2} justify="center">
-          <Grid item xs={12} sm={8} md={6}>
-            <BaseCard>
-              <Grid container spacing={2}>
+    return <Grid container spacing={2} justify="center">
+      <Grid item xs={12} md={8} lg={6}>
+        <BaseCard>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="h4">Swap</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Drain size={2} />
+            </Grid>
+            <Grid item xs={12}>
+              <Bid value={ssjs.undecimalize(bidAmount, bidDecimals)} onChange={this.onBid} />
+            </Grid>
+            <Grid item xs={12}>
+              <Ask value={ssjs.undecimalize(askAmount, askDecimals)} onChange={this.onAsk} />
+            </Grid>
+            <Grid item xs={12}>
+              <Grid container spacing={2} className={classes.action}>
                 <Grid item xs={12}>
-                  <Typography variant="h4">Swap</Typography>
+                  <SwapInfo data={data} />
                 </Grid>
-                <Grid item xs={12}>
-                  <Drain small />
-                </Grid>
-                <Grid item xs={12}>
-                  <Bid value={ssjs.undecimalize(bidAmount, bidDecimals)} onChange={this.onBid} />
-                </Grid>
-                <Grid item xs={12}>
-                  <Ask value={ssjs.undecimalize(askAmount, askDecimals)} onChange={this.onAsk} />
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container spacing={2} className={classes.action}>
-                    <Grid item xs={12}>
-                      <SwapInfo data={data} />
-                    </Grid>
-                    {txId ? <Grid item xs={12}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={8}>
-                          <Button
-                            variant="contained"
-                            color="secondary"
-                            href={utils.explorer(txId)}
-                            target="_blank"
-                            rel="noopener"
-                            startIcon={<PublicRounded />}
-                            fullWidth
-                          >
-                            <Typography>Explore</Typography>
-                          </Button>
-                        </Grid>
-                        <Grid item xs={4}>
-                          <Button
-                            color="secondary"
-                            onClick={this.onClear}
-                            endIcon={<ArrowForwardRounded />}
-                            fullWidth
-                          >
-                            <Typography>Done</Typography>
-                          </Button>
-                        </Grid>
-                      </Grid>
-                    </Grid> : <Grid item xs={12}>
+                {txId ? <Grid item xs={12}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={8}>
                       <Button
                         variant="contained"
-                        color="primary"
-                        onClick={this.onSwap}
-                        startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
-                        disabled={loading || bidState !== 1 || askState !== 1}
+                        color="secondary"
+                        href={utils.explorer(txId)}
+                        target="_blank"
+                        rel="noopener"
+                        startIcon={<PublicRounded />}
                         fullWidth
                       >
-                        <Typography variant="body2">Swap</Typography>
+                        <Typography>Explore</Typography>
                       </Button>
-                    </Grid>}
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Button
+                        color="secondary"
+                        onClick={this.onClear}
+                        endIcon={<ArrowForwardRounded />}
+                        fullWidth
+                      >
+                        <Typography>Done</Typography>
+                      </Button>
+                    </Grid>
                   </Grid>
-                </Grid>
+                </Grid> : <Grid item xs={12}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={this.onSwap}
+                    startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
+                    disabled={loading || bidState !== 1 || askState !== 1}
+                    fullWidth
+                  >
+                    <Typography variant="body2">Swap</Typography>
+                  </Button>
+                </Grid>}
               </Grid>
-            </BaseCard>
+            </Grid>
           </Grid>
-        </Grid>
+        </BaseCard>
       </Grid>
-    </Grid >
+    </Grid>
   }
 }
 

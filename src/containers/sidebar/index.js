@@ -1,8 +1,9 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -10,10 +11,13 @@ import Drain from 'senswap-ui/drain';
 import Brand from 'senswap-ui/brand';
 import Drawer from 'senswap-ui/drawer';
 import List, { ListItem, ListItemIcon, ListItemText } from 'senswap-ui/list';
+import Divider from 'senswap-ui/divider';
 
 import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
-  AccountBalanceWalletRounded
+  AccountBalanceWalletRounded, AccountBalanceRounded, VerifiedUserRounded,
+  GroupWorkRounded, ColorizeRounded, DescriptionRounded,
+  DonutLargeRounded,
 } from 'senswap-ui/icons';
 
 import styles from './styles';
@@ -62,8 +66,10 @@ class Sidebar extends Component {
 
   render() {
     const { classes } = this.props;
+    const { wallet: { user: { address, role } } } = this.props;
     const { visible, route } = this.state;
-    const { sol: { cluster } } = configs;
+    const { sol: { cluster }, basics: { permission } } = configs;
+    const isLogged = ssjs.isAddress(address) && permission.includes(role);
 
     return <Drawer open={visible}>
       <Grid container>
@@ -122,6 +128,93 @@ class Sidebar extends Component {
               </ListItemIcon>
               <ListItemText primary="Wallet" />
             </ListItem>
+            {/* Faucet */}
+            {cluster === 'devnet' ? <Fragment>
+              <Drain size={2} />
+              <Divider />
+              <Drain size={2} />
+              <ListItem
+                button
+                component={RouterLink}
+                to="/faucet"
+                className={route === 'faucet' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <ColorizeRounded />
+                </ListItemIcon>
+                <ListItemText primary="Faucet" secondary="Devnet only" />
+              </ListItem>
+            </Fragment> : null}
+            {/* Admin/Operator zone */}
+            {isLogged ? <Fragment>
+              <Drain size={2} />
+              <Divider />
+              <Drain size={2} />
+              <ListItem
+                button
+                component={RouterLink}
+                to="/issuer"
+                className={route === 'issuer' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <AccountBalanceRounded />
+                </ListItemIcon>
+                <ListItemText primary="Issuer" />
+              </ListItem>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/audit"
+                className={route === 'audit' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <VerifiedUserRounded />
+                </ListItemIcon>
+                <ListItemText primary="Audit" />
+              </ListItem>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/dao"
+                className={route === 'dao' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <GroupWorkRounded />
+                </ListItemIcon>
+                <ListItemText primary="DAO" />
+              </ListItem>
+            </Fragment> : null}
+            {/* Papers */}
+            <Drain size={2} />
+            <Divider />
+            <Drain size={2} />
+            <ListItem
+              button
+              component={RouterLink}
+              to="/tokenomic"
+              target="_blank"
+              rel="noopener"
+              className={classes.listItem}
+              disabled
+            >
+              <ListItemIcon className={classes.listItemIcon}>
+                <DonutLargeRounded />
+              </ListItemIcon>
+              <ListItemText primary="Whitepaper & Tokenomic" />
+            </ListItem>
+            <ListItem
+              button
+              component={RouterLink}
+              to={YELLOWPAPER}
+              target="_blank"
+              rel="noopener"
+              className={classes.listItem}
+            >
+              <ListItemIcon className={classes.listItemIcon}>
+                <DescriptionRounded />
+              </ListItemIcon>
+              <ListItemText primary="Yellow Paper" />
+            </ListItem>
           </List>
         </Grid>
       </Grid>
@@ -131,6 +224,7 @@ class Sidebar extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

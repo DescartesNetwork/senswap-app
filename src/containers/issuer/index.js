@@ -3,8 +3,9 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
@@ -27,59 +28,55 @@ class Issuer extends Component {
     const { classes } = this.props;
     const { location: { pathname } } = this.props;
 
-    return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} lg={8}>
-        <Grid container justify="center" spacing={2}>
-          <Grid item xs={12} sm={8} md={6}>
-            <BaseCard>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Tabs
-                    value={pathname}
-                    onChange={this.onRoute}
-                    className={classes.navigation}
-                    variant="fullWidth"
-                  >
-                    <Tab
-                      classes={{
-                        root: classes.tab,
-                        selected: classes.selectedTab,
-                      }}
-                      label="Initialize Token"
-                      value="/issuer/initialize-token"
-                    />
-                    <Tab
-                      classes={{
-                        root: classes.tab,
-                        selected: classes.selectedTab,
-                      }}
-                      label="Register Token"
-                      value="/issuer/register-token"
-                      icon={<LockRounded fontSize="small" />}
-                    />
-                    <Tab
-                      classes={{
-                        root: classes.tab,
-                        selected: classes.selectedTab,
-                      }}
-                      label="Update Token"
-                      value="/issuer/update-token"
-                      icon={<LockRounded fontSize="small" />}
-                    />
-                  </Tabs>
-                </Grid>
-                <Grid item xs={12}>
-                  <Switch>
-                    <Redirect exact from="/issuer" to="/issuer/initialize-token" />
-                    <Route exact path='/issuer/initialize-token' component={InitializeMint} />
-                    <Route exact path='/issuer/register-token' component={RegisterMint} />
-                    <Route exact path='/issuer/update-token' component={UpdateMint} />
-                  </Switch>
-                </Grid>
-              </Grid>
-            </BaseCard>
+    return <Grid container justify="center">
+      <Grid item xs={12} md={8} lg={6}>
+        <BaseCard>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Tabs
+                value={pathname}
+                onChange={this.onRoute}
+                className={classes.navigation}
+                variant="fullWidth"
+              >
+                <Tab
+                  classes={{
+                    root: classes.tab,
+                    selected: classes.selectedTab,
+                  }}
+                  label="Initialize Token"
+                  value="/issuer/initialize-token"
+                />
+                <Tab
+                  classes={{
+                    root: classes.tab,
+                    selected: classes.selectedTab,
+                  }}
+                  label="Register Token"
+                  value="/issuer/register-token"
+                  icon={<LockRounded fontSize="small" />}
+                />
+                <Tab
+                  classes={{
+                    root: classes.tab,
+                    selected: classes.selectedTab,
+                  }}
+                  label="Update Token"
+                  value="/issuer/update-token"
+                  icon={<LockRounded fontSize="small" />}
+                />
+              </Tabs>
+            </Grid>
+            <Grid item xs={12}>
+              <Switch>
+                <Redirect exact from="/issuer" to="/issuer/initialize-token" />
+                <Route exact path='/issuer/initialize-token' component={InitializeMint} />
+                <Route exact path='/issuer/register-token' component={RegisterMint} />
+                <Route exact path='/issuer/update-token' component={UpdateMint} />
+              </Switch>
+            </Grid>
           </Grid>
-        </Grid>
+        </BaseCard>
       </Grid>
     </Grid>
   }

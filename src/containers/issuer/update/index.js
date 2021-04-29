@@ -3,20 +3,19 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Button from 'senswap-ui/button';
+
 import TextField from '@material-ui/core/TextField';
 
-import { FlightTakeoffRounded, DeleteForeverRounded } from '@material-ui/icons';
+import { FlightTakeoffRounded, DeleteForeverRounded } from 'senswap-ui/icons';
 
-import Ban from 'components/ban';
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 import MintSelection from 'containers/wallet/components/mintSelection';
 
 import styles from './styles';
-import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
 import { updateMint, deleteMint } from 'modules/mint.reducer';
@@ -102,11 +101,8 @@ class UpdateMint extends Component {
 
   render() {
     const { classes } = this.props;
-    const { basics: { permission } } = configs;
-    const { wallet: { user: { role } } } = this.props;
     const { loading, data, ok } = this.state;
 
-    if (!permission.includes(role)) return <Ban />
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h6">Old info</Typography>

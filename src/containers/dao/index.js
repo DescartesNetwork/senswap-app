@@ -10,26 +10,17 @@ import IconButton from '@material-ui/core/IconButton';
 
 import { LanguageRounded, DirectionsBoatRounded } from '@material-ui/icons';
 
-import Ban from 'components/ban';
 import Drain from 'components/drain';
 import InitializeNetwork from './initializeNetwork';
 import NetworkInfo from './info';
 
 import styles from './styles';
-import configs from 'configs';
 
 class DAO extends Component {
 
   render() {
     const { classes } = this.props;
-    const { wallet: { user: { role } } } = this.props;
-    const { basics: { permission } } = configs;
 
-    if (!permission.includes(role)) return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} lg={8}>
-        <Ban />
-      </Grid>
-    </Grid>
     return <Grid container justify="center" spacing={2}>
       <Grid item xs={11}>
         <Grid container spacing={2}>
@@ -80,7 +71,6 @@ class DAO extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
