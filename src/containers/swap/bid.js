@@ -43,7 +43,7 @@ class Bid extends Component {
       percentage: 0,
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   componentDidUpdate(prevProps) {

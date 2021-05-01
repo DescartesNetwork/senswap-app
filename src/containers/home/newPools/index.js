@@ -5,7 +5,6 @@ import { withRouter } from 'react-router-dom';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
-import Drain from 'senswap-ui/drain';
 import { CardPool } from 'senswap-ui/card';
 
 import styles from './styles';
@@ -17,9 +16,6 @@ class NewPools extends Component {
     // const { classes } = this.props;
 
     return <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Drain size={1} />
-      </Grid>
       <Grid item xs={12} md={6} lg={4}>
         <CardPool />
       </Grid>

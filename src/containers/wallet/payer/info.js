@@ -29,7 +29,7 @@ class PayerInfo extends Component {
       amount: 0,
     }
 
-    this.lamports = window.senwallet.lamports;
+    this.lamports = window.senswap.lamports;
   }
 
   onQRCode = () => {

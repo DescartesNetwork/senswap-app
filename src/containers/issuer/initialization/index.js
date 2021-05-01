@@ -39,7 +39,7 @@ class InitializeMint extends Component {
       decimals: '9',
     }
 
-    this.splt = window.senwallet.splt;
+    this.splt = window.senswap.splt;
   }
 
   onMint = (secretKey) => {

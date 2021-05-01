@@ -23,7 +23,7 @@ class PoolPrice extends Component {
       price: 0,
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   componentDidMount() {

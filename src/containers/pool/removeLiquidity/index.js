@@ -48,7 +48,7 @@ class RemoveLiquidity extends Component {
       amount: 0,
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   onAmount = (e) => {

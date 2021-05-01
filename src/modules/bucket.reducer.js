@@ -30,7 +30,7 @@ export const getNetworkData = (networkAddress, force = false) => {
 
       let { bucket: { [networkAddress]: networkData } } = getState();
       if (!networkData || force) {
-        return window.senwallet.swap.getNetworkData(networkAddress).then(re => {
+        return window.senswap.swap.getNetworkData(networkAddress).then(re => {
           networkData = { ...re }
           const data = { [networkAddress]: networkData }
           dispatch({ type: GET_NETWORK_DATA_OK, data });
@@ -69,7 +69,7 @@ export const getAccountData = (accountAddress, force = false) => {
       let { bucket: { [accountAddress]: accountData } } = getState();
       if (!accountData || force) {
         const { api: { base } } = configs;
-        return window.senwallet.splt.getAccountData(accountAddress).then(re => {
+        return window.senswap.splt.getAccountData(accountAddress).then(re => {
           accountData = { ...re }
           const condition = { address: re.mint.address }
           return api.get(base + '/mints', { condition });
@@ -115,7 +115,7 @@ export const getMintData = (mintAddress, force = false) => {
       let { bucket: { [mintAddress]: mintData } } = getState();
       if (!mintData || force) {
         const { api: { base } } = configs;
-        return window.senwallet.splt.getMintData(mintAddress).then(re => {
+        return window.senswap.splt.getMintData(mintAddress).then(re => {
           mintData = { ...re }
           const condition = { address: re.address }
           return api.get(base + '/mints', { condition });
@@ -161,7 +161,7 @@ export const getPoolData = (poolAddress, force = false) => {
       let { bucket: { [poolAddress]: poolData } } = getState();
       if (!poolData || force) {
         const { api: { base } } = configs;
-        return window.senwallet.swap.getPoolData(poolAddress).then(re => {
+        return window.senswap.swap.getPoolData(poolAddress).then(re => {
           poolData = { ...re }
           const condition = { address: re.address }
           return api.get(base + '/pools', { condition });
@@ -214,7 +214,7 @@ export const getLPTData = (lptAddress, force = false) => {
       let { bucket: { [lptAddress]: lptData } } = getState();
       if (!lptData || force) {
         const { api: { base } } = configs;
-        return window.senwallet.swap.getLPTData(lptAddress).then(re => {
+        return window.senswap.swap.getLPTData(lptAddress).then(re => {
           lptData = { ...re }
           const condition = { address: re.pool.address }
           return api.get(base + '/pools', { condition });

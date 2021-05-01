@@ -3,20 +3,54 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import Avatar from '@material-ui/core/Avatar';
-import Link from '@material-ui/core/Link';
+// import {
+//   Connection, Transaction, SystemProgram,
+// } from '@solana/web3.js';
 
-import { PowerRounded } from '@material-ui/icons';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import TextField from 'senswap-ui/textField';
+import Button from 'senswap-ui/button';
+import Avatar from 'senswap-ui/avatar';
+import Link from 'senswap-ui/link';
+
+import { PowerRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 import COIN98_LOGO from 'static/images/coin98-logo.png';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
+
+// const connection = new Connection('https://devnet.solana.com', 'recent');
+// const wallet = new Coin98Wallet();
+// let recentBlockhash = '';
+// let txId = ''
+// return connection.getRecentBlockhash('recent').then(({ blockhash }) => {
+//   recentBlockhash = blockhash;
+//   return wallet.getAccount();
+// }).then(address => {
+//   const publicKey = ssjs.fromAddress(address);
+//   const instruction = SystemProgram.transfer({
+//     fromPubkey: publicKey,
+//     toPubkey: publicKey,
+//     lamports: 1000
+//   });
+//   const transaction = new Transaction();
+//   transaction.add(instruction);
+//   transaction.recentBlockhash = recentBlockhash;
+//   return wallet.sign(transaction);
+// }).then(({ transaction }) => {
+//   const tx = transaction.serialize();
+//   return connection.sendRawTransaction(tx, { skipPreflight: true, commitment: 'recent' });
+// }).then(signature => {
+//   txId = signature;
+//   return connection.confirmTransaction(txId, 'recent');
+// }).then(re => {
+//   console.log(txId)
+// }).catch(er => {
+//   console.log(er);
+// });
 
 
 class Coin98 extends Component {
@@ -60,21 +94,16 @@ class Coin98 extends Component {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Typography>Coin98 Wallet Extension is a variant of Coin98 Wallet for Chrome extension. You can <Link href="https://chrome.google.com/webstore/detail/coin98-wallet/aeachknmefphepccionboohckonoeemg?hl=en" target="_blank" rel="noopener">click here to install.</Link></Typography>
+        <Typography>Coin98 Wallet Extension is a variant of Coin98 Wallet for Chrome extension. You can <Link color="primary" href="https://chrome.google.com/webstore/detail/coin98-wallet/aeachknmefphepccionboohckonoeemg?hl=en" target="_blank" rel="noopener">click here to install.</Link></Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label="Accounts"
-          variant="outlined"
+          placeholder="Accounts"
+          variant="contained"
           value={mainAccount}
           InputProps={{
             endAdornment: <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={this.connect}
-                startIcon={<PowerRounded />}
-              >
+              <Button onClick={this.connect} startIcon={<PowerRounded />}>
                 <Typography>Connect</Typography>
               </Button>
             </Grid>

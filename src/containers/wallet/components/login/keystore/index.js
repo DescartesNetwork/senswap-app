@@ -5,24 +5,22 @@ import { withRouter } from 'react-router-dom';
 import fileDownload from 'js-file-download';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import { Grid } from '@material-ui/core';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Link from '@material-ui/core/Link';
-import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import TextField from 'senswap-ui/textField';
+import Button, { IconButton } from 'senswap-ui/button';
+import Link from 'senswap-ui/link';
+import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 
 import {
   PublishRounded, DescriptionRounded, PowerRounded,
-  RoomServiceRounded, CloseRounded, GetAppRounded,
-  VisibilityRounded, VisibilityOffRounded,
-} from '@material-ui/icons';
+  CloseRounded, GetAppRounded, VisibilityRounded,
+  VisibilityOffRounded,
+} from 'senswap-ui/icons';
 
 import styles from './styles';
+import KeystoreWallet from 'containers/wallet/core/keystoreWallet';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 
@@ -78,10 +76,8 @@ class KeyStore extends Component {
     const { setError, setWallet } = this.props;
     if (!keystore) return setError('Please upload your keystore');
     if (!password) return setError('Please enter your password to unlock your wallet');
-    const account = ssjs.fromKeystore(keystore, password);
-    if (!account) return setError('Corrupted keystore / Incorrect password');
-    const address = account.publicKey.toBase58();
-    return setWallet(address, keystore).then(re => {
+    const wallet = new KeystoreWallet(keystore, password);
+    return setWallet(wallet).then(re => {
       // Do nothing
     }).catch(er => {
       return setError(er);
@@ -119,7 +115,7 @@ class KeyStore extends Component {
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
           <Grid item>
-            <IconButton size="small" color="primary">
+            <IconButton size="small">
               <DescriptionRounded />
             </IconButton>
           </Grid>
@@ -133,8 +129,8 @@ class KeyStore extends Component {
       </Grid>
       <Grid item xs={12} md={6}>
         <TextField
-          label="Filename"
-          variant="outlined"
+          placeholder="Filename"
+          variant="contained"
           value={filename}
           InputProps={{
             endAdornment: <Grid item>
@@ -156,19 +152,14 @@ class KeyStore extends Component {
       </Grid>
       <Grid item xs={12} md={6}>
         <TextField
-          label="Password"
+          placeholder="Password"
           type="password"
-          variant="outlined"
+          variant="contained"
           value={password}
           onChange={this.onPassword}
           InputProps={{
             endAdornment: <Grid item>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={this.onSave}
-                startIcon={<PowerRounded />}
-              >
+              <Button onClick={this.onSave} startIcon={<PowerRounded />}>
                 <Typography>Connect</Typography>
               </Button>
             </Grid>
@@ -176,77 +167,73 @@ class KeyStore extends Component {
           fullWidth
         />
       </Grid>
-      <Grid item xs={12}>
-        <Grid container spacing={2}>
-          <Grid item>
-            <Button onClick={this.onOpen} startIcon={<RoomServiceRounded />} fullWidth >
-              <Typography>Not have keystore yet?</Typography>
-            </Button>
-          </Grid>
-        </Grid>
-        <Dialog open={visible} onClose={this.onClose}>
-          <DialogTitle>
-            <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
-              <Grid item className={classes.stretch}>
-                <Typography variant="h6">Password</Typography>
-              </Grid>
-              <Grid item>
-                <IconButton onClick={this.onClose} edge="end">
-                  <CloseRounded />
-                </IconButton>
-              </Grid>
+      <Grid item className={classes.help}>
+        <Button color="primary" onClick={this.onOpen} fullWidth >
+          <Typography>Not have keystore yet?</Typography>
+        </Button>
+      </Grid>
+      <Dialog open={visible} onClose={this.onClose}>
+        <DialogTitle>
+          <Grid container alignItems="center" className={classes.noWrap} spacing={2}>
+            <Grid item className={classes.stretch}>
+              <Typography variant="h6">Password</Typography>
             </Grid>
-          </DialogTitle>
-          <DialogContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Typography>The password is used to encrypt your keystore. You will need this password to unlock your keystore in demands.</Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Password"
-                  type={visiblePassword ? 'text' : 'password'}
-                  variant="outlined"
-                  value={newPassword}
-                  onChange={this.onNewPassword}
-                  InputProps={{
-                    endAdornment: <IconButton onClick={this.onVisiblePassword} edge="end">
-                      {visiblePassword ? <VisibilityRounded /> : <VisibilityOffRounded />}
-                    </IconButton>
-                  }}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Grid container spacing={2} alignItems="center" justify="flex-end" className={classes.noWrap}>
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={this.onGen}
-                      disabled={!newPassword}
-                    >
-                      <Typography>Create</Typography>
-                    </Button>
-                  </Grid>
-                  <Grid item>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<GetAppRounded />}
-                      onClick={this.onDownload}
-                      disabled={!newKeystore.publicKey}
-                    >
-                      <Typography>Download</Typography>
-                    </Button>
-                  </Grid>
+            <Grid item>
+              <IconButton onClick={this.onClose} edge="end">
+                <CloseRounded />
+              </IconButton>
+            </Grid>
+          </Grid>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography>The password is used to encrypt your keystore. You will need this password to unlock your keystore in demands.</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Password"
+                type={visiblePassword ? 'text' : 'password'}
+                variant="outlined"
+                value={newPassword}
+                onChange={this.onNewPassword}
+                InputProps={{
+                  endAdornment: <IconButton onClick={this.onVisiblePassword} edge="end">
+                    {visiblePassword ? <VisibilityRounded /> : <VisibilityOffRounded />}
+                  </IconButton>
+                }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Grid container spacing={2} alignItems="center" justify="flex-end" className={classes.noWrap}>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={this.onGen}
+                    disabled={!newPassword}
+                  >
+                    <Typography>Create</Typography>
+                  </Button>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<GetAppRounded />}
+                    onClick={this.onDownload}
+                    disabled={!newKeystore.publicKey}
+                  >
+                    <Typography>Download</Typography>
+                  </Button>
                 </Grid>
               </Grid>
-              <Grid item xs={12} /> {/* Safe space */}
             </Grid>
-          </DialogContent>
-        </Dialog>
-      </Grid>
+            <Grid item xs={12} /> {/* Safe space */}
+          </Grid>
+        </DialogContent>
+      </Dialog>
     </Grid>
   }
 }

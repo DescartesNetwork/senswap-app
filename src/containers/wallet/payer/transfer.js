@@ -42,7 +42,7 @@ class PayerTransfer extends Component {
       amount: '',
     }
 
-    this.lamports = window.senwallet.lamports;
+    this.lamports = window.senswap.lamports;
   }
 
   onAddress = (e) => {

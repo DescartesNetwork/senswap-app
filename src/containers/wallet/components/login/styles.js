@@ -8,5 +8,5 @@ export default theme => ({
   },
   warning: {
     color: theme.palette.warning.main,
-  }
+  },
 });

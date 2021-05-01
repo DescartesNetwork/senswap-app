@@ -41,7 +41,7 @@ class TokenTransfer extends Component {
       amount: '',
     }
 
-    this.splt = window.senwallet.splt;
+    this.splt = window.senswap.splt;
   }
 
   onAddress = (e) => {

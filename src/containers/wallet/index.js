@@ -8,25 +8,27 @@ import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
+import Carousel from 'senswap-ui/carousel';
+
+import Login from 'containers/wallet/components/login';
 
 // Main components
 import Header from './header';
 import Info from './info';
 import Assets from './assets';
-import LogIn from './login';
 import Payer from './payer';
 import Tokens from './tokens';
 import Pools from './pools';
 // Subapp
 import QRCode from './qrcode';
-import Unlock from './unlock';
 
 import styles from './styles';
 import configs from 'configs';
 import storage from 'helpers/storage';
 import sol from 'helpers/sol';
+import SecretKeyWallet from 'containers/wallet/core/secretKeyWallet';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
-import { unlockWallet, setWallet, updateWallet, closeWallet } from 'modules/wallet.reducer';
+import { setWallet, updateWallet, closeWallet } from 'modules/wallet.reducer';
 import { getAccountData, getMintData, getPoolData, getLPTData } from 'modules/bucket.reducer';
 
 
@@ -42,7 +44,7 @@ export const configSenWallet = () => {
   // Configs
   const { sol: { node, spltAddress, splataAddress, swapAddress } } = configs;
   // Global access
-  window.senwallet = {
+  window.senswap = {
     splt: new ssjs.SPLT(spltAddress, splataAddress, node),
     swap: new ssjs.Swap(swapAddress, spltAddress, node),
     lamports: new ssjs.Lamports(node),
@@ -57,29 +59,25 @@ class Wallet extends Component {
       setError, setWallet, updateWallet,
       getAccountData, getMintData, getPoolData, getLPTData
     } = this.props;
-    const address = storage.get('address');
-    const keystore = storage.get('keystore');
-    if (!address || !keystore) {
-      storage.clear('address');
-      storage.clear('keystore');
-      return;
-    }
-    return setWallet(address, keystore).then(re => {
-      window.senwallet.splt.watch((er, re) => {
+    const secretKey = storage.get('SecretKey');
+    if (!secretKey) return;
+    const wallet = new SecretKeyWallet(secretKey);
+    return setWallet(wallet).then(({ address }) => {
+      window.senswap.splt.watch((er, re) => {
         if (er) return;
-        const { type, accountId: address } = re;
+        const { type, accountId } = re;
         const { wallet: { user: { mints }, accounts } } = this.props;
-        if (type === 'mint' && mints.includes(address)) return getMintData(address, true);
-        if (type === 'account' && accounts.includes(address)) return getAccountData(address, true);
+        if (type === 'mint' && mints.includes(accountId)) return getMintData(accountId, true);
+        if (type === 'account' && accounts.includes(accountId)) return getAccountData(accountId, true);
       });
-      window.senwallet.swap.watch((er, re) => {
+      window.senswap.swap.watch((er, re) => {
         if (er) return;
-        const { type, accountId: address } = re;
+        const { type, accountId } = re;
         const { wallet: { user: { pools }, lpts } } = this.props;
-        if (type === 'pool' && pools.includes(address)) return getPoolData(address, true);
-        if (type === 'lpt' && lpts.includes(address)) return getLPTData(address, true);
+        if (type === 'pool' && pools.includes(accountId)) return getPoolData(accountId, true);
+        if (type === 'lpt' && lpts.includes(accountId)) return getLPTData(accountId, true);
       });
-      window.senwallet.lamports.watch(address, (er, re) => {
+      window.senswap.lamports.watch(address, (er, re) => {
         if (er) return;
         return updateWallet({ lamports: re });
       });
@@ -96,23 +94,20 @@ class Wallet extends Component {
 
   fetchData = () => {
     const {
-      wallet: { user: { address, mints, pools }, accounts, lpts },
+      wallet: { user: { address, mints }, accounts },
       setError, setLoading, unsetLoading,
-      getAccountData, getLPTData,
-      unlockWallet, updateWallet,
+      getAccountData,
+      updateWallet,
     } = this.props;
     if (!ssjs.isAddress(address)) return;
-    let secretKey = null;
-    return unlockWallet().then(re => {
-      secretKey = re;
-      return setLoading();
-    }).then(re => {
-      return window.senwallet.lamports.get(address);
+
+    return setLoading().then(re => {
+      return window.senswap.lamports.get(address);
     }).then(lamports => {
       return updateWallet({ lamports });
     }).then(re => {
       return Promise.all(mints.map(mintAddress => {
-        return sol.scanAccount(mintAddress, secretKey);
+        return sol.scanAccount(mintAddress, address);
       }));
     }).then(data => {
       data = data.filter(({ state }) => state > 0);
@@ -127,22 +122,7 @@ class Wallet extends Component {
       });
       const mainAccount = newAccounts[0];
       return updateWallet({ accounts: newAccounts, mainAccount });
-    }).then(re => {
-      return Promise.all(pools.map(poolAddress => {
-        return sol.scanLPT(poolAddress, secretKey);
-      }));
-    }).then(data => {
-      data = data.map(({ data }) => data).flat();
-      return Promise.all(data.map(({ address }) => {
-        return getLPTData(address);
-      }));
-    }).then(data => {
-      const newLPTs = [...lpts];
-      data.forEach(({ address: lptAddress }) => {
-        if (!newLPTs.includes(lptAddress)) return newLPTs.push(lptAddress);
-      });
-      return updateWallet({ lpts: newLPTs });
-    }).then(re => {
+    }).then(() => {
       return unsetLoading();
     }).catch(er => {
       return setError(er);
@@ -151,8 +131,28 @@ class Wallet extends Component {
 
   renderComponents = () => {
     const { wallet: { user: { address } } } = this.props;
-    if (!address) return <LogIn />
+
+    if (!ssjs.isAddress(address)) return <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Carousel data={[{
+          subtitle: 'Unlock wallet',
+          title: 'Please connect your wallet to continue',
+          src: 'https://source.unsplash.com/random',
+          action: <Grid container>
+            <Grid item>
+              <Login />
+            </Grid>
+          </Grid>
+        }]} />
+      </Grid>
+    </Grid>
     return <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Info />
+      </Grid>
+      <Grid item xs={12}>
+        <Assets />
+      </Grid>
       <Grid item xs={12} md={6}>
         <Payer />
       </Grid>
@@ -176,12 +176,6 @@ class Wallet extends Component {
       <Grid item xs={12}>
         <Drain size={3} />
       </Grid>
-      <Grid item xs={12}>
-        <Info />
-      </Grid>
-      <Grid item xs={12}>
-        <Assets />
-      </Grid>
 
       <Grid item xs={12}>
         {this.renderComponents()}
@@ -191,7 +185,6 @@ class Wallet extends Component {
       </Grid>
       <Grid item xs={12}>
         <QRCode />
-        <Unlock />
       </Grid>
     </Grid>
   }
@@ -205,7 +198,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setLoading, unsetLoading,
-  unlockWallet, setWallet, updateWallet, closeWallet,
+  setWallet, updateWallet, closeWallet,
   getAccountData, getMintData, getPoolData, getLPTData,
 }, dispatch);
 

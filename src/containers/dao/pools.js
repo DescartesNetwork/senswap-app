@@ -78,7 +78,7 @@ class Pools extends Component {
       loading: false,
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   componentDidMount() {

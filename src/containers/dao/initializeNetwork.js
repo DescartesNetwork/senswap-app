@@ -38,7 +38,7 @@ class InitializeNetwork extends Component {
       mints: [],
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   componentDidMount() {

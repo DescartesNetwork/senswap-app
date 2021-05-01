@@ -6,4 +6,8 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
+  help: {
+    marginTop: -theme.spacing(1),
+    marginLeft: -theme.spacing(1),
+  }
 });

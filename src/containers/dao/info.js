@@ -40,7 +40,7 @@ class NetworkInfo extends Component {
       loading: false,
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   onData = (data) => {

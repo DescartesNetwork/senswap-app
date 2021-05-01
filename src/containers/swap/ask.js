@@ -36,7 +36,7 @@ class Ask extends Component {
       primaryPoolData: {},
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   componentDidUpdate(prevProps) {

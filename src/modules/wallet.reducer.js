@@ -93,27 +93,29 @@ export const SET_WALLET = 'SET_WALLET';
 export const SET_WALLET_OK = 'SET_WALLET_OK';
 export const SET_WALLET_FAIL = 'SET_WALLET_FAIL';
 
-export const setWallet = (address, keystore) => {
+export const setWallet = (wallet) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_WALLET });
 
-      if (!address || !keystore) {
-        const er = 'Invalid input';
+      if (!wallet) {
+        const er = 'Invalid wallet instance';
         dispatch({ type: SET_WALLET_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.get(base + '/user', { address }).then(re => {
+      let address = null;
+      return wallet.getAccount().then(re => {
+        address = re;
+        return api.get(base + '/user', { address });
+      }).then(re => {
         if (!re.data) return api.post(base + '/user', { user: { address } });
         return Promise.resolve(re);
-      }).then(re => {
-        storage.set('address', address);
-        storage.set('keystore', keystore);
-        const { wallet } = getState();
-        const user = { ...wallet.user, ...re.data }
-        const data = { user }
+      }).then(({ data: userData }) => {
+        window.senswap.wallet = wallet;
+        const { wallet: { user } } = getState();
+        const data = { user: { ...user, ...userData } }
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
@@ -233,8 +235,7 @@ export const unsetWallet = () => {
       }
 
       // Local storage
-      storage.clear('address');
-      storage.clear('keystore');
+      storage.clear('SecretKey');
 
       const data = { ...defaultState };
       dispatch({ type: UNSET_WALLET_OK, data });

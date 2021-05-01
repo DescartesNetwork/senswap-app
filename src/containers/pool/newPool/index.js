@@ -48,7 +48,7 @@ class NewPool extends Component {
       networkData: {},
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   onClear = () => {

@@ -50,7 +50,7 @@ class Swap extends Component {
       data: [],
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   onClear = () => {

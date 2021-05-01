@@ -143,7 +143,7 @@ class Info extends Component {
       lasttime: new Date()
     }
 
-    this.swap = window.senwallet.swap;
+    this.swap = window.senswap.swap;
   }
 
   componentDidMount() {

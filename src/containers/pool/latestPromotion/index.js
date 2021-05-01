@@ -5,27 +5,22 @@ import { withRouter } from 'react-router-dom';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
+import { CardPool } from 'senswap-ui/card';
 
-import Login from 'containers/wallet/components/login';
+import { } from 'senswap-ui/icons';
 
 import styles from './styles';
+import { setError } from 'modules/ui.reducer';
 
 
-class Header extends Component {
+class LatestPromotion extends Component {
 
   render() {
-    const { classes } = this.props;
+    // const { classes } = this.props;
 
     return <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <Grid container className={classes.noWrap}>
-          <Grid item className={classes.stretch}>
-            {/* Search */}
-          </Grid>
-          <Grid item>
-            <Login />
-          </Grid>
-        </Grid>
+      <Grid item xs={12} md={6} lg={4}>
+        <CardPool />
       </Grid>
     </Grid>
   }
@@ -36,9 +31,10 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError
 }, dispatch);
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(Header)));
+)(withStyles(styles)(LatestPromotion)));

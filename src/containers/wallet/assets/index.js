@@ -51,7 +51,7 @@ class Assets extends Component {
       // Add SOL also
       data.unshift({
         address,
-        amount: parseFloat(ssjs.undecimalize(lamports, 9)),
+        amount: lamports,
         mint: {
           name: 'Solana',
           symbol: 'SOL',
@@ -89,11 +89,24 @@ class Assets extends Component {
                   <Typography variant="caption">24H MARKET</Typography>
                 </TableCell>
                 <TableCell>
+                  <Typography variant="caption">AMOUNT</Typography>
+                </TableCell>
+                <TableCell>
                   <Typography variant="caption">TOTAL BALANCE</Typography>
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
+              {!data.length ? <TableRow>
+                <TableCell />
+                <TableCell >
+                  <Typography variant="caption">No token</Typography>
+                </TableCell>
+                <TableCell />
+                <TableCell />
+                <TableCell />
+                <TableCell />
+              </TableRow> : null}
               {data.map(accountData => {
                 const { address, amount, mint: { ticket, icon, name, symbol } } = accountData;
                 return <TableRow key={address}>
@@ -115,6 +128,9 @@ class Assets extends Component {
                   </TableCell>
                   <TableCell>
                     <PriceChange ticket={ticket} />
+                  </TableCell>
+                  <TableCell>
+                    <Typography>{parseFloat(ssjs.undecimalize(amount, 9))}</Typography>
                   </TableCell>
                   <TableCell>
                     <Price amount={parseFloat(ssjs.undecimalize(amount, 9))} ticket={ticket} />

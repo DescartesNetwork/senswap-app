@@ -10,7 +10,7 @@ import Button from 'senswap-ui/button';
 
 import { QueueRounded, InputRounded, LaunchRounded } from 'senswap-ui/icons';
 
-import WalletButton from 'containers/wallet/components/walletButton';
+import Login from 'containers/wallet/components/login';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -34,22 +34,22 @@ class Wallet extends Component {
 
     return <Grid container spacing={0}>
       <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
+        <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
             <Typography>SenSwap</Typography>
           </Grid>
           {address ? <Grid item>
-            <WalletButton />
+            <Login />
           </Grid> : null}
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center" spacing={3}>
+        <Grid container alignItems="center" spacing={3}>
           <Grid item>
             <Typography variant="h4">Pools</Typography>
           </Grid>
           {!address ? <Grid item>
-            <WalletButton />
+            <Login />
           </Grid> : <Fragment>
             <Grid item>
               <Button
@@ -61,16 +61,12 @@ class Wallet extends Component {
               </Button>
             </Grid>
             <Grid item>
-              <Button
-                startIcon={<InputRounded />}
-              >
+              <Button startIcon={<InputRounded />} >
                 <Typography>Deposit</Typography>
               </Button>
             </Grid>
             <Grid item>
-              <Button
-                startIcon={<LaunchRounded />}
-              >
+              <Button startIcon={<LaunchRounded />} >
                 <Typography>Withdraw</Typography>
               </Button>
             </Grid>

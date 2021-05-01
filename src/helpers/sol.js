@@ -13,13 +13,11 @@ SOL.poolPath = (poolAddress, index) => {
   return path;
 }
 
-SOL.scanAccount = (mintAddress, secretKey) => {
+SOL.scanAccount = (mintAddress, walletAddress) => {
   return new Promise((resolve, reject) => {
     if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
 
-    const splt = window.senwallet.splt;
-    const payer = ssjs.fromSecretKey(secretKey);
-    const walletAddress = payer.publicKey.toBase58();
+    const splt = window.senswap.splt;
     const spltAddress = splt.spltProgramId.toBase58();
     const splataAddress = splt.splataProgramId.toBase58();
 
@@ -48,7 +46,7 @@ SOL.scanLPT = (poolAddress, secretKey) => {
       nextPath = SOL.poolPath(poolAddress, nextIndex);
       nextLPT = ssjs.deriveChild(secretKey, nextPath);
       const address = nextLPT.publicKey.toBase58();
-      return window.senwallet.swap.getLPTData(address).then(re => {
+      return window.senswap.swap.getLPTData(address).then(re => {
         data.push(re);
         nextIndex = nextIndex + 1;
         return next();
@@ -65,7 +63,7 @@ SOL.newAccount = (mintAddress, secretKey) => {
   return new Promise((resolve, reject) => {
     if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
 
-    const splt = window.senwallet.splt;
+    const splt = window.senswap.splt;
     const payer = ssjs.fromSecretKey(secretKey);
     const walletAddress = payer.publicKey.toBase58();
     const spltAddress = splt.spltProgramId.toBase58();
@@ -93,7 +91,7 @@ SOL.newLPT = (poolAddress, secretKey) => {
     return SOL.scanLPT(poolAddress, secretKey).then(({ nextLPT }) => {
       lpt = nextLPT;
       const payer = ssjs.fromSecretKey(secretKey);
-      return window.senwallet.swap.initializeLPT(lpt, poolAddress, payer);
+      return window.senswap.swap.initializeLPT(lpt, poolAddress, payer);
     }).then(txId => {
       return resolve({ lpt, txId });
     }).catch(er => {

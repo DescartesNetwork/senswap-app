@@ -8,6 +8,8 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
+import Carousel from 'senswap-ui/carousel';
+import Drain from 'senswap-ui/drain';
 
 import Header from './header';
 import NewPools from './newPools';
@@ -20,7 +22,23 @@ class Home extends Component {
     super();
 
     this.state = {
-      route: ''
+      route: '',
+      carouselData: [
+        {
+          title: "Let's Swap with Sen",
+          description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
+          src: 'https://source.unsplash.com/random',
+          action: <Button
+            variant="contained"
+            color="secondary"
+            size="large"
+            component={RouterLink}
+            to="/swap"
+          >
+            <Typography>Swap now</Typography>
+          </Button>,
+        }
+      ]
     }
   }
 
@@ -42,14 +60,20 @@ class Home extends Component {
 
   render() {
     // const { classes } = this.props;
-    const { route } = this.state;
+    const { route, carouselData } = this.state;
 
-    return <Grid container spacing={2}>
+    return <Grid container>
       <Grid item xs={12}>
         <Header />
       </Grid>
       <Grid item xs={12}>
-        {/* Hero panel */}
+        <Drain size={0} />
+      </Grid>
+      <Grid item xs={12}>
+        <Carousel data={carouselData} />
+      </Grid>
+      <Grid item xs={12}>
+        <Drain size={1} />
       </Grid>
       <Grid item xs={12}>
         <Grid container>
