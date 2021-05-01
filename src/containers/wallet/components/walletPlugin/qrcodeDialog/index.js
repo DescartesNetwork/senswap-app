@@ -23,7 +23,7 @@ import styles from './styles';
 import { setQRCode } from 'modules/wallet.reducer';
 
 
-class MyQRCode extends Component {
+class QRCodeDialog extends Component {
   constructor() {
     super();
 
@@ -138,4 +138,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(MyQRCode)));
+)(withStyles(styles)(QRCodeDialog)));

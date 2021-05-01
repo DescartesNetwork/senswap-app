@@ -10,7 +10,7 @@ import Button from 'senswap-ui/button';
 
 import { QueueRounded, InputRounded, LaunchRounded } from 'senswap-ui/icons';
 
-import Login from 'containers/wallet/components/login';
+import { WalletButton } from 'containers/wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -39,7 +39,7 @@ class Wallet extends Component {
             <Typography>SenSwap</Typography>
           </Grid>
           {address ? <Grid item>
-            <Login />
+            <WalletButton />
           </Grid> : null}
         </Grid>
       </Grid>
@@ -49,7 +49,7 @@ class Wallet extends Component {
             <Typography variant="h4">Pools</Typography>
           </Grid>
           {!address ? <Grid item>
-            <Login />
+            <WalletButton />
           </Grid> : <Fragment>
             <Grid item>
               <Button

@@ -13,7 +13,8 @@ class KeystoreWallet extends WalletInterface {
   _setWallet = (keystore, password) => {
     const account = ssjs.fromKeystore(keystore, password);
     const secretKey = Buffer.from(account.secretKey).toString('hex');
-    return storage.set('SecretKey', secretKey);
+    storage.set('WalletType', 'Keystore');
+    storage.set('SecretKey', secretKey);
   }
 
   _getWallet = () => {

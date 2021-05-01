@@ -115,7 +115,7 @@ export const setWallet = (wallet) => {
       }).then(({ data: userData }) => {
         window.senswap.wallet = wallet;
         const { wallet: { user } } = getState();
-        const data = { user: { ...user, ...userData } }
+        const data = { user: { ...user, ...userData }, visible: false }
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
@@ -235,6 +235,7 @@ export const unsetWallet = () => {
       }
 
       // Local storage
+      storage.clear('WalletType');
       storage.clear('SecretKey');
 
       const data = { ...defaultState };

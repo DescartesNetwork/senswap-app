@@ -1,8 +1,19 @@
 import ssjs from 'senswapjs';
 import bs58 from 'bs58';
+
+import storage from 'helpers/storage';
 import WalletInterface from '../walletInterface';
 
 class Coin98Wallet extends WalletInterface {
+  constructor() {
+    super();
+
+    this._setWallet();
+  }
+
+  _setWallet = () => {
+    storage.set('WalletType', 'Coin98');
+  }
 
   _getNode = () => {
     const { coin98 } = window;

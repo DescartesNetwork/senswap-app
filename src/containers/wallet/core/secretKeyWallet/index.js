@@ -11,7 +11,8 @@ class SecretKeyWallet extends WalletInterface {
   }
 
   _setWallet = (secretKey) => {
-    return storage.set('SecretKey', secretKey);
+    storage.set('WalletType', 'SecretKey');
+    storage.set('SecretKey', secretKey);
   }
 
   _getWallet = () => {

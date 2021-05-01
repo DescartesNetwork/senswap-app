@@ -6,7 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 
-import Login from 'containers/wallet/components/login';
+import { WalletButton } from 'containers/wallet';
 
 import styles from './styles';
 
@@ -23,7 +23,7 @@ class Header extends Component {
             {/* Search */}
           </Grid>
           <Grid item>
-            <Login />
+            <WalletButton />
           </Grid>
         </Grid>
       </Grid>

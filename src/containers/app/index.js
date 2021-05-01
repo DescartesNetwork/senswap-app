@@ -12,7 +12,7 @@ import Drain from 'senswap-ui/drain';
 import PrivateRoute from 'containers/auth/privateRoute';
 import Sidebar from 'containers/sidebar';
 import UiUx from 'containers/uiux';
-import Wallet, { configSenWallet } from 'containers/wallet';
+import Wallet, { configSenWallet, WalletPlugin } from 'containers/wallet';
 // Pages
 import NotFound from 'containers/404';
 import Home from 'containers/home';
@@ -68,6 +68,7 @@ class App extends Component {
         {/* Application */}
         <Grid item xs={12} >
           <UiUx />
+          <WalletPlugin />
         </Grid>
       </Grid>
     </ThemeProvider>

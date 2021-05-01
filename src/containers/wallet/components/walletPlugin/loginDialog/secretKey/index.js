@@ -32,7 +32,7 @@ class SecretKey extends Component {
     return this.setState({ secretKey });
   }
 
-  onSave = () => {
+  connect = () => {
     const { setError, setWallet } = this.props;
     const { secretKey } = this.state;
     if (!secretKey) return setError('The secret key cannot be empty');
@@ -78,7 +78,7 @@ class SecretKey extends Component {
           value={secretKey}
           InputProps={{
             endAdornment: <Grid item>
-              <Button onClick={this.onSave} startIcon={<PowerRounded />}>
+              <Button onClick={this.connect} startIcon={<PowerRounded />}>
                 <Typography>Connect</Typography>
               </Button>
             </Grid>

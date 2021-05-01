@@ -71,7 +71,7 @@ class KeyStore extends Component {
     return this.setState({ visiblePassword: !visiblePassword });
   }
 
-  onSave = () => {
+  connect = () => {
     const { password, keystore } = this.state;
     const { setError, setWallet } = this.props;
     if (!keystore) return setError('Please upload your keystore');
@@ -159,7 +159,7 @@ class KeyStore extends Component {
           onChange={this.onPassword}
           InputProps={{
             endAdornment: <Grid item>
-              <Button onClick={this.onSave} startIcon={<PowerRounded />}>
+              <Button onClick={this.connect} startIcon={<PowerRounded />}>
                 <Typography>Connect</Typography>
               </Button>
             </Grid>
