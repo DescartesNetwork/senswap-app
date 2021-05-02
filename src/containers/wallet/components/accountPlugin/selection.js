@@ -38,30 +38,32 @@ class Selection extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { accounts: prevAccounts } } = prevProps;
-    const { wallet: { accounts } } = this.props;
-    if (!isEqual(accounts, prevAccounts)) this.fetchData();
+    const { wallet: prevWallet } = prevProps;
+    const { wallet } = this.props;
+    if (!isEqual(prevWallet, wallet)) this.fetchData();
   }
 
   fetchData = (callback) => {
     const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
-    if (!accounts || !accounts.length) return;;
 
+    const solAccount = {
+      address,
+      amount: global.BigInt(lamports),
+      mint: {
+        decimals: 9,
+        name: 'Solana',
+        symbol: 'SOL',
+        ticket: 'solana',
+        icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
+      }
+    }
+
+    if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
     })).then(data => {
       // Add SOL also
-      data.unshift({
-        address,
-        amount: global.BigInt(lamports),
-        mint: {
-          decimals: 9,
-          name: 'Solana',
-          symbol: 'SOL',
-          ticket: 'solana',
-          icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
-        }
-      });
+      data.unshift(solAccount);
       return this.setState({ data, searchedData: data }, callback);
     }).catch(er => {
       return setError(er);
@@ -135,7 +137,7 @@ class Selection extends Component {
                     <TableCell />
                   </TableRow> : null}
                   {searchedData.map(accountData => {
-                    const { address, amount, mint: { icon, name, symbol } } = accountData;
+                    const { address, amount, mint: { icon, name, symbol, decimals } } = accountData;
                     return <TableRow key={address} className={classes.tableRow} onClick={() => this.onChange(address)}>
                       <TableCell >
                         <Grid container className={classes.noWrap} alignItems="center">
@@ -151,7 +153,7 @@ class Selection extends Component {
                         </Grid>
                       </TableCell>
                       <TableCell>
-                        <Typography>{parseFloat(ssjs.undecimalize(amount, 9))}</Typography>
+                        <Typography>{ssjs.undecimalize(amount, decimals)}</Typography>
                       </TableCell>
                     </TableRow>
                   })}

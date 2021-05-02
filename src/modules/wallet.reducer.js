@@ -22,10 +22,6 @@ const defaultState = {
   accounts: [],
   lpts: [],
   mainAccount: null,
-  qrcode: {
-    visible: false,
-    message: ''
-  },
   unlock: {
     visible: false,
     remembered: '',
@@ -246,35 +242,6 @@ export const unsetWallet = () => {
 }
 
 /**
- * Set QR Code
- */
-export const SET_QRCODE = 'SET_QRCODE';
-export const SET_QRCODE_OK = 'SET_QRCODE_OK';
-export const SET_QRCODE_FAIL = 'SET_QRCODE_FAIL';
-
-export const setQRCode = (visible = false, message = '') => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_QRCODE });
-
-      const { wallet: { qrcode: {
-        visible: prevVisible,
-        message: prevMessage
-      } } } = getState();
-      if (visible === prevVisible && message === prevMessage) {
-        const er = 'Duplicated input';
-        dispatch({ type: SET_QRCODE_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const data = { qrcode: { visible, message } };
-      dispatch({ type: SET_QRCODE_OK, data });
-      return resolve(data);
-    });
-  }
-}
-
-/**
  * Get secret key
  */
 export const UNLOCK_WALLET = 'UNLOCK_WALLET';
@@ -429,10 +396,6 @@ export default (state = defaultState, action) => {
     case UNSET_WALLET_OK:
       return { ...state, ...action.data };
     case UNSET_WALLET_FAIL:
-      return { ...state, ...action.data };
-    case SET_QRCODE_OK:
-      return { ...state, ...action.data };
-    case SET_QRCODE_FAIL:
       return { ...state, ...action.data };
     case UNLOCK_WALLET_OK:
       return { ...state, ...action.data };

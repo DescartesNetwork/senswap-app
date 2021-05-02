@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -8,7 +8,6 @@ import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 
 import LoginDialog from './loginDialog';
-import QRCodeDialog from './qrcodeDialog';
 
 import styles from './styles';
 import storage from 'helpers/storage';
@@ -108,10 +107,7 @@ class WalletPlugin extends Component {
   }
 
   render() {
-    return <Fragment>
-      <LoginDialog />
-      <QRCodeDialog />
-    </Fragment>
+    return <LoginDialog />
   }
 }
 

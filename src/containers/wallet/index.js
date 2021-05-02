@@ -17,8 +17,6 @@ import { AccountSelection, AccountSend, AccountReceive } from 'containers/wallet
 import Header from './header';
 import Info from './info';
 import Assets from './assets';
-import Payer from './payer';
-import Tokens from './tokens';
 import Pools from './pools';
 
 import styles from './styles';
@@ -77,13 +75,10 @@ class Wallet extends Component {
         <Info />
       </Grid>
       <Grid item xs={12}>
+        <Drain size={1} />
+      </Grid>
+      <Grid item xs={12}>
         <Assets />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <Payer />
-      </Grid>
-      <Grid item xs={12} md={6}>
-        <Tokens />
       </Grid>
       <Grid item xs={12}>
         <Drain />

@@ -77,19 +77,13 @@ class Send extends Component {
     });
   }
 
-  onClose = () => {
-    const { onSend, onClose } = this.props;
-    onSend({});
-    return onClose();
-  }
-
   render() {
     const { classes } = this.props;
-    const { visible, data: { amount: balance, mint } } = this.props;
+    const { visible, data: { amount: balance, mint }, onClose } = this.props;
     const { amount, amountError, address, addressError, loading } = this.state;
     const { icon, name, symbol, decimals } = mint || {}
 
-    return <Dialog open={visible} onClose={this.onClose} fullWidth>
+    return <Dialog open={visible} onClose={onClose} fullWidth>
       <DialogTitle>
         <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item>
@@ -100,7 +94,7 @@ class Send extends Component {
             <Typography variant="body2" color="textSecondary">{name}</Typography>
           </Grid>
           <Grid item>
-            <IconButton onClick={this.onClose} edge="end">
+            <IconButton onClick={onClose} edge="end">
               <CloseRounded />
             </IconButton>
           </Grid>

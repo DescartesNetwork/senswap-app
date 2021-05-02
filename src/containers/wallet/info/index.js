@@ -63,11 +63,11 @@ class Info extends Component {
 	onOpenAccountSend = () => this.setState({ visibleAccountSend: true });
 	onTransactionData = ({ amount, from, to }) => {
 		const { setError } = this.props;
-		console.log(amount, from, to)
 		return this.transfer(amount, from, to).then(txId => {
 			console.log(txId);
 			return this.onCloseAccountSend();
 		}).catch(er => {
+			this.onCloseAccountSend();
 			return setError(er);
 		});
 	}

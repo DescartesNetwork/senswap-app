@@ -8,10 +8,11 @@ import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
+import { IconButton } from 'senswap-ui/button';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import Favorite from 'senswap-ui/favorite';
 
-import { } from 'senswap-ui/icons';
+import { AddRounded } from 'senswap-ui/icons';
 
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 import Price from './price';
@@ -36,29 +37,32 @@ class Assets extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { accounts: prevAccounts } } = prevProps;
-    const { wallet: { accounts } } = this.props;
-    if (!isEqual(accounts, prevAccounts)) this.fetchData();
+    const { wallet: prevWallet } = prevProps;
+    const { wallet } = this.props;
+    if (!isEqual(prevWallet, wallet)) this.fetchData();
   }
 
   fetchData = (callback) => {
     const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
-    if (!accounts || !accounts.length) return;;
 
+    const solAccount = {
+      address,
+      amount: global.BigInt(lamports),
+      mint: {
+        decimals: 9,
+        name: 'Solana',
+        symbol: 'SOL',
+        ticket: 'solana',
+        icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
+      }
+    }
+
+    if (!accounts || !accounts.length) return this.setState({ data: [solAccount] });
     return Promise.all(accounts.map(accountAddress => {
       return getAccountData(accountAddress);
     })).then(data => {
       // Add SOL also
-      data.unshift({
-        address,
-        amount: global.BigInt(lamports),
-        mint: {
-          name: 'Solana',
-          symbol: 'SOL',
-          ticket: 'solana',
-          icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
-        }
-      });
+      data.unshift(solAccount);
       return this.setState({ data }, callback);
     }).catch(er => {
       return setError(er);
@@ -69,9 +73,18 @@ class Assets extends Component {
     const { classes } = this.props;
     const { data } = this.state;
 
-    return <Grid container>
+    return <Grid container spacing={1}>
       <Grid item xs={12}>
-        <Typography variant="subtitle1">Asset Balances</Typography>
+        <Grid container className={classes.noWrap}>
+          <Grid item className={classes.stretch}>
+            <Typography variant="subtitle1">Asset Balances</Typography>
+          </Grid>
+          <Grid item>
+            <IconButton color="primary">
+              <AddRounded />
+            </IconButton>
+          </Grid>
+        </Grid>
       </Grid>
       <Grid item xs={12}>
         <TableContainer>
@@ -130,7 +143,7 @@ class Assets extends Component {
                     <PriceChange ticket={ticket} />
                   </TableCell>
                   <TableCell>
-                    <Typography>{parseFloat(ssjs.undecimalize(amount, 9))}</Typography>
+                    <Typography>{ssjs.undecimalize(amount, 9)}</Typography>
                   </TableCell>
                   <TableCell>
                     <Price amount={parseFloat(ssjs.undecimalize(amount, 9))} ticket={ticket} />

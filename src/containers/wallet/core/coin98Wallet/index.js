@@ -1,3 +1,4 @@
+import bs58 from 'bs58';
 import ssjs from 'senswapjs';
 
 import storage from 'helpers/storage';
@@ -39,11 +40,12 @@ class Coin98Wallet extends WalletInterface {
       return this.getAccount().then(account => {
         transaction.feePayer = ssjs.fromAddress(account);
         return node.request({ method: 'sol_sign', params: [transaction] })
-      }).then(re => {
-        if (!re) return reject('Cannot sign the transaction');
-        return resolve(re);
+      }).then(({ publicKey, signature }) => {
+        publicKey = ssjs.fromAddress(publicKey);
+        signature = bs58.decode(signature);
+        return resolve({ publicKey, signature });
       }).catch(er => {
-        return reject(er);
+        return reject(er.message);
       });
     });
   }
