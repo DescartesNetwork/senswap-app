@@ -51,7 +51,7 @@ class Assets extends Component {
       // Add SOL also
       data.unshift({
         address,
-        amount: lamports,
+        amount: global.BigInt(lamports),
         mint: {
           name: 'Solana',
           symbol: 'SOL',

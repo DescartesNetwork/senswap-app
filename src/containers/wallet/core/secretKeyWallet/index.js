@@ -1,3 +1,4 @@
+import nacl from 'tweetnacl';
 import ssjs from 'senswapjs';
 
 import storage from 'helpers/storage';
@@ -34,11 +35,12 @@ class SecretKeyWallet extends WalletInterface {
     return new Promise((resolve, reject) => {
       const account = this._getWallet();
       try {
-        const confirmed = window.confirm('Please confirm to sign the traction!');
+        const confirmed = window.confirm('Please confirm to sign the transaction!');
         if (!confirmed) return reject('User rejects to sign the transaction');
-        const address = account.publicKey.toBase58();
-        transaction.sign(account);
-        return resolve({ address, transaction });
+        const signData = transaction.serializeMessage();
+        const publicKey = account.publicKey;
+        const signature = nacl.sign.detached(signData, account.secretKey);
+        return resolve({ publicKey, signature });
       } catch (er) {
         return reject(er);
       }

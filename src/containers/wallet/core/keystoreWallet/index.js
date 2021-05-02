@@ -1,3 +1,4 @@
+import nacl from 'tweetnacl';
 import ssjs from 'senswapjs';
 
 import storage from 'helpers/storage';
@@ -38,9 +39,10 @@ class KeystoreWallet extends WalletInterface {
       try {
         const confirmed = window.confirm('Please confirm to sign the traction!');
         if (!confirmed) return reject('User rejects to sign the transaction');
-        const address = account.publicKey.toBase58();
-        transaction.sign(account);
-        return resolve({ address, transaction });
+        const signData = transaction.serializeMessage();
+        const publicKey = account.publicKey;
+        const signature = nacl.sign.detached(signData, account.secretKey);
+        return resolve({ publicKey, signature });
       } catch (er) {
         return reject(er);
       }

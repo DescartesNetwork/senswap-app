@@ -31,10 +31,6 @@ class WalletInterface {
     return new Promise((resolve, reject) => {
       if (!this._sign) return reject('Wallet is not connected');
       return this._sign(transaction).then(re => {
-        // re = { address, signedTransaction }
-        // We don't follow the flow of several wallets that
-        // return { publicKey, signature }. Because we want to
-        // take the tx back in case of multisig
         return resolve(re);
       }).catch(er => {
         return reject(er);

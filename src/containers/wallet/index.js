@@ -11,6 +11,7 @@ import Carousel from 'senswap-ui/carousel';
 
 import WalletButton from 'containers/wallet/components/walletButton';
 import WalletPlugin from 'containers/wallet/components/walletPlugin';
+import { AccountSelection, AccountSend, AccountReceive } from 'containers/wallet/components/accountPlugin';
 
 // Main components
 import Header from './header';
@@ -46,7 +47,10 @@ export const configSenWallet = () => {
 /**
  * Wallet UI buttons, dialogs
  */
-export { WalletPlugin, WalletButton };
+export {
+  WalletPlugin, WalletButton,
+  AccountSelection, AccountSend, AccountReceive,
+}
 
 
 class Wallet extends Component {
