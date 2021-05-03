@@ -33,10 +33,6 @@ class Selection extends Component {
     }
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
   componentDidUpdate(prevProps) {
     const { visible: prevVisible } = prevProps;
     const { visible } = this.props;

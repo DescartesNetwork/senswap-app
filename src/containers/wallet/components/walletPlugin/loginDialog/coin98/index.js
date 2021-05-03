@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import { Coin98Wallet } from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -13,7 +14,6 @@ import Link from 'senswap-ui/link';
 import { PowerRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
-import Coin98Wallet from 'containers/wallet/core/coin98Wallet';
 import COIN98_LOGO from 'static/images/coin98-logo.png';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';

@@ -128,7 +128,7 @@ class Send extends Component {
                     <Typography color="textSecondary">{symbol}</Typography>
                   </Grid>
                   <Grid item>
-                    <Button color="primary" onClick={this.onMax}>
+                    <Button color="primary" onClick={this.onMax} size="small">
                       <Typography>Max</Typography>
                     </Button>
                   </Grid>

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import fileDownload from 'js-file-download';
-import ssjs from 'senswapjs';
+import ssjs, { KeystoreWallet } from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -20,7 +20,6 @@ import {
 } from 'senswap-ui/icons';
 
 import styles from './styles';
-import KeystoreWallet from 'containers/wallet/core/keystoreWallet';
 import { setError } from 'modules/ui.reducer';
 import { setWallet } from 'modules/wallet.reducer';
 

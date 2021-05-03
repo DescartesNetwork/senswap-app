@@ -11,6 +11,7 @@ import Typography from 'senswap-ui/typography';
 import { IconButton } from 'senswap-ui/button';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import Favorite from 'senswap-ui/favorite';
+import Paper from 'senswap-ui/paper';
 
 import { AddRounded } from 'senswap-ui/icons';
 
@@ -42,12 +43,13 @@ class Assets extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet } = prevProps;
-    const { wallet } = this.props;
-    if (!isEqual(prevWallet, wallet)) this.fetchData();
+    const { wallet: prevWallet, bucket: prevBucket } = prevProps;
+    const { wallet, bucket } = this.props;
+    if (!isEqual(prevWallet, wallet)) return this.fetchData();
+    if (!isEqual(prevBucket, bucket)) return this.fetchData();
   }
 
-  fetchData = (callback) => {
+  fetchData = () => {
     const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
 
     const solAccount = {
@@ -68,7 +70,7 @@ class Assets extends Component {
     })).then(data => {
       // Add SOL also
       data.unshift(solAccount);
-      return this.setState({ data }, callback);
+      return this.setState({ data });
     }).catch(er => {
       return setError(er);
     });

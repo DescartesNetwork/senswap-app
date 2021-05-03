@@ -21,7 +21,6 @@ const defaultState = {
   },
   accounts: [],
   lpts: [],
-  mainAccount: null,
   unlock: {
     visible: false,
     remembered: '',
@@ -90,7 +89,7 @@ export const SET_WALLET_OK = 'SET_WALLET_OK';
 export const SET_WALLET_FAIL = 'SET_WALLET_FAIL';
 
 export const setWallet = (wallet) => {
-  return (dispatch, getState) => {
+  return dispatch => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_WALLET });
 
@@ -100,18 +99,26 @@ export const setWallet = (wallet) => {
         return reject(er);
       }
 
-      const { api: { base } } = configs;
-      let address = null;
-      return wallet.getAccount().then(re => {
-        address = re;
-        return api.get(base + '/user', { address });
-      }).then(re => {
-        if (!re.data) return api.post(base + '/user', { user: { address } });
-        return Promise.resolve(re);
-      }).then(({ data: userData }) => {
+      const lamports = window.senswap.lamports;
+      const connection = window.senswap.splt.connection;
+      const spltPromgramId = window.senswap.splt.spltProgramId;
+      const data = {
+        user: { address: '' },
+        lamports: 0,
+        accounts: [],
+        visible: false
+      }
+
+      return wallet.getAccount().then(address => {
+        data.user.address = address;
+        return lamports.get(address);
+      }).then(lamports => {
+        data.lamports = lamports;
+        const ownerPublicKey = ssjs.fromAddress(data.user.address);
+        return connection.getTokenAccountsByOwner(ownerPublicKey, { programId: spltPromgramId });
+      }).then(({ value }) => {
+        data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
         window.senswap.wallet = wallet;
-        const { wallet: { user } } = getState();
-        const data = { user: { ...user, ...userData }, visible: false }
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
@@ -297,32 +304,6 @@ export const unlockWallet = () => {
 }
 
 /**
- * Set main token account
- */
-export const SET_MAIN_ACCOUNT = 'SET_MAIN_ACCOUNT';
-export const SET_MAIN_ACCOUNT_OK = 'SET_MAIN_ACCOUNT_OK';
-export const SET_MAIN_ACCOUNT_FAIL = 'SET_MAIN_ACCOUNT_FAIL';
-
-export const setMainAccount = (accountAddress) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_MAIN_ACCOUNT });
-
-      const { wallet: { mainAccount } } = getState();
-      if (mainAccount === accountAddress) {
-        const er = 'The token account is same';
-        dispatch({ type: SET_MAIN_ACCOUNT_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const data = { mainAccount: accountAddress };
-      dispatch({ type: SET_MAIN_ACCOUNT_OK, data });
-      return resolve(data);
-    });
-  }
-}
-
-/**
  * Set remembered
  */
 export const SET_REMEMBERED = 'SET_REMEMBERED';
@@ -402,10 +383,6 @@ export default (state = defaultState, action) => {
     case UNLOCK_WALLET_PENDING:
       return { ...state, ...action.data };
     case UNLOCK_WALLET_FAIL:
-      return { ...state, ...action.data };
-    case SET_MAIN_ACCOUNT_OK:
-      return { ...state, ...action.data };
-    case SET_MAIN_ACCOUNT_FAIL:
       return { ...state, ...action.data };
     case SET_REMEMBERED_OK:
       return { ...state, ...action.data };

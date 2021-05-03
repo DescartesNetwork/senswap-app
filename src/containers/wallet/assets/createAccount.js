@@ -71,7 +71,7 @@ class CreateAccount extends Component {
 
   newAccount = () => {
     const {
-      wallet: { user, accounts },
+      wallet: { accounts },
       mintData: { address: mintAddress },
       onClose, setError, updateWallet
     } = this.props;
@@ -80,11 +80,9 @@ class CreateAccount extends Component {
 
     return this.setState({ loading: true }, () => {
       return this.splt.initializeAccount(address, mintAddress, this.wallet).then(txId => {
-        const newMints = [...user.mints];
-        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
         const newAccounts = [...accounts];
         if (!newAccounts.includes(address)) newAccounts.push(address);
-        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
+        return updateWallet({ accounts: newAccounts });
       }).then(re => {
         return this.setState({ loading: false }, () => {
           return onClose();

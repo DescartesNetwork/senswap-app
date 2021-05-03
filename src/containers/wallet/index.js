@@ -58,7 +58,7 @@ class Wallet extends Component {
   renderComponents = () => {
     const { wallet: { user: { address } } } = this.props;
 
-    if (!ssjs.isAddress(address)) return <Grid container spacing={2}>
+    if (!ssjs.isAddress(address)) return <Grid container>
       <Grid item xs={12}>
         <Carousel data={[{
           subtitle: 'Unlock wallet',
@@ -72,7 +72,7 @@ class Wallet extends Component {
         }]} />
       </Grid>
     </Grid>
-    return <Grid container spacing={2}>
+    return <Grid container>
       <Grid item xs={12}>
         <Info />
       </Grid>
