@@ -1,26 +1,24 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import Collapse from '@material-ui/core/Collapse';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import TextField from 'senswap-ui/textField';
+import Button, { IconButton } from 'senswap-ui/button';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
+import Drain from 'senswap-ui/drain';
+import Divider from 'senswap-ui/divider';
 
-import {
-  CheckCircleOutlineRounded, HelpOutlineRounded, PublicRounded,
-  ArrowForwardRounded, OfflineBoltRounded,
-} from '@material-ui/icons';
+import { CloseRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
 
-import AccountSelection from 'containers/wallet/components/accountSelection';
-import NetworkSelection from 'containers/wallet/components/networkSelection';
+import { MintAvatar, AccountSelection } from 'containers/wallet';
+import Price from './price';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -34,8 +32,6 @@ import { getAccountData } from 'modules/bucket.reducer';
 const EMPTY = {
   txId: '',
   loading: false,
-  amount: 0,
-  price: 0,
 }
 
 class NewPool extends Component {
@@ -44,34 +40,35 @@ class NewPool extends Component {
 
     this.state = {
       ...EMPTY,
-      accountData: {},
-      networkData: {},
+      accountData: [{}, {}, {}],
+      index: 0,
+      amounts: ['', '', ''],
+      visibleAccountSelection: false,
     }
 
     this.swap = window.senswap.swap;
   }
 
-  onClear = () => {
-    return this.setState({ ...EMPTY });
-  }
+  onOpenAccountSelection = (index) => this.setState({ index, visibleAccountSelection: true });
+  onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
 
-  onAccountAddress = (accountAddress) => {
-    const { getAccountData, setError } = this.props;
-    if (!ssjs.isAddress(accountAddress)) return;
-    return getAccountData(accountAddress).then(accountData => {
-      return this.setState({ accountData });
-    }).catch(er => {
-      return setError(er);
+  onAccountData = (data) => {
+    const { setError } = this.props;
+    const { accountData, index } = this.state;
+    if (accountData.some(({ address }) => data.address === address)) return setError('Already selected');
+    let newAccountData = [...accountData];
+    newAccountData[index] = data;
+    return this.setState({ accountData: newAccountData }, () => {
+      return this.onCloseAccountSelection();
     });
   }
 
-  onNetworkData = (networkData) => {
-    return this.setState({ networkData });
-  }
-
-  onAmount = (e) => {
+  onAmount = (index, e) => {
     const amount = e.target.value || '';
-    return this.setState({ amount });
+    const { amounts } = this.state;
+    let newAmounts = [...amounts];
+    newAmounts[index] = amount;
+    return this.setState({ amounts: newAmounts });
   }
 
   onMax = () => {
@@ -81,16 +78,11 @@ class NewPool extends Component {
     return this.setState({ amount });
   }
 
-  onPrice = (e) => {
-    const price = e.target.value || '';
-    return this.setState({ price });
-  }
-
   newPool = () => {
     const {
       accountData: { address: srcAddress, state, mint },
       networkData: { address: networkAddress },
-      amount, price
+      amount
     } = this.state;
     const {
       wallet: { user, lpts },
@@ -100,7 +92,6 @@ class NewPool extends Component {
     const { address: mintAddress, decimals } = mint || {};
     if (!state) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
-    if (!price) return setError('Invalid price');
 
     let poolAddress = '';
     let txId = '';
@@ -119,11 +110,10 @@ class NewPool extends Component {
       }).then(({ nextLPT }) => {
         lpt = nextLPT;
         const reserve = ssjs.decimalize(amount, decimals);
-        const value = ssjs.decimalize(parseFloat(price) * parseFloat(amount), 9);
         const payer = ssjs.fromSecretKey(secretKey);
         return this.swap.initializePool(
           reserve,
-          value,
+          0n,
           networkAddress,
           pool,
           treasury,
@@ -156,113 +146,92 @@ class NewPool extends Component {
 
   render() {
     const { classes } = this.props;
-    const { ui: { advance } } = this.props;
-    const {
-      amount, price, loading, txId,
-      accountData: { amount: balance, state, mint }
-    } = this.state;
-    const { address, decimals, symbol } = mint || {}
+    const { visible, onClose } = this.props;
+    const { loading, amounts, accountData, visibleAccountSelection } = this.state;
 
-    return <Grid container justify="center" spacing={2}>
-      <Grid item xs={12}>
-        <Typography variant="h6">Your token info</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <AccountSelection onChange={this.onAccountAddress} />
-      </Grid>
-      <Grid item xs={12}>
-        <Collapse in={advance}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <NetworkSelection mintAddress={address} onChange={this.onNetworkData} />
+    return <Fragment>
+      <Dialog open={visible} onClose={onClose} fullWidth>
+        <DialogTitle>
+          <Grid container alignItems="center" className={classes.noWrap}>
+            <Grid item className={classes.stretch}>
+              <Typography variant="subtitle1">New pool</Typography>
+            </Grid>
+            <Grid item>
+              <IconButton onClick={onClose} edge="end">
+                <CloseRounded />
+              </IconButton>
             </Grid>
           </Grid>
-        </Collapse>
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container spacing={2} alignItems="center" className={classes.noWrap}>
-          <Grid item className={classes.stretch}>
-            <Typography variant="h6">Pool info</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography>Liquidity provider incentive. <span style={{ color: '#808191' }}>Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity.</span></Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Drain size={2} />
+            </Grid>
+            {accountData.map((data, index) => {
+              const { address, amount, mint } = data;
+              const { symbol, icon, decimals, ticket } = mint || {}
+              return <Fragment key={address}>
+                <Grid item xs={12} >
+                  <TextField
+                    label={!index ? 'Primary Address' : `Address ${index}`}
+                    variant="contained"
+                    placeholder="0"
+                    value={amounts[index]}
+                    onChange={(e) => this.onAmount(index, e)}
+                    InputProps={{
+                      startAdornment: <Grid container>
+                        <Grid item>
+                          <Button
+                            size="small"
+                            startIcon={<MintAvatar icon={icon} />}
+                            endIcon={<ArrowDropDownRounded />}
+                            onClick={() => this.onOpenAccountSelection(index)}
+                          >
+                            <Typography>{symbol || 'Select'} </Typography>
+                          </Button>
+                        </Grid>
+                        <Grid item style={{ paddingLeft: 0 }}>
+                          <Divider orientation="vertical" />
+                        </Grid>
+                      </Grid>
+                    }}
+                    helperTextPrimary={`Available ${utils.prettyNumber(ssjs.undecimalize(amount, decimals))} ${symbol || ''}`}
+                    helperTextSecondary={<Price ticket={ticket} />}
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} />
+              </Fragment>
+            })}
+            <Grid item xs={12}>
+              <Drain size={1} />
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                endIcon={loading ? <CircularProgress size={17} /> : null}
+                disabled={loading}
+                fullWidth
+              >
+                <Typography>New pool</Typography>
+              </Button>
+            </Grid>
+            <Grid item xs={12} />
           </Grid>
-          <Grid item>
-            <Tooltip title="You are the first liquidity provider. Once you are happy with the rate click the button to create a new pool.">
-              <IconButton size="small">
-                <HelpOutlineRounded fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Initial amount"
-          variant="outlined"
-          value={amount}
-          onChange={this.onAmount}
-          disabled={!state}
-          InputProps={{
-            endAdornment: <Tooltip title="Maximum amount">
-              <IconButton edge="end" onClick={this.onMax}>
-                <OfflineBoltRounded />
-              </IconButton>
-            </Tooltip>
-          }}
-          helperText={<span>Available {symbol}: <strong>{utils.prettyNumber(ssjs.undecimalize(balance, decimals))}</strong></span>}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="Initial price"
-          variant="outlined"
-          value={price}
-          onChange={this.onPrice}
-          disabled={!state}
-          fullWidth
-        />
-      </Grid>
-      {txId ? <Grid item xs={12}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography variant="body2">Done! The pool has been created.</Typography>
-          </Grid>
-          <Grid item xs={8}>
-            <Button
-              variant="contained"
-              color="secondary"
-              href={utils.explorer(txId)}
-              target="_blank"
-              rel="noopener"
-              startIcon={<PublicRounded />}
-              fullWidth
-            >
-              <Typography>Explore</Typography>
-            </Button>
-          </Grid>
-          <Grid item xs={4}>
-            <Button
-              color="secondary"
-              onClick={this.onClear}
-              endIcon={<ArrowForwardRounded />}
-              fullWidth
-            >
-              <Typography>Skip</Typography>
-            </Button>
-          </Grid>
-        </Grid>
-      </Grid> : <Grid item xs={12}>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={loading ? <CircularProgress size={17} /> : <CheckCircleOutlineRounded />}
-          onClick={this.newPool}
-          disabled={loading || !state}
-          fullWidth
-        >
-          <Typography variant="body2">Create</Typography>
-        </Button>
-      </Grid>}
-    </Grid>
+        </DialogContent>
+      </Dialog>
+      <AccountSelection
+        visible={visibleAccountSelection}
+        onClose={this.onCloseAccountSelection}
+        onChange={this.onAccountData}
+      />
+    </Fragment>
   }
 }
 
@@ -279,6 +248,16 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   updateWallet, unlockWallet, syncWallet,
   getAccountData,
 }, dispatch);
+
+NewPool.defaultProps = {
+  visible: true,
+  onClose: () => { },
+}
+
+NewPool.propTypes = {
+  visible: PropTypes.bool,
+  onClose: PropTypes.func,
+}
 
 export default withRouter(connect(
   mapStateToProps,

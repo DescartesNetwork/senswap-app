@@ -22,5 +22,16 @@ export default theme => ({
     backgroundColor: theme.palette.background.default,
     border: '1px solid rgba(228, 228, 228, 0.1)',
     borderRadius: theme.shape.borderRadius
-  }
+  },
+  accountIcon: {
+    width: theme.spacing(4),
+    height: theme.spacing(4),
+    background: theme.palette.background.secondary,
+    cursor: 'pointer',
+    boxShadow: theme.shadows[3],
+    transition: theme.transitions.create(),
+    '&:hover': {
+      boxShadow: theme.shadows[6],
+    },
+  },
 });

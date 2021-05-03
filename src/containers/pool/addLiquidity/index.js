@@ -4,20 +4,21 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import TextField from 'senswap-ui/textField';
+import Button, { IconButton } from 'senswap-ui/button';
+import Tooltip from 'senswap-ui/tooltip';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
+
 import Collapse from '@material-ui/core/Collapse';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
 import {
   AddCircleOutlineRounded, PublicRounded, ArrowForwardRounded,
   OfflineBoltRounded,
-} from '@material-ui/icons';
+} from 'senswap-ui/icons';
 
 import LPTSelection from 'containers/wallet/components/lptSelection';
 import AccountSelection from 'containers/wallet/components/accountSelection';

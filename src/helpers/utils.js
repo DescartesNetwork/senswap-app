@@ -1,4 +1,5 @@
 import dateformat from 'dateformat';
+import numeral from 'numeral';
 import ssjs from 'senswapjs';
 
 import configs from 'configs';
@@ -18,39 +19,8 @@ Utils.prettyNumber = (num, type = 'long') => {
   if (!num) return null;
   if (num > 1e19) return null;
   if (num < -1e19) return null;
-
-  if (type === 'short') {
-    if (Math.abs(num) < 1000) return num;
-    num = Math.abs(num);
-    let size = Math.floor(num).toString().length;
-    let exponent = size % 3 === 0 ? size - 3 : size - (size % 3);
-    let shortNumber = Math.round(10 * (num / Math.pow(10, exponent))) / 10;
-
-    let suffixes = { K: 6, M: 9, B: 12, T: 16 }
-    for (let suffix in suffixes) {
-      if (exponent < suffixes[suffix]) {
-        shortNumber += suffix;
-        break;
-      }
-    }
-    let sign = num < 0 ? '-' : '';
-    return sign + shortNumber;
-  }
-
-  if (type === 'long') {
-    num = num.toFixed(9);
-    let [decimal, fraction] = num.split('.');
-    let separateNumber = decimal.split('').reverse().map((a, i) => {
-      if (i > 1 && i % 3 === 0) return a + ',';
-      return a;
-    }).reverse().join('');
-    if (!fraction) return separateNumber;
-    const precision = 6;
-    if (fraction.length > precision) fraction = fraction.substring(0, precision);
-    let re = separateNumber + '.' + fraction;
-    if (re === '0.' + '0'.repeat(precision)) re = '<0.' + '0'.repeat(precision - 1) + '1';
-    return re;
-  }
+  if (type === 'short') return numeral(num).format('0.0a');
+  if (type === 'long') return numeral(num).format('0,0.[000000]');
 }
 
 Utils.prettyDatetime = (datetime) => {

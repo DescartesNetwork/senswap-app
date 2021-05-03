@@ -17,29 +17,6 @@ export default theme => ({
       boxShadow: theme.shadows[6],
     },
   },
-  accountIcon: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
-    background: 'linear-gradient(45deg, hsla(33, 100%, 53%, 1) 0%, hsla(58, 100%, 68%, 1) 100%)',
-    cursor: 'pointer',
-    boxShadow: theme.shadows[3],
-    transition: theme.transitions.create(),
-    '&:hover': {
-      boxShadow: theme.shadows[6],
-    },
-  },
-  mintIcon: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
-    background: '#ffffff',
-    color: theme.palette.text.primary,
-    cursor: 'pointer',
-    boxShadow: theme.shadows[3],
-    transition: theme.transitions.create(),
-    '&:hover': {
-      boxShadow: theme.shadows[6],
-    },
-  },
   networkIcon: {
     width: theme.spacing(2),
     height: theme.spacing(2),
