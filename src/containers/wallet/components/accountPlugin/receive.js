@@ -55,7 +55,7 @@ class Receive extends Component {
             <MintAvatar icon={icon} />
           </Grid>
           <Grid item className={classes.stretch}>
-            <Typography variant="subtitle1">Receive {symbol}</Typography>
+            <Typography variant="subtitle1" style={{ marginBottom: -6 }}>Receive {symbol}</Typography>
             <Typography variant="body2" color="textSecondary">{name}</Typography>
           </Grid>
           <Grid item>

@@ -30,7 +30,7 @@ SOL.scanAccount = (mintAddress, walletAddress) => {
       return resolve(data);
     }).catch(er => {
       if (data.address) return resolve(data);
-      return reject('Cannot scan account');
+      return reject(er);
     });
   });
 }

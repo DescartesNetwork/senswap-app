@@ -18,4 +18,8 @@ export default theme => ({
     padding: 6,
     fontSize: 16,
   },
+  paperInCreateAccount: {
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.background.secondary,
+  },
 });

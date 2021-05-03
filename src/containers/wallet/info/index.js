@@ -51,11 +51,9 @@ class Info extends Component {
 	onAccountData = (accountData) => {
 		const { mark } = this.state;
 		return this.setState({ accountData }, () => {
-			this.onCloseAccountSelection();
-			if (ssjs.isAddress(accountData.address)) {
-				if (mark === 'send') return this.onOpenAccountSend();
-				if (mark === 'receive') return this.onOpenAccountReceive();
-			}
+			if (mark === 'send') this.onOpenAccountSend();
+			if (mark === 'receive') this.onOpenAccountReceive();
+			return this.onCloseAccountSelection();
 		});
 	}
 

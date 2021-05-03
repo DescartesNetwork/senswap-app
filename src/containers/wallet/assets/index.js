@@ -14,9 +14,11 @@ import Favorite from 'senswap-ui/favorite';
 
 import { AddRounded } from 'senswap-ui/icons';
 
+import { MintSelection } from 'containers/wallet';
 import MintAvatar from 'containers/wallet/components/mintAvatar';
 import Price from './price';
 import PriceChange from './priceChange';
+import CreateAccount from './createAccount';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -28,6 +30,9 @@ class Assets extends Component {
     super();
 
     this.state = {
+      visibleMintSelection: false,
+      mintData: {},
+      visibleCreateAccount: false,
       data: [],
     }
   }
@@ -69,9 +74,22 @@ class Assets extends Component {
     });
   }
 
+  onOpenMintSelection = () => this.setState({ visibleMintSelection: true });
+  onCloseMintSelection = () => this.setState({ visibleMintSelection: false });
+  onMintData = (mintData) => {
+    return this.setState({ mintData }, () => {
+      this.onOpenCreateAccount();
+      return this.onCloseMintSelection();
+    });
+  }
+
+  onOpenCreateAccount = () => this.setState({ visibleCreateAccount: true });
+  onCloseCreateAccount = () => this.setState({ visibleCreateAccount: false });
+
+
   render() {
     const { classes } = this.props;
-    const { data } = this.state;
+    const { visibleCreateAccount, mintData, visibleMintSelection, data } = this.state;
 
     return <Grid container spacing={1}>
       <Grid item xs={12}>
@@ -80,9 +98,19 @@ class Assets extends Component {
             <Typography variant="subtitle1">Asset Balances</Typography>
           </Grid>
           <Grid item>
-            <IconButton color="primary">
+            <IconButton color="primary" onClick={this.onOpenMintSelection}>
               <AddRounded />
             </IconButton>
+            <MintSelection
+              visible={visibleMintSelection}
+              onClose={this.onCloseMintSelection}
+              onChange={this.onMintData}
+            />
+            <CreateAccount
+              visible={visibleCreateAccount}
+              onClose={this.onCloseCreateAccount}
+              mintData={mintData}
+            />
           </Grid>
         </Grid>
       </Grid>
@@ -93,19 +121,19 @@ class Assets extends Component {
               <TableRow>
                 <TableCell />
                 <TableCell>
-                  <Typography variant="caption">ASSET</Typography>
+                  <Typography variant="caption" color="textSecondary">ASSET</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="caption">SYMBOL</Typography>
+                  <Typography variant="caption" color="textSecondary">SYMBOL</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="caption">24H MARKET</Typography>
+                  <Typography variant="caption" color="textSecondary">24H MARKET</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="caption">AMOUNT</Typography>
+                  <Typography variant="caption" color="textSecondary">AMOUNT</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="caption">TOTAL BALANCE</Typography>
+                  <Typography variant="caption" color="textSecondary">TOTAL BALANCE</Typography>
                 </TableCell>
               </TableRow>
             </TableHead>

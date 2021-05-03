@@ -12,6 +12,7 @@ import Carousel from 'senswap-ui/carousel';
 import WalletButton from 'containers/wallet/components/walletButton';
 import WalletPlugin from 'containers/wallet/components/walletPlugin';
 import { AccountSelection, AccountSend, AccountReceive } from 'containers/wallet/components/accountPlugin';
+import { MintSelection } from 'containers/wallet/components/mintPlugin';
 
 // Main components
 import Header from './header';
@@ -48,6 +49,7 @@ export const configSenWallet = () => {
 export {
   WalletPlugin, WalletButton,
   AccountSelection, AccountSend, AccountReceive,
+  MintSelection,
 }
 
 

@@ -90,7 +90,7 @@ class Send extends Component {
             <MintAvatar icon={icon} />
           </Grid>
           <Grid item className={classes.stretch}>
-            <Typography variant="subtitle1">Send {symbol}</Typography>
+            <Typography variant="subtitle1" style={{ marginBottom: -6 }}>Send {symbol}</Typography>
             <Typography variant="body2" color="textSecondary">{name}</Typography>
           </Grid>
           <Grid item>
@@ -138,7 +138,7 @@ class Send extends Component {
             />
           </Grid>
           <Grid item xs={12}>
-            <Paper className={classes.paper}>
+            <Paper className={classes.paperInSend}>
               <Grid container spacing={0}>
                 <Grid item xs={12}>
                   <Typography variant="caption" color="textSecondary">TRANSACTION FEE</Typography>

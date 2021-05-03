@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -13,6 +12,7 @@ import { IconButton } from 'senswap-ui/button';
 import TextField from 'senswap-ui/textField';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Table, { TableBody, TableCell, TableContainer, TableRow } from 'senswap-ui/table';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
 
@@ -20,16 +20,16 @@ import MintAvatar from 'containers/wallet/components/mintAvatar';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { getAccountData } from 'modules/bucket.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 
 class Selection extends Component {
   constructor() {
     super();
 
     this.state = {
+      loading: false,
       search: '',
       data: [],
-      searchedData: [],
     }
   }
 
@@ -38,34 +38,17 @@ class Selection extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { visible: prevVisible, wallet: prevWallet } = prevProps;
-    const { visible, wallet } = this.props;
+    const { visible: prevVisible } = prevProps;
+    const { visible } = this.props;
     if (!isEqual(prevVisible, visible) && visible) return this.fetchData();
-    if (!isEqual(prevWallet, wallet)) return this.fetchData();
   }
 
   fetchData = () => {
-    const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
-
-    const solAccount = {
-      address,
-      amount: global.BigInt(lamports),
-      mint: {
-        decimals: 9,
-        name: 'Solana',
-        symbol: 'SOL',
-        ticket: 'solana',
-        icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
-      }
-    }
-
-    if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
-    return Promise.all(accounts.map(accountAddress => {
-      return getAccountData(accountAddress);
-    })).then(data => {
-      // Add SOL also
-      data.unshift(solAccount);
-      return this.setState({ data, searchedData: data });
+    const { setError, getMints, getMint } = this.props;
+    return getMints({}, 5, 0).then(data => {
+      return Promise.all(data.map(({ _id }) => getMint(_id)));
+    }).then(data => {
+      return this.setState({ data })
     }).catch(er => {
       return setError(er);
     });
@@ -73,24 +56,37 @@ class Selection extends Component {
 
   onSearch = (e) => {
     const search = e.target.value || '';
-    const { data } = this.state;
-    if (!search) return this.setState({ search, searchedData: data });
-    const pattern = new RegExp(search, 'gi');
-    const searchedData = data.filter(({ mint: { name, symbol } }) => (pattern.test(name) || pattern.test(symbol)));
-    return this.setState({ search, searchedData });
+    const { setError, getMints, getMint } = this.props;
+    return this.setState({ loading: true, search }, () => {
+      const condition = !search ? {} : {
+        '$or': [
+          { symbol: { '$regex': search, '$options': 'gi' } },
+          { name: { '$regex': search, '$options': 'gi' } }
+        ]
+      }
+      return getMints(condition, 1000, 0).then(data => {
+        return Promise.all(data.map(({ _id }) => getMint(_id)));
+      }).then(data => {
+        return this.setState({ loading: false, data });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
+      });
+    });
   }
 
   onChange = (expectedAddress) => {
     const { onChange } = this.props;
-    const { searchedData } = this.state;
-    const [accountData] = searchedData.filter(({ address }) => expectedAddress === address);
-    return onChange(accountData);
+    const { data } = this.state;
+    const [mintData] = data.filter(({ address }) => expectedAddress === address);
+    return onChange(mintData);
   }
 
   render() {
     const { classes } = this.props;
     const { visible, onClose } = this.props;
-    const { search, searchedData } = this.state;
+    const { loading, search, data } = this.state;
 
     return <Dialog open={visible} onClose={onClose} fullWidth>
       <DialogTitle>
@@ -115,7 +111,7 @@ class Selection extends Component {
               onChange={this.onSearch}
               InputProps={{
                 startAdornment: <IconButton size="small">
-                  <SearchRounded />
+                  {loading ? <CircularProgress size={17} /> : <SearchRounded />}
                 </IconButton>
               }}
               fullWidth
@@ -125,14 +121,14 @@ class Selection extends Component {
             <TableContainer>
               <Table>
                 <TableBody>
-                  {!searchedData.length ? <TableRow>
+                  {!data.length ? <TableRow>
                     <TableCell >
                       <Typography variant="caption">No token</Typography>
                     </TableCell>
                     <TableCell />
                   </TableRow> : null}
-                  {searchedData.map(accountData => {
-                    const { address, amount, mint: { icon, name, symbol, decimals } } = accountData;
+                  {data.map(mintData => {
+                    const { address, icon, name, symbol } = mintData;
                     return <TableRow key={address} className={classes.tableRow} onClick={() => this.onChange(address)}>
                       <TableCell >
                         <Grid container className={classes.noWrap} alignItems="center">
@@ -148,7 +144,7 @@ class Selection extends Component {
                         </Grid>
                       </TableCell>
                       <TableCell>
-                        <Typography>{ssjs.undecimalize(amount, decimals)}</Typography>
+                        <Typography>{address}</Typography>
                       </TableCell>
                     </TableRow>
                   })}
@@ -171,7 +167,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getAccountData,
+  getMints, getMint,
 }, dispatch);
 
 Selection.defaultProps = {
