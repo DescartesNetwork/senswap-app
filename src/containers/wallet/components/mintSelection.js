@@ -8,7 +8,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 import MintList from 'containers/wallet/components/mintList';
 
 import styles from './styles';

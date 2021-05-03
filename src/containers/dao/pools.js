@@ -22,7 +22,7 @@ import Switch from '@material-ui/core/Switch';
 
 import { UpdateRounded } from '@material-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import utils from 'helpers/utils';

@@ -18,7 +18,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 import { UnfoldMoreRounded, EmojiObjectsRounded } from '@material-ui/icons';
 
-import AccountAvatar from './accountAvatar';
+import { AccountAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import utils from 'helpers/utils';

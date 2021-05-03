@@ -14,7 +14,7 @@ import TextField from '@material-ui/core/TextField';
 
 import { DeleteForeverRounded, VerifiedUserRounded } from 'senswap-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 import PoolList from './poolList';
 
 import styles from './styles';

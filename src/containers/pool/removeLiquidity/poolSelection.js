@@ -20,7 +20,7 @@ import {
   CheckCircleOutlineRounded, UnfoldMoreRounded, HelpOutlineRounded,
 } from '@material-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

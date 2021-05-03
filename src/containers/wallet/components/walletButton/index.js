@@ -11,7 +11,7 @@ import Badge from 'senswap-ui/badge';
 
 import { AccountBalanceWalletOutlined, NotificationsOutlined, ExpandMoreRounded } from 'senswap-ui/icons';
 
-import AccountAvatar from 'containers/wallet/components/accountAvatar';
+import { AccountAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { openWallet, closeWallet } from 'modules/wallet.reducer';

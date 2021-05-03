@@ -16,7 +16,7 @@ import CircularProgress from 'senswap-ui/circularProgress';
 
 import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

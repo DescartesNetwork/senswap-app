@@ -10,7 +10,7 @@ import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 
 import AccountList from './accountList';
-import AccountAvatar from './accountAvatar';
+import { AccountAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

@@ -18,7 +18,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import { UnfoldMoreRounded, EmojiObjectsRounded, SearchRounded } from '@material-ui/icons';
 
-import MintAvatar from './mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

@@ -24,7 +24,7 @@ import {
 } from '@material-ui/icons';
 
 import PoolPrice from './poolPrice';
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

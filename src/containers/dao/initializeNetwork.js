@@ -15,7 +15,7 @@ import Typography from '@material-ui/core/Typography';
 
 import { AddRounded, FlightTakeoffRounded } from '@material-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 import Token from './token';
 
 import styles from './styles';

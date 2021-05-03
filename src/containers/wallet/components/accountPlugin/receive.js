@@ -19,7 +19,7 @@ import Tooltip from 'senswap-ui/tooltip';
 
 import { CloseRounded, FilterNoneRounded } from 'senswap-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 import Price from './price';
 
 import styles from './styles';

@@ -17,7 +17,7 @@ import Drain from 'senswap-ui/drain';
 
 import { CloseRounded, OpenInNewRounded } from '@material-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import sol from 'helpers/sol';

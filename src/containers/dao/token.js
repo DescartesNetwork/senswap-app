@@ -14,7 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import { ClearRounded, CheckRounded } from '@material-ui/icons';
 
 import { BaseCard } from 'components/cards';
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { getMintData } from 'modules/bucket.reducer';

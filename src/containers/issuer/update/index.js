@@ -12,7 +12,7 @@ import TextField from '@material-ui/core/TextField';
 
 import { FlightTakeoffRounded, DeleteForeverRounded } from 'senswap-ui/icons';
 
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 import MintSelection from 'containers/wallet/components/mintSelection';
 
 import styles from './styles';

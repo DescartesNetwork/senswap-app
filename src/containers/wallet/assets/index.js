@@ -16,7 +16,7 @@ import Paper from 'senswap-ui/paper';
 import { AddRounded } from 'senswap-ui/icons';
 
 import { MintSelection } from 'containers/wallet';
-import MintAvatar from 'containers/wallet/components/mintAvatar';
+import { MintAvatar } from 'containers/wallet';
 import Price from './price';
 import PriceChange from './priceChange';
 import CreateAccount from './createAccount';
