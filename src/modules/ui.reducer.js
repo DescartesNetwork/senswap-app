@@ -9,7 +9,7 @@ const defaultState = {
   error: '',
   visible: false,
   loading: false,
-  advance: false,
+  leftbar: true,
 }
 
 
@@ -186,52 +186,21 @@ export const unsetLoading = () => {
 }
 
 /**
- * Advance
+ * Toggle leftbar
  */
-export const SET_ADVANCE = 'SET_ADVANCE';
-export const SET_ADVANCE_OK = 'SET_ADVANCE_OK';
-export const SET_ADVANCE_FAIL = 'SET_ADVANCE_FAIL';
+export const TOGGLE_LEFT_BAR = 'TOOGLE_LEFT_BAR';
+export const TOGGLE_LEFT_BAR_OK = 'TOGGLE_LEFT_BAR_OK';
+export const TOGGLE_LEFT_BAR_FAIL = 'TOGGLE_LEFT_BAR_FAIL';
 
-export const setAdvance = () => {
+export const toggleLeftBar = () => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
-      dispatch({ type: SET_ADVANCE });
+      dispatch({ type: TOGGLE_LEFT_BAR });
 
-      const { ui: { advance: prevAdvance } } = getState();
-      if (prevAdvance) {
-        const er = 'Already advance';
-        dispatch({ type: SET_ADVANCE_FAIL, reason: er });
-        return reject(er);
-      }
+      const { ui: { leftbar: prevLeftbar } } = getState();
 
-      const data = { advance: true }
-      dispatch({ type: SET_ADVANCE_OK, data });
-      return resolve(data);
-    });
-  }
-}
-
-/**
- * Unadvance
- */
-export const UNSET_ADVANCE = 'UNSET_ADVANCE';
-export const UNSET_ADVANCE_OK = 'UNSET_ADVANCE_OK';
-export const UNSET_ADVANCE_FAIL = 'UNSET_ADVANCE_FAIL';
-
-export const unsetAdvance = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UNSET_ADVANCE });
-
-      const { ui: { advance: prevAdvance } } = getState();
-      if (!prevAdvance) {
-        const er = 'Already unadvance';
-        dispatch({ type: UNSET_ADVANCE_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const data = { advance: false }
-      dispatch({ type: UNSET_ADVANCE_OK, data });
+      const data = { leftbar: !prevLeftbar }
+      dispatch({ type: TOGGLE_LEFT_BAR_OK, data });
       return resolve(data);
     });
   }
@@ -267,13 +236,9 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case UNSET_LOADING_FAIL:
       return { ...state, ...action.data };
-    case SET_ADVANCE_OK:
+    case TOGGLE_LEFT_BAR_OK:
       return { ...state, ...action.data };
-    case SET_ADVANCE_FAIL:
-      return { ...state, ...action.data };
-    case UNSET_ADVANCE_OK:
-      return { ...state, ...action.data };
-    case UNSET_ADVANCE_FAIL:
+    case TOGGLE_LEFT_BAR_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

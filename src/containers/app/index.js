@@ -34,13 +34,14 @@ class App extends Component {
 
   render() {
     const { classes } = this.props;
+
     return <ThemeProvider>
       <Grid container>
         {/* Views */}
         <Grid item xs={12}>
           <Grid container className={classes.noWrap}>
             <Sidebar />
-            <Grid item className={classes.stretch}>
+            <Grid item xs={12}>
               <Grid container justify="center" >
                 {/* Safe space */}
                 <Grid item xs={12}>
@@ -76,6 +77,7 @@ class App extends Component {
 }
 
 const mapStateToProps = state => ({
+  ui: state.ui,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

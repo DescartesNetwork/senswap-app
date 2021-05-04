@@ -17,7 +17,7 @@ import { BaseCard } from 'components/cards';
 import Header from './header';
 import FeaturedPool from './featuredPool';
 import LatestPromotion from './latestPromotion';
-import AddLiquidity from './addLiquidity';
+import MyPool from './myPool';
 import RemoveLiquidity from './removeLiquidity';
 
 import styles from './styles';
@@ -96,7 +96,7 @@ class Pool extends Component {
         <Switch>
           <Redirect exact from="/pool" to="/pool/latest-promotion" />
           <Route exact path='/pool/latest-promotion' component={LatestPromotion} />
-          <Route exact path='/pool/add-liquidity' component={AddLiquidity} />
+          <Route exact path='/pool/my-pool' component={MyPool} />
           <Route exact path='/pool/remove-liquidity' component={RemoveLiquidity} />
         </Switch>
       </Grid>
@@ -110,14 +110,6 @@ class Pool extends Component {
                 className={classes.navigation}
                 variant="fullWidth"
               >
-                <Tab
-                  classes={{
-                    root: classes.tab,
-                    selected: classes.selectedTab,
-                  }}
-                  label="Add Liquidity"
-                  value="/pool/add-liquidity"
-                />
                 <Tab
                   classes={{
                     root: classes.tab,

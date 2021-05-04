@@ -13,6 +13,7 @@ import Drawer from 'senswap-ui/drawer';
 import List, { ListItem, ListItemIcon, ListItemText } from 'senswap-ui/list';
 import Divider from 'senswap-ui/divider';
 
+
 import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
   AccountBalanceWalletRounded, AccountBalanceRounded, VerifiedUserRounded,
@@ -23,7 +24,7 @@ import {
 import styles from './styles';
 import configs from 'configs';
 import YELLOWPAPER from 'static/docs/senswap_yellowpaper.pdf';
-import { setAdvance, unsetAdvance } from 'modules/ui.reducer';
+import { toggleLeftBar } from 'modules/ui.reducer';
 
 
 class Sidebar extends Component {
@@ -31,7 +32,6 @@ class Sidebar extends Component {
     super();
 
     this.state = {
-      visible: true,
       route: ''
     }
   }
@@ -53,25 +53,21 @@ class Sidebar extends Component {
   }
 
   onDrawer = () => {
-    const { visible } = this.state;
-    return this.setState({ visible: !visible });
-  }
-
-  onAdvance = (e) => {
-    const { setAdvance, unsetAdvance } = this.props;
-    const advance = e.target.checked || false;
-    if (advance) return setAdvance();
-    return unsetAdvance();
+    const { toggleLeftBar } = this.props;
+    return toggleLeftBar();
   }
 
   render() {
-    const { classes } = this.props;
-    const { wallet: { user: { address, role } } } = this.props;
-    const { visible, route } = this.state;
+    const {
+      classes,
+      ui: { leftbar },
+      wallet: { user: { address, role } },
+    } = this.props;
+    const { route } = this.state;
     const { sol: { cluster }, basics: { permission } } = configs;
     const isLogged = ssjs.isAddress(address) && permission.includes(role);
 
-    return <Drawer open={visible}>
+    return <Drawer open={leftbar}>
       <Grid container>
         {/* Safe space */}
         <Grid item xs={12} />
@@ -228,7 +224,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setAdvance, unsetAdvance,
+  toggleLeftBar,
 }, dispatch);
 
 export default withRouter(connect(

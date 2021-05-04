@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
@@ -14,6 +15,7 @@ import CircularProgress from 'senswap-ui/circularProgress';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
 import Divider from 'senswap-ui/divider';
+import Paper from 'senswap-ui/paper';
 
 import { CloseRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
 
@@ -21,9 +23,11 @@ import { MintAvatar, AccountSelection } from 'containers/wallet';
 import Price from './price';
 
 import styles from './styles';
+import configs from 'configs';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
+import { getMints, getMint } from 'modules/mint.reducer';
 import { addPool } from 'modules/pool.reducer';
 import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
@@ -47,6 +51,40 @@ class NewPool extends Component {
     }
 
     this.swap = window.senswap.swap;
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { wallet: { accounts: prevAccounts } } = prevProps;
+    const { wallet: { accounts } } = this.props;
+    if (!isEqual(prevAccounts, accounts)) this.fetchData();
+  }
+
+  fetchData = () => {
+    const { sol: { senAddress } } = configs;
+    const {
+      wallet: { accounts },
+      setError, getAccountData, getMints, getMint,
+    } = this.props;
+    const { accountData } = this.state;
+    let newAccountData = [...accountData];
+
+    return getMints({ address: senAddress }).then(([{ _id }]) => {
+      return getMint(_id);
+    }).then(data => {
+      newAccountData[0] = { mint: { ...data } }
+      return Promise.all(accounts.map(accountAddress => getAccountData(accountAddress)));
+    }).then(data => {
+      const senData = data.filter(({ mint: { address } }) => (address === senAddress))[0];
+      if (!senData) return;
+      newAccountData[0] = senData;
+      return this.setState({ accountData: newAccountData });
+    }).catch(er => {
+      return setError(er);
+    });
   }
 
   onOpenAccountSelection = (index) => this.setState({ index, visibleAccountSelection: true });
@@ -144,10 +182,20 @@ class NewPool extends Component {
     });
   }
 
+  renderSENRole = () => {
+    return <Grid item xs={12}>
+      <Typography>SEN Token is required. <span style={{ color: '#808191' }}>A pool in SenSwap is a trilogy in which SEN plays the role of middle man to reduce fee, leverage routing, and realize DAO.</span></Typography>
+    </Grid>
+  }
+
   render() {
     const { classes } = this.props;
     const { visible, onClose } = this.props;
     const { loading, amounts, accountData, visibleAccountSelection } = this.state;
+
+    const { address, mint } = accountData[0];
+    const { icon: senIcon, symbol: senSymbol } = mint || {}
+    const havingSen = ssjs.isAddress(address);
 
     return <Fragment>
       <Dialog open={visible} onClose={onClose} fullWidth>
@@ -163,8 +211,36 @@ class NewPool extends Component {
             </Grid>
           </Grid>
         </DialogTitle>
-        <DialogContent>
+        {!havingSen ? <DialogContent>
           <Grid container spacing={2}>
+            {this.renderSENRole()}
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <Grid container spacing={1}>
+                  <Grid item xs={12}>
+                    <Grid container className={classes.noWrap} alignItems="center">
+                      <Grid item className={classes.stretch}>
+                        <Typography variant="caption" color="textSecondary">HOW TO GET SEN?</Typography>
+                      </Grid>
+                      <Grid item>
+                        <Typography>{senSymbol}</Typography>
+                      </Grid>
+                      <Grid item>
+                        <MintAvatar icon={senIcon} />
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography>Explain how to get SEN here</Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} />
+          </Grid>
+        </DialogContent> : <DialogContent>
+          <Grid container spacing={2}>
+            {this.renderSENRole()}
             <Grid item xs={12}>
               <Typography>Liquidity provider incentive. <span style={{ color: '#808191' }}>Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity.</span></Typography>
             </Grid>
@@ -172,9 +248,9 @@ class NewPool extends Component {
               <Drain size={2} />
             </Grid>
             {accountData.map((data, index) => {
-              const { address, amount, mint } = data;
+              const { amount, mint } = data;
               const { symbol, icon, decimals, ticket } = mint || {}
-              return <Fragment key={address}>
+              return <Fragment key={index}>
                 <Grid item xs={12} >
                   <TextField
                     label={!index ? 'Primary Address' : `Address ${index}`}
@@ -190,6 +266,7 @@ class NewPool extends Component {
                             startIcon={<MintAvatar icon={icon} />}
                             endIcon={<ArrowDropDownRounded />}
                             onClick={() => this.onOpenAccountSelection(index)}
+                            disabled={!index}
                           >
                             <Typography>{symbol || 'Select'} </Typography>
                           </Button>
@@ -224,7 +301,7 @@ class NewPool extends Component {
             </Grid>
             <Grid item xs={12} />
           </Grid>
-        </DialogContent>
+        </DialogContent>}
       </Dialog>
       <AccountSelection
         visible={visibleAccountSelection}
@@ -244,13 +321,14 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
+  getMints, getMint,
   addPool,
   updateWallet, unlockWallet, syncWallet,
   getAccountData,
 }, dispatch);
 
 NewPool.defaultProps = {
-  visible: true,
+  visible: false,
   onClose: () => { },
 }
 

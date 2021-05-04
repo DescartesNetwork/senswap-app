@@ -17,5 +17,10 @@ export default theme => ({
   listItemIcon: {
     color: 'inherit',
     minWidth: theme.spacing(5),
+  },
+  fab: {
+    position: 'fixed',
+    bottom: theme.spacing(2),
+    left: theme.spacing(2),
   }
 });

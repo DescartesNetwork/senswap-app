@@ -12,6 +12,7 @@ import { QueueRounded, InputRounded, LaunchRounded } from 'senswap-ui/icons';
 
 import { WalletButton } from 'containers/wallet';
 import NewPool from '../newPool';
+import AddLiquidity from '../addLiquidity';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -23,12 +24,16 @@ class Wallet extends Component {
     super();
 
     this.state = {
-      visibleNewPool: false
+      visibleNewPool: false,
+      visibleDeposit: false,
     }
   }
 
   onOpenNewPool = () => this.setState({ visibleNewPool: true });
   onCloseNewPool = () => this.setState({ visibleNewPool: false });
+
+  onOpenDeposit = () => this.setState({ visibleDeposit: true });
+  onCloseDeposit = () => this.setState({ visibleDeposit: false });
 
   disconnect = () => {
     const { setError, unsetWallet } = this.props;
@@ -42,7 +47,7 @@ class Wallet extends Component {
   render() {
     const { classes } = this.props;
     const { wallet: { user: { address } } } = this.props;
-    const { visibleNewPool } = this.state;
+    const { visibleNewPool, visibleDeposit } = this.state;
 
     return <Grid container spacing={0}>
       <Grid item xs={12}>
@@ -75,9 +80,13 @@ class Wallet extends Component {
               <NewPool visible={visibleNewPool} onClose={this.onCloseNewPool} />
             </Grid>
             <Grid item>
-              <Button startIcon={<InputRounded />} >
+              <Button
+                startIcon={<InputRounded />}
+                onClick={this.onOpenDeposit}
+              >
                 <Typography>Deposit</Typography>
               </Button>
+              <AddLiquidity visible={visibleDeposit} onClose={this.onCloseDeposit} />
             </Grid>
             <Grid item>
               <Button startIcon={<LaunchRounded />} >

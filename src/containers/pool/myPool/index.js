@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
-import Carousel from 'senswap-ui/carousel';
+import { CardPool } from 'senswap-ui/card';
 
 import { } from 'senswap-ui/icons';
 
@@ -13,36 +13,14 @@ import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 
 
-class FeaturedPool extends Component {
-  constructor() {
-    super();
-
-    this.state = {
-      carouselData: [
-        {
-          title: "Let's Swap with Sen",
-          description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
-          src: 'https://source.unsplash.com/random',
-        },
-        {
-          title: "About SenSwap Pools",
-          description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
-          src: 'https://source.unsplash.com/random',
-        }
-      ]
-    }
-  }
+class MyPool extends Component {
 
   render() {
-    const { classes } = this.props;
-    const { carouselData } = this.state;
+    // const { classes } = this.props;
 
-    return <Grid container className={classes.noWrap}>
-      <Grid item className={classes.stretch}>
-        <Carousel data={carouselData} />
-      </Grid>
-      <Grid item>
-
+    return <Grid container spacing={2}>
+      <Grid item xs={12} md={6} lg={4}>
+        <CardPool />
       </Grid>
     </Grid>
   }
@@ -59,4 +37,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(FeaturedPool)));
+)(withStyles(styles)(MyPool)));

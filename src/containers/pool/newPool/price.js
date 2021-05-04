@@ -8,6 +8,7 @@ function Price(props) {
   const [price, setPrice] = useState(0);
   const { ticket } = props;
   useEffect(() => {
+    if (!ticket) return setPrice(0);
     return ssjs.parseCGK(ticket).then(({ price }) => {
       return setPrice(price);
     }).catch(er => {
