@@ -1,4 +1,5 @@
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
@@ -12,13 +13,15 @@ import Brand from 'senswap-ui/brand';
 import Drawer from 'senswap-ui/drawer';
 import List, { ListItem, ListItemIcon, ListItemText } from 'senswap-ui/list';
 import Divider from 'senswap-ui/divider';
+import { IconButton } from 'senswap-ui/button';
 
+import Fab from '@material-ui/core/Fab';
 
 import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
   AccountBalanceWalletRounded, AccountBalanceRounded, VerifiedUserRounded,
   GroupWorkRounded, ColorizeRounded, DescriptionRounded,
-  DonutLargeRounded,
+  DonutLargeRounded, MenuOpenRounded, MenuRounded
 } from 'senswap-ui/icons';
 
 import styles from './styles';
@@ -58,163 +61,173 @@ class Sidebar extends Component {
   }
 
   render() {
-    const {
-      classes,
-      ui: { leftbar },
-      wallet: { user: { address, role } },
-    } = this.props;
+    const { classes, ui: { leftbar }, wallet: { user: { address, role } }, toggleLeftBar } = this.props;
     const { route } = this.state;
     const { sol: { cluster }, basics: { permission } } = configs;
     const isLogged = ssjs.isAddress(address) && permission.includes(role);
 
-    return <Drawer open={leftbar}>
-      <Grid container>
-        {/* Safe space */}
-        <Grid item xs={12} />
-        {/* Sen logo */}
-        <Grid item xs={12}>
-          <Brand subtitle={cluster} />
-        </Grid>
-        <Grid item xs={12}>
-          <Drain size={1} />
-        </Grid>
-        <Grid item xs={12}>
-          <List>
-            <ListItem
-              button
-              component={RouterLink}
-              to="/home"
-              className={route === 'home' ? classes.listItemActive : classes.listItem}
-            >
-              <ListItemIcon className={classes.listItemIcon}>
-                <WidgetsRounded />
-              </ListItemIcon>
-              <ListItemText primary="Home" />
-            </ListItem>
-            <ListItem
-              button
-              component={RouterLink}
-              to="/swap"
-              className={route === 'swap' ? classes.listItemActive : classes.listItem}
-            >
-              <ListItemIcon className={classes.listItemIcon}>
-                <SwapCallsRounded />
-              </ListItemIcon>
-              <ListItemText primary="Swap" />
-            </ListItem>
-            <ListItem
-              button
-              component={RouterLink}
-              to="/pool"
-              className={route === 'pool' ? classes.listItemActive : classes.listItem}
-            >
-              <ListItemIcon className={classes.listItemIcon}>
-                <LayersRounded />
-              </ListItemIcon>
-              <ListItemText primary="Pool" />
-            </ListItem>
-            <ListItem
-              button
-              component={RouterLink}
-              to="/wallet"
-              className={route === 'wallet' ? classes.listItemActive : classes.listItem}
-            >
-              <ListItemIcon className={classes.listItemIcon}>
-                <AccountBalanceWalletRounded />
-              </ListItemIcon>
-              <ListItemText primary="Wallet" />
-            </ListItem>
-            {/* Faucet */}
-            {cluster === 'devnet' ? <Fragment>
+    return <Fragment>
+      {!leftbar ? <Fab color="primary" size="medium" onClick={toggleLeftBar} className={classes.fab}>
+        <MenuRounded />
+      </Fab> : null}
+      <Drawer open={leftbar}>
+        <Grid container>
+          {/* Safe space */}
+          <Grid item xs={12} />
+          {/* Sen logo */}
+          <Grid item xs={12}>
+            <Grid container className={classes.noWrap} alignItems="center">
+              <Grid item className={classes.stretch}>
+                <Brand subtitle={cluster} />
+              </Grid>
+              <Grid item>
+                <IconButton onClick={toggleLeftBar}>
+                  <MenuOpenRounded />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <Drain size={1} />
+          </Grid>
+          <Grid item xs={12}>
+            <List>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/home"
+                className={route === 'home' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <WidgetsRounded />
+                </ListItemIcon>
+                <ListItemText primary="Home" />
+              </ListItem>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/swap"
+                className={route === 'swap' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <SwapCallsRounded />
+                </ListItemIcon>
+                <ListItemText primary="Swap" />
+              </ListItem>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/pool"
+                className={route === 'pool' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <LayersRounded />
+                </ListItemIcon>
+                <ListItemText primary="Pool" />
+              </ListItem>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/wallet"
+                className={route === 'wallet' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <AccountBalanceWalletRounded />
+                </ListItemIcon>
+                <ListItemText primary="Wallet" />
+              </ListItem>
+              {/* Faucet */}
+              {cluster === 'devnet' ? <Fragment>
+                <Drain size={2} />
+                <Divider />
+                <Drain size={2} />
+                <ListItem
+                  button
+                  component={RouterLink}
+                  to="/faucet"
+                  className={route === 'faucet' ? classes.listItemActive : classes.listItem}
+                >
+                  <ListItemIcon className={classes.listItemIcon}>
+                    <ColorizeRounded />
+                  </ListItemIcon>
+                  <ListItemText primary="Faucet" secondary="Devnet only" />
+                </ListItem>
+              </Fragment> : null}
+              {/* Admin/Operator zone */}
+              {isLogged ? <Fragment>
+                <Drain size={2} />
+                <Divider />
+                <Drain size={2} />
+                <ListItem
+                  button
+                  component={RouterLink}
+                  to="/issuer"
+                  className={route === 'issuer' ? classes.listItemActive : classes.listItem}
+                >
+                  <ListItemIcon className={classes.listItemIcon}>
+                    <AccountBalanceRounded />
+                  </ListItemIcon>
+                  <ListItemText primary="Issuer" />
+                </ListItem>
+                <ListItem
+                  button
+                  component={RouterLink}
+                  to="/audit"
+                  className={route === 'audit' ? classes.listItemActive : classes.listItem}
+                >
+                  <ListItemIcon className={classes.listItemIcon}>
+                    <VerifiedUserRounded />
+                  </ListItemIcon>
+                  <ListItemText primary="Audit" />
+                </ListItem>
+                <ListItem
+                  button
+                  component={RouterLink}
+                  to="/dao"
+                  className={route === 'dao' ? classes.listItemActive : classes.listItem}
+                >
+                  <ListItemIcon className={classes.listItemIcon}>
+                    <GroupWorkRounded />
+                  </ListItemIcon>
+                  <ListItemText primary="DAO" />
+                </ListItem>
+              </Fragment> : null}
+              {/* Papers */}
               <Drain size={2} />
               <Divider />
               <Drain size={2} />
               <ListItem
                 button
                 component={RouterLink}
-                to="/faucet"
-                className={route === 'faucet' ? classes.listItemActive : classes.listItem}
+                to="/tokenomic"
+                target="_blank"
+                rel="noopener"
+                className={classes.listItem}
+                disabled
               >
                 <ListItemIcon className={classes.listItemIcon}>
-                  <ColorizeRounded />
+                  <DonutLargeRounded />
                 </ListItemIcon>
-                <ListItemText primary="Faucet" secondary="Devnet only" />
-              </ListItem>
-            </Fragment> : null}
-            {/* Admin/Operator zone */}
-            {isLogged ? <Fragment>
-              <Drain size={2} />
-              <Divider />
-              <Drain size={2} />
-              <ListItem
-                button
-                component={RouterLink}
-                to="/issuer"
-                className={route === 'issuer' ? classes.listItemActive : classes.listItem}
-              >
-                <ListItemIcon className={classes.listItemIcon}>
-                  <AccountBalanceRounded />
-                </ListItemIcon>
-                <ListItemText primary="Issuer" />
+                <ListItemText primary="Whitepaper & Tokenomic" />
               </ListItem>
               <ListItem
                 button
                 component={RouterLink}
-                to="/audit"
-                className={route === 'audit' ? classes.listItemActive : classes.listItem}
+                to={YELLOWPAPER}
+                target="_blank"
+                rel="noopener"
+                className={classes.listItem}
               >
                 <ListItemIcon className={classes.listItemIcon}>
-                  <VerifiedUserRounded />
+                  <DescriptionRounded />
                 </ListItemIcon>
-                <ListItemText primary="Audit" />
+                <ListItemText primary="Yellow Paper" />
               </ListItem>
-              <ListItem
-                button
-                component={RouterLink}
-                to="/dao"
-                className={route === 'dao' ? classes.listItemActive : classes.listItem}
-              >
-                <ListItemIcon className={classes.listItemIcon}>
-                  <GroupWorkRounded />
-                </ListItemIcon>
-                <ListItemText primary="DAO" />
-              </ListItem>
-            </Fragment> : null}
-            {/* Papers */}
-            <Drain size={2} />
-            <Divider />
-            <Drain size={2} />
-            <ListItem
-              button
-              component={RouterLink}
-              to="/tokenomic"
-              target="_blank"
-              rel="noopener"
-              className={classes.listItem}
-              disabled
-            >
-              <ListItemIcon className={classes.listItemIcon}>
-                <DonutLargeRounded />
-              </ListItemIcon>
-              <ListItemText primary="Whitepaper & Tokenomic" />
-            </ListItem>
-            <ListItem
-              button
-              component={RouterLink}
-              to={YELLOWPAPER}
-              target="_blank"
-              rel="noopener"
-              className={classes.listItem}
-            >
-              <ListItemIcon className={classes.listItemIcon}>
-                <DescriptionRounded />
-              </ListItemIcon>
-              <ListItemText primary="Yellow Paper" />
-            </ListItem>
-          </List>
+            </List>
+          </Grid>
         </Grid>
-      </Grid>
-    </Drawer>
+      </Drawer>
+    </Fragment>
   }
 }
 
@@ -226,6 +239,14 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   toggleLeftBar,
 }, dispatch);
+
+Sidebar.defaultProps = {
+  onWidth: () => { }
+}
+
+Sidebar.propTypes = {
+  onWidth: PropTypes.func
+}
 
 export default withRouter(connect(
   mapStateToProps,

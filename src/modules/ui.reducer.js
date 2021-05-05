@@ -9,7 +9,7 @@ const defaultState = {
   error: '',
   visible: false,
   loading: false,
-  leftbar: true,
+  leftbar: window.innerWidth >= 600,
 }
 
 

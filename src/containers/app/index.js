@@ -31,7 +31,6 @@ configSenWallet();
 
 
 class App extends Component {
-
   render() {
     const { classes } = this.props;
 
@@ -41,7 +40,7 @@ class App extends Component {
         <Grid item xs={12}>
           <Grid container className={classes.noWrap}>
             <Sidebar />
-            <Grid item xs={12}>
+            <Grid item className={classes.stretch} style={{ overflow: 'auto' }}>
               <Grid container justify="center" >
                 {/* Safe space */}
                 <Grid item xs={12}>
