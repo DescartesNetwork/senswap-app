@@ -27,7 +27,7 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet, updateWallet, syncWallet } from 'modules/wallet.reducer';
+import { unlockWallet, updateWallet } from 'modules/wallet.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
 
 
@@ -90,10 +90,7 @@ class RemoveLiquidity extends Component {
     return new Promise((resolve, reject) => {
       if (!secretKey) return reject('Cannot unlock account');
       if (!mintAddress) return reject('Unknown token');
-      const {
-        wallet: { user, accounts },
-        updateWallet, syncWallet
-      } = this.props;
+      const { wallet: { user, accounts }, updateWallet } = this.props;
       const { dstAddress } = this.state;
       if (dstAddress) return resolve(dstAddress);
 
@@ -105,8 +102,6 @@ class RemoveLiquidity extends Component {
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
         return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
-      }).then(re => {
-        return syncWallet(secretKey);
       }).then(re => {
         return resolve(accountAddress);
       }).catch(er => {
@@ -266,7 +261,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet, updateWallet, syncWallet,
+  unlockWallet, updateWallet,
   getLPTData,
 }, dispatch);
 

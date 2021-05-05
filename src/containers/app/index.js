@@ -7,13 +7,11 @@ import { ThemeProvider, withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 
-
-// Static component
+// Components
 import PrivateRoute from 'containers/auth/privateRoute';
 import Sidebar from 'containers/sidebar';
 import UiUx from 'containers/uiux';
 import Wallet, { configSenWallet, WalletPlugin } from 'containers/wallet';
-// Pages
 import NotFound from 'containers/404';
 import Home from 'containers/home';
 import Swap from 'containers/swap';
@@ -60,6 +58,10 @@ class App extends Component {
                     <Route path='/wallet' component={Wallet} />
                     <Route exact path='*' component={NotFound} />
                   </Switch>
+                </Grid>
+                {/* Safe space */}
+                <Grid item xs={12}>
+                  <Drain size={1} />
                 </Grid>
               </Grid>
             </Grid>

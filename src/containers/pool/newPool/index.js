@@ -29,7 +29,7 @@ import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getMints, getMint } from 'modules/mint.reducer';
 import { addPool } from 'modules/pool.reducer';
-import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -122,11 +122,7 @@ class NewPool extends Component {
       networkData: { address: networkAddress },
       amount
     } = this.state;
-    const {
-      wallet: { user, lpts },
-      setError,
-      updateWallet, unlockWallet, syncWallet, addPool
-    } = this.props;
+    const { wallet: { user, lpts }, setError, updateWallet, unlockWallet, addPool } = this.props;
     const { address: mintAddress, decimals } = mint || {};
     if (!state) return setError('Please wait for data loaded');
     if (!amount) return setError('Invalid amount');
@@ -168,8 +164,6 @@ class NewPool extends Component {
         const newLPTs = [...lpts];
         if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
         return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
-      }).then(re => {
-        return syncWallet(secretKey);
       }).then(re => {
         return addPool({ address: poolAddress });
       }).then(re => {
@@ -322,7 +316,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getMints, getMint,
   addPool,
-  updateWallet, unlockWallet, syncWallet,
+  updateWallet, unlockWallet,
   getAccountData,
 }, dispatch);
 

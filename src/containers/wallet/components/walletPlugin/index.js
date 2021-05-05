@@ -10,7 +10,7 @@ import LoginDialog from './loginDialog';
 
 import styles from './styles';
 import storage from 'helpers/storage';
-import { setError } from 'modules/ui.reducer';
+import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { setWallet, updateWallet } from 'modules/wallet.reducer';
 import { getAccountData, getPoolData, getLPTData } from 'modules/bucket.reducer';
 
@@ -18,12 +18,18 @@ import { getAccountData, getPoolData, getLPTData } from 'modules/bucket.reducer'
 class WalletPlugin extends Component {
 
   componentDidMount() {
-    const { setError, setWallet, updateWallet, getAccountData, getPoolData, getLPTData } = this.props;
+    const {
+      setError, setLoading, unsetLoading,
+      setWallet, updateWallet,
+      getAccountData, getPoolData, getLPTData
+    } = this.props;
 
     const wallet = this.reconnect();
     if (!wallet) return;
 
-    return setWallet(wallet).then(({ address }) => {
+    return setLoading().then(() => {
+      return setWallet(wallet);
+    }).then(({ address }) => {
       window.senswap.splt.watch((er, re) => {
         if (er) return;
         const { type, address: changedAddress } = re;
@@ -44,6 +50,7 @@ class WalletPlugin extends Component {
         if (er) return;
         return updateWallet({ lamports: re });
       });
+      return unsetLoading();
     }).catch(er => {
       return setError(er);
     });
@@ -71,7 +78,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
+  setError, setLoading, unsetLoading,
   setWallet, updateWallet,
   getAccountData, getPoolData, getLPTData,
 }, dispatch);

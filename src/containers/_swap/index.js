@@ -23,7 +23,7 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import oracle from 'helpers/oracle';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 
 const EMPTY = {
@@ -97,7 +97,7 @@ class Swap extends Component {
 
   onAutogenDestinationAddress = (mintAddress, secretKey) => {
     return new Promise((resolve, reject) => {
-      const { wallet: { user, accounts }, updateWallet, syncWallet } = this.props;
+      const { wallet: { user, accounts }, updateWallet } = this.props;
       if (!ssjs.isAddress(mintAddress) || !secretKey) return reject('Invalid input');
 
       let accountAddress = null;
@@ -109,8 +109,6 @@ class Swap extends Component {
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
         return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
-      }).then(re => {
-        return syncWallet(secretKey);
       }).then(re => {
         return resolve(accountAddress);
       }).catch(er => {
@@ -289,7 +287,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet, syncWallet,
+  updateWallet, unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

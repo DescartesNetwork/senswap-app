@@ -10,14 +10,14 @@ import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 import Drain from 'senswap-ui/drain';
 import Paper from 'senswap-ui/paper';
-import Link from 'senswap-ui/link';
 import TextField from 'senswap-ui/textField';
 import Brand from 'senswap-ui/brand';
 import Divider from 'senswap-ui/divider';
 
-import { MovieFilterRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
+import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
 import Header from './header';
+import Introduction from './introduction';
 import { MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
 
 import styles from './styles';
@@ -52,6 +52,26 @@ class Swap extends Component {
     return this.setState({ mintData }, () => {
       return this.onCloseMintSelection();
     });
+  }
+
+  renderAction = () => {
+    const { wallet: { user: { address } } } = this.props;
+    if (!ssjs.isAddress(address)) return <Button
+      variant="contained"
+      color="primary"
+      size="large"
+      fullWidth
+    >
+      <Typography>Connect Wallet</Typography>
+    </Button>
+    return <Button
+      variant="contained"
+      color="primary"
+      size="large"
+      fullWidth
+    >
+      <Typography>Swap</Typography>
+    </Button>
   }
 
   render() {
@@ -163,14 +183,7 @@ class Swap extends Component {
                     </Grid>
                     <Grid item xs={12} />
                     <Grid item xs={12}>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        size="large"
-                        fullWidth
-                      >
-                        <Typography>Connect Wallet</Typography>
-                      </Button>
+                      {this.renderAction()}
                     </Grid>
                     <Grid item xs={12}>
                       <Drain />
@@ -183,38 +196,7 @@ class Swap extends Component {
         </Paper>
       </Grid>
       <Grid item xs={12} md={4}>
-        <Paper className={classes.paper}>
-          <Grid container>
-            <Grid item xs={12}>
-              <Typography variant="h5">What is SenSwap?</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography color="textSecondary">The safe, fast and most secure way to bring cross-chain assets to Binance chains.</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<MovieFilterRounded />}
-              >
-                <Typography>Introduction Video</Typography>
-              </Button>
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container spacing={0}>
-                <Grid item xs={12}>
-                  <Link href="#">View Proof of Assets</Link>
-                </Grid>
-                <Grid item xs={12}>
-                  <Link href="#">User Guide</Link>
-                </Grid>
-                <Grid item xs={12}>
-                  <Link href="#">Got a problem? Just get in touch</Link>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Paper>
+        <Introduction />
       </Grid>
     </Grid >
   }

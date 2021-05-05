@@ -99,6 +99,7 @@ export const setWallet = (wallet) => {
         return reject(er);
       }
 
+      const { api: { base } } = configs;
       const lamports = window.senswap.lamports;
       const connection = window.senswap.splt.connection;
       const spltPromgramId = window.senswap.splt.spltProgramId;
@@ -119,6 +120,12 @@ export const setWallet = (wallet) => {
       }).then(({ value }) => {
         data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
         window.senswap.wallet = wallet;
+        return api.get(base + '/user', { address: data.user.address });
+      }).then(re => {
+        // Only add an account to db when its lamports > 0
+        if (re.data || data.lamports <= 0) return Promise.resolve(re);
+        return api.post(base + '/user', { user: { address: data.user.address } });
+      }).then(re => {
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
@@ -182,38 +189,6 @@ export const updateWallet = (data) => {
       data = JSON.parse(JSON.stringify(data));
       dispatch({ type: UPDATE_WALLET_OK, data });
       return resolve(data);
-    });
-  }
-}
-
-/**
- * Sync wallet
- */
-export const SYNC_WALLET = 'SYNC_WALLET';
-export const SYNC_WALLET_OK = 'SYNC_WALLET_OK';
-export const SYNC_WALLET_FAIL = 'SYNC_WALLET_FAIL';
-
-export const syncWallet = (secretKey) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SYNC_WALLET });
-
-      const { wallet: { user } } = getState();
-      if (!user || !secretKey) {
-        const er = 'Invalid data';
-        dispatch({ type: SYNC_WALLET_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const { api: { base } } = configs;
-      return api.put(base + '/user', { user }, secretKey).then(({ data: user }) => {
-        const data = { user }
-        dispatch({ type: SYNC_WALLET_OK, data });
-        return resolve(data);
-      }).catch(er => {
-        dispatch({ type: SYNC_WALLET_FAIL, reason: er.toString() });
-        return reject(er);
-      });
     });
   }
 }
@@ -304,47 +279,6 @@ export const unlockWallet = () => {
 }
 
 /**
- * Set remembered
- */
-export const SET_REMEMBERED = 'SET_REMEMBERED';
-export const SET_REMEMBERED_OK = 'SET_REMEMBERED_OK';
-export const SET_REMEMBERED_FAIL = 'SET_REMEMBERED_FAIL';
-
-export const setRemembered = (password) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_REMEMBERED });
-
-      const { wallet: { remembered } } = getState();
-      if (remembered && password) {
-        const er = 'Already remembered';
-        dispatch({ type: SET_REMEMBERED_FAIL, reason: er });
-        return reject(er);
-      }
-      if (!remembered && !password) {
-        const er = 'Not yet remembered';
-        dispatch({ type: SET_REMEMBERED_FAIL, reason: er });
-        return reject(er);
-      }
-
-      // Forget
-      if (!password) {
-        const data = { remembered: '' };
-        dispatch({ type: SET_REMEMBERED_OK, data });
-        return resolve(data);
-      }
-      // Store to sessionStorage
-      const key = ssjs.crypto.hash(ssjs.salt());
-      session.set(key, password);
-      // Remember key
-      const data = { remembered: key };
-      dispatch({ type: SET_REMEMBERED_OK, data });
-      return resolve(data);
-    });
-  }
-}
-
-/**
  * Reducder
  */
 // eslint-disable-next-line
@@ -370,10 +304,6 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case UPDATE_WALLET_FAIL:
       return { ...state, ...action.data };
-    case SYNC_WALLET_OK:
-      return { ...state, ...action.data };
-    case SYNC_WALLET_FAIL:
-      return { ...state, ...action.data };
     case UNSET_WALLET_OK:
       return { ...state, ...action.data };
     case UNSET_WALLET_FAIL:
@@ -383,10 +313,6 @@ export default (state = defaultState, action) => {
     case UNLOCK_WALLET_PENDING:
       return { ...state, ...action.data };
     case UNLOCK_WALLET_FAIL:
-      return { ...state, ...action.data };
-    case SET_REMEMBERED_OK:
-      return { ...state, ...action.data };
-    case SET_REMEMBERED_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

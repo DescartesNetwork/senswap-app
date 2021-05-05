@@ -99,7 +99,6 @@ class Wallet extends Component {
       <Grid item xs={12}>
         <Drain size={3} />
       </Grid>
-
       <Grid item xs={12}>
         {this.renderComponents()}
       </Grid>

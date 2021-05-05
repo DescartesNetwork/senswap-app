@@ -23,7 +23,7 @@ import { BaseCard } from 'components/cards';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet, updateWallet, openWallet, syncWallet } from 'modules/wallet.reducer';
+import { unlockWallet, updateWallet, openWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
 import { getMintData, getAccountData } from 'modules/bucket.reducer';
 
@@ -74,11 +74,7 @@ class Faucet extends Component {
       if (!secretKey) return reject('Cannot unlock account');
       if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
 
-      const {
-        wallet: { user, accounts },
-        getAccountData,
-        updateWallet, syncWallet
-      } = this.props;
+      const { wallet: { user, accounts }, getAccountData, updateWallet } = this.props;
       return Promise.all(accounts.map(accountAddress => {
         return getAccountData(accountAddress);
       })).then(data => {
@@ -92,8 +88,6 @@ class Faucet extends Component {
           const newAccounts = [...accounts];
           if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
           return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
-        }).then(re => {
-          return syncWallet(secretKey);
         }).then(re => {
           return resolve(accountAddress);
         }).catch(er => {
@@ -202,7 +196,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet, updateWallet, openWallet, syncWallet,
+  unlockWallet, updateWallet, openWallet,
   getWhiteList, airdropLamports, airdropTokens,
   getMintData, getAccountData,
 }, dispatch);

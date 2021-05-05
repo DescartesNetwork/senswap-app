@@ -22,7 +22,7 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
@@ -59,11 +59,7 @@ class InitializeMint extends Component {
 
   onCreate = () => {
     const { mint, supply: refSupply, decimals: refDecimals } = this.state;
-    const {
-      wallet: { user, accounts },
-      setError,
-      unlockWallet, updateWallet, syncWallet
-    } = this.props;
+    const { wallet: { user, accounts }, setError, unlockWallet, updateWallet } = this.props;
 
     const decimals = parseInt(refDecimals) || 0;
     const supply = parseInt(refSupply) || 0;
@@ -94,8 +90,6 @@ class InitializeMint extends Component {
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
         return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
-      }).then(re => {
-        return syncWallet(secretKey);
       }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
@@ -181,7 +175,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet, syncWallet,
+  updateWallet, unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

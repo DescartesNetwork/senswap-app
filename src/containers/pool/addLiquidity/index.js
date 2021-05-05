@@ -24,7 +24,7 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
+import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -57,10 +57,7 @@ class AddLiquidity extends Component {
     return new Promise((resolve, reject) => {
       if (!ssjs.isAddress(poolAddress)) return reject('Invalid pool address');
       if (!secretKey) return reject('Cannot unlock wallet');
-      const {
-        wallet: { user, lpts },
-        updateWallet, syncWallet
-      } = this.props;
+      const { wallet: { user, lpts }, updateWallet } = this.props;
       let { lptAddress } = this.state;
       if (lptAddress) return resolve(lptAddress);
       return sol.newLPT(poolAddress, secretKey).then(({ lpt }) => {
@@ -70,8 +67,6 @@ class AddLiquidity extends Component {
         const lptAddress = lpt.publicKey.toBase58();
         if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
         return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
-      }).then(re => {
-        return syncWallet(secretKey);
       }).then(re => {
         return resolve(lptAddress);
       }).catch(er => {
@@ -206,7 +201,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet, syncWallet,
+  updateWallet, unlockWallet,
   getAccountData,
 }, dispatch);
 

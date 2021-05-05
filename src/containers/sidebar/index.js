@@ -27,6 +27,7 @@ import styles from './styles';
 import configs from 'configs';
 import YELLOWPAPER from 'static/docs/senswap_yellowpaper.pdf';
 import { toggleLeftBar } from 'modules/ui.reducer';
+import { Typography } from '@material-ui/core';
 
 
 class Sidebar extends Component {
@@ -66,7 +67,12 @@ class Sidebar extends Component {
     const isLogged = ssjs.isAddress(address) && permission.includes(role);
 
     return <Fragment>
-      {!leftbar ? <Fab color="primary" size="medium" onClick={toggleLeftBar} className={classes.fab}>
+      {!leftbar ? <Fab
+        color="primary"
+        size="medium"
+        onClick={toggleLeftBar}
+        className={classes.fab}
+      >
         <MenuRounded />
       </Fab> : null}
       <Drawer open={leftbar} variant={width >= 600 ? 'persistent' : 'temporary'}>

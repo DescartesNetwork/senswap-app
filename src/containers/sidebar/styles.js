@@ -20,7 +20,11 @@ export default theme => ({
   },
   fab: {
     position: 'fixed',
+    transition: theme.transitions.create(),
     bottom: theme.spacing(2),
-    left: theme.spacing(2),
+    left: -theme.spacing(3),
+    '&:hover': {
+      left: theme.spacing(1),
+    }
   }
 });
