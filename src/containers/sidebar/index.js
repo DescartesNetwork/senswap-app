@@ -69,7 +69,7 @@ class Sidebar extends Component {
       {!leftbar ? <Fab color="primary" size="medium" onClick={toggleLeftBar} className={classes.fab}>
         <MenuRounded />
       </Fab> : null}
-      <Drawer open={leftbar} variant={width >= 600 ? 'permanent' : 'temporary'}>
+      <Drawer open={leftbar} variant={width >= 600 ? 'persistent' : 'temporary'}>
         <Grid container>
           {/* Safe space */}
           <Grid item xs={12} />
