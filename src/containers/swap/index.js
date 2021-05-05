@@ -8,275 +8,215 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
-import CircularProgress from 'senswap-ui/circularProgress';
 import Drain from 'senswap-ui/drain';
+import Paper from 'senswap-ui/paper';
+import Link from 'senswap-ui/link';
+import TextField from 'senswap-ui/textField';
+import Brand from 'senswap-ui/brand';
+import Divider from 'senswap-ui/divider';
 
-import { PublicRounded, ArrowForwardRounded, SwapHorizRounded } from 'senswap-ui/icons';
+import { MovieFilterRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
 
-import { BaseCard } from 'components/cards';
-import Bid from './bid';
-import Ask from './ask';
-import SwapInfo from './info';
+import Header from './header';
+import { MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
-import oracle from 'helpers/oracle';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet, syncWallet } from 'modules/wallet.reducer';
-
-
-const EMPTY = {
-  bidAmount: global.BigInt(0),
-  askAmount: global.BigInt(0),
-  loading: false,
-  txId: '',
-}
 
 class Swap extends Component {
   constructor() {
     super();
 
     this.state = {
-      ...EMPTY,
-
-      srcAddress: '',
-      bidData: {},
-      bidPrimaryData: {},
-      dstAddress: '',
-      askData: {},
-      askPrimaryData: {},
-
-      data: [],
+      visibleAccountSelection: false,
+      accountData: {},
+      visibleMintSelection: false,
+      mintData: {},
     }
-
-    this.swap = window.senswap.swap;
   }
 
-  onClear = () => {
-    return this.setState({ ...EMPTY, txId: '' });
-  }
+  onOpenAccountSelection = (index) => this.setState({ index, visibleAccountSelection: true });
+  onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
 
-  onBid = ({
-    amount: bidAmount,
-    poolData: bidData,
-    primaryPoolData: bidPrimaryData,
-    accountAddress: srcAddress
-  }) => {
-    return this.setState({ bidAmount, bidData, bidPrimaryData, srcAddress }, () => {
-      const { setError } = this.props;
-      const { bidAmount, bidData, bidPrimaryData, askData, askPrimaryData } = this.state;
-      if (bidData.state !== 1 || askData.state !== 1) return this.setState({ data: [] });
-      return oracle.curve(bidAmount, bidData, askData, bidPrimaryData, askPrimaryData).then(data => {
-        const { askAmount } = data[data.length - 1];
-        return this.setState({ data, askAmount });
-      }).catch(er => {
-        return setError(er);
-      });
+  onOpenMintSelection = (index) => this.setState({ index, visibleMintSelection: true });
+  onCloseMintSelection = () => this.setState({ visibleMintSelection: false });
+
+  onAccountData = (accountData) => {
+    return this.setState({ accountData }, () => {
+      return this.onCloseAccountSelection();
     });
   }
 
-  onAsk = ({
-    amount: askAmount,
-    poolData: askData,
-    primaryPoolData: askPrimaryData,
-    accountAddress: dstAddress
-  }) => {
-    return this.setState({ askAmount, askData, askPrimaryData, dstAddress }, () => {
-      const { setError } = this.props;
-      const { askAmount, bidData, bidPrimaryData, askData, askPrimaryData } = this.state;
-      if (bidData.state !== 1 || askData.state !== 1) return this.setState({ data: [] });
-      return oracle.inverseCurve(askAmount, bidData, askData, bidPrimaryData, askPrimaryData).then(data => {
-        const { bidAmount } = data[0];
-        return this.setState({ data, bidAmount });
-      }).catch(er => {
-        return setError(er);
-      });
-    });
-  }
-
-  onAutogenDestinationAddress = (mintAddress, secretKey) => {
-    return new Promise((resolve, reject) => {
-      const { wallet: { user, accounts }, updateWallet, syncWallet } = this.props;
-      if (!ssjs.isAddress(mintAddress) || !secretKey) return reject('Invalid input');
-
-      let accountAddress = null;
-      return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
-        accountAddress = address;
-        const newMints = [...user.mints];
-        if (newMints.includes(mintAddress)) return resolve(accountAddress);
-        newMints.push(mintAddress);
-        const newAccounts = [...accounts];
-        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
-      }).then(re => {
-        return syncWallet(secretKey);
-      }).then(re => {
-        return resolve(accountAddress);
-      }).catch(er => {
-        return reject(er);
-      });
-    });
-  }
-
-  onSwap = () => {
-    const { setError, unlockWallet } = this.props;
-    const { srcAddress, data } = this.state;
-
-    let secretKey = null;
-    return this.setState({ loading: true }, () => {
-      return unlockWallet().then(re => {
-        secretKey = re;
-        return this._onSwap(srcAddress, data[0], secretKey);
-      }).then(({ txId, dstAddress: nextSrcAddress }) => {
-        if (data[1]) return this._onSwap(nextSrcAddress, data[1], secretKey);
-        else return Promise.resolve({ txId });
-      }).then(({ txId }) => {
-        return this.setState({ loading: false, txId });
-      }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
-      });
-    });
-  }
-
-  _onSwap = (srcAddress, data, secretKey) => {
-    return new Promise((resolve, reject) => {
-      const {
-        bidAmount,
-        bidData: {
-          state: bidState,
-          address: bidPoolAddress,
-          treasury: { address: bidTreasuryAddress },
-        },
-        askData: {
-          state: askState,
-          address: askPoolAddress,
-          mint: { address: askMintAddress },
-          treasury: { address: askTreasuryAddress }
-        },
-        primaryData: {
-          state: senState,
-          address: senPoolAddress,
-          treasury: { address: senTreasuryAddress },
-          network: {
-            address: networkAddress,
-            vault: { address: vaultAddress }
-          },
-        }
-      } = data;
-
-      if (bidState === 0) return reject('Uninitialized bid pool');
-      if (askState === 0) return reject('Uninitialized ask pool');
-      if (senState === 0) return reject('Uninitialized sen pool');
-      if (bidState === 2) return reject('Frozen bid pool');
-      if (askState === 2) return reject('Frozen ask pool');
-      if (senState === 2) return reject('Frozen sen pool');
-      if (!bidAmount) return reject('Invalid bid amount');
-      if (!ssjs.isAddress(srcAddress)) return reject('Invalid source address');
-
-      let dstAddress = null;
-      return this.onAutogenDestinationAddress(askMintAddress, secretKey).then(re => {
-        dstAddress = re;
-        const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.swap(
-          bidAmount,
-          networkAddress,
-          bidPoolAddress,
-          bidTreasuryAddress,
-          srcAddress,
-          askPoolAddress,
-          askTreasuryAddress,
-          dstAddress,
-          senPoolAddress,
-          senTreasuryAddress,
-          vaultAddress,
-          payer
-        );
-      }).then(txId => {
-        return resolve({ txId, dstAddress });
-      }).catch(er => {
-        return reject(er);
-      });
+  onMintData = (mintData) => {
+    return this.setState({ mintData }, () => {
+      return this.onCloseMintSelection();
     });
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, ui: { width } } = this.props;
     const {
-      bidAmount, bidData: { state: bidState, mint: bidMint },
-      askAmount, askData: { state: askState, mint: askMint },
-      data, txId, loading
+      visibleAccountSelection, accountData: { amount: balance, mint: bidMintData },
+      visibleMintSelection, mintData: askMintData
     } = this.state;
-    const { decimals: bidDecimals } = bidMint || {}
-    const { decimals: askDecimals } = askMint || {}
 
-    return <Grid container spacing={2} justify="center">
-      <Grid item xs={12} md={8} lg={6}>
-        <BaseCard>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Typography variant="h4">Swap</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Drain size={2} />
-            </Grid>
-            <Grid item xs={12}>
-              <Bid value={ssjs.undecimalize(bidAmount, bidDecimals)} onChange={this.onBid} />
-            </Grid>
-            <Grid item xs={12}>
-              <Ask value={ssjs.undecimalize(askAmount, askDecimals)} onChange={this.onAsk} />
-            </Grid>
-            <Grid item xs={12}>
-              <Grid container spacing={2} className={classes.action}>
-                <Grid item xs={12}>
-                  <SwapInfo data={data} />
+    const { icon: bidIcon, symbol: bidSymbol, decimals } = bidMintData || {};
+    const { icon: askIcon, symbol: askSymbol } = askMintData || {};
+
+    return <Grid container>
+      <Grid item xs={12}>
+        <Header />
+      </Grid>
+      <Grid item xs={12}>
+        <Drain size={3} />
+      </Grid>
+      <Grid item xs={12} md={8}>
+        <Paper className={classes.paper}>
+          <Grid container>
+            <Grid item xs={12} md={4}>
+              <div
+                className={width < 960 ? classes.imageColumn : classes.imageRow}
+                style={{
+                  background: 'url("https://source.unsplash.com/random")',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              >
+                <Grid container>
+                  <Grid item xs={12} >
+                    <Brand />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Drain size={8} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="h2">Let's Swap</Typography>
+                  </Grid>
                 </Grid>
-                {txId ? <Grid item xs={12}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={8}>
+              </div>
+            </Grid>
+            <Grid item xs={12} md={8}>
+              <Grid container justify="center">
+                <Grid item xs={11}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <Drain />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        variant="contained"
+                        label="From"
+                        InputProps={{
+                          startAdornment: <Grid container className={classes.noWrap}>
+                            <Grid item>
+                              <Button
+                                size="small"
+                                startIcon={<MintAvatar icon={bidIcon} />}
+                                endIcon={<ArrowDropDownRounded />}
+                                onClick={this.onOpenAccountSelection}
+                              >
+                                <Typography>{bidSymbol || 'Select'} </Typography>
+                              </Button>
+                            </Grid>
+                            <Grid item style={{ paddingLeft: 0 }}>
+                              <Divider orientation="vertical" />
+                            </Grid>
+                          </Grid>
+                        }}
+                        helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals))} ${bidSymbol || ''}`}
+                      />
+                      <AccountSelection
+                        visible={visibleAccountSelection}
+                        onClose={this.onCloseAccountSelection}
+                        onChange={this.onAccountData}
+                        solana={false}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <TextField
+                        variant="contained"
+                        label="To"
+                        InputProps={{
+                          startAdornment: <Grid container className={classes.noWrap}>
+                            <Grid item>
+                              <Button
+                                size="small"
+                                startIcon={<MintAvatar icon={askIcon} />}
+                                endIcon={<ArrowDropDownRounded />}
+                                onClick={this.onOpenMintSelection}
+                              >
+                                <Typography>{askSymbol || 'Select'} </Typography>
+                              </Button>
+                            </Grid>
+                            <Grid item style={{ paddingLeft: 0 }}>
+                              <Divider orientation="vertical" />
+                            </Grid>
+                          </Grid>
+                        }}
+                      />
+                      <MintSelection
+                        visible={visibleMintSelection}
+                        onChange={this.onMintData}
+                        onClose={this.onCloseMintSelection}
+                      />
+                    </Grid>
+                    <Grid item xs={12} />
+                    <Grid item xs={12}>
                       <Button
                         variant="contained"
-                        color="secondary"
-                        href={utils.explorer(txId)}
-                        target="_blank"
-                        rel="noopener"
-                        startIcon={<PublicRounded />}
+                        color="primary"
+                        size="large"
                         fullWidth
                       >
-                        <Typography>Explore</Typography>
+                        <Typography>Connect Wallet</Typography>
                       </Button>
                     </Grid>
-                    <Grid item xs={4}>
-                      <Button
-                        color="secondary"
-                        onClick={this.onClear}
-                        endIcon={<ArrowForwardRounded />}
-                        fullWidth
-                      >
-                        <Typography>Done</Typography>
-                      </Button>
+                    <Grid item xs={12}>
+                      <Drain />
                     </Grid>
                   </Grid>
-                </Grid> : <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={this.onSwap}
-                    startIcon={loading ? <CircularProgress size={17} /> : <SwapHorizRounded />}
-                    disabled={loading || bidState !== 1 || askState !== 1}
-                    fullWidth
-                  >
-                    <Typography variant="body2">Swap</Typography>
-                  </Button>
-                </Grid>}
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
-        </BaseCard>
+        </Paper>
       </Grid>
-    </Grid>
+      <Grid item xs={12} md={4}>
+        <Paper className={classes.paper}>
+          <Grid container>
+            <Grid item xs={12}>
+              <Typography variant="h5">What is SenSwap?</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography color="textSecondary">The safe, fast and most secure way to bring cross-chain assets to Binance chains.</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<MovieFilterRounded />}
+              >
+                <Typography>Introduction Video</Typography>
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <Grid container spacing={0}>
+                <Grid item xs={12}>
+                  <Link href="#">View Proof of Assets</Link>
+                </Grid>
+                <Grid item xs={12}>
+                  <Link href="#">User Guide</Link>
+                </Grid>
+                <Grid item xs={12}>
+                  <Link href="#">Got a problem? Just get in touch</Link>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Grid>
+    </Grid >
   }
 }
 
@@ -289,7 +229,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet, syncWallet,
 }, dispatch);
 
 export default withRouter(connect(

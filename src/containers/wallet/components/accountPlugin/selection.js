@@ -41,7 +41,9 @@ class Selection extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
+    const {
+      wallet: { user: { address }, lamports, accounts },
+      solana, getAccountData } = this.props;
 
     const solAccount = {
       address,
@@ -60,7 +62,7 @@ class Selection extends Component {
       return getAccountData(accountAddress);
     })).then(data => {
       // Add SOL also
-      data.unshift(solAccount);
+      if (solana) data.unshift(solAccount);
       return this.setState({ data, searchedData: data });
     }).catch(er => {
       return setError(er);
@@ -171,12 +173,14 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 Selection.defaultProps = {
+  solana: true,
   visible: false,
   onChange: () => { },
   onClose: () => { },
 }
 
 Selection.propTypes = {
+  solana: PropTypes.bool,
   visible: PropTypes.bool,
   onChange: PropTypes.func,
   onClose: PropTypes.func,

@@ -11,8 +11,8 @@ import Button from 'senswap-ui/button';
 import { QueueRounded, InputRounded, LaunchRounded } from 'senswap-ui/icons';
 
 import { WalletButton } from 'containers/wallet';
-import NewPool from '../newPool';
-import AddLiquidity from '../addLiquidity';
+import NewPool from './newPool';
+import AddLiquidity from './addLiquidity';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

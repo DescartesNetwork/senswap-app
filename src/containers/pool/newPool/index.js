@@ -189,8 +189,7 @@ class NewPool extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { visible, onClose } = this.props;
+    const { classes, visible, onClose } = this.props;
     const { loading, amounts, accountData, visibleAccountSelection } = this.state;
 
     const { address, mint } = accountData[0];
@@ -259,7 +258,7 @@ class NewPool extends Component {
                     value={amounts[index]}
                     onChange={(e) => this.onAmount(index, e)}
                     InputProps={{
-                      startAdornment: <Grid container>
+                      startAdornment: <Grid container className={classes.noWrap}>
                         <Grid item>
                           <Button
                             size="small"
