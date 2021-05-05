@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Link as RouterLink, withRouter } from 'react-router-dom';
@@ -61,7 +60,7 @@ class Sidebar extends Component {
   }
 
   render() {
-    const { classes, ui: { leftbar }, wallet: { user: { address, role } }, toggleLeftBar } = this.props;
+    const { classes, ui: { leftbar, width }, wallet: { user: { address, role } }, toggleLeftBar } = this.props;
     const { route } = this.state;
     const { sol: { cluster }, basics: { permission } } = configs;
     const isLogged = ssjs.isAddress(address) && permission.includes(role);
@@ -70,7 +69,7 @@ class Sidebar extends Component {
       {!leftbar ? <Fab color="primary" size="medium" onClick={toggleLeftBar} className={classes.fab}>
         <MenuRounded />
       </Fab> : null}
-      <Drawer open={leftbar}>
+      <Drawer open={leftbar} variant={width >= 600 ? 'permanent' : 'temporary'}>
         <Grid container>
           {/* Safe space */}
           <Grid item xs={12} />
@@ -239,14 +238,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   toggleLeftBar,
 }, dispatch);
-
-Sidebar.defaultProps = {
-  onWidth: () => { }
-}
-
-Sidebar.propTypes = {
-  onWidth: PropTypes.func
-}
 
 export default withRouter(connect(
   mapStateToProps,
