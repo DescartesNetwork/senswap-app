@@ -21,6 +21,7 @@ import PriceChange from './priceChange';
 import CreateAccount from './createAccount';
 
 import styles from './styles';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
@@ -175,7 +176,7 @@ class Assets extends Component {
                     <PriceChange ticket={ticket} />
                   </TableCell>
                   <TableCell>
-                    <Typography>{ssjs.undecimalize(amount, 9)}</Typography>
+                    <Typography>{utils.prettyNumber(ssjs.undecimalize(amount, 9))}</Typography>
                   </TableCell>
                   <TableCell>
                     <Price amount={parseFloat(ssjs.undecimalize(amount, 9))} ticket={ticket} />
