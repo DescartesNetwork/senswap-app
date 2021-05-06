@@ -27,7 +27,7 @@ function Price(props) {
 
 Price.defaultProps = {
   amount: 0,
-  ticket: 'solana',
+  ticket: '',
 }
 
 Price.propTypes = {

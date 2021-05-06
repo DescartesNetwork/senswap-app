@@ -35,7 +35,7 @@ function PriceChange(props) {
 }
 
 PriceChange.defaultProps = {
-  ticket: 'solana',
+  ticket: '',
 }
 
 PriceChange.propTypes = {

@@ -150,7 +150,10 @@ class Assets extends Component {
                 <TableCell />
               </TableRow> : null}
               {data.map(accountData => {
-                const { address, amount, mint: { ticket, icon, name, symbol } } = accountData;
+                const {
+                  address, amount,
+                  mint: { address: mintAddress, ticket, icon, name, symbol }
+                } = accountData;
                 return <TableRow key={address}>
                   <TableCell >
                     <Favorite />
@@ -161,12 +164,12 @@ class Assets extends Component {
                         <MintAvatar icon={icon} />
                       </Grid>
                       <Grid item>
-                        <Typography>{name}</Typography>
+                        <Typography>{name || mintAddress.substring(0, 6) + '...'}</Typography>
                       </Grid>
                     </Grid>
                   </TableCell>
                   <TableCell>
-                    <Typography>{symbol}</Typography>
+                    <Typography>{symbol || 'UNKNOWN'}</Typography>
                   </TableCell>
                   <TableCell>
                     <PriceChange ticket={ticket} />
