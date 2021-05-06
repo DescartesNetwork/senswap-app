@@ -29,11 +29,10 @@
     "react-scripts": "4.0.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "senswap-ui": "^0.2.43",
-    "senswapjs": "^1.0.8",
+    "senswap-ui": "^0.2.44",
+    "senswapjs": "^1.1.6",
     "serve": "^11.3.2",
-    "soprox-abi": "0.0.10",
-    "tweetnacl": "^1.0.3"
+    "soprox-abi": "0.0.10"
   },
   "scripts": {
     "start": "REACT_APP_ENV=development react-scripts start",

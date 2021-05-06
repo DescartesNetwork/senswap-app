@@ -24,7 +24,6 @@ import Price from './price';
 
 import styles from './styles';
 import configs from 'configs';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getMints, getMint } from 'modules/mint.reducer';
@@ -50,6 +49,7 @@ class NewPool extends Component {
       visibleAccountSelection: false,
     }
 
+    this.wallet = window.senswap.wallet;
     this.swap = window.senswap.swap;
   }
 
@@ -109,66 +109,47 @@ class NewPool extends Component {
     return this.setState({ amounts: newAmounts });
   }
 
-  onMax = () => {
-    const { accountData: { amount: balance, mint } } = this.state;
-    const { decimals } = mint || {};
-    const amount = ssjs.undecimalize(balance, decimals);
-    return this.setState({ amount });
-  }
-
   newPool = () => {
     const {
-      accountData: { address: srcAddress, state, mint },
-      networkData: { address: networkAddress },
-      amount
+      accountData: [
+        { address: srcSAddress, mint: { decimals: decimalsS } },
+        { address: srcAAddress, mint: { decimals: decimalsA } },
+        { address: srcBAddress, mint: { decimals: decimalsB } }
+      ],
+      amounts: [amountS, amountA, amountB]
     } = this.state;
-    const { wallet: { user, lpts }, setError, updateWallet, unlockWallet, addPool } = this.props;
-    const { address: mintAddress, decimals } = mint || {};
-    if (!state) return setError('Please wait for data loaded');
-    if (!amount) return setError('Invalid amount');
+    const { wallet: { accounts }, setError, updateWallet, addPool } = this.props;
+    if (!ssjs.isAddress(srcSAddress)) return setError('Please select primary token');
+    if (!ssjs.isAddress(srcAAddress)) return setError('Please select token 1');
+    if (!ssjs.isAddress(srcBAddress)) return setError('Please select token 2');
+    if (!amountS || !amountA || !amountB) return setError('Invalid amount');
+    const reserveS = ssjs.decimalize(amountS, decimalsS);
+    const reserveA = ssjs.decimalize(amountA, decimalsA);
+    const reserveB = ssjs.decimalize(amountB, decimalsB);
+    if (!reserveS || !reserveA || !reserveB) return setError('Invalid amount');
 
-    let poolAddress = '';
     let txId = '';
-    let secretKey = null;
-    let pool = null;
-    let treasury = ssjs.createAccount();
-    let lpt = null;
+    let poolAddress = '';
+    let lptAddress = '';
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(re => {
-        secretKey = re;
-        return ssjs.createStrictAccount(this.swap.swapProgramId);
-      }).then(re => {
-        pool = re;
-        poolAddress = pool.publicKey.toBase58();
-        return sol.scanLPT(poolAddress, secretKey);
-      }).then(({ nextLPT }) => {
-        lpt = nextLPT;
-        const reserve = ssjs.decimalize(amount, decimals);
-        const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.initializePool(
-          reserve,
-          0n,
-          networkAddress,
-          pool,
-          treasury,
-          lpt,
-          srcAddress,
-          mintAddress,
-          payer
-        );
-      }).then(re => {
-        txId = re;
-        const lptAddress = lpt.publicKey.toBase58();
-        const newPools = [...user.pools];
-        if (!newPools.includes(poolAddress)) newPools.push(poolAddress);
-        const newLPTs = [...lpts];
-        if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
-        return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
+      return this.swap.initializePool(
+        reserveS, reserveA, reserveB,
+        srcSAddress, srcAAddress, srcBAddress,
+        this.wallet
+      ).then(re => {
+        txId = re.txId;
+        poolAddress = re.poolAddress;
+        lptAddress = re.lptAddress;
+        const newAccounts = [...accounts];
+        if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
+        return updateWallet({ accounts: newAccounts });
       }).then(re => {
         return addPool({ address: poolAddress });
       }).then(re => {
+        console.log(txId)
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
+        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
@@ -285,6 +266,7 @@ class NewPool extends Component {
                 variant="contained"
                 color="primary"
                 size="large"
+                onClick={this.newPool}
                 endIcon={loading ? <CircularProgress size={17} /> : null}
                 disabled={loading}
                 fullWidth
@@ -297,6 +279,7 @@ class NewPool extends Component {
         </DialogContent>}
       </Dialog>
       <AccountSelection
+        solana={false}
         visible={visibleAccountSelection}
         onClose={this.onCloseAccountSelection}
         onChange={this.onAccountData}

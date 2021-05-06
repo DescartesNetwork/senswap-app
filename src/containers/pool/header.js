@@ -24,7 +24,7 @@ class Wallet extends Component {
     super();
 
     this.state = {
-      visibleNewPool: false,
+      visibleNewPool: true,
       visibleDeposit: false,
     }
   }

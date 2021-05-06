@@ -37,15 +37,15 @@ class WalletPlugin extends Component {
         if (type === 'account' && accounts.includes(changedAddress))
           return getAccountData(changedAddress, true);
       });
-      window.senswap.swap.watch((er, re) => {
-        if (er) return;
-        const { type, address: changedAddress } = re;
-        const { wallet: { user: { pools }, lpts } } = this.props;
-        if (type === 'pool' && pools.includes(changedAddress))
-          return getPoolData(changedAddress, true);
-        if (type === 'lpt' && lpts.includes(changedAddress))
-          return getLPTData(changedAddress, true);
-      });
+      // window.senswap.swap.watch((er, re) => {
+      //   if (er) return;
+      //   const { type, address: changedAddress } = re;
+      //   const { wallet: { user: { pools }, lpts } } = this.props;
+      //   if (type === 'pool' && pools.includes(changedAddress))
+      //     return getPoolData(changedAddress, true);
+      //   if (type === 'lpt' && lpts.includes(changedAddress))
+      //     return getLPTData(changedAddress, true);
+      // });
       window.senswap.lamports.watch(address, (er, re) => {
         if (er) return;
         return updateWallet({ lamports: re });

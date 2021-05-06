@@ -38,7 +38,7 @@ export const configSenWallet = () => {
   // Global access
   window.senswap = {
     splt: new ssjs.SPLT(spltAddress, splataAddress, node),
-    swap: new ssjs.Swap(swapAddress, spltAddress, node),
+    swap: new ssjs.LiteSwap(swapAddress, spltAddress, splataAddress, node),
     lamports: new ssjs.Lamports(node),
   }
 }

@@ -11,7 +11,6 @@ import Typography from 'senswap-ui/typography';
 import { IconButton } from 'senswap-ui/button';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import Favorite from 'senswap-ui/favorite';
-import Paper from 'senswap-ui/paper';
 
 import { AddRounded } from 'senswap-ui/icons';
 

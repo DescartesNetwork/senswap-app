@@ -27,7 +27,6 @@ import styles from './styles';
 import configs from 'configs';
 import YELLOWPAPER from 'static/docs/senswap_yellowpaper.pdf';
 import { toggleLeftBar } from 'modules/ui.reducer';
-import { Typography } from '@material-ui/core';
 
 
 class Sidebar extends Component {
