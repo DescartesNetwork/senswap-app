@@ -21,11 +21,6 @@ const defaultState = {
   },
   accounts: [],
   lpts: [],
-  unlock: {
-    visible: false,
-    remembered: '',
-    callback: (er, re) => { },
-  }
 }
 
 
@@ -110,6 +105,9 @@ export const setWallet = (wallet) => {
         visible: false
       }
 
+      // Set wallet
+      window.senswap.wallet = wallet;
+      // Fetch mint accounts and lpt accounts
       return wallet.getAccount().then(address => {
         data.user.address = address;
         return lamports.get(address);
@@ -119,7 +117,6 @@ export const setWallet = (wallet) => {
         return connection.getTokenAccountsByOwner(ownerPublicKey, { programId: spltPromgramId });
       }).then(({ value }) => {
         data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
-        window.senswap.wallet = wallet;
         return api.get(base + '/user', { address: data.user.address });
       }).then(re => {
         // Only add an account to db when its lamports > 0

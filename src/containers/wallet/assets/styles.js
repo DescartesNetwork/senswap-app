@@ -22,4 +22,11 @@ export default theme => ({
     padding: theme.spacing(2),
     backgroundColor: theme.palette.background.secondary,
   },
+  tableRow: {
+    cursor: 'pointer',
+    transition: theme.transitions.create(),
+    '&:hover': {
+      backgroundColor: theme.palette.background.secondary,
+    },
+  },
 });

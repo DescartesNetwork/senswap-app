@@ -47,7 +47,7 @@ class App extends Component {
                 {/* Pages */}
                 <Grid item xs={11}>
                   <Switch>
-                    <Redirect exact from="/" to="/home" />
+                    <Redirect exact from='/' to='/home' />
                     <Route path='/home' component={Home} />
                     <Route exact path='/swap' component={Swap} />
                     <Route path='/pool' component={Pool} />

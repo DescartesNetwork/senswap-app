@@ -1,5 +1,6 @@
 import { forever } from 'async';
 import ssjs from 'senswapjs';
+
 import configs from 'configs';
 
 
@@ -11,6 +12,18 @@ SOL.poolPath = (poolAddress, index) => {
   const indexAddress = ssjs.toPathAddress(index.toString());
   const path = `m/${swapAddress}/${poolAddress}/${indexAddress}`;
   return path;
+}
+
+SOL.isMintLPTAddress = (mintAuthorityAddress, freezeAuthorityAddress) => {
+  return new Promise((resolve, _) => {
+    const { sol: { swapAddress } } = configs;
+    return ssjs.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress, swapAddress).then(poolAddress => {
+      if (!ssjs.isAddress(poolAddress)) return resolve(false);
+      return resolve(poolAddress);
+    }).catch(er => {
+      return resolve(false);
+    });
+  });
 }
 
 SOL.scanAccount = (mintAddress, walletAddress) => {

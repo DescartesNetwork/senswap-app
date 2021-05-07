@@ -13,12 +13,12 @@ import WalletButton from 'containers/wallet/components/walletButton';
 import WalletPlugin from 'containers/wallet/components/walletPlugin';
 import { AccountSelection, AccountSend, AccountReceive, AccountAvatar } from 'containers/wallet/components/accountPlugin';
 import { MintSelection, MintAvatar } from 'containers/wallet/components/mintPlugin';
+import { PoolAvatar } from 'containers/wallet/components/poolPlugin';
 
 // Main components
 import Header from './header';
 import Info from './info';
 import Assets from './assets';
-import Pools from './pools';
 
 import styles from './styles';
 import configs from 'configs';
@@ -50,6 +50,7 @@ export {
   WalletPlugin, WalletButton,
   AccountSelection, AccountSend, AccountReceive, AccountAvatar,
   MintSelection, MintAvatar,
+  PoolAvatar
 }
 
 
@@ -81,12 +82,6 @@ class Wallet extends Component {
       </Grid>
       <Grid item xs={12}>
         <Assets />
-      </Grid>
-      <Grid item xs={12}>
-        <Drain />
-      </Grid>
-      <Grid item xs={12}>
-        <Pools />
       </Grid>
     </Grid>
   }

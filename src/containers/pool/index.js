@@ -71,7 +71,7 @@ class Pool extends Component {
         <Drain size={1} />
       </Grid>
       <Grid item xs={12}>
-        <Grid container>
+        <Grid container className={classes.noWrap}>
           <Grid item>
             <Button
               component={RouterLink}

@@ -8,9 +8,8 @@ import configs from 'configs';
 const Utils = {}
 
 Utils.scrollTop = () => {
-  let root = document.getElementById("root");
-  if (!root) return;
-  root.scrollIntoView();
+  let root = document.getElementById('root');
+  if (root) return root.scrollIntoView();
 }
 
 Utils.prettyNumber = (num, type = 'long') => {

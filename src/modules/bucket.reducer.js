@@ -2,6 +2,7 @@ import ssjs from 'senswapjs';
 
 import configs from 'configs';
 import api from 'helpers/api';
+import sol from 'helpers/sol';
 
 /**
  * Documents
@@ -78,6 +79,37 @@ export const getAccountData = (accountAddress, force = false) => {
           return api.get(base + '/mint', { _id: re._id });
         }).then(({ data: re }) => {
           accountData.mint = { ...accountData.mint, ...re }
+          const {
+            mint_authority: mintAuthorityAddress,
+            freeze_authority: freezeAuthorityAddress,
+          } = accountData.mint || {};
+          return sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
+        }).then(poolAddress => {
+          // It is token account
+          if (!ssjs.isAddress(poolAddress)) {
+            const data = { [accountAddress]: accountData }
+            dispatch({ type: GET_ACCOUNT_DATA_OK, data });
+            return resolve(accountData);
+          }
+          // It is lpt account
+          accountData.pool = { address: poolAddress }
+          return window.senswap.swap.getPoolData(poolAddress);
+        }).then(re => {
+          accountData.pool = { ...accountData.pool, ...re }
+          const condition = { address: re.address }
+          return api.get(base + '/pools', { condition });
+        }).then(({ data: [re] }) => {
+          if (!re) return Promise.resolve({ data: {} });
+          return api.get(base + '/pool', { _id: re._id });
+        }).then(({ data: re }) => {
+          const { mint_s, mint_a, mint_b, ...others } = accountData.pool;
+          const { mintS, mintA, mintB, ...someothers } = re;
+          accountData.pool = {
+            ...others, ...someothers,
+            mint_s: { ...mint_s, ...mintS },
+            mint_a: { ...mint_a, ...mintA },
+            mint_b: { ...mint_b, ...mintB },
+          }
           const data = { [accountAddress]: accountData }
           dispatch({ type: GET_ACCOUNT_DATA_OK, data });
           return resolve(accountData);
@@ -163,20 +195,21 @@ export const getPoolData = (poolAddress, force = false) => {
         const { api: { base } } = configs;
         return window.senswap.swap.getPoolData(poolAddress).then(re => {
           poolData = { ...re }
-          const condition = { address: re.address }
+          const condition = { address: poolAddress }
           return api.get(base + '/pools', { condition });
-        }).then(({ data: [re] }) => {
-          if (!re) return Promise.resolve({ data: {} });
-          return api.get(base + '/pool', { _id: re._id });
+        }).then(({ data: [{ _id }] }) => {
+          if (!_id) return Promise.resolve({ mintS: {}, mintA: {}, mintB: {} });
+          return api.get(base + '/pool', { _id });
         }).then(({ data: re }) => {
-          poolData = { ...re, ...poolData }
-          const condition = { address: poolData.mint.address }
-          return api.get(base + '/mints', { condition });
-        }).then(({ data: [re] }) => {
-          if (!re) return Promise.resolve({ data: {} });
-          return api.get(base + '/mint', { _id: re._id });
-        }).then(({ data: re }) => {
-          poolData.mint = { ...poolData.mint, ...re }
+          const { mint_s, mint_a, mint_b, ...others } = poolData;
+          const { mintS, mintA, mintB, ...someothers } = re;
+          poolData = {
+            ...others,
+            ...someothers,
+            mint_s: { ...mint_s, ...mintS },
+            mint_a: { ...mint_a, ...mintA },
+            mint_b: { ...mint_b, ...mintB },
+          }
           const data = { [poolAddress]: poolData }
           dispatch({ type: GET_POOL_DATA_OK, data });
           return resolve(poolData);

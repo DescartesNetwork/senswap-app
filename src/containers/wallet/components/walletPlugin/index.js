@@ -12,7 +12,7 @@ import styles from './styles';
 import storage from 'helpers/storage';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { setWallet, updateWallet } from 'modules/wallet.reducer';
-import { getAccountData, getPoolData, getLPTData } from 'modules/bucket.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 class WalletPlugin extends Component {
@@ -21,7 +21,7 @@ class WalletPlugin extends Component {
     const {
       setError, setLoading, unsetLoading,
       setWallet, updateWallet,
-      getAccountData, getPoolData, getLPTData
+      getAccountData,
     } = this.props;
 
     const wallet = this.reconnect();
@@ -37,15 +37,6 @@ class WalletPlugin extends Component {
         if (type === 'account' && accounts.includes(changedAddress))
           return getAccountData(changedAddress, true);
       });
-      // window.senswap.swap.watch((er, re) => {
-      //   if (er) return;
-      //   const { type, address: changedAddress } = re;
-      //   const { wallet: { user: { pools }, lpts } } = this.props;
-      //   if (type === 'pool' && pools.includes(changedAddress))
-      //     return getPoolData(changedAddress, true);
-      //   if (type === 'lpt' && lpts.includes(changedAddress))
-      //     return getLPTData(changedAddress, true);
-      // });
       window.senswap.lamports.watch(address, (er, re) => {
         if (er) return;
         return updateWallet({ lamports: re });
@@ -80,7 +71,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setLoading, unsetLoading,
   setWallet, updateWallet,
-  getAccountData, getPoolData, getLPTData,
+  getAccountData,
 }, dispatch);
 
 export default withRouter(connect(
