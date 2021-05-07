@@ -38,9 +38,9 @@ class MyPool extends Component {
 
   fetchData = () => {
     const { wallet: { accounts }, setError, getAccountData } = this.props;
-    return Promise.all(accounts.map(address => {
-      return getAccountData(address).then(re => Promise.resolve(re)).catch(er => Promise.resolve({}));
-    })).then(data => {
+    return accounts.each(address => {
+      return getAccountData(address);
+    }, { skipError: true, skipIndex: true }).then(data => {
       data = data.filter(({ pool }) => {
         const { address } = pool || {};
         return ssjs.isAddress(address);

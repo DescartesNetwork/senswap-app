@@ -19,6 +19,7 @@ import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
 import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
@@ -58,9 +59,9 @@ class Selection extends Component {
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
-    return Promise.all(accounts.map(accountAddress => {
+    return accounts.each(accountAddress => {
       return getAccountData(accountAddress);
-    })).then(data => {
+    }, { skipError: true, skipIndex: true }).then(data => {
       // Add SOL also
       if (solana) data.unshift(solAccount);
       return this.setState({ data, searchedData: data });
@@ -138,15 +139,15 @@ class Selection extends Component {
                             <MintAvatar icon={icon} />
                           </Grid>
                           <Grid item>
-                            <Typography>{name}</Typography>
+                            <Typography>{name || address.substring(0, 6) + '...'}</Typography>
                           </Grid>
                           <Grid item>
-                            <Typography color="textSecondary">{symbol}</Typography>
+                            <Typography color="textSecondary">{symbol || 'UNKNOWN'}</Typography>
                           </Grid>
                         </Grid>
                       </TableCell>
                       <TableCell>
-                        <Typography>{ssjs.undecimalize(amount, decimals)}</Typography>
+                        <Typography>{utils.prettyNumber(ssjs.undecimalize(amount, decimals))}</Typography>
                       </TableCell>
                     </TableRow>
                   })}

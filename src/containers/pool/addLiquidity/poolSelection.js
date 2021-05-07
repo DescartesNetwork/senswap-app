@@ -62,14 +62,14 @@ class PoolSelection extends Component {
     let pools = [];
     const condition = { '$or': mints.map(mintAddress => ({ mint: mintAddress })) }
     return getPools(condition, 1000, 0).then(poolIds => {
-      return Promise.all(poolIds.map(({ _id }) => {
+      return poolIds.each(({ _id }) => {
         return getPool(_id);
-      }));
+      }, { skipError: true, skipIndex: true });
     }).then(data => {
       pools = data;
-      return Promise.all(pools.map(({ address }) => {
+      return pools.each(({ address }) => {
         return getPoolData(address);
-      }));
+      }, { skipError: true, skipIndex: true });
     }).then(data => {
       return this.setState({ pools: data }, () => {
         return this.onSelect(data[0].address);

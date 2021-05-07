@@ -10,6 +10,7 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import Favorite from 'senswap-ui/favorite';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import { MintAvatar } from 'containers/wallet';
 import Price from './price';
@@ -26,6 +27,7 @@ class Accounts extends Component {
     super();
 
     this.state = {
+      loading: false,
       data: [],
     }
   }
@@ -35,10 +37,9 @@ class Accounts extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: prevWallet, bucket: prevBucket } = prevProps;
-    const { wallet, bucket } = this.props;
+    const { wallet: prevWallet } = prevProps;
+    const { wallet } = this.props;
     if (!isEqual(prevWallet, wallet)) return this.fetchData();
-    if (!isEqual(prevBucket, bucket)) return this.fetchData();
   }
 
   fetchData = () => {
@@ -57,23 +58,27 @@ class Accounts extends Component {
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount] });
-    return Promise.all(accounts.map(accountAddress => {
-      return getAccountData(accountAddress);
-    })).then(data => {
-      data = data.filter(({ pool }) => {
-        const { address: poolAddress } = pool || {};
-        return !ssjs.isAddress(poolAddress);
+    return this.setState({ loading: true }, () => {
+      return accounts.each(accountAddress => {
+        return getAccountData(accountAddress);
+      }, { skipError: true, skipIndex: true }).then(data => {
+        data = data.filter(({ pool }) => {
+          const { address: poolAddress } = pool || {};
+          return !ssjs.isAddress(poolAddress);
+        });
+        data.unshift(solAccount);
+        return this.setState({ data, loading: false });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
       });
-      data.unshift(solAccount);
-      return this.setState({ data });
-    }).catch(er => {
-      return setError(er);
     });
   }
 
   render() {
     const { classes } = this.props;
-    const { data } = this.state;
+    const { loading, data } = this.state;
 
     return <TableContainer>
       <Table>
@@ -101,7 +106,7 @@ class Accounts extends Component {
           {!data.length ? <TableRow>
             <TableCell />
             <TableCell >
-              <Typography variant="caption">No token</Typography>
+              {loading ? <CircularProgress size={17} /> : <Typography variant="caption">No token</Typography>}
             </TableCell>
             <TableCell />
             <TableCell />

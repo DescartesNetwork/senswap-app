@@ -9,6 +9,8 @@ import { CardPool } from 'senswap-ui/card';
 
 import { } from 'senswap-ui/icons';
 
+import AddLiquidity from '../addLiquidity';
+
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
@@ -20,6 +22,8 @@ class LatestPromotion extends Component {
     super();
 
     this.state = {
+      visible: false,
+      poolData: {},
       data: []
     }
   }
@@ -31,9 +35,9 @@ class LatestPromotion extends Component {
   fetchData = () => {
     const { setError, getPools, getPool, getPoolData } = this.props;
     return getPools({}, 9, 0).then(poolIds => {
-      return Promise.all(poolIds.map(({ _id }) => getPool(_id)));
+      return poolIds.each(({ _id }) => getPool(_id), { skipError: true, skipIndex: true });
     }).then(data => {
-      return Promise.all(data.map(({ address }) => getPoolData(address)));
+      return data.each(({ address }) => getPoolData(address), { skipError: true, skipIndex: true });
     }).then(data => {
       return this.setState({ data });
     }).catch(er => {
@@ -41,9 +45,19 @@ class LatestPromotion extends Component {
     });
   }
 
+  onOpen = (i) => {
+    const { data } = this.state;
+    const poolData = { ...data[i] }
+    return this.setState({ poolData, visible: true });
+  }
+
+  onClose = () => {
+    return this.setState({ poolData: {}, visible: false });
+  }
+
   render() {
     // const { classes } = this.props;
-    const { data } = this.state;
+    const { poolData, visible, data } = this.state;
 
     return <Grid container spacing={2}>
       {data.map((poolData, i) => {
@@ -55,9 +69,14 @@ class LatestPromotion extends Component {
         const icons = [iconA, iconB, iconS];
         const symbols = [symbolA, symbolB, symbolS];
         return <Grid item key={i} xs={12} md={6} lg={4}>
-          <CardPool icons={icons} symbols={symbols} />
+          <CardPool
+            icons={icons}
+            symbols={symbols}
+            onDeposit={() => this.onOpen(i)}
+          />
         </Grid>
       })}
+      <AddLiquidity data={poolData} visible={visible} onClose={this.onClose} />
     </Grid>
   }
 }

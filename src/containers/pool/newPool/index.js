@@ -53,14 +53,11 @@ class NewPool extends Component {
     this.swap = window.senswap.swap;
   }
 
-  componentDidMount() {
-    this.fetchData();
-  }
-
   componentDidUpdate(prevProps) {
-    const { wallet: { accounts: prevAccounts } } = prevProps;
-    const { wallet: { accounts } } = this.props;
-    if (!isEqual(prevAccounts, accounts)) this.fetchData();
+    const { wallet: { accounts: prevAccounts }, visible: prevVisible } = prevProps;
+    const { wallet: { accounts }, visible } = this.props;
+    if (!isEqual(prevAccounts, accounts) && visible) this.fetchData();
+    if (!isEqual(prevVisible, visible) && visible) this.fetchData();
   }
 
   fetchData = () => {
@@ -76,7 +73,9 @@ class NewPool extends Component {
       return getMint(_id);
     }).then(data => {
       newAccountData[0] = { mint: { ...data } }
-      return Promise.all(accounts.map(accountAddress => getAccountData(accountAddress)));
+      return accounts.each(accountAddress => {
+        return getAccountData(accountAddress);
+      }, { skipError: true, skipIndex: true });
     }).then(data => {
       const senData = data.filter(({ mint: { address } }) => (address === senAddress))[0];
       if (!senData) return;

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
+import eachOfSeries from 'async/eachOfSeries';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -33,9 +34,43 @@ export const configSenWallet = () => {
   global.BigInt.prototype.toJSON = function () {
     return this.toString();
   }
-  // Configs
-  const { sol: { node, spltAddress, splataAddress, swapAddress } } = configs;
+  // Array convenient patch
+  // eslint-disable-next-line
+  Array.prototype.each = function (promise, options = {}) {
+    return new Promise((resolve, reject) => {
+      try {
+        // Parse options
+        const opts = { skipError: false, skipIndex: false, ...options }
+        const { skipError, skipIndex } = opts;
+        // Promise series
+        let data = [];
+        return eachOfSeries(this, (each, i, cb) => {
+          return promise(each, i).then(re => {
+            data.push(re);
+            return cb();
+          }).catch(er => {
+            if (!skipError) return cb(er);
+            if (!skipIndex) data.push(null);
+            return cb();
+          });
+        }, (er) => {
+          if (er) return reject(er);
+          return resolve(data);
+        });
+      } catch (er) {
+        return reject(er);
+      }
+    });
+  }
+  // eslint-disable-next-line
+  Array.prototype.zip = function (arr) {
+    if (typeof arr !== 'object') return [];
+    if (this.length !== arr.length) return [];
+    if (!this.length) return [];
+    return this.map((value, index) => ([value, arr[index]]));
+  }
   // Global access
+  const { sol: { node, spltAddress, splataAddress, swapAddress } } = configs;
   window.senswap = {
     splt: new ssjs.SPLT(spltAddress, splataAddress, node),
     swap: new ssjs.LiteSwap(swapAddress, spltAddress, splataAddress, node),

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
@@ -15,16 +16,14 @@ import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
 import Divider from 'senswap-ui/divider';
 
-
 import { CloseRounded } from 'senswap-ui/icons';
 
 import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -40,9 +39,9 @@ class AddLiquidity extends Component {
     this.state = {
       ...EMPTY,
 
-      accountData: [{}, {}, {}],
       index: 0,
       amounts: ['', '', ''],
+      accountData: [],
 
       poolData: {},
       srcData: {},
@@ -53,61 +52,77 @@ class AddLiquidity extends Component {
     this.swap = window.senswap.swap;
   }
 
-  onAutogenLPTAddress = (poolAddress, secretKey) => {
-    return new Promise((resolve, reject) => {
-      if (!ssjs.isAddress(poolAddress)) return reject('Invalid pool address');
-      if (!secretKey) return reject('Cannot unlock wallet');
-      const { wallet: { user, lpts }, updateWallet } = this.props;
-      let { lptAddress } = this.state;
-      if (lptAddress) return resolve(lptAddress);
-      return sol.newLPT(poolAddress, secretKey).then(({ lpt }) => {
-        const newPools = [...user.pools];
-        if (!newPools.includes(poolAddress)) newPools.push(poolAddress);
-        const newLPTs = [...lpts];
-        const lptAddress = lpt.publicKey.toBase58();
-        if (!newLPTs.includes(lptAddress)) newLPTs.push(lptAddress);
-        return updateWallet({ user: { ...user, pools: newPools }, lpts: newLPTs });
-      }).then(re => {
-        return resolve(lptAddress);
-      }).catch(er => {
-        return reject(er);
-      });
+  componentDidUpdate(prevProps) {
+    const { data: prevData, visible: prevVisible } = prevProps;
+    const { data, visible } = this.props;
+    if (!isEqual(prevData, data) && visible) return this.fetchData();
+    if (!isEqual(prevVisible, visible) && visible) return this.fetchData();
+  }
+
+  fetchData = () => {
+    const { data, wallet: { accounts }, getAccountData, setError } = this.props;
+    const { mint_s, mint_a, mint_b } = data;
+    const { address: mintAddressS } = mint_s || {}
+    const { address: mintAddressA } = mint_a || {}
+    const { address: mintAddressB } = mint_b || {}
+    let mintAddresses = [mintAddressS, mintAddressA, mintAddressB];
+    return accounts.each(accounAddress => {
+      return getAccountData(accounAddress);
+    }, { skipError: true, skipIndex: true }).then(accountData => {
+      accountData = mintAddresses.map(mintAddress => {
+        const [re] = accountData.filter(({ mint: { address } }) => mintAddress === address);
+        return re;
+      })
+      return this.setState({ accountData });
+    }).catch(er => {
+      return setError(er);
     });
   }
 
-  addLiquidity = () => {
-    const { setError, unlockWallet } = this.props;
-    const {
-      amount, srcData: { address: srcAddress },
-      poolData: { state, address: poolAddress, mint, treasury },
-    } = this.state;
-    const { decimals } = mint || {}
-    const { address: treasuryAddress } = treasury || {}
-    if (state !== 1) return setError('The pool is uninitilized or frozen');
-    if (!amount || !parseFloat(amount)) return setError('Invalid amount');
+  onAmount = (i, e) => {
+    const { amounts } = this.state;
+    let newAmounts = [...amounts];
+    newAmounts[i] = e.target.value || '';
+    return this.setState({ amounts: newAmounts });
+  }
 
-    let secretKey = null;
-    return this.setState({ loading: true }, () => {
-      return unlockWallet().then(re => {
-        secretKey = re;
-        return this.onAutogenLPTAddress(poolAddress, secretKey);
-      }).then(lptAddress => {
-        const reserve = ssjs.decimalize(parseFloat(amount), decimals);
-        const payer = ssjs.fromSecretKey(secretKey);
-        return this.swap.addLiquidity(
-          reserve,
-          poolAddress,
-          treasuryAddress,
-          lptAddress,
-          srcAddress,
-          payer
-        );
-      }).then(txId => {
-        return this.setState({ ...EMPTY, txId });
-      }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
+  addLiquidity = () => {
+    const {
+      wallet: { accounts }, updateWallet,
+      setError, data: { address: poolAddress },
+    } = this.props;
+    const { accountData, amounts } = this.state;
+
+    if (!ssjs.isAddress(poolAddress)) return setError('Invalid pool address');
+
+    let txId = '';
+    const info = accountData.zip(amounts);
+    const [[accountDataS, amountS], [accountDataA, amountA], [accountDataB, amountB]] = info;
+    const { address: srcAddressS, mint: { decimals: decimalsS } } = accountDataS || { mint: { decimals: 9 } }
+    const { address: srcAddressA, mint: { decimals: decimalsA } } = accountDataA || { mint: { decimals: 9 } }
+    const { address: srcAddressB, mint: { decimals: decimalsB } } = accountDataB || { mint: { decimals: 9 } }
+    const deltaS = ssjs.decimalize(amountS, decimalsS);
+    const deltaA = ssjs.decimalize(amountA, decimalsA);
+    const deltaB = ssjs.decimalize(amountB, decimalsB);
+
+    return this.swap.addLiquidity(
+      deltaS, deltaA, deltaB,
+      poolAddress,
+      srcAddressS, srcAddressA, srcAddressB,
+      window.senswap.wallet
+    ).then(({ txId: re, lptAddress }) => {
+      txId = re;
+      console.log(lptAddress)
+      const newAccounts = [...accounts];
+      if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
+      return updateWallet({ accounts: newAccounts });
+    }).then(re => {
+      console.log(txId);
+      return this.setState({ ...EMPTY, txId });
+    }).catch(er => {
+      console.log(er)
+      return this.setState({ ...EMPTY }, () => {
+        return setError(er);
       });
     });
   }
@@ -140,8 +155,9 @@ class AddLiquidity extends Component {
           <Grid item xs={12}>
             <Drain size={2} />
           </Grid>
-          {accountData.map((data, index) => {
-            const { amount, mint } = data;
+          {accountData.map((each, index) => {
+            if (!each) return null;
+            const { amount, mint } = each;
             const { symbol, name, icon, decimals } = mint || {}
             return <Fragment key={index}>
               <Grid item xs={12} >
@@ -152,19 +168,26 @@ class AddLiquidity extends Component {
                   value={amounts[index]}
                   onChange={(e) => this.onAmount(index, e)}
                   InputProps={{
-                    startAdornment: <Grid container>
+                    startAdornment: <Grid container className={classes.noWrap}>
                       <Grid item>
-                        <MintAvatar icon={icon} />
+                        <Grid container className={classes.noWrap} alignItems="center">
+                          <Grid item>
+                            <MintAvatar icon={icon} />
+                          </Grid>
+                          <Grid item>
+                            <Typography>{symbol}</Typography>
+                          </Grid>
+                        </Grid>
                       </Grid>
                       <Grid item>
-                        <Typography color="textSecondary">{symbol}</Typography>
-                      </Grid>
-                      <Grid item style={{ paddingLeft: 0 }}>
                         <Divider orientation="vertical" />
                       </Grid>
-                    </Grid>
+                    </Grid>,
+                    endAdornment: <Button color="primary">
+                      <Typography>MAX</Typography>
+                    </Button>
                   }}
-                  helperText={`Available ${utils.prettyNumber(ssjs.undecimalize(amount, decimals))} ${symbol || ''}`}
+                  helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(amount, decimals))} ${symbol || ''}`}
                   fullWidth
                 />
               </Grid>
@@ -181,6 +204,7 @@ class AddLiquidity extends Component {
               size="large"
               endIcon={loading ? <CircularProgress size={17} /> : null}
               disabled={loading}
+              onClick={this.addLiquidity}
               fullWidth
             >
               <Typography>Deposit</Typography>
@@ -201,17 +225,19 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet,
+  updateWallet,
   getAccountData,
 }, dispatch);
 
 AddLiquidity.defaultProps = {
   visible: true,
+  data: {},
   onClose: () => { },
 }
 
 AddLiquidity.propTypes = {
   visible: PropTypes.bool,
+  data: PropTypes.object,
   onClose: PropTypes.func,
 }
 
