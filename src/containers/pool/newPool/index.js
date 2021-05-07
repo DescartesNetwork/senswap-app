@@ -118,7 +118,7 @@ class NewPool extends Component {
       ],
       amounts: [amountS, amountA, amountB]
     } = this.state;
-    const { wallet: { accounts }, setError, updateWallet, addPool } = this.props;
+    const { wallet: { accounts }, setError, updateWallet, addPool, onClose } = this.props;
     if (!ssjs.isAddress(srcSAddress)) return setError('Please select primary token');
     if (!ssjs.isAddress(srcAAddress)) return setError('Please select token 1');
     if (!ssjs.isAddress(srcBAddress)) return setError('Please select token 2');
@@ -147,9 +147,10 @@ class NewPool extends Component {
         return addPool({ address: poolAddress });
       }).then(re => {
         console.log(txId)
-        return this.setState({ ...EMPTY, txId });
+        return this.setState({ ...EMPTY, txId }, () => {
+          return onClose();
+        });
       }).catch(er => {
-        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
