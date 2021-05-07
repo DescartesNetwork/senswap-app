@@ -68,60 +68,61 @@ export const getAccountData = (accountAddress, force = false) => {
       }
 
       let { bucket: { [accountAddress]: accountData } } = getState();
-      if (!accountData || force) {
-        const { api: { base } } = configs;
-        return window.senswap.splt.getAccountData(accountAddress).then(re => {
-          accountData = { ...re }
-          const condition = { address: re.mint.address }
-          return api.get(base + '/mints', { condition });
-        }).then(({ data: [re] }) => {
-          if (!re) return Promise.resolve({ data: {} });
-          return api.get(base + '/mint', { _id: re._id });
-        }).then(({ data: re }) => {
-          accountData.mint = { ...accountData.mint, ...re }
-          const {
-            mint_authority: mintAuthorityAddress,
-            freeze_authority: freezeAuthorityAddress,
-          } = accountData.mint || {};
-          return sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
-        }).then(poolAddress => {
-          // It is token account
-          if (!ssjs.isAddress(poolAddress)) {
-            const data = { [accountAddress]: accountData }
-            dispatch({ type: GET_ACCOUNT_DATA_OK, data });
-            return resolve(accountData);
-          }
-          // It is lpt account
-          accountData.pool = { address: poolAddress }
-          return window.senswap.swap.getPoolData(poolAddress);
-        }).then(re => {
-          accountData.pool = { ...accountData.pool, ...re }
-          const condition = { address: re.address }
-          return api.get(base + '/pools', { condition });
-        }).then(({ data: [re] }) => {
-          if (!re) return Promise.resolve({ data: {} });
-          return api.get(base + '/pool', { _id: re._id });
-        }).then(({ data: re }) => {
-          const { mint_s, mint_a, mint_b, ...others } = accountData.pool;
-          const { mintS, mintA, mintB, ...someothers } = re;
-          accountData.pool = {
-            ...others, ...someothers,
-            mint_s: { ...mint_s, ...mintS },
-            mint_a: { ...mint_a, ...mintA },
-            mint_b: { ...mint_b, ...mintB },
-          }
-          const data = { [accountAddress]: accountData }
-          dispatch({ type: GET_ACCOUNT_DATA_OK, data });
-          return resolve(accountData);
-        }).catch(er => {
-          dispatch({ type: GET_ACCOUNT_DATA_FAIL, reason: er.toString() });
-          return reject(er);
-        });
-      } else {
+      if (accountData && !force) {
         const data = { [accountAddress]: accountData }
         dispatch({ type: GET_ACCOUNT_DATA_OK, data });
         return resolve(accountData);
       }
+
+      const { api: { base } } = configs;
+      return window.senswap.splt.getAccountData(accountAddress).then(re => {
+        accountData = { ...re }
+        const condition = { address: re.mint.address }
+        return api.get(base + '/mints', { condition });
+      }).then(({ data: [re] }) => {
+        if (!re) return Promise.resolve({ data: {} });
+        return api.get(base + '/mint', { _id: re._id });
+      }).then(({ data: re }) => {
+        accountData.mint = { ...accountData.mint, ...re }
+        const {
+          mint_authority: mintAuthorityAddress,
+          freeze_authority: freezeAuthorityAddress,
+        } = accountData.mint || {};
+        return sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
+      }).then(poolAddress => {
+        // It is token account -> Break the promise chain
+        if (!ssjs.isAddress(poolAddress)) return Promise.reject('No error');
+        // It is lpt account
+        accountData.pool = { address: poolAddress }
+        return window.senswap.swap.getPoolData(poolAddress);
+      }).then(re => {
+        accountData.pool = { ...accountData.pool, ...re }
+        const condition = { address: re.address }
+        return api.get(base + '/pools', { condition });
+      }).then(({ data: [re] }) => {
+        if (!re) return Promise.resolve({ data: {} });
+        return api.get(base + '/pool', { _id: re._id });
+      }).then(({ data: re }) => {
+        const { mint_s, mint_a, mint_b, ...others } = accountData.pool;
+        const { mintS, mintA, mintB, ...someothers } = re;
+        accountData.pool = {
+          ...others, ...someothers,
+          mint_s: { ...mint_s, ...mintS },
+          mint_a: { ...mint_a, ...mintA },
+          mint_b: { ...mint_b, ...mintB },
+        }
+        const data = { [accountAddress]: accountData }
+        dispatch({ type: GET_ACCOUNT_DATA_OK, data });
+        return resolve(accountData);
+      }).catch(er => {
+        if (er === 'No error') {
+          const data = { [accountAddress]: accountData }
+          dispatch({ type: GET_ACCOUNT_DATA_OK, data });
+          return resolve(accountData);
+        }
+        dispatch({ type: GET_ACCOUNT_DATA_FAIL, reason: er.toString() });
+        return reject(er);
+      });
     });
   }
 }
@@ -198,14 +199,13 @@ export const getPoolData = (poolAddress, force = false) => {
           const condition = { address: poolAddress }
           return api.get(base + '/pools', { condition });
         }).then(({ data: [{ _id }] }) => {
-          if (!_id) return Promise.resolve({ mintS: {}, mintA: {}, mintB: {} });
+          if (!_id) return Promise.resolve({});
           return api.get(base + '/pool', { _id });
         }).then(({ data: re }) => {
           const { mint_s, mint_a, mint_b, ...others } = poolData;
           const { mintS, mintA, mintB, ...someothers } = re;
           poolData = {
-            ...others,
-            ...someothers,
+            ...others, ...someothers,
             mint_s: { ...mint_s, ...mintS },
             mint_a: { ...mint_a, ...mintA },
             mint_b: { ...mint_b, ...mintB },

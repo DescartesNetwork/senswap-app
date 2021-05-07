@@ -8,11 +8,10 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 
-import { QueueRounded, InputRounded, LaunchRounded } from 'senswap-ui/icons';
+import { QueueRounded } from 'senswap-ui/icons';
 
 import { WalletButton } from 'containers/wallet';
 import NewPool from './newPool';
-import AddLiquidity from './addLiquidity';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -32,22 +31,10 @@ class Wallet extends Component {
   onOpenNewPool = () => this.setState({ visibleNewPool: true });
   onCloseNewPool = () => this.setState({ visibleNewPool: false });
 
-  onOpenDeposit = () => this.setState({ visibleDeposit: true });
-  onCloseDeposit = () => this.setState({ visibleDeposit: false });
-
-  disconnect = () => {
-    const { setError, unsetWallet } = this.props;
-    return unsetWallet().then(re => {
-      // Nothing
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
   render() {
     const { classes } = this.props;
     const { wallet: { user: { address } } } = this.props;
-    const { visibleNewPool, visibleDeposit } = this.state;
+    const { visibleNewPool } = this.state;
 
     return <Grid container spacing={0}>
       <Grid item xs={12}>
@@ -78,20 +65,6 @@ class Wallet extends Component {
                 <Typography>New Pool</Typography>
               </Button>
               <NewPool visible={visibleNewPool} onClose={this.onCloseNewPool} />
-            </Grid>
-            <Grid item>
-              <Button
-                startIcon={<InputRounded />}
-                onClick={this.onOpenDeposit}
-              >
-                <Typography>Deposit</Typography>
-              </Button>
-              <AddLiquidity visible={visibleDeposit} onClose={this.onCloseDeposit} />
-            </Grid>
-            <Grid item>
-              <Button startIcon={<LaunchRounded />} >
-                <Typography>Withdraw</Typography>
-              </Button>
             </Grid>
           </Fragment>}
         </Grid>
