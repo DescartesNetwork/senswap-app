@@ -10,13 +10,18 @@ import {CardPool} from 'senswap-ui/card';
 
 import styles from './styles';
 
-import * as solana from '../../../helpers/solana'
+import * as report from '../../../helpers/report'
+import * as moment from "moment";
 
 
 class NewPools extends Component {
 
     componentDidMount() {
-        solana.getTokenAccountsByOwner("GHjB1mY6WinFHy6kz81boVBmGoaM5PN37r75TLJfcU3c", "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+        // solana.getHistoryTokenTransaction("GHjB1mY6WinFHy6kz81boVBmGoaM5PN37r75TLJfcU3c")
+        //solana.getHistoryTokenTransaction("4EGz1FgjUauAz9PeaKz4FBhVBvDpuiLAsZZSWzeMxayE")
+        const timeFrom = moment().startOf('day').valueOf()
+        const timeTo = moment().endOf('day').valueOf()
+        report.findAllTransactionByTime("52yrd8vkxUsoCcSkuQtBERNYuJ6ok5PFbf5MK6NqP8iY", timeFrom, timeTo)
     }
 
     render() {
