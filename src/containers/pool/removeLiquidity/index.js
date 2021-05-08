@@ -4,24 +4,25 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
-import Collapse from '@material-ui/core/Collapse';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import TextField from 'senswap-ui/textField';
+import Button, { IconButton } from 'senswap-ui/button';
+import Tooltip from 'senswap-ui/tooltip';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
+import Drain from 'senswap-ui/drain';
+import Divider from 'senswap-ui/divider';
+import Paper from 'senswap-ui/paper';
+
 
 import {
   RemoveCircleOutlineRounded, PublicRounded, ArrowForwardRounded,
-  OfflineBoltRounded,
+  OfflineBoltRounded, CloseRounded, ArrowDownwardRounded,
 } from '@material-ui/icons';
 
 import PoolSelection from './poolSelection';
-import LPTSelection from 'containers/wallet/components/lptSelection';
-import AccountSelection from 'containers/wallet/components/accountSelection';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -147,8 +148,7 @@ class RemoveLiquidity extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { ui: { advance } } = this.props;
+    const { classes, onClose } = this.props;
     const {
       loading, txId,
       amount, poolData: { address: poolAddress, reserve, lpt: value, mint },
@@ -157,6 +157,112 @@ class RemoveLiquidity extends Component {
     const { decimals } = mint || {}
 
     return <Grid container justify="center" spacing={2}>
+
+      <Dialog open={true} onClose={onClose} fullWidth>
+        <DialogTitle>
+          <Grid container alignItems="center" className={classes.noWrap}>
+            <Grid item className={classes.stretch}>
+              <Typography variant="subtitle1">Remove Liquidity</Typography>
+            </Grid>
+            <Grid item>
+              <IconButton onClick={onClose} edge="end">
+                <CloseRounded />
+              </IconButton>
+            </Grid>
+          </Grid>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container justify="center">
+            <Grid item xs={12}>
+              <TextField
+                label="Amount"
+                variant="contained"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    <Typography variant="h2">90%</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Drain size={1} />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Grid container>
+                      <Grid item xs={3}>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          fullWidth
+                        >
+                          <Typography color="primary">25%</Typography>
+                        </Button>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          fullWidth
+                        >
+                          <Typography color="primary">50%</Typography>
+                        </Button>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          fullWidth
+                        >
+                          <Typography color="primary">75%</Typography>
+                        </Button>
+                      </Grid>
+                      <Grid item xs={3}>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          fullWidth
+                        >
+                          <Typography color="primary">MAX</Typography>
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item>
+              <IconButton size="small">
+                <ArrowDownwardRounded />
+              </IconButton>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <Grid container>
+                  <Grid item xs={12}>
+
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                endIcon={loading ? <CircularProgress size={17} /> : null}
+                disabled={loading}
+                onClick={this.removeLiquidity}
+                fullWidth
+              >
+                <Typography>Withdraw</Typography>
+              </Button>
+            </Grid>
+            <Grid item xs={12} />
+          </Grid>
+        </DialogContent>
+      </Dialog>
+
       <Grid item xs={12}>
         <Typography variant="h6">Pool info</Typography>
       </Grid>
@@ -180,22 +286,6 @@ class RemoveLiquidity extends Component {
           helperText={<span>Available LPT: <strong>{utils.prettyNumber(ssjs.undecimalize(lpt, 9))}</strong></span>}
           fullWidth
         />
-      </Grid>
-      <Grid item xs={12}>
-        <Collapse in={advance}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <LPTSelection onChange={this.onLPTAddress} poolAddress={poolAddress} />
-            </Grid>
-            <Grid item xs={12}>
-              <AccountSelection
-                label="Destination Address"
-                poolAddress={poolAddress}
-                onChange={this.onDestinationAddress}
-              />
-            </Grid>
-          </Grid>
-        </Collapse>
       </Grid>
       <Grid item xs={12}>
         <Grid container spacing={2} className={classes.action}>

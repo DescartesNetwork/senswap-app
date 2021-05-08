@@ -9,7 +9,7 @@ export default theme => ({
   icon: {
     width: theme.spacing(4),
     height: theme.spacing(4),
-    background: '#ffffff',
+    background: theme.palette.background.secondary,
     color: theme.palette.text.primary,
     cursor: 'pointer',
     boxShadow: theme.shadows[3],

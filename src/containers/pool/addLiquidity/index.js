@@ -42,11 +42,6 @@ class AddLiquidity extends Component {
       index: 0,
       amounts: ['', '', ''],
       accountData: [],
-
-      poolData: {},
-      srcData: {},
-      lptAddress: '',
-      amount: 0,
     }
 
     this.swap = window.senswap.swap;
@@ -86,10 +81,19 @@ class AddLiquidity extends Component {
     return this.setState({ amounts: newAmounts });
   }
 
+  onMax = (index) => {
+    const { accountData, amounts } = this.state;
+    const { amount, mint } = accountData[index] || {}
+    const { decimals } = mint || {}
+    let newAmounts = [...amounts];
+    newAmounts[index] = ssjs.undecimalize(amount, decimals);
+    return this.setState({ amounts: newAmounts });
+  }
+
   addLiquidity = () => {
     const {
-      wallet: { accounts }, updateWallet,
-      setError, data: { address: poolAddress },
+      wallet: { accounts }, updateWallet, data: { address: poolAddress },
+      setError, onClose
     } = this.props;
     const { accountData, amounts } = this.state;
 
@@ -105,24 +109,25 @@ class AddLiquidity extends Component {
     const deltaA = ssjs.decimalize(amountA, decimalsA);
     const deltaB = ssjs.decimalize(amountB, decimalsB);
 
-    return this.swap.addLiquidity(
-      deltaS, deltaA, deltaB,
-      poolAddress,
-      srcAddressS, srcAddressA, srcAddressB,
-      window.senswap.wallet
-    ).then(({ txId: re, lptAddress }) => {
-      txId = re;
-      console.log(lptAddress)
-      const newAccounts = [...accounts];
-      if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
-      return updateWallet({ accounts: newAccounts });
-    }).then(re => {
-      console.log(txId);
-      return this.setState({ ...EMPTY, txId });
-    }).catch(er => {
-      console.log(er)
-      return this.setState({ ...EMPTY }, () => {
-        return setError(er);
+    return this.setState({ loading: true }, () => {
+      return this.swap.addLiquidity(
+        deltaS, deltaA, deltaB,
+        poolAddress,
+        srcAddressS, srcAddressA, srcAddressB,
+        window.senswap.wallet
+      ).then(({ txId: re, lptAddress }) => {
+        txId = re;
+        const newAccounts = [...accounts];
+        if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
+        return updateWallet({ accounts: newAccounts });
+      }).then(re => {
+        return this.setState({ ...EMPTY, txId }, () => {
+          return onClose();
+        });
+      }).catch(er => {
+        return this.setState({ ...EMPTY }, () => {
+          return setError(er);
+        });
       });
     });
   }
@@ -183,7 +188,7 @@ class AddLiquidity extends Component {
                         <Divider orientation="vertical" />
                       </Grid>
                     </Grid>,
-                    endAdornment: <Button color="primary">
+                    endAdornment: <Button color="primary" onClick={() => this.onMax(index)}>
                       <Typography>MAX</Typography>
                     </Button>
                   }}

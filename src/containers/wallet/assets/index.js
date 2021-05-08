@@ -17,7 +17,6 @@ import Accounts from './accounts';
 import LPTs from './lpts';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 

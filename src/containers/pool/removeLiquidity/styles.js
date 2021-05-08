@@ -6,6 +6,11 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
+  paper: {
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.background.secondary,
+    padding: theme.spacing(2)
+  },
   badge: {
     padding: 0,
     height: 14,
