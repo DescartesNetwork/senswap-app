@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -9,7 +10,6 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import TextField from 'senswap-ui/textField';
 import Button, { IconButton } from 'senswap-ui/button';
-import Tooltip from 'senswap-ui/tooltip';
 import CircularProgress from 'senswap-ui/circularProgress';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
@@ -18,11 +18,10 @@ import Paper from 'senswap-ui/paper';
 
 
 import {
-  RemoveCircleOutlineRounded, PublicRounded, ArrowForwardRounded,
-  OfflineBoltRounded, CloseRounded, ArrowDownwardRounded,
+  CloseRounded, ArrowDownwardRounded,
 } from '@material-ui/icons';
 
-import PoolSelection from './poolSelection';
+import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -43,10 +42,7 @@ class RemoveLiquidity extends Component {
 
     this.state = {
       ...EMPTY,
-      poolData: {},
-      dstAddress: '',
-      lptData: {},
-      amount: 0,
+      amount: '',
     }
 
     this.swap = window.senswap.swap;
@@ -65,44 +61,17 @@ class RemoveLiquidity extends Component {
     return this.setState({ amount });
   }
 
-  onClear = () => {
-    return this.setState({ ...EMPTY });
-  }
-
-  onPoolData = (poolData = {}) => {
-    return this.setState({ poolData });
-  }
-
-  onLPTAddress = (lptAddress) => {
-    const { getLPTData, setError } = this.props;
-    if (!ssjs.isAddress(lptAddress)) return this.setState({ lptData: {} });
-    return getLPTData(lptAddress).then(lptData => {
-      return this.setState({ lptData });
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  onDestinationAddress = (dstAddress) => {
-    return this.setState({ dstAddress });
-  }
-
-  onAutogenDestinationAddress = (mintAddress, secretKey) => {
+  onAutogenDestinationAddress = (mintAddress) => {
     return new Promise((resolve, reject) => {
-      if (!secretKey) return reject('Cannot unlock account');
       if (!mintAddress) return reject('Unknown token');
-      const { wallet: { user, accounts }, updateWallet } = this.props;
-      const { dstAddress } = this.state;
-      if (dstAddress) return resolve(dstAddress);
+      const { wallet: { accounts }, updateWallet } = this.props;
 
       let accountAddress = null;
-      return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
+      return sol.newAccount(mintAddress).then(({ address }) => {
         accountAddress = address;
-        const newMints = [...user.mints];
-        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
+        return updateWallet({ accounts: newAccounts });
       }).then(re => {
         return resolve(accountAddress);
       }).catch(er => {
@@ -112,33 +81,42 @@ class RemoveLiquidity extends Component {
   }
 
   removeLiquidity = () => {
-    const { setError, unlockWallet } = this.props;
-    const {
-      amount, poolData: { address: poolAddress, mint, treasury },
-      lptData: { is_initialized, address: lptAddress }
-    } = this.state;
-    const { address: mintAddress } = mint || {}
-    const { address: treasuryAddress } = treasury || {}
-    if (!is_initialized) return setError('Please wait for data loaded');
-    if (!amount || !parseFloat(amount)) return setError('Invalid amount');
-    let secretKey = null;
+    const { data: { pool, mint: { decimals } }, setError, onClose } = this.props;
+    const { amount } = this.state;
+
+    const lpt = ssjs.decimalize(amount, decimals);
+    const { address: poolAddress, mint_s, mint_a, mint_b } = pool || {};
+    const { address: mintAddressS } = mint_s || {}
+    const { address: mintAddressA } = mint_a || {}
+    const { address: mintAddressB } = mint_b || {}
+
+    if (!lpt) return setError('Invalid amount');
+    if (!ssjs.isAddress(poolAddress)) return setError('Invalid pool address');
+    if (!ssjs.isAddress(mintAddressS)) return setError('Invalid primary mint address');
+    if (!ssjs.isAddress(mintAddressA)) return setError('Invalid secondary mint address');
+    if (!ssjs.isAddress(mintAddressB)) return setError('Invalid secondary mint address');
+
+    let dstAddressS = '';
+    let dstAddressA = '';
+    let dstAddressB = '';
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(re => {
-        secretKey = re;
-        return this.onAutogenDestinationAddress(mintAddress, secretKey);
-      }).then(dstAddress => {
-        const lpt = ssjs.decimalize(parseFloat(amount), 9);
-        const payer = ssjs.fromSecretKey(secretKey);
+      return this.onAutogenDestinationAddress(mintAddressS).then(accountAddress => {
+        dstAddressS = accountAddress;
+        return this.onAutogenDestinationAddress(mintAddressA);
+      }).then(accountAddress => {
+        dstAddressA = accountAddress;
+        return this.onAutogenDestinationAddress(mintAddressB);
+      }).then(accountAddress => {
+        dstAddressB = accountAddress;
         return this.swap.removeLiquidity(
-          lpt,
-          poolAddress,
-          treasuryAddress,
-          lptAddress,
-          dstAddress,
-          payer
+          lpt, poolAddress,
+          dstAddressS, dstAddressA, dstAddressB,
+          window.senswap.wallet
         );
-      }).then(txId => {
-        return this.setState({ ...EMPTY, txId });
+      }).then(({ txId }) => {
+        return this.setState({ ...EMPTY, txId }, () => {
+          return onClose();
+        });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
@@ -148,198 +126,149 @@ class RemoveLiquidity extends Component {
   }
 
   render() {
-    const { classes, onClose } = this.props;
-    const {
-      loading, txId,
-      amount, poolData: { address: poolAddress, reserve, lpt: value, mint },
-      lptData: { is_initialized, lpt }
-    } = this.state;
-    const { decimals } = mint || {}
+    const { classes, data, visible, onClose } = this.props;
+    const { loading, amount, } = this.state;
 
-    return <Grid container justify="center" spacing={2}>
+    const { amount: balance, pool, mint } = data;
+    const { supply, decimals } = mint || {}
+    const { mint_s, mint_a, mint_b, treasury_s, treasury_a, treasury_b } = pool || {};
 
-      <Dialog open={true} onClose={onClose} fullWidth>
-        <DialogTitle>
-          <Grid container alignItems="center" className={classes.noWrap}>
-            <Grid item className={classes.stretch}>
-              <Typography variant="subtitle1">Remove Liquidity</Typography>
-            </Grid>
-            <Grid item>
-              <IconButton onClick={onClose} edge="end">
-                <CloseRounded />
-              </IconButton>
-            </Grid>
+    const treasuries = [
+      { ...treasury_s, mint: { ...(treasury_s || {}).mint, ...mint_s } },
+      { ...treasury_a, mint: { ...(treasury_a || {}).mint, ...mint_a } },
+      { ...treasury_b, mint: { ...(treasury_b || {}).mint, ...mint_b } },
+    ];
+    const ratio = ssjs.div(ssjs.decimalize(amount, decimals), supply);
+
+    return <Dialog open={visible} onClose={onClose} fullWidth>
+      <DialogTitle>
+        <Grid container alignItems="center" className={classes.noWrap}>
+          <Grid item className={classes.stretch}>
+            <Typography variant="subtitle1">Remove Liquidity</Typography>
           </Grid>
-        </DialogTitle>
-        <DialogContent>
-          <Grid container justify="center">
-            <Grid item xs={12}>
-              <TextField
-                label="Amount"
-                variant="contained"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    <Typography variant="h2">90%</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Drain size={1} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Grid container>
-                      <Grid item xs={3}>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          fullWidth
-                        >
-                          <Typography color="primary">25%</Typography>
-                        </Button>
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          fullWidth
-                        >
-                          <Typography color="primary">50%</Typography>
-                        </Button>
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          fullWidth
-                        >
-                          <Typography color="primary">75%</Typography>
-                        </Button>
-                      </Grid>
-                      <Grid item xs={3}>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          fullWidth
-                        >
-                          <Typography color="primary">MAX</Typography>
-                        </Button>
-                      </Grid>
+          <Grid item>
+            <IconButton onClick={onClose} edge="end">
+              <CloseRounded />
+            </IconButton>
+          </Grid>
+        </Grid>
+      </DialogTitle>
+      <DialogContent>
+        <Grid container justify="center">
+          <Grid item xs={12}>
+            <TextField
+              label="Amount"
+              variant="contained"
+              placeholder="0"
+              value={amount}
+              onChange={this.onAmount}
+              helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals))} LPT`}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Paper className={classes.paper}>
+              <Grid container>
+                <Grid item xs={12}>
+                  <Typography variant="h2">{utils.prettyNumber(ratio * 100)}%</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Drain size={1} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container>
+                    <Grid item xs={3}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        fullWidth
+                      >
+                        <Typography color="primary">25%</Typography>
+                      </Button>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        fullWidth
+                      >
+                        <Typography color="primary">50%</Typography>
+                      </Button>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        fullWidth
+                      >
+                        <Typography color="primary">75%</Typography>
+                      </Button>
+                    </Grid>
+                    <Grid item xs={3}>
+                      <Button
+                        variant="contained"
+                        color="secondary"
+                        fullWidth
+                      >
+                        <Typography color="primary">MAX</Typography>
+                      </Button>
                     </Grid>
                   </Grid>
                 </Grid>
-              </Paper>
-            </Grid>
-            <Grid item>
-              <IconButton size="small">
-                <ArrowDownwardRounded />
-              </IconButton>
-            </Grid>
-            <Grid item xs={12}>
-              <Paper className={classes.paper}>
-                <Grid container>
-                  <Grid item xs={12}>
-
-                  </Grid>
-                </Grid>
-              </Paper>
-            </Grid>
-            <Grid item xs={12}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                endIcon={loading ? <CircularProgress size={17} /> : null}
-                disabled={loading}
-                onClick={this.removeLiquidity}
-                fullWidth
-              >
-                <Typography>Withdraw</Typography>
-              </Button>
-            </Grid>
-            <Grid item xs={12} />
+              </Grid>
+            </Paper>
           </Grid>
-        </DialogContent>
-      </Dialog>
-
-      <Grid item xs={12}>
-        <Typography variant="h6">Pool info</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <PoolSelection onChange={this.onPoolData} />
-      </Grid>
-      <Grid item xs={6}>
-        <TextField
-          label="LPT Amount"
-          variant="outlined"
-          value={amount}
-          onChange={this.onAmount}
-          disabled={!is_initialized}
-          InputProps={{
-            endAdornment: <Tooltip title="Maximum amount">
-              <IconButton edge="end" onClick={this.onMax}>
-                <OfflineBoltRounded />
-              </IconButton>
-            </Tooltip>
-          }}
-          helperText={<span>Available LPT: <strong>{utils.prettyNumber(ssjs.undecimalize(lpt, 9))}</strong></span>}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Grid container spacing={2} className={classes.action}>
+          <Grid item>
+            <IconButton size="small">
+              <ArrowDownwardRounded />
+            </IconButton>
+          </Grid>
           <Grid item xs={12}>
-            <Grid container justify="space-around" spacing={2}>
-              <Grid item>
-                <Typography variant="h6" align="center"><span className={classes.subtitle}>Reserve</span> {utils.prettyNumber(ssjs.undecimalize(reserve, decimals))}</Typography>
+            <Paper className={classes.paper}>
+              <Grid container>
+                {treasuries.map((treasuryData, index) => {
+                  const { amount: reserve, mint } = treasuryData;
+                  const { icon, symbol, decimals } = mint;
+                  return <Grid item key={index} xs={12}>
+                    <Grid container alignItems="center">
+                      <Grid item xs={6}>
+                        <Grid container alignItems="center" className={classes.noWrap}>
+                          <Grid item>
+                            <MintAvatar icon={icon} />
+                          </Grid>
+                          <Grid item >
+                            <Typography>{symbol}</Typography>
+                          </Grid>
+                        </Grid>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography>{utils.prettyNumber(ratio * ssjs.undecimalize(reserve, decimals))}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                })}
               </Grid>
-              <Grid item>
-                <Typography variant="h6" align="center"><span className={classes.subtitle}>Value</span> {utils.prettyNumber(ssjs.undecimalize(value, 9))}</Typography>
-              </Grid>
-            </Grid>
+            </Paper>
           </Grid>
-          {txId ? <Grid item xs={12}>
-            <Grid container spacing={2}>
-              <Grid item xs={8}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  href={utils.explorer(txId)}
-                  target="_blank"
-                  rel="noopener"
-                  startIcon={<PublicRounded />}
-                  fullWidth
-                >
-                  <Typography>Explore</Typography>
-                </Button>
-              </Grid>
-              <Grid item xs={4}>
-                <Button
-                  color="secondary"
-                  onClick={this.onClear}
-                  endIcon={<ArrowForwardRounded />}
-                  fullWidth
-                >
-                  <Typography>Done</Typography>
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid> : <Grid item xs={12}>
+          <Grid item xs={12}>
+            <Drain size={1} />
+          </Grid>
+          <Grid item xs={12}>
             <Button
               variant="contained"
               color="primary"
-              startIcon={loading ? <CircularProgress size={17} /> : <RemoveCircleOutlineRounded />}
+              size="large"
+              endIcon={loading ? <CircularProgress size={17} /> : null}
+              disabled={loading}
               onClick={this.removeLiquidity}
-              disabled={loading || !is_initialized}
               fullWidth
             >
-              <Typography variant="body2">Remove</Typography>
+              <Typography>Withdraw</Typography>
             </Button>
-          </Grid>}
+          </Grid>
+          <Grid item xs={12} />
         </Grid>
-      </Grid>
-    </Grid>
+      </DialogContent>
+    </Dialog>
   }
 }
 
@@ -354,6 +283,19 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   unlockWallet, updateWallet,
   getLPTData,
 }, dispatch);
+
+RemoveLiquidity.defaultProps = {
+  visible: false,
+  data: {},
+  onClose: () => { },
+}
+
+RemoveLiquidity.propTypes = {
+  visible: PropTypes.bool,
+  data: PropTypes.object,
+  onClose: PropTypes.func,
+}
+
 
 export default withRouter(connect(
   mapStateToProps,

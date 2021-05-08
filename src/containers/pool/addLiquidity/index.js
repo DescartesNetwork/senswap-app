@@ -235,7 +235,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 AddLiquidity.defaultProps = {
-  visible: true,
+  visible: false,
   data: {},
   onClose: () => { },
 }

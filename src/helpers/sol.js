@@ -60,7 +60,6 @@ SOL.newAccount = (mintAddress) => {
     }).then(txId => {
       return resolve({ address, txId });
     }).catch(er => {
-      console.log(er)
       return reject(er);
     });
   });

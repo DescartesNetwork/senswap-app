@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Link as RouterLink, Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -10,15 +11,11 @@ import Drain from 'senswap-ui/drain';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-
-import { BaseCard } from 'components/cards';
+import PrivateRoute from 'containers/auth/privateRoute';
 import Header from './header';
 import FeaturedPool from './featuredPool';
 import LatestPromotion from './latestPromotion';
 import MyPool from './myPool';
-import RemoveLiquidity from './removeLiquidity';
 
 import styles from './styles';
 
@@ -48,14 +45,11 @@ class Pool extends Component {
     return this.setState({ route })
   }
 
-  onRoute = (e, route) => {
-    return this.props.history.push(route);
-  }
-
   render() {
-    const { classes } = this.props;
-    const { location: { pathname } } = this.props;
+    const { classes, wallet: { user: { address } } } = this.props;
     const { route } = this.state;
+
+    const isLoggedIn = ssjs.isAddress(address);
 
     return <Grid container justify="center">
       <Grid item xs={12}>
@@ -86,6 +80,7 @@ class Pool extends Component {
               component={RouterLink}
               color={route === 'my-pool' ? 'primary' : 'default'}
               to='/pool/my-pool'
+              disabled={!isLoggedIn}
             >
               <Typography>My Pool</Typography>
             </Button>
@@ -96,32 +91,8 @@ class Pool extends Component {
         <Switch>
           <Redirect exact from="/pool" to="/pool/latest-promotion" />
           <Route exact path='/pool/latest-promotion' component={LatestPromotion} />
-          <Route exact path='/pool/my-pool' component={MyPool} />
-          <Route exact path='/pool/remove-liquidity' component={RemoveLiquidity} />
+          <PrivateRoute exact path='/pool/my-pool' component={MyPool} skipRole />
         </Switch>
-      </Grid>
-      <Grid item xs={12} md={8} lg={6}>
-        <BaseCard >
-          <Grid container>
-            <Grid item xs={12}>
-              <Tabs
-                value={pathname}
-                onChange={this.onRoute}
-                className={classes.navigation}
-                variant="fullWidth"
-              >
-                <Tab
-                  classes={{
-                    root: classes.tab,
-                    selected: classes.selectedTab,
-                  }}
-                  label="Withdraw Liquidity"
-                  value="/pool/remove-liquidity"
-                />
-              </Tabs>
-            </Grid>
-          </Grid>
-        </BaseCard>
       </Grid>
     </Grid>
   }
@@ -129,6 +100,7 @@ class Pool extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

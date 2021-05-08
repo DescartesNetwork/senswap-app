@@ -9,7 +9,8 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import { CardPool } from 'senswap-ui/card';
 
-import { } from 'senswap-ui/icons';
+import AddLiquidity from '../addLiquidity';
+import RemoveLiquidity from '../removeLiquidity';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -22,6 +23,10 @@ class MyPool extends Component {
     super();
 
     this.state = {
+      visibleDeposit: false,
+      visibleWithdraw: false,
+      poolData: {},
+      accountData: {},
       data: []
     }
   }
@@ -51,16 +56,30 @@ class MyPool extends Component {
     });
   }
 
-  onDeposit = () => { }
+  onOpenDeposit = (index) => {
+    const { data } = this.state;
+    const poolData = { ...data[index].pool }
+    return this.setState({ poolData, visibleDeposit: true });
+  }
+  onCloseDeposit = () => {
+    return this.setState({ poolData: {}, visibleDeposit: false });
+  }
 
-  onWithdraw = () => { }
+  onOpenWithdraw = (index) => {
+    const { data } = this.state;
+    const accountData = { ...data[index] }
+    return this.setState({ accountData, visibleWithdraw: true });
+  }
+  onCloseWithdraw = () => {
+    return this.setState({ accountData: {}, visibleWithdraw: false });
+  }
 
   render() {
     // const { classes } = this.props;
-    const { data } = this.state;
+    const { poolData, accountData, visibleDeposit, visibleWithdraw, data } = this.state;
 
     return <Grid container spacing={2}>
-      {data.map((lptData, i) => {
+      {data.map((lptData, index) => {
         const {
           amount, mint: { decimals },
           pool: {
@@ -71,16 +90,18 @@ class MyPool extends Component {
         } = lptData;
         const icons = [iconA, iconB, iconS];
         const symbols = [symbolA, symbolB, symbolS];
-        return <Grid item key={i} xs={12} md={6} lg={4}>
+        return <Grid item key={index} xs={12} md={6} lg={4}>
           <CardPool
             stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals))}
             icons={icons}
             symbols={symbols}
-            onDeposit={this.onDeposit}
-            onWithdraw={this.onWithdraw}
+            onDeposit={() => this.onOpenDeposit(index)}
+            onWithdraw={() => this.onOpenWithdraw(index)}
           />
         </Grid>
       })}
+      <AddLiquidity data={poolData} visible={visibleDeposit} onClose={this.onCloseDeposit} />
+      <RemoveLiquidity data={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
     </Grid>
   }
 }
