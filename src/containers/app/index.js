@@ -18,7 +18,6 @@ import Swap from 'containers/swap';
 import Pool from 'containers/pool';
 import Faucet from 'containers/faucet';
 import Issuer from 'containers/issuer';
-import Audit from 'containers/audit';
 import DAO from 'containers/dao';
 
 // CSS
@@ -53,7 +52,6 @@ class App extends Component {
                     <Route path='/pool' component={Pool} />
                     <Route exact path='/faucet' component={Faucet} />
                     <PrivateRoute path='/issuer' component={Issuer} />
-                    <PrivateRoute path='/audit' component={Audit} />
                     <PrivateRoute path='/dao' component={DAO} />
                     <Route path='/wallet' component={Wallet} />
                     <Route exact path='*' component={NotFound} />

@@ -1,7 +1,6 @@
 import ssjs from 'senswapjs';
 
 import configs from 'configs';
-import storage from 'helpers/storage';
 import session from 'helpers/session';
 import api from 'helpers/api';
 
@@ -16,8 +15,6 @@ const defaultState = {
   user: {
     address: null,
     role: 'user',
-    mints: [],
-    pools: [],
   },
   accounts: [],
   lpts: [],
@@ -120,45 +117,14 @@ export const setWallet = (wallet) => {
         return api.get(base + '/user', { address: data.user.address });
       }).then(re => {
         // Only add an account to db when its lamports > 0
-        if (re.data || data.lamports <= 0) return Promise.resolve(re);
+        if (!re.data || data.lamports <= 0) return Promise.resolve(re);
         return api.post(base + '/user', { user: { address: data.user.address } });
-      }).then(re => {
+      }).then(({ data: re }) => {
+        data.user = { ...data.user, ...re }
         dispatch({ type: SET_WALLET_OK, data });
         return resolve(data);
       }).catch(er => {
         dispatch({ type: SET_WALLET_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
-    });
-  }
-}
-
-/**
- * Get wallet
- */
-export const GET_WALLET = 'GET_WALLET';
-export const GET_WALLET_OK = 'GET_WALLET_OK';
-export const GET_WALLET_FAIL = 'GET_WALLET_FAIL';
-
-export const getWallet = () => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: GET_WALLET });
-
-      const address = storage.get('address');
-      if (!address) {
-        const er = 'Already disconnected';
-        dispatch({ type: GET_WALLET_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const { api: { base } } = configs;
-      return api.get(base + '/user', { address }).then(({ data: user }) => {
-        const data = { user };
-        dispatch({ type: GET_WALLET_OK, data });
-        return resolve(data);
-      }).catch(er => {
-        dispatch({ type: GET_WALLET_FAIL, reason: er.toString() });
         return reject(er.toString());
       });
     });
@@ -209,9 +175,9 @@ export const unsetWallet = () => {
         return reject(er);
       }
 
-      // Local storage
-      storage.clear('WalletType');
-      storage.clear('SecretKey');
+      // Session storage
+      session.clear('WalletType');
+      session.clear('SecretKey');
 
       const data = { ...defaultState };
       dispatch({ type: UNSET_WALLET_OK, data });
@@ -251,7 +217,7 @@ export const unlockWallet = () => {
           dispatch({ type: UNLOCK_WALLET_FAIL, data: { ...EMPTY_DATA }, reason: er });
           return reject(er);
         }
-        const keystore = storage.get('keystore');
+        const keystore = session.get('keystore');
         const account = ssjs.fromKeystore(keystore, password);
         if (!account) {
           er = 'Incorrect password';
@@ -292,10 +258,6 @@ export default (state = defaultState, action) => {
     case SET_WALLET_OK:
       return { ...state, ...action.data };
     case SET_WALLET_FAIL:
-      return { ...state, ...action.data };
-    case GET_WALLET_OK:
-      return { ...state, ...action.data };
-    case GET_WALLET_FAIL:
       return { ...state, ...action.data };
     case UPDATE_WALLET_OK:
       return { ...state, ...action.data };

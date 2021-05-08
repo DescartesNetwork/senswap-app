@@ -72,7 +72,7 @@ class LoginDialog extends Component {
                 <Typography variant="subtitle1">Other methods</Typography>
               </Grid>
               <Grid item>
-                <Tooltip title="Caution! This format is not recommended due to a lack of cryptographical protection. By switching the button, you agree that you will use this function at your own risk.">
+                <Tooltip title="Caution! These methods is not recommended due to lack of cryptographical protection. By switching the button, you agree that you will use this function at your own risk.">
                   <Chip
                     icon={<ErrorRounded className={classes.warning} />}
                     label="Caution!"

@@ -9,7 +9,7 @@ import { withStyles } from 'senswap-ui/styles';
 import LoginDialog from './loginDialog';
 
 import styles from './styles';
-import storage from 'helpers/storage';
+import session from 'helpers/session';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { setWallet, updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
@@ -41,18 +41,19 @@ class WalletPlugin extends Component {
         if (er) return;
         return updateWallet({ lamports: re });
       });
-      return unsetLoading();
     }).catch(er => {
       return setError(er);
+    }).finally(() => {
+      return unsetLoading();
     });
   }
 
   reconnect = () => {
     const types = ['SecretKey', 'Keystore', 'Coin98'];
-    const walletType = storage.get('WalletType');
+    const walletType = session.get('WalletType');
     if (!types.includes(walletType)) return null;
-    if (walletType === 'SecretKey') return new SecretKeyWallet(storage.get('SecretKey'));
-    if (walletType === 'Keystore') return new SecretKeyWallet(storage.get('SecretKey'));
+    if (walletType === 'SecretKey') return new SecretKeyWallet(session.get('SecretKey'));
+    if (walletType === 'Keystore') return new SecretKeyWallet(session.get('SecretKey'));
     if (walletType === 'Coin98') return new Coin98Wallet();
     return null;
   }

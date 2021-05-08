@@ -30,7 +30,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "senswap-ui": "^0.2.44",
-    "senswapjs": "^1.1.18",
+    "senswapjs": "^1.1.19",
     "serve": "^11.3.2",
     "soprox-abi": "0.0.10"
   },

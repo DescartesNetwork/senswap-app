@@ -44,10 +44,6 @@ class CreateAccount extends Component {
     this.splt = window.senswap.splt;
   }
 
-  componentDidMount() {
-    this.genAccountAddress();
-  }
-
   componentDidUpdate(prevProps) {
     const { visible: prevVisible } = prevProps;
     const { visible } = this.props;

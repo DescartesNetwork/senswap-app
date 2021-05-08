@@ -9,30 +9,22 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import { IconButton } from 'senswap-ui/button';
 import Tooltip from 'senswap-ui/tooltip';
-import CircularProgress from 'senswap-ui/circularProgress';
+import TextField from 'senswap-ui/textField';
 
-import TextField from '@material-ui/core/TextField';
-import Collapse from '@material-ui/core/Collapse';
-
-import { HelpOutlineRounded, VisibilityRounded } from 'senswap-ui/icons';
+import { HelpOutlineRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 
-const EMPTY = {
-  loading: false,
-}
 
 class MintAddress extends Component {
   constructor() {
     super();
 
     this.state = {
-      ...EMPTY,
       prefix: '',
       address: '',
       secretKey: '',
-      advance: false,
     }
   }
 
@@ -48,32 +40,25 @@ class MintAddress extends Component {
     const { prefix } = this.state;
     const { setError, onChange } = this.props;
     if (this.cancel) this.cancel();
-    return this.setState({ loading: true }, () => {
-      onChange(null); // Clear previous address
-      return ssjs.createPrefixedAccount(prefix, (address, cancel) => {
-        this.cancel = cancel;
-        return this.setState({ address });
-      }).then(account => {
-        const address = account.publicKey.toBase58();
-        const secretKey = Buffer(account.secretKey).toString('hex');
-        return this.setState({ ...EMPTY, address, secretKey }, () => {
-          return onChange(secretKey);
-        });
-      }).catch(er => {
-        return setError(er);
+    onChange(null); // Clear previous address
+    return ssjs.createPrefixedAccount(prefix, (address, cancel) => {
+      this.cancel = cancel;
+      return this.setState({ address });
+    }).then(account => {
+      const address = account.publicKey.toBase58();
+      const secretKey = Buffer(account.secretKey).toString('hex');
+      return this.setState({ address, secretKey }, () => {
+        return onChange(secretKey);
       });
+    }).catch(er => {
+      return setError(er);
     });
   }
 
   onPrefix = (e) => {
     const prefix = e.target.value || '';
     if (prefix.length > 3) return;
-    return this.setState({ prefix, ...EMPTY }, this.onAddress);
-  }
-
-  onAdvance = () => {
-    const { advance } = this.state;
-    return this.setState({ advance: !advance });
+    return this.setState({ prefix }, this.onAddress);
   }
 
   onSecretKey = (e) => {
@@ -88,7 +73,7 @@ class MintAddress extends Component {
 
   render() {
     // const { classes } = this.props;
-    const { loading, prefix, address, advance, secretKey } = this.state;
+    const { prefix, address, secretKey } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={4}>
@@ -112,30 +97,17 @@ class MintAddress extends Component {
           label="Address"
           variant="outlined"
           value={address}
-          InputProps={{
-            endAdornment: loading ? <IconButton edge="end">
-              <CircularProgress size={17} />
-            </IconButton> : <IconButton edge="end" onClick={this.onAdvance}>
-              <VisibilityRounded />
-            </IconButton>
-          }}
           fullWidth
         />
       </Grid>
       <Grid item xs={12}>
-        <Collapse in={advance}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="Secret Key"
-                variant="outlined"
-                onChange={this.onSecretKey}
-                value={secretKey}
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-        </Collapse>
+        <TextField
+          label="Secret Key"
+          variant="outlined"
+          onChange={this.onSecretKey}
+          value={secretKey}
+          fullWidth
+        />
       </Grid>
     </Grid>
   }

@@ -27,7 +27,7 @@ import configs from 'configs';
 
 /**
  * Need to call this function at the very first moment of application
- * to avoid unexpected exception
+ * to avoid unexpected exceptions
  */
 export const configSenWallet = () => {
   // Need it cause https://github.com/GoogleChromeLabs/jsbi/issues/30

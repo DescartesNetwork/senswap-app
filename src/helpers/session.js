@@ -1,30 +1,36 @@
-import ssjs from 'senswapjs';
-
-/**
- * This sessionStorage have to be encrypted
- * This is not secure in term of cryptography but help to blind the tamperer
- */
+const KEY = 'senswap';
 const db = window.sessionStorage;
 
 const session = {}
 
+session.convert = (value) => {
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    return false;
+  }
+}
+
 session.set = (key, value) => {
-  const hash = ssjs.crypto.hash(key);
-  const cypher = ssjs.crypto.encrypt(key, value + hash);
-  return db.setItem(hash, cypher);
+  let data = session.convert(db.getItem(KEY));
+  if (!data || typeof data !== 'object') {
+    data = {}
+    data[key] = value;
+  }
+  else {
+    data[key] = value;
+  }
+  db.setItem(KEY, JSON.stringify(data));
 }
 
 session.get = (key) => {
-  const hash = ssjs.crypto.hash(key);
-  const cypher = db.getItem(hash);
-  const plain = ssjs.crypto.decrypt(key, cypher);
-  const data = plain.replace(hash, '');
-  return data;
+  let data = session.convert(db.getItem(KEY));
+  if (!data || typeof data !== 'object') return null;
+  return data[key];
 }
 
 session.clear = (key) => {
-  const hash = ssjs.crypto.hash(key);
-  return session.set(hash, null);
+  session.set(key, null);
 }
 
 export default session;

@@ -10,9 +10,7 @@ import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 import Link from 'senswap-ui/link';
 import CircularProgress from 'senswap-ui/circularProgress';
-
-import TextField from '@material-ui/core/TextField';
-import Collapse from '@material-ui/core/Collapse';
+import TextField from 'senswap-ui/textField';
 
 import { FlightTakeoffRounded } from 'senswap-ui/icons';
 
@@ -102,27 +100,11 @@ class InitializeMint extends Component {
 
   render() {
     const { classes } = this.props;
-    const { ui: { advance } } = this.props;
     const { loading, txId, supply, decimals } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
         <Typography variant="h6">Token Info</Typography>
-      </Grid>
-      <Grid item xs={12}>
-        <Collapse in={advance}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                label="SPL Token Address"
-                variant="outlined"
-                value={this.splt.spltProgramId.toBase58()}
-                inputProps={{ readOnly: true }}
-                fullWidth
-              />
-            </Grid>
-          </Grid>
-        </Collapse>
       </Grid>
       <Grid item xs={12}>
         <MintAddress onChange={this.onMint} />

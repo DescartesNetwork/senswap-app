@@ -18,7 +18,7 @@ import Fab from '@material-ui/core/Fab';
 
 import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
-  AccountBalanceWalletRounded, AccountBalanceRounded, VerifiedUserRounded,
+  AccountBalanceWalletRounded, AccountBalanceRounded,
   GroupWorkRounded, ColorizeRounded, DescriptionRounded,
   DonutLargeRounded, MenuOpenRounded, MenuRounded
 } from 'senswap-ui/icons';
@@ -172,17 +172,6 @@ class Sidebar extends Component {
                     <AccountBalanceRounded />
                   </ListItemIcon>
                   <ListItemText primary="Issuer" />
-                </ListItem>
-                <ListItem
-                  button
-                  component={RouterLink}
-                  to="/audit"
-                  className={route === 'audit' ? classes.listItemActive : classes.listItem}
-                >
-                  <ListItemIcon className={classes.listItemIcon}>
-                    <VerifiedUserRounded />
-                  </ListItemIcon>
-                  <ListItemText primary="Audit" />
                 </ListItem>
                 <ListItem
                   button
