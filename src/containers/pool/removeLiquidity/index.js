@@ -65,7 +65,6 @@ class RemoveLiquidity extends Component {
     return new Promise((resolve, reject) => {
       if (!mintAddress) return reject('Unknown token');
       const { wallet: { accounts }, updateWallet } = this.props;
-
       let accountAddress = null;
       return sol.newAccount(mintAddress).then(({ address }) => {
         accountAddress = address;

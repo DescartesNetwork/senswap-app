@@ -6,4 +6,7 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
+  opticalCorrectionBrand: {
+    marginLeft: -theme.spacing(1 / 2)
+  },
 });

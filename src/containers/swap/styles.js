@@ -6,6 +6,9 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
+  opticalCorrectionBrand: {
+    marginLeft: -theme.spacing(1 / 2)
+  },
   paper: {
     borderRadius: theme.shape.borderRadius * 2,
     padding: theme.spacing(4),

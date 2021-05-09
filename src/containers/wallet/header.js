@@ -8,6 +8,7 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
+import Brand from 'senswap-ui/brand';
 
 import { PowerSettingsNewRounded } from 'senswap-ui/icons';
 
@@ -28,14 +29,17 @@ class Wallet extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { wallet: { user: { address } } } = this.props;
+    const { classes, wallet: { user: { address } }, ui: { leftbar } } = this.props;
 
-    return <Grid container>
+    return <Grid container spacing={0}>
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
-            <Typography variant="h4">Wallet</Typography>
+            {!leftbar ? <Grid container>
+              <Grid item className={classes.opticalCorrectionBrand}>
+                <Brand />
+              </Grid>
+            </Grid> : <Typography>SenSwap</Typography>}
           </Grid>
           {ssjs.isAddress(address) ? <Grid item>
             <Button
@@ -46,6 +50,9 @@ class Wallet extends Component {
             </Button>
           </Grid> : null}
         </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="h4">Wallet</Typography>
       </Grid>
     </Grid>
   }

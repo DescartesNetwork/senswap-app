@@ -41,10 +41,8 @@ class Swap extends Component {
       accountData: {},
       mintData: {},
       bidValue: '',
-      bidAmount: null,
       askValue: '',
-      askAmount: null,
-      poolData: {},
+      hopData: [],
     }
 
     this.swap = window.senswap.swap;
@@ -108,18 +106,14 @@ class Swap extends Component {
           ssjs.decimalize(bidValue, bidDecimals),
           srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
       }).then(data => {
-        const [{ askAmount, bidAmount, ratio, slippage, poolData }] = data;
-        if (inverse) return this.setState({
-          loading: false,
-          bidAmount, askAmount,
-          bidValue: ssjs.undecimalize(bidAmount, bidDecimals),
-          poolData,
-        });
-        return this.setState({
-          loading: false,
-          bidAmount, askAmount,
-          askValue: ssjs.undecimalize(askAmount, askDecimals),
-          poolData,
+        let bidAmount = null;
+        let askAmount = null;
+        if (data.length === 1) [{ askAmount, bidAmount }] = data;
+        else if (data.length === 2) [{ bidAmount }, { askAmount }] = data;
+        else throw new Error('Cannot find available pools');
+        return this.setState({ loading: false, hopData: data }, () => {
+          if (inverse) return this.setState({ bidValue: ssjs.undecimalize(bidAmount, bidDecimals) });
+          return this.setState({ askValue: ssjs.undecimalize(askAmount, askDecimals) });
         });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
@@ -171,7 +165,6 @@ class Swap extends Component {
     return new Promise((resolve, reject) => {
       if (!mintAddress) return reject('Unknown token');
       const { wallet: { accounts }, updateWallet } = this.props;
-
       let accountAddress = null;
       return sol.newAccount(mintAddress).then(({ address }) => {
         accountAddress = address;
@@ -188,9 +181,9 @@ class Swap extends Component {
 
   executeSwap = () => {
     const { setError } = this.props;
-    const { accountData, mintData, bidAmount, poolData } = this.state;
+    const { accountData, mintData, bidAmount, hopData } = this.state;
     const { address: srcAddress } = accountData;
-    const { address: poolAddress } = poolData;
+    const [{ address: poolAddress }] = hopData;
     const { address: dstMintAddress } = mintData || {}
     this.setState({ loading: true }, () => {
       return this.onAutogenDestinationAddress(dstMintAddress).then(dstAddress => {
@@ -234,7 +227,7 @@ class Swap extends Component {
     const {
       visibleAccountSelection, visibleMintSelection,
       accountData: { amount: balance, mint: bidMintData }, mintData: askMintData,
-      bidValue, askValue,
+      bidValue, askValue, hopData,
     } = this.state;
 
     const { icon: bidIcon, symbol: bidSymbol, decimals } = bidMintData || {};
@@ -352,6 +345,55 @@ class Swap extends Component {
                     <Grid item xs={12} />
                     <Grid item xs={12}>
                       {this.renderAction()}
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Drain />
+                    </Grid>
+                    <Grid item xs={12}>
+                      {hopData.map((data, index) => {
+                        const {
+                          srcMintAddress, bidAmount,
+                          dstMintAddress, askAmount,
+                          fee, ratio, slippage,
+                        } = data;
+                        console.log(data)
+                        return <Grid container key={index}>
+                          <Grid item xs={12}>
+                            <Typography>Hop #{index}</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Typography>Source Mint Address</Typography>
+                            <Typography>{srcMintAddress}</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Typography>Destination Mint Address</Typography>
+                            <Typography>{dstMintAddress}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography>Bid Amount</Typography>
+                            <Typography>{ssjs.undecimalize(bidAmount, 9)}</Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography>Ask Amount</Typography>
+                            <Typography>{ssjs.undecimalize(askAmount, 9)}</Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography>Fee</Typography>
+                            <Typography>{ssjs.undecimalize(fee, 9)}</Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography>Ratio</Typography>
+                            <Typography>{ratio}</Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <Typography>Slippage</Typography>
+                            <Typography>{slippage}</Typography>
+                          </Grid>
+                          <Grid item xs={12}>
+                            <Divider />
+                          </Grid>
+                        </Grid>
+                      })}
                     </Grid>
                     <Grid item xs={12}>
                       <Drain />

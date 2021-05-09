@@ -6,6 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
+import Brand from 'senswap-ui/brand';
 
 import { WalletButton } from 'containers/wallet';
 
@@ -26,14 +27,17 @@ class Wallet extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { wallet: { user: { address } } } = this.props;
+    const { classes, wallet: { user: { address } }, ui: { leftbar } } = this.props;
 
     return <Grid container spacing={0}>
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
-            <Typography>SenSwap</Typography>
+            {!leftbar ? <Grid container>
+              <Grid item className={classes.opticalCorrectionBrand}>
+                <Brand />
+              </Grid>
+            </Grid> : <Typography>SenSwap</Typography>}
           </Grid>
           {address ? <Grid item>
             <WalletButton />
@@ -43,7 +47,7 @@ class Wallet extends Component {
       <Grid item xs={12}>
         <Typography variant="h4">Swap</Typography>
       </Grid>
-    </Grid>
+    </Grid >
   }
 }
 

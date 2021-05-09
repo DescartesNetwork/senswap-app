@@ -20,6 +20,7 @@ import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
 import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
@@ -46,7 +47,8 @@ class Selection extends Component {
   fetchData = () => {
     const {
       wallet: { user: { address }, lamports, accounts },
-      solana, getAccountData } = this.props;
+      solana, lpt, getAccountData
+    } = this.props;
 
     const solAccount = {
       address,
@@ -61,13 +63,26 @@ class Selection extends Component {
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
+    let accountData = [];
     return this.setState({ loading: true }, () => {
       return accounts.each(accountAddress => {
         return getAccountData(accountAddress);
       }, { skipError: true, skipIndex: true }).then(data => {
+        accountData = data;
+        return Promise.all(accountData.map(({ mint }) => {
+          const {
+            mint_authority: mintAuthorityAddress,
+            freeze_authority: freezeAuthorityAddress,
+          } = mint || {};
+          if (lpt) return false;
+          return sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
+        }));
+      }).then(flags => {
+        // Filter lpt accounts
+        accountData = accountData.filter((_, index) => !flags[index]);
         // Add SOL also
-        if (solana) data.unshift(solAccount);
-        return this.setState({ data, searchedData: data, loading: false });
+        if (solana) accountData.unshift(solAccount);
+        return this.setState({ data: accountData, searchedData: accountData, loading: false });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
           return setError(er);
@@ -187,6 +202,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 Selection.defaultProps = {
   solana: true,
+  lpt: false,
   visible: false,
   onChange: () => { },
   onClose: () => { },
@@ -194,6 +210,7 @@ Selection.defaultProps = {
 
 Selection.propTypes = {
   solana: PropTypes.bool,
+  lpt: PropTypes.bool,
   visible: PropTypes.bool,
   onChange: PropTypes.func,
   onClose: PropTypes.func,
