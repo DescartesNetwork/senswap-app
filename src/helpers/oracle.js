@@ -29,7 +29,7 @@ Oracle.curve = (bidAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolD
       return reject(er);
     });
     // Routing - Shared SEN
-    return Oracle.routingCurve(
+    return Oracle._routingCurve(
       bidAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData
     ).then(data => {
       return resolve(data);
@@ -60,7 +60,7 @@ Oracle.inverseCurve = (askAmount, srcMintAddress, bidPoolData, dstMintAddress, a
       return reject(er);
     });
     // Routing - Shared SEN
-    return Oracle.inverseRoutingCurve(
+    return Oracle._inverseRoutingCurve(
       askAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData
     ).then(data => {
       return resolve(data);
@@ -86,8 +86,7 @@ Oracle._directCurve = (bidAmount, srcMintAddress, dstMintAddress, poolData) => {
     const { amount: bidReserve } = Oracle._parseTreasury(srcMintAddress, poolData);
     const { amount: askReserve } = Oracle._parseTreasury(dstMintAddress, poolData);
 
-    if (!bidReserve) return reject('Outdated bid pool');
-    if (!askReserve) return reject('Outdated ask pool');
+    if (!bidReserve || !askReserve) return reject('Outdated pool');
 
     // Fee
     const { sol: { senAddress } } = configs;
@@ -123,8 +122,7 @@ Oracle._inverseDirectCurve = (askAmount, srcMintAddress, dstMintAddress, poolDat
     const { amount: bidReserve } = Oracle._parseTreasury(srcMintAddress, poolData);
     const { amount: askReserve } = Oracle._parseTreasury(dstMintAddress, poolData);
 
-    if (!bidReserve) return reject('Outdated bid pool');
-    if (!askReserve) return reject('Outdated ask pool');
+    if (!bidReserve || !askReserve) return reject('Outdated pool');
     if (askAmount > askReserve) return reject('Cannot buy an amount larger than the available reserve');
 
     // Fee
@@ -156,29 +154,13 @@ Oracle._inverseDirectCurve = (askAmount, srcMintAddress, dstMintAddress, poolDat
   });
 }
 
-Oracle.hop = (bidAmount, bidData, askData, bidPrimaryData, askPrimaryData) => {
+Oracle._routingCurve = (bidAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData) => {
   return new Promise((resolve, reject) => {
-    const {
-      network: { primary: { address: bidPrimaryAddress } },
-      reserve: bidReserve, lpt: bidLPT
-    } = bidData;
-    const {
-      network: { primary: { address: askPrimaryAddress } },
-      reserve: askReserve, lpt: askLPT
-    } = askData;
-
-    if (!bidReserve || !bidLPT) return reject('Outdated bid pool');
-    if (!askReserve || !askLPT) return reject('Outdated ask pool');
-    if (bidPrimaryAddress !== askPrimaryAddress) return reject('Unsupported routing');
-    if (!bidPrimaryData) return reject('Invalid bid primary pool data');
-    if (!askPrimaryData) return reject('Invalid ask primary pool data');
-    if (bidPrimaryData.state !== 1) return reject('Frozen bid primary pool');
-    if (askPrimaryData.state !== 1) return reject('Frozen ask primary pool');
-
+    const { sol: { senAddress } } = configs;
     let data = [{}, {}];
-    return Oracle.pureCurve(bidAmount, bidData, bidPrimaryData, bidPrimaryData).then(([re]) => {
+    return Oracle._directCurve(bidAmount, srcMintAddress, senAddress, bidPoolData).then(([re]) => {
       data[0] = re;
-      return Oracle.pureCurve(re.askAmount, askPrimaryData, askData, askPrimaryData);
+      return Oracle._directCurve(re.askAmount, senAddress, dstMintAddress, askPoolData);
     }).then(([re]) => {
       data[1] = re;
       return resolve(data);
@@ -188,31 +170,15 @@ Oracle.hop = (bidAmount, bidData, askData, bidPrimaryData, askPrimaryData) => {
   });
 }
 
-Oracle.inverseHop = (askAmount, bidData, askData, bidPrimaryData, askPrimaryData) => {
+Oracle._inverseRoutingCurve = (askAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData) => {
   return new Promise((resolve, reject) => {
-    const {
-      network: { primary: { address: bidPrimaryAddress } },
-      reserve: bidReserve, lpt: bidLPT
-    } = bidData;
-    const {
-      network: { primary: { address: askPrimaryAddress } },
-      reserve: askReserve, lpt: askLPT
-    } = askData;
-
-    if (!bidReserve || !bidLPT) return reject('Outdated bid pool');
-    if (!askReserve || !askLPT) return reject('Outdated ask pool');
-    if (bidPrimaryAddress !== askPrimaryAddress) return reject('Unsupported routing');
-    if (!bidPrimaryData) return reject('Invalid bid primary pool data');
-    if (!askPrimaryData) return reject('Invalid ask primary pool data');
-    if (bidPrimaryData.state !== 1) return reject('Frozen bid primary pool');
-    if (askPrimaryData.state !== 1) return reject('Frozen ask primary pool');
-
+    const { sol: { senAddress } } = configs;
     let data = [{}, {}];
-    return Oracle.pureInverseCurve(askAmount, askPrimaryData, askData, askPrimaryData).then(([re]) => {
-      data[1] = re;
-      return Oracle.pureInverseCurve(re.bidAmount, bidData, bidPrimaryData, bidPrimaryData);
-    }).then(([re]) => {
+    return Oracle._inverseDirectCurve(askAmount, senAddress, dstMintAddress, askPoolData).then(([re]) => {
       data[0] = re;
+      return Oracle._inverseDirectCurve(re.bidAmount, srcMintAddress, senAddress, bidPoolData);
+    }).then(([re]) => {
+      data[1] = re;
       return resolve(data);
     }).catch(er => {
       return reject(er);
