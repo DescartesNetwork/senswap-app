@@ -13,6 +13,7 @@ import { IconButton } from 'senswap-ui/button';
 import TextField from 'senswap-ui/textField';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Table, { TableBody, TableCell, TableContainer, TableRow } from 'senswap-ui/table';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
 
@@ -28,6 +29,7 @@ class Selection extends Component {
     super();
 
     this.state = {
+      loading: false,
       search: '',
       data: [],
       searchedData: [],
@@ -59,14 +61,18 @@ class Selection extends Component {
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
-    return accounts.each(accountAddress => {
-      return getAccountData(accountAddress);
-    }, { skipError: true, skipIndex: true }).then(data => {
-      // Add SOL also
-      if (solana) data.unshift(solAccount);
-      return this.setState({ data, searchedData: data });
-    }).catch(er => {
-      return setError(er);
+    return this.setState({ loading: true }, () => {
+      return accounts.each(accountAddress => {
+        return getAccountData(accountAddress);
+      }, { skipError: true, skipIndex: true }).then(data => {
+        // Add SOL also
+        if (solana) data.unshift(solAccount);
+        return this.setState({ data, searchedData: data, loading: false });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
+      });
     });
   }
 
@@ -89,7 +95,7 @@ class Selection extends Component {
   render() {
     const { classes } = this.props;
     const { visible, onClose } = this.props;
-    const { search, searchedData } = this.state;
+    const { loading, search, searchedData } = this.state;
 
     return <Dialog open={visible} onClose={onClose} fullWidth>
       <DialogTitle>
@@ -124,13 +130,19 @@ class Selection extends Component {
             <TableContainer>
               <Table>
                 <TableBody>
-                  {!searchedData.length ? <TableRow>
+                  {loading ? <TableRow>
+                    <TableCell >
+                      <CircularProgress size={17} />
+                    </TableCell>
+                    <TableCell />
+                  </TableRow> : null}
+                  {!searchedData.length && !loading ? <TableRow>
                     <TableCell >
                       <Typography variant="caption">No token</Typography>
                     </TableCell>
                     <TableCell />
                   </TableRow> : null}
-                  {searchedData.map(accountData => {
+                  {!loading ? searchedData.map(accountData => {
                     const { address, amount, mint: { icon, name, symbol, decimals } } = accountData;
                     return <TableRow key={address} className={classes.tableRow} onClick={() => this.onChange(address)}>
                       <TableCell >
@@ -150,7 +162,7 @@ class Selection extends Component {
                         <Typography>{utils.prettyNumber(ssjs.undecimalize(amount, decimals))}</Typography>
                       </TableCell>
                     </TableRow>
-                  })}
+                  }) : null}
                 </TableBody>
               </Table>
             </TableContainer>

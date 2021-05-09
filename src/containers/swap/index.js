@@ -13,6 +13,7 @@ import Paper from 'senswap-ui/paper';
 import TextField from 'senswap-ui/textField';
 import Brand from 'senswap-ui/brand';
 import Divider from 'senswap-ui/divider';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
@@ -21,41 +22,192 @@ import Introduction from './introduction';
 import { MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
 
 import styles from './styles';
+import oracle from 'helpers/oracle';
 import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
+import { getPools, getPool } from 'modules/pool.reducer';
+import { getMintData, getPoolData } from 'modules/bucket.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 
 class Swap extends Component {
   constructor() {
     super();
 
     this.state = {
+      txId: '',
       visibleAccountSelection: false,
-      accountData: {},
       visibleMintSelection: false,
+      accountData: {},
       mintData: {},
+      bidValue: '',
+      bidAmount: null,
+      askValue: '',
+      askAmount: null,
+      poolData: {},
     }
+
+    this.swap = window.senswap.swap;
   }
 
-  onOpenAccountSelection = (index) => this.setState({ index, visibleAccountSelection: true });
+  _routing = (srcIds, dstIds) => {
+    for (let srcId of srcIds) {
+      for (let dstId of dstIds) {
+        if (srcId === dstId) return [srcId, dstId];
+      }
+    }
+    return [srcIds[0], dstIds[0]];
+  }
+
+  routing = (srcMintAddress, dstMintAddress) => {
+    return new Promise((resolve, reject) => {
+      if (!ssjs.isAddress(srcMintAddress)) return reject('Invalid source mint address');
+      if (!ssjs.isAddress(dstMintAddress)) return reject('Invalid destination mint address');
+      if (srcMintAddress === dstMintAddress) return reject('The pools is identical');
+
+      const { getPool, getPools, getPoolData } = this.props;
+      const srcCondition = { '$or': [{ mintS: srcMintAddress }, { mintA: srcMintAddress }, { mintB: srcMintAddress }] }
+      const dstCondition = { '$or': [{ mintS: dstMintAddress }, { mintA: dstMintAddress }, { mintB: dstMintAddress }] }
+      let srcIds = [];
+      let dstIds = [];
+      return getPools(srcCondition, -1, 0).then(data => {
+        if (!data.length) throw new Error('Cannot find available pools');
+        srcIds = data.map(({ _id }) => _id);
+        return getPools(dstCondition, -1, 0);
+      }).then(data => {
+        if (!data.length) throw new Error('Cannot find available pools');
+        dstIds = data.map(({ _id }) => _id);
+        const route = this._routing(srcIds, dstIds);
+        return route.each(_id => getPool(_id));
+      }).then(data => {
+        if (data.length < 2) throw new Error('Cannot find available pools');
+        return data.each(({ address }) => getPoolData(address));
+      }).then(data => {
+        if (data.length < 2) throw new Error('Cannot find available pools');
+        return resolve(data);
+      }).catch(er => {
+        return reject(er);
+      });
+    });
+  }
+
+  estimateState = (inverse = false) => {
+    const { setError } = this.props;
+    const { accountData, mintData, bidValue, askValue } = this.state;
+    const { mint } = accountData;
+    const { address: srcMintAddress, decimals: bidDecimals } = mint || {}
+    const { address: dstMintAddress, decimals: askDecimals } = mintData || {}
+    if (!ssjs.isAddress(srcMintAddress) || !ssjs.isAddress(dstMintAddress)) return;
+
+    return this.setState({ loading: true }, () => {
+      return this.routing(srcMintAddress, dstMintAddress).then(([bidPoolData, askPoolData]) => {
+        if (inverse) return oracle.inverseCurve(
+          ssjs.decimalize(askValue, askDecimals),
+          srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
+        return oracle.curve(
+          ssjs.decimalize(bidValue, bidDecimals),
+          srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
+      }).then(data => {
+        const [{ askAmount, bidAmount, ratio, slippage, poolData }] = data;
+        if (inverse) return this.setState({
+          loading: false,
+          bidAmount, askAmount,
+          bidValue: ssjs.undecimalize(bidAmount, bidDecimals),
+          poolData,
+        });
+        return this.setState({
+          loading: false,
+          bidAmount, askAmount,
+          askValue: ssjs.undecimalize(askAmount, askDecimals),
+          poolData,
+        });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
+      });
+    });
+  }
+
+  onOpenAccountSelection = () => this.setState({ visibleAccountSelection: true });
   onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
 
-  onOpenMintSelection = (index) => this.setState({ index, visibleMintSelection: true });
+  onOpenMintSelection = () => this.setState({ visibleMintSelection: true });
   onCloseMintSelection = () => this.setState({ visibleMintSelection: false });
 
   onAccountData = (accountData) => {
-    return this.setState({ accountData }, () => {
+    return this.setState({ accountData, bidValue: '', askValue: '' }, () => {
       return this.onCloseAccountSelection();
     });
   }
 
-  onMintData = (mintData) => {
-    return this.setState({ mintData }, () => {
-      return this.onCloseMintSelection();
+  onMintData = (data) => {
+    const { address: mintAddress } = data;
+    const { setError, getMintData } = this.props;
+    return getMintData(mintAddress).then(mintData => {
+      return this.setState({ mintData, bidValue: '', askValue: '' }, () => {
+        return this.onCloseMintSelection();
+      });
+    }).catch(er => {
+      return setError(er);
+    });
+  }
+
+  onBidValue = (e) => {
+    const bidValue = e.target.value || '';
+    return this.setState({ bidValue }, () => {
+      return this.estimateState();
+    });
+  }
+
+  onAskValue = (e) => {
+    const askValue = e.target.value || '';
+    return this.setState({ askValue }, () => {
+      return this.estimateState(true);
+    });
+  }
+
+  onAutogenDestinationAddress = (mintAddress) => {
+    return new Promise((resolve, reject) => {
+      if (!mintAddress) return reject('Unknown token');
+      const { wallet: { accounts }, updateWallet } = this.props;
+
+      let accountAddress = null;
+      return sol.newAccount(mintAddress).then(({ address }) => {
+        accountAddress = address;
+        const newAccounts = [...accounts];
+        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
+        return updateWallet({ accounts: newAccounts });
+      }).then(re => {
+        return resolve(accountAddress);
+      }).catch(er => {
+        return reject(er);
+      });
+    });
+  }
+
+  executeSwap = () => {
+    const { setError } = this.props;
+    const { accountData, mintData, bidAmount, poolData } = this.state;
+    const { address: srcAddress } = accountData;
+    const { address: poolAddress } = poolData;
+    const { address: dstMintAddress } = mintData || {}
+    this.setState({ loading: true }, () => {
+      return this.onAutogenDestinationAddress(dstMintAddress).then(dstAddress => {
+        return this.swap.swap(bidAmount, poolAddress, srcAddress, dstAddress, window.senswap.wallet);
+      }).then(txId => {
+        return this.setState({ loading: false, txId });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
+      });
     });
   }
 
   renderAction = () => {
     const { wallet: { user: { address } } } = this.props;
+    const { loading } = this.state;
     if (!ssjs.isAddress(address)) return <Button
       variant="contained"
       color="primary"
@@ -68,6 +220,9 @@ class Swap extends Component {
       variant="contained"
       color="primary"
       size="large"
+      disabled={loading}
+      startIcon={loading ? <CircularProgress size={17} /> : null}
+      onClick={this.executeSwap}
       fullWidth
     >
       <Typography>Swap</Typography>
@@ -77,8 +232,9 @@ class Swap extends Component {
   render() {
     const { classes, ui: { width } } = this.props;
     const {
-      visibleAccountSelection, accountData: { amount: balance, mint: bidMintData },
-      visibleMintSelection, mintData: askMintData
+      visibleAccountSelection, visibleMintSelection,
+      accountData: { amount: balance, mint: bidMintData }, mintData: askMintData,
+      bidValue, askValue,
     } = this.state;
 
     const { icon: bidIcon, symbol: bidSymbol, decimals } = bidMintData || {};
@@ -127,6 +283,9 @@ class Swap extends Component {
                       <TextField
                         variant="contained"
                         label="From"
+                        placeholder="0"
+                        value={bidValue}
+                        onChange={this.onBidValue}
                         InputProps={{
                           startAdornment: <Grid container className={classes.noWrap}>
                             <Grid item>
@@ -136,15 +295,21 @@ class Swap extends Component {
                                 endIcon={<ArrowDropDownRounded />}
                                 onClick={this.onOpenAccountSelection}
                               >
-                                <Typography>{bidSymbol || 'Select'} </Typography>
+                                <Typography>{bidSymbol || 'Select'}</Typography>
                               </Button>
                             </Grid>
                             <Grid item style={{ paddingLeft: 0 }}>
                               <Divider orientation="vertical" />
                             </Grid>
-                          </Grid>
+                          </Grid>,
+                          endAdornment: <Button
+                            size="small"
+                            color="primary"
+                          >
+                            <Typography>MAX</Typography>
+                          </Button>
                         }}
-                        helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals))} ${bidSymbol || ''}`}
+                        helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals)) || 0} ${bidSymbol || ''}`}
                       />
                       <AccountSelection
                         visible={visibleAccountSelection}
@@ -157,6 +322,9 @@ class Swap extends Component {
                       <TextField
                         variant="contained"
                         label="To"
+                        placeholder="0"
+                        value={askValue}
+                        onChange={this.onAskValue}
                         InputProps={{
                           startAdornment: <Grid container className={classes.noWrap}>
                             <Grid item>
@@ -211,6 +379,9 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
+  updateWallet,
+  getPools, getPool,
+  getMintData, getPoolData,
 }, dispatch);
 
 export default withRouter(connect(

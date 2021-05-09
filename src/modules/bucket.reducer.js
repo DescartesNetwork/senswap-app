@@ -103,13 +103,14 @@ export const getAccountData = (accountAddress, force = false) => {
         if (!re) return Promise.resolve({ data: {} });
         return api.get(base + '/pool', { _id: re._id });
       }).then(({ data: re }) => {
-        const { mint_s, mint_a, mint_b, ...others } = accountData.pool;
-        const { mintS, mintA, mintB, ...someothers } = re;
+        const { mint_s, mint_a, mint_b, mint_lpt, ...others } = accountData.pool;
+        const { mintS, mintA, mintB, mintLPT, ...someothers } = re;
         accountData.pool = {
           ...others, ...someothers,
           mint_s: { ...mint_s, ...mintS },
           mint_a: { ...mint_a, ...mintA },
           mint_b: { ...mint_b, ...mintB },
+          mint_lpt: { ...mint_lpt, ...mintLPT },
         }
         const data = { [accountAddress]: accountData }
         dispatch({ type: GET_ACCOUNT_DATA_OK, data });
@@ -202,13 +203,14 @@ export const getPoolData = (poolAddress, force = false) => {
           if (!_id) return Promise.resolve({});
           return api.get(base + '/pool', { _id });
         }).then(({ data: re }) => {
-          const { mint_s, mint_a, mint_b, ...others } = poolData;
-          const { mintS, mintA, mintB, ...someothers } = re;
+          const { mint_s, mint_a, mint_b, mint_lpt, ...others } = poolData;
+          const { mintS, mintA, mintB, mintLPT, ...someothers } = re;
           poolData = {
             ...others, ...someothers,
             mint_s: { ...mint_s, ...mintS },
             mint_a: { ...mint_a, ...mintA },
             mint_b: { ...mint_b, ...mintB },
+            mint_lpt: { ...mint_lpt, ...mintLPT }
           }
           const data = { [poolAddress]: poolData }
           dispatch({ type: GET_POOL_DATA_OK, data });

@@ -1,56 +1,37 @@
 import ssjs from 'senswapjs';
+import configs from 'configs';
+
+const ZERO = global.BigInt(0);
+const FEE = global.BigInt(250000);
+const EARN = global.BigInt(50000);
+const FEE_DECIMALS = global.BigInt(1000000000);
 
 const Oracle = {}
 
-Oracle.curve = (bidAmount, bidData, askData, bidPrimaryData, askPrimaryData) => {
+Oracle.curve = (bidAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData) => {
   return new Promise((resolve, reject) => {
-    if (!bidData) return reject('Invalid bid pool data');
-    if (!askData) return reject('Invalid ask pool data');
-    if (!bidPrimaryData) return reject('Invalid primary pool data');
-    if (!askPrimaryData) return reject('Invalid primary pool data');
-    if (bidData.state !== 1) return reject('Frozen bid pool');
-    if (askData.state !== 1) return reject('Frozen ask pool');
-    if (bidPrimaryData.state !== 1) return reject('Frozen primary pool');
-    if (askPrimaryData.state !== 1) return reject('Frozen primary pool');
+    if (typeof bidAmount !== 'bigint') return reject('Amount must be BigInt');
+    if (!ssjs.isAddress(srcMintAddress)) return reject('Invalid source mint address');
+    if (!bidPoolData) return reject('Invalid bid pool data');
+    if (bidPoolData.state !== 1) return reject('Frozen bid pool');
+    if (!ssjs.isAddress(dstMintAddress)) return reject('Invalid destination mint address');
+    if (!askPoolData) return reject('Invalid ask pool data');
+    if (askPoolData.state !== 1) return reject('Frozen ask pool');
     // Parse data
-    const { network: { address: bidNetworkAddress } } = bidData;
-    const { network: { address: askNetworkAddress } } = askData;
-    // Single network
-    if (bidNetworkAddress === askNetworkAddress) return Oracle.pureCurve(bidAmount, bidData, askData, bidPrimaryData).then(data => {
+    const { address: bidPoolAddress } = bidPoolData;
+    const { address: askPoolAddress } = askPoolData;
+    // Shared pool
+    if (bidPoolAddress === askPoolAddress) return Oracle._directCurve(
+      bidAmount, srcMintAddress, dstMintAddress, bidPoolData
+    ).then(data => {
       return resolve(data);
     }).catch(er => {
       return reject(er);
     });
-    // Hopping
-    return Oracle.hop(bidAmount, bidData, askData, bidPrimaryData, askPrimaryData).then(data => {
-      return resolve(data);
-    }).catch(er => {
-      return reject(er);
-    });
-  })
-}
-
-Oracle.inverseCurve = (askAmount, bidData, askData, bidPrimaryData, askPrimaryData) => {
-  return new Promise((resolve, reject) => {
-    if (!bidData) return reject('Invalid bid pool data');
-    if (!askData) return reject('Invalid ask pool data');
-    if (!bidPrimaryData) return reject('Invalid primary pool data');
-    if (!askPrimaryData) return reject('Invalid primary pool data');
-    if (bidData.state !== 1) return reject('Frozen bid pool');
-    if (askData.state !== 1) return reject('Frozen ask pool');
-    if (bidPrimaryData.state !== 1) return reject('Frozen primary pool');
-    if (askPrimaryData.state !== 1) return reject('Frozen primary pool');
-    // Parse data
-    const { network: { address: bidNetworkAddress } } = bidData;
-    const { network: { address: askNetworkAddress } } = askData;
-    // Single network
-    if (bidNetworkAddress === askNetworkAddress) return Oracle.pureInverseCurve(askAmount, bidData, askData, askPrimaryData).then(data => {
-      return resolve(data);
-    }).catch(er => {
-      return reject(er);
-    });
-    // Hopping
-    return Oracle.inverseHop(askAmount, bidData, askData, bidPrimaryData, askPrimaryData).then(data => {
+    // Routing - Shared SEN
+    return Oracle.routingCurve(
+      bidAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData
+    ).then(data => {
       return resolve(data);
     }).catch(er => {
       return reject(er);
@@ -58,112 +39,119 @@ Oracle.inverseCurve = (askAmount, bidData, askData, bidPrimaryData, askPrimaryDa
   });
 }
 
-Oracle.pureCurve = (bidAmount, bidData, askData, primaryData) => {
+Oracle.inverseCurve = (askAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData) => {
   return new Promise((resolve, reject) => {
-    const {
-      network: { address: bidNetworkAddress },
-      mint: { decimals: bidDecimals },
-      reserve: bidReserve, lpt: bidLPT
-    } = bidData;
-    const {
-      network: { address: askNetworkAddress, primary: { address: primaryAddress } },
-      mint: { address: askMintAddress, decimals: askDecimals },
-      reserve: askReserve, lpt: askLPT
-    } = askData;
-    const { reserve: primaryReserve, lpt: primaryLPT } = primaryData;
+    if (typeof askAmount !== 'bigint') return reject('Amount must be BigInt');
+    if (!ssjs.isAddress(srcMintAddress)) return reject('Invalid source mint address');
+    if (!bidPoolData) return reject('Invalid bid pool data');
+    if (bidPoolData.state !== 1) return reject('Frozen bid pool');
+    if (!ssjs.isAddress(dstMintAddress)) return reject('Invalid destination mint address');
+    if (!askPoolData) return reject('Invalid ask pool data');
+    if (askPoolData.state !== 1) return reject('Frozen ask pool');
+    // Parse data
+    const { address: bidPoolAddress } = bidPoolData;
+    const { address: askPoolAddress } = askPoolData;
+    // Shared pool
+    if (bidPoolAddress === askPoolAddress) return Oracle._inverseDirectCurve(
+      askAmount, srcMintAddress, dstMintAddress, askPoolData
+    ).then(data => {
+      return resolve(data);
+    }).catch(er => {
+      return reject(er);
+    });
+    // Routing - Shared SEN
+    return Oracle.inverseRoutingCurve(
+      askAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData
+    ).then(data => {
+      return resolve(data);
+    }).catch(er => {
+      return reject(er);
+    });
+  });
+}
 
-    if (!bidReserve || !bidLPT) return reject('Outdated bid pool');
-    if (!askReserve || !askLPT) return reject('Outdated ask pool');
-    if (!primaryReserve || !primaryLPT) return reject('Outdated primary pool');
+Oracle._parseTreasury = (mintAddress, poolData) => {
+  const {
+    mint_s: { address: mintAddressS }, treasury_s,
+    mint_a: { address: mintAddressA }, treasury_a,
+    mint_b: { address: mintAddressB }, treasury_b,
+  } = poolData;
+  if (mintAddress === mintAddressS) return treasury_s;
+  if (mintAddress === mintAddressA) return treasury_a;
+  if (mintAddress === mintAddressB) return treasury_b;
+}
+
+Oracle._directCurve = (bidAmount, srcMintAddress, dstMintAddress, poolData) => {
+  return new Promise((resolve, reject) => {
+    const { amount: bidReserve } = Oracle._parseTreasury(srcMintAddress, poolData);
+    const { amount: askReserve } = Oracle._parseTreasury(dstMintAddress, poolData);
+
+    if (!bidReserve) return reject('Outdated bid pool');
+    if (!askReserve) return reject('Outdated ask pool');
 
     // Fee
-    if (bidNetworkAddress !== askNetworkAddress) return reject('Unsupported routing');
-    const fee = primaryAddress === askMintAddress ? global.BigInt(2500000) : global.BigInt(3000000);
+    const { sol: { senAddress } } = configs;
+    const fee = dstMintAddress === senAddress ? FEE : FEE + EARN;
 
+    // Default state
     if (!bidAmount) {
-      const slippage = '1';
-      const ratio = ssjs.div(
-        ssjs.decimalize(bidLPT * askReserve, bidDecimals),
-        ssjs.decimalize(askLPT * bidReserve, askDecimals)
-      );
+      const slippage = 0;
+      const ratio = ssjs.div(askReserve, bidReserve);
       return resolve([{
         slippage, ratio, fee,
-        bidAmount: global.BigInt(0), askAmount: global.BigInt(0),
-        bidData, askData, primaryData,
+        bidAmount: ZERO, askAmount: ZERO,
+        srcMintAddress, dstMintAddress, poolData,
       }]);
     }
-
-    if (typeof bidAmount !== 'bigint') return reject('Amount must be BigInt');
-
-    const newBidReserve = bidReserve + bidAmount;
-    const newAskReserve = ssjs.curve(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const ratio = ssjs.undecimalize(
-      ssjs.decimalize(
-        ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT)
-        , bidDecimals)
-      , askDecimals);
-    const paidAmountWithoutFee = askReserve - newAskReserve;
-    const askAmount = paidAmountWithoutFee * (global.BigInt(10 ** 9) - fee) / global.BigInt(10 ** 9);
+    // Curving
+    const askAmount = ssjs.curve(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS);
+    const slippage = ssjs.div(
+      ssjs.slippage(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS),
+      FEE_DECIMALS
+    );
+    const ratio = ssjs.div(askAmount, bidAmount);
     return resolve([{
       slippage, ratio, fee,
       bidAmount, askAmount,
-      bidData, askData, primaryData
+      srcMintAddress, dstMintAddress, poolData,
     }]);
   });
 }
 
-Oracle.pureInverseCurve = (askAmount, bidData, askData, primaryData) => {
+Oracle._inverseDirectCurve = (askAmount, srcMintAddress, dstMintAddress, poolData) => {
   return new Promise((resolve, reject) => {
-    const {
-      network: { address: bidNetworkAddress },
-      mint: { decimals: bidDecimals },
-      reserve: bidReserve, lpt: bidLPT
-    } = bidData;
-    const {
-      network: { address: askNetworkAddress, primary: { address: primaryAddress } },
-      mint: { address: askMintAddress, decimals: askDecimals },
-      reserve: askReserve, lpt: askLPT
-    } = askData;
-    const { reserve: primaryReserve, lpt: primaryLPT } = primaryData;
+    const { amount: bidReserve } = Oracle._parseTreasury(srcMintAddress, poolData);
+    const { amount: askReserve } = Oracle._parseTreasury(dstMintAddress, poolData);
 
-    if (!bidReserve || !bidLPT) return reject('Outdated bid pool');
-    if (!askReserve || !askLPT) return reject('Outdated ask pool');
-    if (!primaryReserve || !primaryLPT) return reject('Outdated primary pool');
+    if (!bidReserve) return reject('Outdated bid pool');
+    if (!askReserve) return reject('Outdated ask pool');
+    if (askAmount > askReserve) return reject('Cannot buy an amount larger than the available reserve');
 
     // Fee
-    if (bidNetworkAddress !== askNetworkAddress) return reject('Unsupported routing');
-    const fee = primaryAddress === askMintAddress ? global.BigInt(2500000) : global.BigInt(3000000);
+    const { sol: { senAddress } } = configs;
+    const fee = dstMintAddress === senAddress ? FEE : FEE + EARN;
 
+    // Default state
     if (!askAmount) {
-      const slippage = '1';
-      const ratio = ssjs.div(
-        ssjs.decimalize(bidLPT * askReserve, bidDecimals),
-        ssjs.decimalize(askLPT * bidReserve, askDecimals)
-      );
+      const slippage = 0;
+      const ratio = ssjs.div(askReserve, bidReserve);
       return resolve([{
         slippage, ratio, fee,
-        bidAmount: global.BigInt(0), askAmount: global.BigInt(0),
-        bidData, askData, primaryData,
+        bidAmount: ZERO, askAmount: ZERO,
+        srcMintAddress, dstMintAddress, poolData,
       }]);
     }
-
-    if (typeof askAmount !== 'bigint') return reject('Amount must be BigInt');
-
-    const askAmountWithoutFee = askAmount * global.BigInt(10 ** 9) / (global.BigInt(10 ** 9) - fee);
-    const newAskReserve = askReserve - askAmountWithoutFee;
-    const newBidReserve = ssjs.inverseCurve(newAskReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const slippage = ssjs.slippage(newBidReserve, bidReserve, bidLPT, askReserve, askLPT);
-    const ratio = ssjs.undecimalize(
-      ssjs.decimalize(
-        ssjs.ratio(newBidReserve, bidReserve, bidLPT, askReserve, askLPT)
-        , bidDecimals)
-      , askDecimals);
-    const bidAmount = newBidReserve - bidReserve + global.BigInt(1);
+    // Curving
+    const bidAmount = ssjs.inverseCurve(askAmount, bidReserve, askReserve, fee, FEE_DECIMALS);
+    const slippage = ssjs.div(
+      ssjs.slippage(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS),
+      FEE_DECIMALS
+    );
+    const ratio = ssjs.div(askAmount, bidAmount);
     return resolve([{
       slippage, ratio, fee,
       bidAmount, askAmount,
-      bidData, askData, primaryData
+      srcMintAddress, dstMintAddress, poolData,
     }]);
   });
 }
