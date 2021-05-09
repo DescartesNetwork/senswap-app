@@ -53,12 +53,7 @@ class Sidebar extends Component {
     const route = pathname.split('/')[1];
     return this.setState({ route })
   }
-
-  onDrawer = () => {
-    const { toggleLeftBar } = this.props;
-    return toggleLeftBar();
-  }
-
+  
   render() {
     const { classes, ui: { leftbar, width }, wallet: { user: { address, role } }, toggleLeftBar } = this.props;
     const { route } = this.state;

@@ -10,6 +10,7 @@ const defaultState = {
   visible: false,
   loading: false,
   leftbar: window.innerWidth >= 600,
+  rightbar: false,
 }
 
 
@@ -207,6 +208,27 @@ export const toggleLeftBar = () => {
 }
 
 /**
+ * Toggle rightbar
+ */
+export const TOGGLE_RIGHT_BAR = 'TOOGLE_RIGHT_BAR';
+export const TOGGLE_RIGHT_BAR_OK = 'TOGGLE_RIGHT_BAR_OK';
+export const TOGGLE_RIGHT_BAR_FAIL = 'TOGGLE_RIGHT_BAR_FAIL';
+
+export const toggleRightBar = () => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: TOGGLE_RIGHT_BAR });
+
+      const { ui: { rightbar: prevRightbar } } = getState();
+
+      const data = { rightbar: !prevRightbar }
+      dispatch({ type: TOGGLE_RIGHT_BAR_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
  * Reducder
  */
 // eslint-disable-next-line
@@ -239,6 +261,10 @@ export default (state = defaultState, action) => {
     case TOGGLE_LEFT_BAR_OK:
       return { ...state, ...action.data };
     case TOGGLE_LEFT_BAR_FAIL:
+      return { ...state, ...action.data };
+    case TOGGLE_RIGHT_BAR_OK:
+      return { ...state, ...action.data };
+    case TOGGLE_RIGHT_BAR_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

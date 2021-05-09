@@ -14,13 +14,14 @@ import { AccountBalanceWalletOutlined, NotificationsOutlined, ExpandMoreRounded 
 import { AccountAvatar } from 'containers/wallet';
 
 import styles from './styles';
+import { toggleRightBar } from 'modules/ui.reducer';
 import { openWallet, closeWallet } from 'modules/wallet.reducer';
 
 
 class WalletButton extends Component {
 
   walletButton = () => {
-    const { wallet: { user: { address } }, openWallet } = this.props;
+    const { wallet: { user: { address } }, openWallet, toggleRightBar } = this.props;
     const text = address ? address.substring(0, 3) + '...' + address.substring(address.length - 2, address.length) : 'Connect Wallet';
 
     if (!address) return <Grid item>
@@ -37,7 +38,7 @@ class WalletButton extends Component {
 
     return <Fragment>
       <Grid item>
-        <IconButton>
+        <IconButton onClick={toggleRightBar}>
           <Badge variant="dot" color="primary">
             <NotificationsOutlined />
           </Badge>
@@ -70,6 +71,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  toggleRightBar,
   openWallet, closeWallet,
 }, dispatch);
 

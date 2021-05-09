@@ -10,6 +10,7 @@ import Drain from 'senswap-ui/drain';
 // Components
 import PrivateRoute from 'containers/auth/privateRoute';
 import Sidebar from 'containers/sidebar';
+import History from 'containers/history';
 import UiUx from 'containers/uiux';
 import Wallet, { configSenWallet, WalletPlugin } from 'containers/wallet';
 import NotFound from 'containers/404';
@@ -37,6 +38,7 @@ class App extends Component {
         <Grid item xs={12}>
           <Grid container className={classes.noWrap}>
             <Sidebar />
+            <History />
             <Grid item className={classes.stretch} style={{ overflow: 'auto' }}>
               <Grid container justify="center" >
                 {/* Safe space */}
