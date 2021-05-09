@@ -238,7 +238,7 @@ class Swap extends Component {
         <Header />
       </Grid>
       <Grid item xs={12}>
-        <Drain size={3} />
+        <Drain />
       </Grid>
       <Grid item xs={12} md={8}>
         <Paper className={classes.paper}>

@@ -56,7 +56,7 @@ class Pool extends Component {
         <Header />
       </Grid>
       <Grid item xs={12}>
-        <Drain size={0} />
+        <Drain />
       </Grid>
       <Grid item xs={12}>
         <FeaturedPool />

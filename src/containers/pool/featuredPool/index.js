@@ -21,7 +21,7 @@ class FeaturedPool extends Component {
     this.state = {
       carouselData: [
         {
-          title: "Let's Swap with Sen",
+          title: "Let's swap with SenSwap",
           description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
           src: 'https://source.unsplash.com/random',
         },
@@ -52,14 +52,14 @@ class FeaturedPool extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, ui: { width } } = this.props;
     const { carouselData, featuredPoolData } = this.state;
 
-    return <Grid container className={classes.noWrap}>
-      <Grid item className={classes.stretch}>
+    return <Grid container {...(width >= 600 ? { className: classes.noWrap } : {})}>
+      <Grid item {...(width >= 600 ? { className: classes.stretch } : { xs: 12 })}>
         <Carousel data={carouselData} />
       </Grid>
-      <Grid item style={{ maxWidth: 300 }}>
+      <Grid item {...(width >= 600 ? { style: { maxWidth: 300 } } : { xs: 12 })}>
         <Grid container>
           <Grid item xs={12}>
             <Typography variant="subtitle1">Featured Pools</Typography>

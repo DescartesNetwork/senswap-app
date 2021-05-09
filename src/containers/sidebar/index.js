@@ -74,7 +74,11 @@ class Sidebar extends Component {
       >
         <MenuRounded />
       </Fab> : null}
-      <Drawer open={leftbar} variant={width >= 600 ? 'persistent' : 'temporary'}>
+      <Drawer
+        open={leftbar}
+        variant={width >= 600 ? 'persistent' : 'temporary'}
+        onClose={toggleLeftBar}
+      >
         <Grid container>
           {/* Safe space */}
           <Grid item xs={12} />
