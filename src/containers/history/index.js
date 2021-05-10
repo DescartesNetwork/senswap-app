@@ -88,10 +88,8 @@ class History extends Component {
           <Typography variant="h6">Latest Activities</Typography>
         </Grid>
         <Grid item xs={12}>
-          <Drain size={1} />
-        </Grid>
-        <Grid item xs={12}>
           <List>
+            <EventItem />
             <EventItem />
           </List>
         </Grid>

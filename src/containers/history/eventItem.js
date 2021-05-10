@@ -76,7 +76,6 @@ class EventItem extends Component {
           </Grid>
         </ListItemText>
       </ListItem>
-
       <Divider variant="inset" />
     </Fragment>
   }

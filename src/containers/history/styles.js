@@ -11,8 +11,7 @@ export default theme => ({
     padding: theme.spacing(4),
   },
   listItem: {
-    paddingLeft: 0,
-    paddingRight: 0,
+    padding: `${theme.spacing(2)}px 0px`,
   },
   avatarItem: {
     marginRight: theme.spacing(2)
