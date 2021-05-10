@@ -2,8 +2,8 @@ import ssjs from 'senswapjs';
 import configs from 'configs';
 
 const ZERO = global.BigInt(0);
-const FEE = global.BigInt(250000);
-const EARN = global.BigInt(50000);
+const FEE = global.BigInt(2500000);
+const EARN = global.BigInt(500000);
 const FEE_DECIMALS = global.BigInt(1000000000);
 
 const Oracle = {}

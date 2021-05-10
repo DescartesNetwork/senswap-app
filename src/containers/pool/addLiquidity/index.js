@@ -103,7 +103,6 @@ class AddLiquidity extends Component {
     });
     const { reserve_s: reserveS, reserve_a: reserveA, reserve_b: reserveB } = poolData;
     return oracle.rake(deltaS, deltaA, deltaB, reserveS, reserveA, reserveB).then(({ lpt }) => {
-      console.log(lpt)
       lpt = ssjs.undecimalize(lpt, 9);
       return this.setState({ lpt });
     }).catch(er => {
