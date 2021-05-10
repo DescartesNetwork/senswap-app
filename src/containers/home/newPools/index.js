@@ -45,8 +45,9 @@ class NewPools extends Component {
   }
 
   getPoolDataAndAccountData = (poolAddress) => {
+    const { getPoolData, getAccountData } = this.props;
+    if (!window.senswap.wallet) return getPoolData(poolAddress);
     return new Promise((resolve, reject) => {
-      const { getPoolData, getAccountData } = this.props;
       let poolData = {}
       return getPoolData(poolAddress).then(data => {
         poolData = data;
@@ -61,6 +62,7 @@ class NewPools extends Component {
         poolData.accountData = accountData;
         return resolve(poolData);
       }).catch(er => {
+        console.log(er)
         return reject(er);
       });
     });
