@@ -104,10 +104,7 @@ Oracle._directCurve = (bidAmount, srcMintAddress, dstMintAddress, poolData) => {
     }
     // Curving
     const askAmount = ssjs.curve(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS);
-    const slippage = ssjs.div(
-      ssjs.slippage(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS),
-      FEE_DECIMALS
-    );
+    const slippage = ssjs.slippage(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS);
     const ratio = ssjs.div(askAmount, bidAmount);
     return resolve([{
       slippage, ratio, fee,
@@ -141,10 +138,7 @@ Oracle._inverseDirectCurve = (askAmount, srcMintAddress, dstMintAddress, poolDat
     }
     // Curving
     const bidAmount = ssjs.inverseCurve(askAmount, bidReserve, askReserve, fee, FEE_DECIMALS);
-    const slippage = ssjs.div(
-      ssjs.slippage(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS),
-      FEE_DECIMALS
-    );
+    const slippage = ssjs.slippage(bidAmount, bidReserve, askReserve, fee, FEE_DECIMALS);
     const ratio = ssjs.div(askAmount, bidAmount);
     return resolve([{
       slippage, ratio, fee,

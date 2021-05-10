@@ -3,14 +3,14 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import { IconButton } from 'senswap-ui/button';
+import Drain from 'senswap-ui/drain';
 
 import { LanguageRounded, DirectionsBoatRounded } from '@material-ui/icons';
 
-import Drain from 'components/drain';
 import InitializeNetwork from './initializeNetwork';
 import NetworkInfo from './info';
 

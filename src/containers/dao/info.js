@@ -12,13 +12,13 @@ import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import Drain from 'senswap-ui/drain';
 
 import {
   EcoRounded, MonetizationOnRounded, LocalGasStation,
   OfflineBoltRounded
 } from '@material-ui/icons';
 
-import Drain from 'components/drain';
 import NetworkSelection from 'containers/wallet/components/networkSelection';
 import Token from './token';
 import Pools from './pools';

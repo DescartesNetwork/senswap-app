@@ -379,7 +379,7 @@ class Swap extends Component {
                           </Grid>
                           <Grid item xs={4}>
                             <Typography>Fee</Typography>
-                            <Typography>{ssjs.undecimalize(fee, 9)}</Typography>
+                            <Typography>{ssjs.undecimalize(fee, 9) * 100}%</Typography>
                           </Grid>
                           <Grid item xs={4}>
                             <Typography>Ratio</Typography>
@@ -387,7 +387,7 @@ class Swap extends Component {
                           </Grid>
                           <Grid item xs={4}>
                             <Typography>Slippage</Typography>
-                            <Typography>{slippage}</Typography>
+                            <Typography>{ssjs.undecimalize(slippage, 9) * 100}%</Typography>
                           </Grid>
                           <Grid item xs={12}>
                             <Divider />

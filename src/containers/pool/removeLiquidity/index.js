@@ -8,12 +8,10 @@ import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import TextField from 'senswap-ui/textField';
 import Button, { IconButton } from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
-import Divider from 'senswap-ui/divider';
 import Paper from 'senswap-ui/paper';
 
 
@@ -21,6 +19,7 @@ import {
   CloseRounded, ArrowDownwardRounded,
 } from '@material-ui/icons';
 
+import TextInput from 'components/textInput';
 import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
@@ -48,16 +47,15 @@ class RemoveLiquidity extends Component {
     this.swap = window.senswap.swap;
   }
 
-  onAmount = (e) => {
-    const amount = e.target.value || '';
+  onAmount = (amount) => {
+    if (parseFloat(amount).toString() !== amount) return;
     return this.setState({ amount });
   }
 
-  onMax = () => {
-    const { lptData: { lpt, pool } } = this.state;
-    const { mint } = pool || {}
+  onPercentage = (percentage) => {
+    const { data: { amount: balance, mint } } = this.props;
     const { decimals } = mint || {}
-    const amount = ssjs.undecimalize(lpt, decimals);
+    const amount = ssjs.undecimalize(balance, decimals) * percentage;
     return this.setState({ amount });
   }
 
@@ -126,7 +124,7 @@ class RemoveLiquidity extends Component {
 
   render() {
     const { classes, data, visible, onClose } = this.props;
-    const { loading, amount, } = this.state;
+    const { loading, amount } = this.state;
 
     const { amount: balance, pool, mint } = data;
     const { supply, decimals } = mint || {}
@@ -155,20 +153,21 @@ class RemoveLiquidity extends Component {
       <DialogContent>
         <Grid container justify="center">
           <Grid item xs={12}>
-            <TextField
-              label="Amount"
-              variant="contained"
-              placeholder="0"
-              value={amount}
-              onChange={this.onAmount}
-              helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals))} LPT`}
-            />
-          </Grid>
-          <Grid item xs={12}>
             <Paper className={classes.paper}>
               <Grid container>
                 <Grid item xs={12}>
-                  <Typography variant="h2">{utils.prettyNumber(ratio * 100)}%</Typography>
+                  <Typography>Amount</Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <TextInput
+                    variant="h2"
+                    onChange={this.onAmount}
+                    value={amount}
+                    focus
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="caption">{`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals))} LPT`}</Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Drain size={1} />
@@ -179,6 +178,7 @@ class RemoveLiquidity extends Component {
                       <Button
                         variant="contained"
                         color="secondary"
+                        onClick={() => this.onPercentage(0.25)}
                         fullWidth
                       >
                         <Typography color="primary">25%</Typography>
@@ -188,6 +188,7 @@ class RemoveLiquidity extends Component {
                       <Button
                         variant="contained"
                         color="secondary"
+                        onClick={() => this.onPercentage(0.5)}
                         fullWidth
                       >
                         <Typography color="primary">50%</Typography>
@@ -197,6 +198,7 @@ class RemoveLiquidity extends Component {
                       <Button
                         variant="contained"
                         color="secondary"
+                        onClick={() => this.onPercentage(0.75)}
                         fullWidth
                       >
                         <Typography color="primary">75%</Typography>
@@ -206,6 +208,7 @@ class RemoveLiquidity extends Component {
                       <Button
                         variant="contained"
                         color="secondary"
+                        onClick={() => this.onPercentage(1)}
                         fullWidth
                       >
                         <Typography color="primary">MAX</Typography>
@@ -228,8 +231,8 @@ class RemoveLiquidity extends Component {
                   const { amount: reserve, mint } = treasuryData;
                   const { icon, symbol, decimals } = mint;
                   return <Grid item key={index} xs={12}>
-                    <Grid container alignItems="center">
-                      <Grid item xs={6}>
+                    <Grid container alignItems="center" className={classes.noWrap}>
+                      <Grid item className={classes.stretch}>
                         <Grid container alignItems="center" className={classes.noWrap}>
                           <Grid item>
                             <MintAvatar icon={icon} />
@@ -239,8 +242,8 @@ class RemoveLiquidity extends Component {
                           </Grid>
                         </Grid>
                       </Grid>
-                      <Grid item xs={6}>
-                        <Typography>{utils.prettyNumber(ratio * ssjs.undecimalize(reserve, decimals))}</Typography>
+                      <Grid item>
+                        <Typography align="right">{utils.prettyNumber(ratio * ssjs.undecimalize(reserve, decimals))}</Typography>
                       </Grid>
                     </Grid>
                   </Grid>

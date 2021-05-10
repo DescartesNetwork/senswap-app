@@ -117,7 +117,7 @@ export const setWallet = (wallet) => {
         return api.get(base + '/user', { address: data.user.address });
       }).then(re => {
         // Only add an account to db when its lamports > 0
-        if (!re.data || data.lamports <= 0) return Promise.resolve(re);
+        if (re.data && data.lamports > 0) return Promise.resolve(re);
         return api.post(base + '/user', { user: { address: data.user.address } });
       }).then(({ data: re }) => {
         data.user = { ...data.user, ...re }

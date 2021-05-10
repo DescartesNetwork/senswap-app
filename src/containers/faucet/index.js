@@ -14,10 +14,10 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Link from '@material-ui/core/Link';
+import Drain from 'senswap-ui/drain';
 
 import { FlightTakeoffRounded } from '@material-ui/icons';
 
-import Drain from 'components/drain';
 import { BaseCard } from 'components/cards';
 
 import styles from './styles';
