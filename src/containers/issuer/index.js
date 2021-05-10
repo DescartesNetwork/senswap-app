@@ -11,7 +11,7 @@ import Drain from 'senswap-ui/drain';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-import { LockRounded } from '@material-ui/icons';
+import { LockRounded } from 'senswap-ui/icons';
 
 import InitializeMint from './initialization';
 import RegisterMint from './register';

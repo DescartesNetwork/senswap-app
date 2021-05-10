@@ -62,4 +62,20 @@ Utils.explorer = (addressOrTxId) => {
   return `https://explorer.solana.com/tx/${addressOrTxId}?cluster=${cluster}`;
 }
 
+Utils.fetchValue = (balance, ticket) => {
+  return new Promise((resolve, reject) => {
+    let value = 0;
+    let btc = 0;
+    return ssjs.parseCGK(ticket).then(({ price }) => {
+      value = balance * price;
+      return ssjs.parseCGK('bitcoin');
+    }).then(({ price }) => {
+      btc = value / price;
+      return resolve({ value, btc });
+    }).catch(er => {
+      return reject(er);
+    });
+  });
+}
+
 export default Utils;

@@ -37,8 +37,8 @@ class App extends Component {
         {/* Views */}
         <Grid item xs={12}>
           <Grid container className={classes.noWrap}>
+            {/* Left bar */}
             <Sidebar />
-            <History />
             <Grid item className={classes.stretch} style={{ overflow: 'auto' }}>
               <Grid container justify="center" >
                 {/* Safe space */}
@@ -65,6 +65,8 @@ class App extends Component {
                 </Grid>
               </Grid>
             </Grid>
+            {/* Right bar */}
+            <History />
           </Grid>
         </Grid>
         {/* Application */}

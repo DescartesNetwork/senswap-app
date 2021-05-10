@@ -10,7 +10,7 @@ const defaultState = {
   visible: false,
   loading: false,
   leftbar: window.innerWidth >= 600,
-  rightbar: false,
+  rightbar: true,
 }
 
 

@@ -7,10 +7,10 @@ import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
-import { CardPool } from 'senswap-ui/card';
 
-import AddLiquidity from '../addLiquidity';
-import RemoveLiquidity from '../removeLiquidity';
+import AddLiquidity from 'containers/pool/addLiquidity';
+import RemoveLiquidity from 'containers/pool/removeLiquidity';
+import { CardPool } from 'components/card';
 
 import styles from './styles';
 import utils from 'helpers/utils';
