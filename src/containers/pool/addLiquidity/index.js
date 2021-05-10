@@ -9,18 +9,18 @@ import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import TextField from 'senswap-ui/textField';
 import Button, { IconButton } from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
-import Divider from 'senswap-ui/divider';
+import Paper from 'senswap-ui/paper';
 
-import { CloseRounded } from 'senswap-ui/icons';
+import { CloseRounded, ArrowDownwardRounded } from 'senswap-ui/icons';
 
-import { MintAvatar } from 'containers/wallet';
+import Field from './field';
 
 import styles from './styles';
+import oracle from 'helpers/oracle';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
@@ -42,43 +42,80 @@ class AddLiquidity extends Component {
       index: 0,
       amounts: ['', '', ''],
       accountData: [],
+      lpt: 0,
     }
 
     this.swap = window.senswap.swap;
   }
 
+  componentDidMount() {
+    const { visible } = this.props;
+    if (visible) return this.fetchData();
+  }
+
   componentDidUpdate(prevProps) {
-    const { data: prevData, visible: prevVisible } = prevProps;
-    const { data, visible } = this.props;
-    if (!isEqual(prevData, data) && visible) return this.fetchData();
+    const { poolData: prevPoolData, visible: prevVisible } = prevProps;
+    const { poolData, visible } = this.props;
+    if (!isEqual(prevPoolData, poolData) && visible) return this.fetchData();
     if (!isEqual(prevVisible, visible) && visible) return this.fetchData();
+    if (!isEqual(prevVisible, visible) && !visible) return this.setState({
+      ...EMPTY,
+      index: 0,
+      amounts: ['', '', ''],
+    });
   }
 
   fetchData = () => {
-    const { data, wallet: { accounts }, getAccountData, setError } = this.props;
-    const { mint_s, mint_a, mint_b } = data;
+    const { poolData, wallet: { accounts }, getAccountData, setError } = this.props;
+    const { mint_s, mint_a, mint_b } = poolData;
     const { address: mintAddressS } = mint_s || {}
     const { address: mintAddressA } = mint_a || {}
     const { address: mintAddressB } = mint_b || {}
     let mintAddresses = [mintAddressS, mintAddressA, mintAddressB];
-    return accounts.each(accounAddress => {
-      return getAccountData(accounAddress);
-    }, { skipError: true, skipIndex: true }).then(accountData => {
-      accountData = mintAddresses.map(mintAddress => {
-        const [re] = accountData.filter(({ mint: { address } }) => mintAddress === address);
-        return re;
-      })
-      return this.setState({ accountData });
+    return this.setState({ loading: true }, () => {
+      return accounts.each(accounAddress => {
+        return getAccountData(accounAddress);
+      }, { skipError: true, skipIndex: true }).then(accountData => {
+        accountData = mintAddresses.map(mintAddress => {
+          const [re] = accountData.filter(({ mint: { address } }) => mintAddress === address);
+          return re;
+        })
+        return this.setState({ accountData, loading: false });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
+      });
+    });
+  }
+
+  estimateState = () => {
+    const { setError, poolData } = this.props;
+    const { amounts } = this.state;
+    if (amounts.every(amount => !amount)) return this.setState({ lpt: 0 });
+    const [deltaS, deltaA, deltaB] = amounts.map((amount, index) => {
+      let decimals = 9;
+      const { mint_s, mint_a, mint_b } = poolData;
+      if (index === 0) decimals = mint_s.decimals;
+      if (index === 1) decimals = mint_a.decimals;
+      if (index === 2) decimals = mint_b.decimals;
+      return ssjs.decimalize(amount, decimals);
+    });
+    const { reserve_s: reserveS, reserve_a: reserveA, reserve_b: reserveB } = poolData;
+    return oracle.rake(deltaS, deltaA, deltaB, reserveS, reserveA, reserveB).then(({ lpt }) => {
+      console.log(lpt)
+      lpt = ssjs.undecimalize(lpt, 9);
+      return this.setState({ lpt });
     }).catch(er => {
       return setError(er);
     });
   }
 
-  onAmount = (i, e) => {
+  onAmount = (i, value) => {
     const { amounts } = this.state;
     let newAmounts = [...amounts];
-    newAmounts[i] = e.target.value || '';
-    return this.setState({ amounts: newAmounts });
+    newAmounts[i] = value;
+    return this.setState({ amounts: newAmounts }, this.estimateState);
   }
 
   onMax = (index) => {
@@ -87,13 +124,13 @@ class AddLiquidity extends Component {
     const { decimals } = mint || {}
     let newAmounts = [...amounts];
     newAmounts[index] = ssjs.undecimalize(amount, decimals);
-    return this.setState({ amounts: newAmounts });
+    return this.setState({ amounts: newAmounts }, this.estimateState);
   }
 
   addLiquidity = () => {
     const {
-      wallet: { accounts }, updateWallet, data: { address: poolAddress },
-      setError, onClose
+      wallet: { accounts }, poolData: { address: poolAddress },
+      updateWallet, setError, onClose
     } = this.props;
     const { accountData, amounts } = this.state;
 
@@ -121,6 +158,7 @@ class AddLiquidity extends Component {
         if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
         return updateWallet({ accounts: newAccounts });
       }).then(re => {
+        console.log(txId);
         return this.setState({ ...EMPTY, txId }, () => {
           return onClose();
         });
@@ -134,7 +172,7 @@ class AddLiquidity extends Component {
 
   render() {
     const { classes, visible, onClose } = this.props;
-    const { loading, amounts, accountData } = this.state;
+    const { loading, amounts, accountData, lpt } = this.state;
 
     return <Dialog open={visible} onClose={onClose} fullWidth>
       <DialogTitle>
@@ -160,45 +198,37 @@ class AddLiquidity extends Component {
           <Grid item xs={12}>
             <Drain size={2} />
           </Grid>
-          {accountData.map((each, index) => {
-            if (!each) return null;
-            const { amount, mint } = each;
-            const { symbol, name, icon, decimals } = mint || {}
-            return <Fragment key={index}>
-              <Grid item xs={12} >
-                <TextField
-                  label={name}
-                  variant="contained"
-                  placeholder="0"
-                  value={amounts[index]}
-                  onChange={(e) => this.onAmount(index, e)}
-                  InputProps={{
-                    startAdornment: <Grid container className={classes.noWrap}>
-                      <Grid item>
-                        <Grid container className={classes.noWrap} alignItems="center">
-                          <Grid item>
-                            <MintAvatar icon={icon} />
-                          </Grid>
-                          <Grid item>
-                            <Typography>{symbol}</Typography>
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                      <Grid item>
-                        <Divider orientation="vertical" />
-                      </Grid>
-                    </Grid>,
-                    endAdornment: <Button color="primary" onClick={() => this.onMax(index)}>
-                      <Typography>MAX</Typography>
-                    </Button>
-                  }}
-                  helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(amount, decimals))} ${symbol || ''}`}
-                  fullWidth
-                />
+          {accountData.map((data, index) => <Grid item key={index} xs={12}>
+            <Field
+              accountData={data}
+              value={amounts[index]}
+              onChange={value => this.onAmount(index, value)}
+            />
+          </Grid>
+          )}
+          {lpt ? <Fragment>
+            <Grid item xs={12}>
+              <Grid container justify="center">
+                <Grid item>
+                  <IconButton size="small">
+                    <ArrowDownwardRounded />
+                  </IconButton>
+                </Grid>
               </Grid>
-              <Grid item xs={12} />
-            </Fragment>
-          })}
+            </Grid>
+            <Grid item xs={12}>
+              <Paper className={classes.paper}>
+                <Grid container className={classes.noWrap} alignItems="center">
+                  <Grid item className={classes.stretch}>
+                    <Typography>Total LPT</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="subtitle1">{utils.prettyNumber(lpt)}</Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+          </Fragment> : null}
           <Grid item xs={12}>
             <Drain size={1} />
           </Grid>
@@ -208,8 +238,8 @@ class AddLiquidity extends Component {
               color="primary"
               size="large"
               endIcon={loading ? <CircularProgress size={17} /> : null}
-              disabled={loading}
               onClick={this.addLiquidity}
+              disabled={loading || amounts.every(e => !e)}
               fullWidth
             >
               <Typography>Deposit</Typography>
@@ -236,13 +266,13 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 AddLiquidity.defaultProps = {
   visible: false,
-  data: {},
+  poolData: {},
   onClose: () => { },
 }
 
 AddLiquidity.propTypes = {
   visible: PropTypes.bool,
-  data: PropTypes.object,
+  poolData: PropTypes.object,
   onClose: PropTypes.func,
 }
 

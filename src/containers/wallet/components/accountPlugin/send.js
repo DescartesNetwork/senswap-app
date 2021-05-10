@@ -20,6 +20,7 @@ import { CloseRounded } from 'senswap-ui/icons';
 import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
+import utils from 'helpers/utils';
 
 
 const DEFAULT_STATE = {
@@ -121,7 +122,7 @@ class Send extends Component {
               value={amount}
               onChange={this.onAmount}
               error={amountError}
-              helperTextSecondary={`Available: ${ssjs.undecimalize(balance, decimals)} ${symbol}`}
+              helperTextSecondary={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals))} ${symbol}`}
               InputProps={{
                 endAdornment: <Grid container alignItems="center">
                   <Grid item>
@@ -129,7 +130,7 @@ class Send extends Component {
                   </Grid>
                   <Grid item>
                     <Button color="primary" onClick={this.onMax} size="small">
-                      <Typography>Max</Typography>
+                      <Typography>MAX</Typography>
                     </Button>
                   </Grid>
                 </Grid>
@@ -144,7 +145,7 @@ class Send extends Component {
                   <Typography variant="caption" color="textSecondary">TRANSACTION FEE</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography>{symbol === 'SOL' ? '0.000000001' : '0.000005'} SOL</Typography>
+                  <Typography>{ssjs.BASIC_TX_FEE} SOL</Typography>
                 </Grid>
               </Grid>
             </Paper>
@@ -156,7 +157,7 @@ class Send extends Component {
                   <Typography variant="caption" color="textSecondary">REMAINER</Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <Typography>{ssjs.undecimalize(balance, decimals) - amount} {symbol}</Typography>
+                  <Typography>{utils.prettyNumber(ssjs.undecimalize(balance, decimals) - amount)} {symbol}</Typography>
                 </Grid>
               </Grid>
             </Paper>

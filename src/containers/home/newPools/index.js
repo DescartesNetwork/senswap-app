@@ -121,14 +121,14 @@ class NewPools extends Component {
           <CardPool
             icons={icons}
             symbols={symbols}
-            stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals))}
+            stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals)) || '0'}
             {...(!isLoggedIn ? { onConnect: openWallet } : null)}
             {...(isLP ? { onWithdraw: () => this.onOpenWithdraw(i) } : null)}
             onDeposit={() => this.onOpenDeposit(i)}
           />
         </Grid>
       })}
-      <AddLiquidity data={poolData} visible={visibleDeposit} onClose={this.onCloseDeposit} />
+      <AddLiquidity poolData={poolData} visible={visibleDeposit} onClose={this.onCloseDeposit} />
       <RemoveLiquidity data={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
     </Grid>
   }

@@ -155,7 +155,7 @@ class CreateAccount extends Component {
                   <Drain size={1} />
                 </Grid>
                 {existing ? <Grid item xs={12}>
-                  <Typography>The account for {symbol} have already existed. <span style={{ color: '#808191' }}>Due to the easy of use, SenSwap doesn't support Ancillary Token Accounts.</span></Typography>
+                  <Typography color="primary">The account for {symbol} have already existed. <span style={{ color: '#808191' }}>Due to the easy of use, SenSwap doesn't support Ancillary Token Accounts.</span></Typography>
                 </Grid> : null}
               </Grid>
             </Paper>

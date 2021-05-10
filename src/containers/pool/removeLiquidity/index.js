@@ -14,10 +14,7 @@ import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
 import Paper from 'senswap-ui/paper';
 
-
-import {
-  CloseRounded, ArrowDownwardRounded,
-} from '@material-ui/icons';
+import { CloseRounded, ArrowDownwardRounded } from 'senswap-ui/icons';
 
 import TextInput from 'components/textInput';
 import { MintAvatar } from 'containers/wallet';

@@ -8,6 +8,19 @@ const FEE_DECIMALS = global.BigInt(1000000000);
 
 const Oracle = {}
 
+Oracle.rake = (deltaS, deltaA, deltaB, reserveS, reserveA, reserveB) => {
+  return new Promise((resolve, reject) => {
+    if (!deltaS && !deltaA && !deltaB) return reject('Invalid amounts');
+    if (!reserveS || !reserveA || !reserveB) return reject('Outdated pool');
+    const data = ssjs.rake(
+      deltaS, deltaA, deltaB,
+      reserveS, reserveA, reserveB,
+      FEE, FEE_DECIMALS
+    );
+    return resolve(data);
+  });
+}
+
 Oracle.curve = (bidAmount, srcMintAddress, bidPoolData, dstMintAddress, askPoolData) => {
   return new Promise((resolve, reject) => {
     if (typeof bidAmount !== 'bigint') return reject('Amount must be BigInt');

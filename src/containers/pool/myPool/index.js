@@ -100,7 +100,7 @@ class MyPool extends Component {
           />
         </Grid>
       })}
-      <AddLiquidity data={poolData} visible={visibleDeposit} onClose={this.onCloseDeposit} />
+      <AddLiquidity poolData={poolData} visible={visibleDeposit} onClose={this.onCloseDeposit} />
       <RemoveLiquidity data={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
     </Grid>
   }
