@@ -15,5 +15,29 @@ export default theme => ({
   },
   avatarItem: {
     marginRight: theme.spacing(2)
-  }
+  },
+  default: {
+    color: theme.palette.common.white,
+    backgroundColor: '#21232F',
+  },
+  send: {
+    color: theme.palette.common.white,
+    backgroundColor: '#6C5DD3',
+  },
+  receive: {
+    color: theme.palette.common.white,
+    backgroundColor: '#4FBF67',
+  },
+  swap: {
+    color: theme.palette.common.white,
+    backgroundColor: '#F9575E',
+  },
+  deposit: {
+    color: theme.palette.common.white,
+    backgroundColor: '#6C5DD3',
+  },
+  withdraw: {
+    color: theme.palette.common.white,
+    backgroundColor: '#4FBF67',
+  },
 });

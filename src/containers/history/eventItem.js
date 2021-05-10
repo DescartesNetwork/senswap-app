@@ -10,7 +10,10 @@ import Divider from 'senswap-ui/divider';
 import Link from 'senswap-ui/link';
 import Avatar from 'senswap-ui/avatar';
 
-import { WarningRounded } from 'senswap-ui/icons';
+import {
+  OpenInNewRounded, DirectionsRunRounded, FlightTakeoffRounded,
+  SwapCallsRounded, FlightLandRounded, InputRounded,
+} from 'senswap-ui/icons';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -38,14 +41,39 @@ class EventItem extends Component {
     }
   }
 
+  parseIcon = () => {
+    const { variant } = this.props;
+    switch (variant) {
+      case 'default':
+        return <DirectionsRunRounded />;
+      case 'send':
+        return <FlightTakeoffRounded />;
+      case 'receive':
+        return <FlightLandRounded />;
+      case 'swap':
+        return <SwapCallsRounded />;
+      case 'deposit':
+        return <InputRounded />;
+      case 'withdraw':
+        return <OpenInNewRounded />;
+      default:
+        return <DirectionsRunRounded />;
+    }
+  }
+
+  parseColor = () => {
+    const { classes, variant } = this.props;
+    return classes[variant] || classes.default;
+  }
+
   render() {
     const { classes, link, amount, unit } = this.props;
 
     return <Fragment>
       <ListItem className={classes.listItem} alignItems="flex-start">
         <ListItemAvatar className={classes.avatarItem}>
-          <Avatar size="medium">
-            <WarningRounded />
+          <Avatar size="medium" className={this.parseColor()} >
+            {this.parseIcon()}
           </Avatar>
         </ListItemAvatar>
         <ListItemText>
@@ -67,12 +95,14 @@ class EventItem extends Component {
                 style={{ color: '#4FBF67' }}
               >View on explorer</Link>
             </Grid>
-            <Grid item xs={12} >
-              <Drain size={1} />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography>{utils.prettyNumber(amount)} {unit}</Typography>
-            </Grid>
+            {amount ? <Fragment>
+              <Grid item xs={12} >
+                <Drain size={1} />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography>{utils.prettyNumber(amount)} {unit}</Typography>
+              </Grid>
+            </Fragment> : null}
           </Grid>
         </ListItemText>
       </ListItem>

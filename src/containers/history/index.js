@@ -10,7 +10,7 @@ import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 import Drawer from 'senswap-ui/drawer';
 import Typography from 'senswap-ui/typography';
-import { IconButton } from 'senswap-ui/button';
+import Button, { IconButton } from 'senswap-ui/button';
 import List from 'senswap-ui/list';
 
 import { ArrowForwardIosRounded } from 'senswap-ui/icons';
@@ -90,8 +90,20 @@ class History extends Component {
         <Grid item xs={12}>
           <List>
             <EventItem />
-            <EventItem />
+            <EventItem variant="swap" amount={10000} unit="SEN" />
+            <EventItem variant="send" amount={1.4917} unit="SOL" />
+            <EventItem variant="receive" />
+            <EventItem variant="deposit" />
+            <EventItem variant="withdraw" amount={10} unit="WETH" />
           </List>
+        </Grid>
+        <Grid item xs={12}>
+          <Button fullWidth>
+            <Typography>See more</Typography>
+          </Button>
+        </Grid>
+        <Grid item xs={12}>
+          <Drain size={4} />
         </Grid>
       </Grid>
     </Drawer>
