@@ -19,6 +19,7 @@ import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
 import Header from './header';
 import Introduction from './introduction';
+import Details from './details';
 import { MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
 
 import styles from './styles';
@@ -342,62 +343,19 @@ class Swap extends Component {
                         onClose={this.onCloseMintSelection}
                       />
                     </Grid>
-                    <Grid item xs={12} />
+                    <Grid item xs={12} >
+                      <Divider />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Details hopData={hopData} />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Drain size={1} />
+                    </Grid>
                     <Grid item xs={12}>
                       {this.renderAction()}
                     </Grid>
-                    <Grid item xs={12}>
-                      <Drain />
-                    </Grid>
-                    <Grid item xs={12}>
-                      {hopData.map((data, index) => {
-                        const {
-                          srcMintAddress, bidAmount,
-                          dstMintAddress, askAmount,
-                          fee, ratio, slippage,
-                        } = data;
-                        console.log(data)
-                        return <Grid container key={index}>
-                          <Grid item xs={12}>
-                            <Typography>Hop #{index}</Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Typography>Source Mint Address</Typography>
-                            <Typography>{srcMintAddress}</Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Typography>Destination Mint Address</Typography>
-                            <Typography>{dstMintAddress}</Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography>Bid Amount</Typography>
-                            <Typography>{ssjs.undecimalize(bidAmount, 9)}</Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography>Ask Amount</Typography>
-                            <Typography>{ssjs.undecimalize(askAmount, 9)}</Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Typography>Fee</Typography>
-                            <Typography>{ssjs.undecimalize(fee, 9) * 100}%</Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Typography>Ratio</Typography>
-                            <Typography>{ratio}</Typography>
-                          </Grid>
-                          <Grid item xs={4}>
-                            <Typography>Slippage</Typography>
-                            <Typography>{ssjs.undecimalize(slippage, 9) * 100}%</Typography>
-                          </Grid>
-                          <Grid item xs={12}>
-                            <Divider />
-                          </Grid>
-                        </Grid>
-                      })}
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Drain />
-                    </Grid>
+                    <Grid item xs={12} />
                   </Grid>
                 </Grid>
               </Grid>

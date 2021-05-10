@@ -14,6 +14,10 @@ export default theme => ({
     padding: theme.spacing(4),
     height: `calc(100% - ${theme.spacing(8)}px)`
   },
+  details: {
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.background.secondary
+  },
   imageRow: {
     padding: theme.spacing(2),
     minHeight: theme.spacing(20),

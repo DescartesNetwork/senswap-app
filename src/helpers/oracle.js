@@ -94,7 +94,7 @@ Oracle._directCurve = (bidAmount, srcMintAddress, dstMintAddress, poolData) => {
 
     // Default state
     if (!bidAmount) {
-      const slippage = 0;
+      const slippage = ZERO;
       const ratio = ssjs.div(askReserve, bidReserve);
       return resolve([{
         slippage, ratio, fee,
@@ -128,7 +128,7 @@ Oracle._inverseDirectCurve = (askAmount, srcMintAddress, dstMintAddress, poolDat
 
     // Default state
     if (!askAmount) {
-      const slippage = 0;
+      const slippage = ZERO;
       const ratio = ssjs.div(askReserve, bidReserve);
       return resolve([{
         slippage, ratio, fee,
