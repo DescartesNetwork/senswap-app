@@ -6,14 +6,14 @@ import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import { IconButton } from 'senswap-ui/button';
+import Paper from 'senswap-ui/paper';
 
-import { ClearRounded, CheckRounded } from '@material-ui/icons';
+import { ClearRounded, CheckRounded } from 'senswap-ui/icons';
 
-import { BaseCard } from 'components/cards';
 import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
@@ -58,7 +58,7 @@ class Token extends Component {
     const { data: { icon, address, name, symbol } } = this.state;
 
     if (!address) return null;
-    return <BaseCard>
+    return <Paper>
       <Grid container spacing={2} className={classes.noWrap} alignItems="center">
         <Grid item>
           <MintAvatar icon={icon} />
@@ -77,7 +77,7 @@ class Token extends Component {
           <Typography className={classes.subtitle}>{address}</Typography>
         </Grid>
       </Grid>
-    </BaseCard>
+    </Paper>
   }
 }
 

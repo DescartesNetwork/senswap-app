@@ -57,7 +57,7 @@ class InitializeMint extends Component {
 
   onCreate = () => {
     const { mint, supply: refSupply, decimals: refDecimals } = this.state;
-    const { wallet: { user, accounts }, setError, unlockWallet, updateWallet } = this.props;
+    const { wallet: { accounts }, setError, updateWallet } = this.props;
 
     const decimals = parseInt(refDecimals) || 0;
     const supply = parseInt(refSupply) || 0;
@@ -66,28 +66,23 @@ class InitializeMint extends Component {
     if (supply < 1 || supply > 1000000000000) return setError('Total supply must be grearer than0, and less than or equal to 1000000000000');
 
     const mintAddress = mint.publicKey.toBase58();
-    let secretKey = null;
     let txId = null;
     let accountAddress = null;
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
+    const wallet = window.senswap.wallet;
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(re => {
-        secretKey = re;
-        const payer = ssjs.fromSecretKey(secretKey);
-        return this.splt.initializeMint(decimals, null, mint, payer);
+      return wallet.getAccount().then(payerAddress => {
+        return this.splt.initializeMint(decimals, payerAddress, null, mint, wallet);
       }).then(txId => {
-        return sol.newAccount(mintAddress, secretKey);
+        return sol.newAccount(mintAddress);
       }).then(({ address, txId }) => {
         accountAddress = address;
-        const payer = ssjs.fromSecretKey(secretKey);
-        return this.splt.mintTo(totalSupply, mintAddress, accountAddress, payer);
+        return this.splt.mintTo(totalSupply, mintAddress, accountAddress, wallet);
       }).then(refTxId => {
         txId = refTxId;
-        const newMints = [...user.mints];
-        if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
+        return updateWallet({ accounts: newAccounts });
       }).then(re => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {

@@ -6,6 +6,9 @@ export default theme => ({
   stretch: {
     flex: '1 1 auto',
   },
+  paper: {
+    padding: theme.spacing(2),
+  },
   tab: {
     minHeight: theme.spacing(7),
     minWidth: 'initial',

@@ -1,6 +1,5 @@
-import BaseCard from './base';
-import NotiCard from './noti';
+import CardPool from './cardPool';
 
 export {
-  BaseCard, NotiCard,
+  CardPool,
 }

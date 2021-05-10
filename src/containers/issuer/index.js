@@ -5,13 +5,14 @@ import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
+import Paper from 'senswap-ui/paper';
+import Drain from 'senswap-ui/drain';
 
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
 import { LockRounded } from '@material-ui/icons';
 
-import { BaseCard } from 'components/cards';
 import InitializeMint from './initialization';
 import RegisterMint from './register';
 import UpdateMint from './update';
@@ -20,17 +21,19 @@ import styles from './styles';
 
 class Issuer extends Component {
 
-  onRoute = (e, route) => {
+  onRoute = (_, route) => {
     return this.props.history.push(route);
   }
 
   render() {
-    const { classes } = this.props;
-    const { location: { pathname } } = this.props;
+    const { classes, location: { pathname } } = this.props;
 
     return <Grid container justify="center">
+      <Grid item xs={12}>
+        <Drain size={10} />
+      </Grid>
       <Grid item xs={12} md={8} lg={6}>
-        <BaseCard>
+        <Paper className={classes.paper}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Tabs
@@ -76,7 +79,7 @@ class Issuer extends Component {
               </Switch>
             </Grid>
           </Grid>
-        </BaseCard>
+        </Paper>
       </Grid>
     </Grid>
   }

@@ -4,21 +4,21 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Button from 'senswap-ui/button';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Link from 'senswap-ui/link';
+import Drain from 'senswap-ui/drain';
+import Paper from 'senswap-ui/paper';
+
+import { FlightTakeoffRounded } from 'senswap-ui/icons';
+
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Link from '@material-ui/core/Link';
-import Drain from 'senswap-ui/drain';
-
-import { FlightTakeoffRounded } from '@material-ui/icons';
-
-import { BaseCard } from 'components/cards';
 
 import styles from './styles';
 import sol from 'helpers/sol';
@@ -137,7 +137,7 @@ class Faucet extends Component {
       <Grid item xs={11} md={10}>
         <Grid container justify="center" spacing={2}>
           <Grid item xs={12} md={6}>
-            <BaseCard>
+            <Paper className={classes.paper}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <Typography variant="h4">SenFaucet</Typography>
@@ -179,7 +179,7 @@ class Faucet extends Component {
                   </Grid>
                 </Grid>
               </Grid>
-            </BaseCard>
+            </Paper>
           </Grid>
         </Grid>
       </Grid>
