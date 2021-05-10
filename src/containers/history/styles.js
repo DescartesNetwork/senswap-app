@@ -7,7 +7,14 @@ export default theme => ({
     flex: '1 1 auto',
   },
   drawer: {
-    width: theme.spacing(32),
+    width: theme.spacing(35),
     padding: theme.spacing(4),
+  },
+  listItem: {
+    paddingLeft: 0,
+    paddingRight: 0,
+  },
+  avatarItem: {
+    marginRight: theme.spacing(2)
   }
 });

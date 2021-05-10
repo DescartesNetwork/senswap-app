@@ -11,10 +11,12 @@ import Drain from 'senswap-ui/drain';
 import Drawer from 'senswap-ui/drawer';
 import Typography from 'senswap-ui/typography';
 import { IconButton } from 'senswap-ui/button';
+import List from 'senswap-ui/list';
 
 import { ArrowForwardIosRounded } from 'senswap-ui/icons';
 
 import { CardBalance } from 'components/card';
+import EventItem from './eventItem';
 
 import styles from './styles';
 import { toggleRightBar } from 'modules/ui.reducer';
@@ -80,10 +82,18 @@ class History extends Component {
           <CardBalance accountData={accountData} />
         </Grid>
         <Grid item xs={12}>
-          <Drain size={1} />
+          <Drain size={2} />
         </Grid>
         <Grid item xs={12}>
           <Typography variant="h6">Latest Activities</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Drain size={1} />
+        </Grid>
+        <Grid item xs={12}>
+          <List>
+            <EventItem />
+          </List>
         </Grid>
       </Grid>
     </Drawer>
