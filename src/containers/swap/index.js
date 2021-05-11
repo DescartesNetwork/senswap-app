@@ -207,7 +207,6 @@ class Swap extends Component {
         console.log(txId)
         return this.setState({ loading: false });
       }).catch(er => {
-        console.log(er);
         return this.setState({ loading: false }, () => {
           return setError(er);
         });
