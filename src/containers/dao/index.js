@@ -9,12 +9,12 @@ import Typography from 'senswap-ui/typography';
 import { IconButton } from 'senswap-ui/button';
 import Drain from 'senswap-ui/drain';
 
-import { LanguageRounded, DirectionsBoatRounded } from '@material-ui/icons';
+import { LanguageRounded } from '@material-ui/icons';
 
-import InitializeNetwork from './initializeNetwork';
 import NetworkInfo from './info';
 
 import styles from './styles';
+
 
 class DAO extends Component {
 
@@ -38,7 +38,7 @@ class DAO extends Component {
                 </IconButton>
               </Grid>
               <Grid item>
-                <Typography variant="h6" color="primary">Current Networks</Typography>
+                <Typography variant="h6" color="primary">Current Pool</Typography>
               </Grid>
             </Grid>
           </Grid>
@@ -47,21 +47,6 @@ class DAO extends Component {
           </Grid>
           <Grid item xs={12}>
             <Drain />
-          </Grid>
-          <Grid item xs={12}>
-            <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
-              <Grid item>
-                <IconButton color="secondary" onClick={this.onAdvance}>
-                  <DirectionsBoatRounded />
-                </IconButton>
-              </Grid>
-              <Grid item>
-                <Typography variant="h6" color="primary">New Network</Typography>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <InitializeNetwork />
           </Grid>
         </Grid>
       </Grid>

@@ -23,7 +23,7 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet, updateWallet } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 import { getLPTData } from 'modules/bucket.reducer';
 
 
@@ -279,7 +279,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet, updateWallet,
+  updateWallet,
   getLPTData,
 }, dispatch);
 

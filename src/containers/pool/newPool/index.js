@@ -28,7 +28,7 @@ import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getMints, getMint } from 'modules/mint.reducer';
 import { addPool } from 'modules/pool.reducer';
-import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -299,7 +299,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getMints, getMint,
   addPool,
-  updateWallet, unlockWallet,
+  updateWallet,
   getAccountData,
 }, dispatch);
 

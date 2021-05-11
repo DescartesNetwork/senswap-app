@@ -17,7 +17,6 @@ import MintSelection from 'containers/wallet/components/mintSelection';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet } from 'modules/wallet.reducer';
 import { updateMint, deleteMint } from 'modules/mint.reducer';
 
 const EMPTY = {
@@ -36,12 +35,10 @@ class UpdateMint extends Component {
   }
 
   onUpdate = () => {
-    const { updateMint, unlockWallet, setError } = this.props;
+    const { updateMint, setError } = this.props;
     const { data } = this.state;
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(secretKey => {
-        return updateMint(data, secretKey);
-      }).then(re => {
+      return updateMint(data).then(re => {
         return this.setState({ ...EMPTY, ok: true });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -52,12 +49,10 @@ class UpdateMint extends Component {
   }
 
   onDelete = () => {
-    const { deleteMint, unlockWallet, setError } = this.props;
+    const { deleteMint, setError } = this.props;
     const { data } = this.state;
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(secretKey => {
-        return deleteMint(data, secretKey);
-      }).then(re => {
+      return deleteMint(data).then(re => {
         return this.setState({ ...EMPTY, ok: true });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -191,7 +186,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet,
   updateMint, deleteMint,
 }, dispatch);
 
