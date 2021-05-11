@@ -18,13 +18,6 @@ export default theme => ({
       boxShadow: theme.shadows[6],
     },
   },
-  address: {
-    fontSize: 10
-  },
-  tools: {
-    width: `calc(100% - ${theme.spacing(2)}px)`,
-    margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
-  },
   badgeIcon: {
     width: theme.spacing(2),
     height: theme.spacing(2),

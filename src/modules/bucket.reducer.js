@@ -228,59 +228,6 @@ export const getPoolData = (poolAddress, force = false) => {
   }
 }
 
-/**
- * Get pool data
- */
-export const GET_LPT_DATA = 'GET_LPT_DATA';
-export const GET_LPT_DATA_OK = 'GET_LPT_DATA_OK';
-export const GET_LPT_DATA_FAIL = 'GET_LPT_DATA_FAIL';
-
-export const getLPTData = (lptAddress, force = false) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: GET_LPT_DATA });
-
-      if (!ssjs.isAddress(lptAddress)) {
-        const er = 'Invalid LPT address';
-        dispatch({ type: GET_LPT_DATA_FAIL, reason: er });
-        return reject(er);
-      }
-
-      let { bucket: { [lptAddress]: lptData } } = getState();
-      if (!lptData || force) {
-        const { api: { base } } = configs;
-        return window.senswap.swap.getLPTData(lptAddress).then(re => {
-          lptData = { ...re }
-          const condition = { address: re.pool.address }
-          return api.get(base + '/pools', { condition });
-        }).then(({ data: [re] }) => {
-          if (!re) return Promise.resolve({ data: {} });
-          return api.get(base + '/pool', { _id: re._id });
-        }).then(({ data: re }) => {
-          lptData.pool = { ...re, ...lptData.pool }
-          const condition = { address: lptData.pool.mint.address }
-          return api.get(base + '/mints', { condition });
-        }).then(({ data: [re] }) => {
-          if (!re) return Promise.resolve({ data: {} });
-          return api.get(base + '/mint', { _id: re._id });
-        }).then(({ data: re }) => {
-          lptData.pool.mint = { ...lptData.pool.mint, ...re }
-          const data = { [lptAddress]: lptData }
-          dispatch({ type: GET_LPT_DATA_OK, data });
-          return resolve(lptData);
-        }).catch(er => {
-          dispatch({ type: GET_LPT_DATA_FAIL, reason: er.toString() });
-          return reject(er);
-        });
-      } else {
-        const data = { [lptAddress]: lptData };
-        dispatch({ type: GET_LPT_DATA_OK, data });
-        return resolve(lptData);
-      }
-    });
-  }
-}
-
 
 /**
  * Set item
@@ -329,10 +276,6 @@ export default (state = defaultState, action) => {
     case GET_POOL_DATA_OK:
       return { ...state, ...action.data };
     case GET_POOL_DATA_FAIL:
-      return { ...state, ...action.data };
-    case GET_LPT_DATA_OK:
-      return { ...state, ...action.data };
-    case GET_LPT_DATA_FAIL:
       return { ...state, ...action.data };
     case SET_ITEM_OK:
       return { ...state, ...action.data };

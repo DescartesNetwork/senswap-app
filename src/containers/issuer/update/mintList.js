@@ -87,8 +87,7 @@ class MintList extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { icon, size, edge } = this.props;
+    const { classes, icon, size, edge } = this.props;
     const { anchorEl, data, search, loading } = this.state;
 
     return <Fragment>

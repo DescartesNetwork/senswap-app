@@ -24,7 +24,6 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
-import { getLPTData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -280,7 +279,6 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
-  getLPTData,
 }, dispatch);
 
 RemoveLiquidity.defaultProps = {

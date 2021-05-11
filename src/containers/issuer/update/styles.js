@@ -11,4 +11,11 @@ export default theme => ({
     height: theme.spacing(4),
     marginRight: theme.spacing(1),
   },
+  address: {
+    fontSize: 10
+  },
+  tools: {
+    width: `calc(100% - ${theme.spacing(2)}px)`,
+    margin: `${theme.spacing(-1)}px ${theme.spacing(1)}px`,
+  },
 });
