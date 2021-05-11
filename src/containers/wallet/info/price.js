@@ -1,33 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
+import isEqual from 'react-fast-compare';
 
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
+import Chip from 'senswap-ui/chip';
 
+import styles from './styles';
 import utils from 'helpers/utils';
+import { setError } from 'modules/ui.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
-function Price(props) {
-  const [usd, setUSD] = useState(0);
-  const { amount, ticket } = props;
-  useEffect(() => {
-    return ssjs.parseCGK(ticket).then(({ price }) => {
-      return setUSD(price * amount);
+
+class Price extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      usd: 0,
+      btc: 0,
+    }
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  componentDidUpdate(prevProps) {
+    const { wallet: { accounts: prevAccounts } } = prevProps;
+    const { wallet: { accounts } } = this.props;
+    if (!isEqual(prevAccounts, accounts)) this.fetchData();
+  }
+
+  fetchData = () => {
+    const { wallet: { accounts }, serError, getAccountData } = this.props;
+    return accounts.each(accountAddress => {
+      return getAccountData(accountAddress);
+    }, { skipError: true, skipIndex: true }).then(data => {
+      data = data.filter(({ pool, mint }) => {
+        const { address: poolAddress } = pool || {}
+        const { ticket } = mint || {}
+        return !ssjs.isAddress(poolAddress) && ticket;
+      });
+      return data.each(({ amount, mint: { decimals, ticket } }) => {
+        const balance = ssjs.undecimalize(amount, decimals);
+        return utils.fetchValue(balance, ticket);
+      });
+    }).then(data => {
+      const usd = data.map(({ value }) => value).reduce((a, b) => a + b, 0);
+      const btc = data.map(({ btc }) => btc).reduce((a, b) => a + b, 0);
+      return this.setState({ usd, btc, loading: false });
     }).catch(er => {
-      return console.error(er);
+      return serError(er);
     });
-  }, [amount, ticket]);
+  }
 
-  return <Typography variant="h5" color="textSecondary">{utils.prettyNumber(usd)} USD</Typography>
+  render() {
+    const { classes } = this.props;
+    const { usd } = this.state;
+
+    return <Grid container>
+      <Grid item xs={12}>
+        <Grid container alignItems="center" className={classes.noWrap}>
+          <Grid item>
+            <Typography variant="h4">{utils.prettyNumber(ssjs.undecimalize(usd, 9)) || '0'}</Typography>
+          </Grid>
+          <Grid item className={classes.stretch}>
+            <Chip label={<Typography variant="h6">BTC</Typography>} color="#FF9F38" />
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="subtitle1" color="textSecondary">{utils.prettyNumber(usd)} USD</Typography>
+      </Grid>
+    </Grid>
+  }
 }
 
-Price.defaultProps = {
-  amount: 0,
-  ticket: 'solana',
-}
+const mapStateToProps = state => ({
+  ui: state.ui,
+  wallet: state.wallet,
+  bucket: state.bucket,
+});
 
-Price.propTypes = {
-  amount: PropTypes.number,
-  ticket: PropTypes.string,
-}
+const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
+  getAccountData,
+}, dispatch);
 
-export default Price;
+export default withRouter(connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withStyles(styles)(Price)));

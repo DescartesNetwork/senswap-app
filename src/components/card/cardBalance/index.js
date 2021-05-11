@@ -28,7 +28,7 @@ class CardBalance extends Component {
     this.state = {
       loading: false,
       censored: false,
-      value: 0,
+      usd: 0,
       btc: 0,
       error: '',
     }
@@ -56,18 +56,18 @@ class CardBalance extends Component {
         const balance = ssjs.undecimalize(amount, decimals);
         return utils.fetchValue(balance, ticket);
       }).then(data => {
-        const value = data.map(({ value }) => value).reduce((a, b) => a + b, 0);
+        const usd = data.map(({ value }) => value).reduce((a, b) => a + b, 0);
         const btc = data.map(({ btc }) => btc).reduce((a, b) => a + b, 0);
-        return this.setState({ value, btc, error: '', loading: false });
+        return this.setState({ usd, btc, error: '', loading: false });
       }).catch(er => {
-        return this.setState({ error: er.toString(), value: 0, btc: 0, loading: false });
+        return this.setState({ error: er.toString(), usd: 0, btc: 0, loading: false });
       });
     });
   }
 
   render() {
     const { classes, accountData } = this.props;
-    const { censored, error, value, btc, loading } = this.state;
+    const { censored, error, usd, btc, loading } = this.state;
 
     const [sample] = accountData || [];
     const { owner } = sample || {}
@@ -120,7 +120,7 @@ class CardBalance extends Component {
             </Grid>
             <Grid item xs={12}>
               <Typography variant="h5" align="center">{censored ? "*****" : utils.prettyNumber(btc)}</Typography>
-              <Typography color="textSecondary" align="center">{censored ? '*****' : '$' + utils.prettyNumber(value)}</Typography>
+              <Typography color="textSecondary" align="center">{censored ? '*****' : '$' + utils.prettyNumber(usd)}</Typography>
             </Grid>
           </Grid>
         </Grid>

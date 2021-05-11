@@ -25,7 +25,7 @@ class EventItem extends Component {
     const { variant } = this.props;
     switch (variant) {
       case 'default':
-        return 'Transaction';
+        return 'Other';
       case 'send':
         return 'Send';
       case 'receive':
@@ -37,7 +37,7 @@ class EventItem extends Component {
       case 'withdraw':
         return 'Withdraw';
       default:
-        return 'Transaction';
+        return 'Other';
     }
   }
 

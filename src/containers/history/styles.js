@@ -1,3 +1,5 @@
+const DRAWER_WIDTH = 42;
+
 // eslint-disable-next-line
 export default theme => ({
   noWrap: {
@@ -7,7 +9,10 @@ export default theme => ({
     flex: '1 1 auto',
   },
   drawer: {
-    width: theme.spacing(35),
+    width: theme.spacing(DRAWER_WIDTH),
+  },
+  paper: {
+    width: theme.spacing(DRAWER_WIDTH) - 2 * theme.spacing(4),
     padding: theme.spacing(4),
   },
   listItem: {
@@ -16,6 +21,7 @@ export default theme => ({
   avatarItem: {
     marginRight: theme.spacing(2)
   },
+  // Avatars
   default: {
     color: theme.palette.common.white,
     backgroundColor: '#21232F',

@@ -2,23 +2,23 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Paper from 'senswap-ui/paper';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
-import Chip from 'senswap-ui/chip';
+import Drain from 'senswap-ui/drain';
 
 import { FlightTakeoffRounded, FlightLandRounded, HistoryRounded } from 'senswap-ui/icons';
+
+import Hidden from '@material-ui/core/Hidden';
 
 import Price from './price';
 import { AccountSelection, AccountSend, AccountReceive } from 'containers/wallet';
 
 import styles from './styles';
-import utils from 'helpers/utils';
-import { setError } from 'modules/ui.reducer';
+import { setError, toggleRightBar } from 'modules/ui.reducer';
 
 
 class Info extends Component {
@@ -33,17 +33,15 @@ class Info extends Component {
 			visibleAccountReceive: false,
 		}
 
-		this.wallet = window.senswap.wallet;
 		this.splt = window.senswap.splt;
 		this.lamports = window.senswap.lamports;
 	}
 
 	transfer = (amount, from, to) => {
-		if (!from) {
-			amount = amount.toString();
-			return this.lamports.transfer(amount, to, this.wallet);
-		}
-		return this.splt.transfer(amount, from, to, this.wallet);
+		const wallet = window.senswap.wallet;
+		if (from) return this.splt.transfer(amount, from, to, wallet);
+		amount = amount.toString();
+		return this.lamports.transfer(amount, to, wallet);
 	}
 
 	onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
@@ -74,49 +72,52 @@ class Info extends Component {
 	onOpenAccountReceive = () => this.setState({ visibleAccountReceive: true });
 
 	render() {
-		const { classes } = this.props;
-		const { wallet: { lamports } } = this.props;
+		const { classes, toggleRightBar } = this.props;
 		const { accountData, visibleAccountSelection, visibleAccountSend, visibleAccountReceive } = this.state;
 
 		return <Paper className={classes.paper}>
-			<Grid container spacing={1}>
+			<Grid container>
 				<Grid item xs={12}>
 					<Grid container className={classes.noWrap}>
 						<Grid item className={classes.stretch}>
 							<Typography variant="h6">Total Balance</Typography>
 						</Grid>
 						<Grid item>
-							<Button startIcon={<HistoryRounded color="disabled" />}>
+							<Button startIcon={<HistoryRounded color="disabled" />} onClick={toggleRightBar}>
 								<Typography variant="body2" color="textSecondary">History</Typography>
 							</Button>
 						</Grid>
 					</Grid>
 				</Grid>
-				<Grid item xs={12}>
-					<Grid container alignItems="center" className={classes.noWrap}>
-						<Grid item>
-							<Typography variant="h2">{utils.prettyNumber(ssjs.undecimalize(lamports, 9))}</Typography>
-						</Grid>
-						<Grid item className={classes.stretch}>
-							<Chip label="SOL" classes={{ root: classes.chip }} />
-						</Grid>
-						<Grid item>
+				<Grid item xs={12} md={6}>
+					<Price />
+				</Grid>
+				<Hidden mdUp>
+					<Grid item xs={12}>
+						<Drain size={2} />
+					</Grid>
+				</Hidden>
+				<Grid item xs={12} md={6}>
+					<Grid container justify="flex-end" className={classes.noWrap}>
+						<Grid item xs={6} md='auto'>
 							<Button
 								variant="contained"
 								color="primary"
 								startIcon={<FlightTakeoffRounded />}
 								size="large"
 								onClick={() => this.onOpenAccountSelection('send')}
+								fullWidth
 							>
 								<Typography>Send</Typography>
 							</Button>
 						</Grid>
-						<Grid item>
+						<Grid item xs={6} md='auto'>
 							<Button
 								variant="outlined"
 								startIcon={<FlightLandRounded />}
 								size="large"
 								onClick={() => this.onOpenAccountSelection('receive')}
+								fullWidth
 							>
 								<Typography>Receive</Typography>
 							</Button>
@@ -139,9 +140,6 @@ class Info extends Component {
 						/>
 					</Grid>
 				</Grid>
-				<Grid item xs={12}>
-					<Price amount={parseFloat(ssjs.undecimalize(lamports, 9))} ticket="solana" />
-				</Grid>
 			</Grid>
 		</Paper>
 	}
@@ -153,7 +151,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-	setError,
+	setError, toggleRightBar,
 }, dispatch);
 
 export default withRouter(connect(

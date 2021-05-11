@@ -42,7 +42,7 @@ class Pool extends Component {
   parseRoute = () => {
     const { location: { pathname } } = this.props;
     const route = pathname.split('/')[2];
-    return this.setState({ route })
+    return this.setState({ route });
   }
 
   render() {

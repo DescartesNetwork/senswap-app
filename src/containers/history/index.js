@@ -28,18 +28,25 @@ class History extends Component {
     super();
 
     this.state = {
+      route: '',
       accountData: []
     }
   }
 
   componentDidMount() {
     const { ui: { rightbar } } = this.props;
-    if (rightbar) return this.fetchData();
+    if (rightbar) this.fetchData();
+    this.parseRoute();
   }
 
   componentDidUpdate(prevProps) {
-    const { wallet: { accounts: prevAccounts }, ui: { rightbar: prevRightbar } } = prevProps;
-    const { wallet: { accounts }, ui: { rightbar } } = this.props;
+    const {
+      wallet: { accounts: prevAccounts },
+      ui: { rightbar: prevRightbar },
+      location: prevLocation
+    } = prevProps;
+    const { wallet: { accounts }, ui: { rightbar }, location } = this.props;
+    if (!isEqual(prevLocation, location)) this.parseRoute();
     if (!isEqual(prevAccounts, accounts) && rightbar) return this.fetchData();
     if (!isEqual(prevRightbar, rightbar) && rightbar) return this.fetchData();
   }
@@ -59,6 +66,12 @@ class History extends Component {
     });
   }
 
+  parseRoute = () => {
+    const { location: { pathname } } = this.props;
+    const route = pathname.split('/')[1];
+    return this.setState({ route });
+  }
+
   render() {
     const { classes, ui: { rightbar }, toggleRightBar } = this.props;
     const { accountData } = this.state;
@@ -68,7 +81,8 @@ class History extends Component {
       anchor="right"
       variant="temporary"
       onClose={toggleRightBar}
-      classes={{ paper: classes.drawer }}
+      className={classes.drawer}
+      classes={{ paper: classes.paper }}
     >
       <Grid container>
         {/* Safe space */}

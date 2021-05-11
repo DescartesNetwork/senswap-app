@@ -39,6 +39,7 @@ class App extends Component {
           <Grid container className={classes.noWrap}>
             {/* Left bar */}
             <Sidebar />
+            {/* Body */}
             <Grid item className={classes.stretch} style={{ overflow: 'auto' }}>
               <Grid container justify="center" >
                 {/* Safe space */}

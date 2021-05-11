@@ -10,12 +10,4 @@ export default theme => ({
     padding: theme.spacing(4),
     borderRadius: theme.shape.borderRadius * 2,
   },
-  chip: {
-    '& span': {
-      backgroundColor: '#00e5ff',
-    },
-    backgroundColor: '#00e5ff',
-    padding: 6,
-    fontSize: 16,
-  }
 });
