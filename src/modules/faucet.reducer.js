@@ -37,36 +37,6 @@ export const getWhiteList = () => {
 }
 
 /**
- * Airdrop lamports
- */
-export const AIRDROP_LAMPORTS = 'AIRDROP_LAMPORTS';
-export const AIRDROP_LAMPORTS_OK = 'AIRDROP_LAMPORTS_OK';
-export const AIRDROP_LAMPORTS_FAIL = 'AIRDROP_LAMPORTS_FAIL';
-
-export const airdropLamports = (dstAddress) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: AIRDROP_LAMPORTS });
-
-      if (!ssjs.isAddress(dstAddress)) {
-        const er = 'Invalid input';
-        dispatch({ type: AIRDROP_LAMPORTS_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const { api: { base } } = configs;
-      return api.post(base + '/faucet/fund', { dstAddress }).then(({ data }) => {
-        dispatch({ type: AIRDROP_LAMPORTS_OK, data });
-        return resolve(data);
-      }).catch(er => {
-        dispatch({ type: AIRDROP_LAMPORTS_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
-    });
-  }
-}
-
-/**
  * Airdrop tokens
  */
 export const AIRDROP_TOKENS = 'AIRDROP_TOKENS';
@@ -105,10 +75,6 @@ export default (state = defaultState, action) => {
     case GET_WHITELIST_OK:
       return { ...state, ...action.data };
     case GET_WHITELIST_FAIL:
-      return { ...state, ...action.data };
-    case AIRDROP_LAMPORTS_OK:
-      return { ...state, ...action.data };
-    case AIRDROP_LAMPORTS_FAIL:
       return { ...state, ...action.data };
     case AIRDROP_TOKENS_OK:
       return { ...state, ...action.data };

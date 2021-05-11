@@ -15,7 +15,7 @@ function Price(props) {
       setPrice(price);
       setUSD(price * amount);
     }).catch(er => {
-      return console.error(er);
+      // Do nothing
     });
   }, [amount, ticket]);
 

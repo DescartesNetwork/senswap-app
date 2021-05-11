@@ -23,8 +23,8 @@ import Select from '@material-ui/core/Select';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet, updateWallet, openWallet } from 'modules/wallet.reducer';
-import { getWhiteList, airdropLamports, airdropTokens } from 'modules/faucet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
+import { getWhiteList, airdropTokens } from 'modules/faucet.reducer';
 import { getMintData, getAccountData } from 'modules/bucket.reducer';
 
 
@@ -69,30 +69,18 @@ class Faucet extends Component {
     return this.setState({ mintAddress });
   }
 
-  onAutogenDestinationAddress = (mintAddress, secretKey) => {
+  onAutogenDestinationAddress = (mintAddress) => {
     return new Promise((resolve, reject) => {
-      if (!secretKey) return reject('Cannot unlock account');
-      if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
-
-      const { wallet: { user, accounts }, getAccountData, updateWallet } = this.props;
-      return Promise.all(accounts.map(accountAddress => {
-        return getAccountData(accountAddress);
-      })).then(data => {
-        const accountData = data.find(({ mint: { address } }) => address === mintAddress);
-        if (accountData && accountData.address) return resolve(accountData.address);
-        let accountAddress = null;
-        return sol.newAccount(mintAddress, secretKey).then(({ address }) => {
-          accountAddress = address;
-          const newMints = [...user.mints];
-          if (!newMints.includes(mintAddress)) newMints.push(mintAddress);
-          const newAccounts = [...accounts];
-          if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-          return updateWallet({ user: { ...user, mints: newMints }, accounts: newAccounts });
-        }).then(re => {
-          return resolve(accountAddress);
-        }).catch(er => {
-          return reject(er);
-        });
+      if (!mintAddress) return reject('Unknown token');
+      const { wallet: { accounts }, updateWallet } = this.props;
+      let accountAddress = null;
+      return sol.newAccount(mintAddress).then(({ address }) => {
+        accountAddress = address;
+        const newAccounts = [...accounts];
+        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
+        return updateWallet({ accounts: newAccounts });
+      }).then(re => {
+        return resolve(accountAddress);
       }).catch(er => {
         return reject(er);
       });
@@ -100,25 +88,22 @@ class Faucet extends Component {
   }
 
   onAirdrop = () => {
-    const {
-      wallet: { user },
-      setError,
-      unlockWallet,
-      airdropLamports, airdropTokens,
-    } = this.props;
+    const { wallet: { user }, setError, airdropTokens } = this.props;
     const { mintAddress } = this.state;
     if (!ssjs.isAddress(mintAddress)) return setError('Invalid token address');
 
     return this.setState({ loading: true }, () => {
-      return airdropLamports(user.address).then(re => {
-        return unlockWallet();
-      }).then(secretKey => {
-        return this.onAutogenDestinationAddress(mintAddress, secretKey);
+      const connection = window.senswap.splt.connection;
+      const publicKey = ssjs.fromAddress(user.address);
+      const amount = 10 ** 9;
+      return connection.requestAirdrop(publicKey, amount).then(re => {
+        return this.onAutogenDestinationAddress(mintAddress);
       }).then(dstAddress => {
         return airdropTokens(dstAddress, mintAddress);
       }).then(({ txId }) => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
+        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
@@ -129,59 +114,57 @@ class Faucet extends Component {
   render() {
     const { classes } = this.props;
     const { mintAddress, data, txId, loading } = this.state;
-    const { openWallet } = this.props;
 
     const selectedData = data.filter(({ address }) => address === mintAddress)[0] || {};
 
     return <Grid container justify="center" spacing={2}>
-      <Grid item xs={11} md={10}>
-        <Grid container justify="center" spacing={2}>
-          <Grid item xs={12} md={6}>
-            <Paper className={classes.paper}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant="h4">SenFaucet</Typography>
+      <Grid item xs={12}>
+        <Drain size={10} />
+      </Grid>
+      <Grid item xs={12} md={8} lg={6}>
+        <Paper className={classes.paper}>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="h4">SenFaucet</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Drain size={4} />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography>You will receive a little amount of desired token to test. Be aware that these tokens are valueless.</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel>{selectedData.name || 'Unknown'}</InputLabel>
+                <Select
+                  label={selectedData.name || 'Unknown'}
+                  value={mintAddress}
+                  onChange={this.onSelect}
+                >
+                  {data.map(({ address }) => <MenuItem key={address} value={address}>{address}</MenuItem>)}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <Grid container className={classes.noWrap} spacing={2}>
+                <Grid item className={classes.stretch}>
+                  {txId ? <Typography>Success - <Link color="primary" to="/wallet">check it out!</Link></Typography> : null}
                 </Grid>
-                <Grid item xs={12}>
-                  <Drain small />
-                </Grid>
-                <Grid item xs={12}>
-                  <Typography>You will receive a little amount of desired token to test. Be aware that these tokens are valueless.</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl variant="outlined" fullWidth>
-                    <InputLabel>{selectedData.name || 'Unknown'}</InputLabel>
-                    <Select
-                      label={selectedData.name || 'Unknown'}
-                      value={mintAddress}
-                      onChange={this.onSelect}
-                    >
-                      {data.map(({ address }) => <MenuItem key={address} value={address}>{address}</MenuItem>)}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <Grid container className={classes.noWrap} spacing={2}>
-                    <Grid item className={classes.stretch}>
-                      {txId ? <Typography>Success - <Link component="button" variant="body1" onClick={openWallet}>check it out!</Link></Typography> : null}
-                    </Grid>
-                    <Grid item>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        endIcon={loading ? <CircularProgress size={17} /> : <FlightTakeoffRounded />}
-                        onClick={this.onAirdrop}
-                        disabled={loading}
-                      >
-                        <Typography>OK</Typography>
-                      </Button>
-                    </Grid>
-                  </Grid>
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    endIcon={loading ? <CircularProgress size={17} /> : <FlightTakeoffRounded />}
+                    onClick={this.onAirdrop}
+                    disabled={loading}
+                  >
+                    <Typography>OK</Typography>
+                  </Button>
                 </Grid>
               </Grid>
-            </Paper>
+            </Grid>
           </Grid>
-        </Grid>
+        </Paper>
       </Grid>
     </Grid>
   }
@@ -196,8 +179,8 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet, updateWallet, openWallet,
-  getWhiteList, airdropLamports, airdropTokens,
+  updateWallet,
+  getWhiteList, airdropTokens,
   getMintData, getAccountData,
 }, dispatch);
 

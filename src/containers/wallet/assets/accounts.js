@@ -76,6 +76,10 @@ class Accounts extends Component {
     });
   }
 
+  toExplorer = (accountAddress) => {
+    return window.open(utils.explorer(accountAddress));
+  }
+
   render() {
     const { classes } = this.props;
     const { loading, data } = this.state;
@@ -125,7 +129,7 @@ class Accounts extends Component {
               <TableCell>
                 <Grid container className={classes.noWrap} alignItems="center">
                   <Grid item>
-                    <MintAvatar icon={icon} />
+                    <MintAvatar title={'View on explorer'} icon={icon} onClick={() => this.toExplorer(address)} />
                   </Grid>
                   <Grid item>
                     <Typography>{name || mintAddress.substring(0, 6) + '...'}</Typography>

@@ -12,7 +12,7 @@ function Price(props) {
     return ssjs.parseCGK(ticket).then(({ price }) => {
       return setPrice(price);
     }).catch(er => {
-      return console.error(er);
+      // Do nothing
     });
   }, [ticket]);
 
