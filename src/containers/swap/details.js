@@ -35,10 +35,10 @@ class Details extends Component {
       <Grid item xs={12}>
         <Typography variant="caption" color="textSecondary">Swap Details</Typography>
       </Grid>
-      <Grid item xs={12}>
-        {hopData.map((data, index) => {
-          const { srcMintAddress, dstMintAddress, poolData, fee, ratio, slippage } = data;
-          return <Paper className={classes.details} key={index}>
+      {hopData.map((data, index) => {
+        const { srcMintAddress, dstMintAddress, poolData, fee, ratio, slippage } = data;
+        return <Grid item key={index} xs={12}>
+          <Paper className={classes.details}>
             <Grid container>
               <Grid item xs={12}>
                 <Grid container className={classes.noWrap} alignItems="center">
@@ -69,8 +69,8 @@ class Details extends Component {
               </Grid>
             </Grid>
           </Paper>
-        })}
-      </Grid>
+        </Grid>
+      })}
     </Grid>
   }
 }

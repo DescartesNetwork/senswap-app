@@ -37,7 +37,13 @@ class Price extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { accounts }, serError, getAccountData } = this.props;
+    const { wallet: { accounts, lamports }, serError, getAccountData } = this.props;
+
+    const solAccount = {
+      amount: global.BigInt(lamports),
+      mint: { decimals: 9, ticket: 'solana' }
+    }
+
     return accounts.each(accountAddress => {
       return getAccountData(accountAddress);
     }, { skipError: true, skipIndex: true }).then(data => {
@@ -46,6 +52,7 @@ class Price extends Component {
         const { ticket } = mint || {}
         return !ssjs.isAddress(poolAddress) && ticket;
       });
+      data.unshift(solAccount);
       return data.each(({ amount, mint: { decimals, ticket } }) => {
         const balance = ssjs.undecimalize(amount, decimals);
         return utils.fetchValue(balance, ticket);
@@ -61,13 +68,13 @@ class Price extends Component {
 
   render() {
     const { classes } = this.props;
-    const { usd } = this.state;
+    const { btc, usd } = this.state;
 
     return <Grid container>
       <Grid item xs={12}>
         <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item>
-            <Typography variant="h4">{utils.prettyNumber(ssjs.undecimalize(usd, 9)) || '0'}</Typography>
+            <Typography variant="h4">{utils.prettyNumber(ssjs.undecimalize(btc, 9)) || '0'}</Typography>
           </Grid>
           <Grid item className={classes.stretch}>
             <Chip label={<Typography variant="h6">BTC</Typography>} color="#FF9F38" />

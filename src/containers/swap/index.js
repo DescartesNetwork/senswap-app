@@ -182,16 +182,32 @@ class Swap extends Component {
 
   executeSwap = () => {
     const { setError } = this.props;
-    const { accountData, mintData, bidAmount, hopData } = this.state;
-    const { address: srcAddress } = accountData;
-    const [{ address: poolAddress }] = hopData;
-    const { address: dstMintAddress } = mintData || {}
-    this.setState({ loading: true }, () => {
-      return this.onAutogenDestinationAddress(dstMintAddress).then(dstAddress => {
-        return this.swap.swap(bidAmount, poolAddress, srcAddress, dstAddress, window.senswap.wallet);
+    const { accountData, hopData } = this.state;
+    let { address: srcAddress } = accountData;
+    console.log(hopData)
+    return this.setState({ loading: true }, () => {
+      return hopData.each(data => {
+        const { dstMintAddress } = data || {}
+        return this.onAutogenDestinationAddress(dstMintAddress);
+      }).then(dstAddresses => {
+        const data = hopData.zip(dstAddresses);
+        return data.each(data => {
+          const [{ bidAmount, poolData: { address: poolAddress } }, dstAddress] = data;
+          const _srcAddress = srcAddress;
+          srcAddress = dstAddress;
+          return this.swap.swap(
+            bidAmount,
+            poolAddress,
+            _srcAddress,
+            dstAddress,
+            window.senswap.wallet
+          );
+        });
       }).then(txId => {
-        return this.setState({ loading: false, txId });
+        console.log(txId)
+        return this.setState({ loading: false });
       }).catch(er => {
+        console.log(er);
         return this.setState({ loading: false }, () => {
           return setError(er);
         });

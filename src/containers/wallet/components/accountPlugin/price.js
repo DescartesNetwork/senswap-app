@@ -13,7 +13,7 @@ function Price(props) {
     return ssjs.parseCGK(ticket).then(({ price }) => {
       setUSD(price * amount);
     }).catch(er => {
-      return console.error(er);
+      // Do nothing
     });
   }, [amount, ticket]);
 

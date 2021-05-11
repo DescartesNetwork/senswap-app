@@ -6,17 +6,20 @@ const api = {}
 /**
  * Build access token
  */
-api.auth = (secretKey) => {
-  try {
-    const address = ssjs.fromSecretKey(secretKey).publicKey.toBase58();
-    const datetime = Number(new Date()) + 10000; // Valid in 10s
+api.auth = (auth = false) => {
+  return new Promise((resolve, reject) => {
+    if (!auth) return resolve(null);
+    const wallet = window.senswap.wallet;
+    if (!wallet) return reject('Wallet is not connected');
+    const datetime = Number(new Date()) + 60000; // Valid in 10s
     const msg = datetime.toString() + ssjs.salt();
-    const { sig: accessToken } = ssjs.sign(msg, secretKey);
-    const authHeader = `${address} ${accessToken}`;
-    return authHeader;
-  } catch (er) {
-    return null;
-  }
+    return wallet.certify(msg).then(({ address, sig }) => {
+      const authHeader = `${address} ${sig}`;
+      return resolve(authHeader);
+    }).catch(er => {
+      return reject(er);
+    });
+  });
 }
 
 /**
@@ -24,13 +27,15 @@ api.auth = (secretKey) => {
  */
 
 // Create
-api.post = (url, params = null, secretKey = null) => {
+api.post = (url, params = null, auth = false) => {
   return new Promise((resolve, reject) => {
-    return axios({
-      method: 'post',
-      url: url,
-      data: params,
-      headers: { 'Authorization': api.auth(secretKey) }
+    return api.auth(auth).then(authHeader => {
+      return axios({
+        method: 'post',
+        url: url,
+        data: params,
+        headers: { 'Authorization': authHeader }
+      });
     }).then(re => {
       let data = re.data;
       if (data.status === 'ERROR') return reject(data.error);
@@ -46,13 +51,15 @@ api.post = (url, params = null, secretKey = null) => {
 }
 
 // Read
-api.get = (url, params = null, secretKey = null) => {
+api.get = (url, params = null, auth = false) => {
   return new Promise((resolve, reject) => {
-    return axios({
-      method: 'get',
-      url: url,
-      params: params,
-      headers: { 'Authorization': api.auth(secretKey) }
+    return api.auth(auth).then(authHeader => {
+      return axios({
+        method: 'get',
+        url: url,
+        params: params,
+        headers: { 'Authorization': authHeader }
+      });
     }).then(re => {
       let data = re.data;
       if (data.status === 'ERROR') return reject(data.error);
@@ -68,13 +75,15 @@ api.get = (url, params = null, secretKey = null) => {
 }
 
 // Update
-api.put = (url, params = null, secretKey = null) => {
+api.put = (url, params = null, auth = false) => {
   return new Promise((resolve, reject) => {
-    return axios({
-      method: 'put',
-      url: url,
-      data: params,
-      headers: { 'Authorization': api.auth(secretKey) }
+    return api.auth(auth).then(authHeader => {
+      return axios({
+        method: 'put',
+        url: url,
+        data: params,
+        headers: { 'Authorization': authHeader }
+      });
     }).then(re => {
       let data = re.data;
       if (data.status === 'ERROR') return reject(data.error);
@@ -90,13 +99,15 @@ api.put = (url, params = null, secretKey = null) => {
 }
 
 // Delete
-api.delete = (url, params = null, secretKey = null) => {
+api.delete = (url, params = null, auth = false) => {
   return new Promise((resolve, reject) => {
-    return axios({
-      method: 'delete',
-      url: url,
-      data: params,
-      headers: { 'Authorization': api.auth(secretKey) }
+    api.auth(auth).then(authHeader => {
+      return axios({
+        method: 'delete',
+        url: url,
+        data: params,
+        headers: { 'Authorization': authHeader }
+      });
     }).then(re => {
       let data = re.data;
       if (data.status === 'ERROR') return reject(data.error);

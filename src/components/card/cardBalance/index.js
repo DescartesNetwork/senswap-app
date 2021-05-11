@@ -66,11 +66,8 @@ class CardBalance extends Component {
   }
 
   render() {
-    const { classes, accountData } = this.props;
+    const { classes, address } = this.props;
     const { censored, error, usd, btc, loading } = this.state;
-
-    const [sample] = accountData || [];
-    const { owner } = sample || {}
 
     return <Paper className={classes.paper}>
       <Grid item container>
@@ -96,7 +93,7 @@ class CardBalance extends Component {
               <IconButton
                 size="small"
                 className={classes.iconButton}
-                href={utils.explorer(owner)}
+                href={utils.explorer(address)}
                 target="_blank"
                 rel="noopener"
               >
@@ -131,10 +128,12 @@ class CardBalance extends Component {
 }
 
 CardBalance.defaultProps = {
+  address: '',
   accountData: []
 }
 
 CardBalance.propsType = {
+  address: PropTypes.string,
   accountData: PropTypes.array
 }
 

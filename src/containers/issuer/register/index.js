@@ -18,7 +18,6 @@ import { FlightTakeoffRounded, HelpOutlineRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet } from 'modules/wallet.reducer';
 import { addMint } from 'modules/mint.reducer';
 
 const EMPTY = {
@@ -39,11 +38,9 @@ class RegisterMint extends Component {
 
   onSubmit = () => {
     const { data } = this.state;
-    const { addMint, unlockWallet, setError } = this.props;
+    const { addMint, setError } = this.props;
     return this.setState({ loading: true }, () => {
-      return unlockWallet().then(secretKey => {
-        return addMint(data, secretKey);
-      }).then(re => {
+      return addMint(data).then(re => {
         return this.setState({ ...EMPTY, ok: true });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -153,7 +150,6 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  unlockWallet,
   addMint,
 }, dispatch);
 

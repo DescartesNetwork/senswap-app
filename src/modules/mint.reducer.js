@@ -71,19 +71,19 @@ export const ADD_MINT = 'ADD_MINT';
 export const ADD_MINT_OK = 'ADD_MINT_OK';
 export const ADD_MINT_FAIL = 'ADD_MINT_FAIL';
 
-export const addMint = (mint, secretKey) => {
+export const addMint = (mint) => {
   return dispatch => {
     return new Promise((resolve, reject) => {
       dispatch({ type: ADD_MINT });
 
-      if (!secretKey) {
-        const er = 'Unauthenticated request';
+      if (!mint) {
+        const er = 'Invalid mint data';
         dispatch({ type: ADD_MINT_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.post(base + '/mint', { mint }, secretKey).then(({ data: mintData }) => {
+      return api.post(base + '/mint', { mint }, true).then(({ data: mintData }) => {
         const data = { [mintData._id]: mintData }
         dispatch({ type: ADD_MINT_OK, data });
         return resolve(mintData);
@@ -102,19 +102,19 @@ export const UPDATE_MINT = 'UPDATE_MINT';
 export const UPDATE_MINT_OK = 'UPDATE_MINT_OK';
 export const UPDATE_MINT_FAIL = 'UPDATE_MINT_FAIL';
 
-export const updateMint = (mint, secretKey) => {
+export const updateMint = (mint) => {
   return dispatch => {
     return new Promise((resolve, reject) => {
       dispatch({ type: UPDATE_MINT });
 
-      if (!secretKey) {
-        const er = 'Unauthenticated request';
+      if (!mint) {
+        const er = 'Invalid mint data';
         dispatch({ type: ADD_MINT_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.put(base + '/mint', { mint }, secretKey).then(({ data: mintData }) => {
+      return api.put(base + '/mint', { mint }, true).then(({ data: mintData }) => {
         const data = { [mintData._id]: mintData }
         dispatch({ type: UPDATE_MINT_OK, data });
         return resolve(mintData);
@@ -133,19 +133,19 @@ export const DELETE_MINT = 'DELETE_MINT';
 export const DELETE_MINT_OK = 'DELETE_MINT_OK';
 export const DELETE_MINT_FAIL = 'DELETE_MINT_FAIL';
 
-export const deleteMint = (mint, secretKey) => {
+export const deleteMint = (mint) => {
   return dispatch => {
     return new Promise((resolve, reject) => {
       dispatch({ type: DELETE_MINT });
 
-      if (!secretKey) {
-        const er = 'Unauthenticated request';
+      if (!mint) {
+        const er = 'Invalid mint data';
         dispatch({ type: DELETE_MINT_FAIL, reason: er });
         return reject(er);
       }
 
       const { api: { base } } = configs;
-      return api.delete(base + '/mint', { mint }, secretKey).then(({ data: mintData }) => {
+      return api.delete(base + '/mint', { mint }, true).then(({ data: mintData }) => {
         const data = { [mintData._id]: null }
         dispatch({ type: DELETE_MINT_OK, data });
         return resolve(mintData);

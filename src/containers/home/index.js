@@ -95,15 +95,6 @@ class Home extends Component {
               <Typography>Top Swap</Typography>
             </Button>
           </Grid>
-          <Grid item>
-            <Button
-              component={RouterLink}
-              color={route === 'top-views' ? 'primary' : 'default'}
-              to='/home/top-views'
-            >
-              <Typography>Top Views</Typography>
-            </Button>
-          </Grid>
         </Grid>
       </Grid>
       <Grid item xs={12}>
@@ -111,7 +102,6 @@ class Home extends Component {
           <Redirect exact from="/home" to="/home/new-pools" />
           <Route exact path='/home/new-pools' component={NewPools} />
           <Route exact path='/home/top-swap' component={NewPools} />
-          <Route exact path='/home/top-views' component={NewPools} />
         </Switch>
       </Grid>
     </Grid>

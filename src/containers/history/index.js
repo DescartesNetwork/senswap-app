@@ -52,14 +52,21 @@ class History extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { accounts }, serError, getAccountData } = this.props;
+    const { wallet: { accounts, lamports }, serError, getAccountData } = this.props;
+
+    const solAccount = {
+      amount: global.BigInt(lamports),
+      mint: { decimals: 9, ticket: 'solana' }
+    }
+
     return accounts.each(accountAddress => {
       return getAccountData(accountAddress);
     }, { skipError: true, skipIndex: true }).then(data => {
-      const accountData = data.filter(({ pool }) => {
+      let accountData = data.filter(({ pool }) => {
         const { address: poolAddress } = pool || {}
         return !ssjs.isAddress(poolAddress);
       });
+      accountData.unshift(solAccount);
       return this.setState({ accountData });
     }).catch(er => {
       return serError(er);
@@ -73,7 +80,7 @@ class History extends Component {
   }
 
   render() {
-    const { classes, ui: { rightbar }, toggleRightBar } = this.props;
+    const { classes, ui: { rightbar }, wallet: { user: { address } }, toggleRightBar } = this.props;
     const { accountData } = this.state;
 
     return <Drawer
@@ -93,7 +100,7 @@ class History extends Component {
         </Grid>
         {/* Overall */}
         <Grid item xs={12}>
-          <CardBalance accountData={accountData} />
+          <CardBalance accountData={accountData} address={address} />
         </Grid>
         <Grid item xs={12}>
           <Drain size={2} />
