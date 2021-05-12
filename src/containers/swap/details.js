@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -9,8 +9,9 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Paper from 'senswap-ui/paper';
 import { IconButton } from 'senswap-ui/button';
+import Divider from 'senswap-ui/divider';
 
-import { ArrowForwardRounded } from 'senswap-ui/icons';
+import { ArrowForwardRounded, ExpandLessRounded, ExpandMoreRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -19,6 +20,13 @@ import { getMintData } from 'modules/bucket.reducer';
 
 
 class Details extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      selected: -1
+    }
+  }
 
   parseSymbol = (mintAddress, poolData) => {
     const { mint_a, mint_b, mint_s } = poolData;
@@ -27,8 +35,21 @@ class Details extends Component {
     if (mintAddress === mint_s.address) return mint_s.symbol;
   }
 
+  parseReserve = (mintAddress, poolData) => {
+    const { mint_a, mint_b, mint_s, treasury_a, treasury_b, treasury_s } = poolData;
+    if (mintAddress === mint_a.address) return ssjs.undecimalize(treasury_a.amount, mint_a.decimals);
+    if (mintAddress === mint_b.address) return ssjs.undecimalize(treasury_b.amount, mint_b.decimals);
+    if (mintAddress === mint_s.address) return ssjs.undecimalize(treasury_s.amount, mint_s.decimals);
+  }
+
+  onAdvance = (index) => {
+    const { selected } = this.state;
+    return this.setState({ selected: selected >= 0 ? -1 : index });
+  }
+
   render() {
     const { classes, hopData } = this.props;
+    const { selected } = this.state;
     if (!hopData || !hopData.length) return null;
 
     return <Grid container>
@@ -66,6 +87,28 @@ class Details extends Component {
               <Grid item xs={12} sm={4}>
                 <Typography color="textSecondary">Slippage</Typography>
                 <Typography>{utils.prettyNumber(ssjs.undecimalize(slippage, 9) * 100)}%</Typography>
+              </Grid>
+              {selected === index ? <Fragment>
+                <Grid item xs={12}>
+                  <Divider />
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography color="textSecondary">{this.parseSymbol(srcMintAddress, poolData)} Reserve</Typography>
+                  <Typography>{utils.prettyNumber(this.parseReserve(srcMintAddress, poolData))}</Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography color="textSecondary">{this.parseSymbol(dstMintAddress, poolData)} Reserve</Typography>
+                  <Typography>{utils.prettyNumber(this.parseReserve(dstMintAddress, poolData))}</Typography>
+                </Grid>
+              </Fragment> : null}
+              <Grid item xs={12} style={{ padding: 0 }}>
+                <Grid container justify="flex-end">
+                  <Grid item>
+                    <IconButton size="small" onClick={() => this.onAdvance(index)}>
+                      {selected === index ? <ExpandLessRounded fontSize="small" color="disabled" /> : <ExpandMoreRounded fontSize="small" color="disabled" />}
+                    </IconButton>
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
           </Paper>

@@ -76,7 +76,6 @@ class NewPools extends Component {
         poolData.accountData = accountData;
         return resolve(poolData);
       }).catch(er => {
-        console.log(er)
         return reject(er);
       });
     });
