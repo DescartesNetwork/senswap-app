@@ -89,6 +89,9 @@ class Info extends Component {
             </Grid>
           </Grid>
         </Grid>
+        <Grid item xs={12}>
+          <Drain size={1}/>
+        </Grid>
         <Grid item xs={12} md={6}>
           <Price />
         </Grid>

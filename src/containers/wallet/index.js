@@ -10,11 +10,11 @@ import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 import Carousel from 'senswap-ui/carousel';
 
-import WalletButton from 'containers/wallet/components/walletButton';
-import WalletPlugin from 'containers/wallet/components/walletPlugin';
-import { AccountSelection, AccountSend, AccountReceive, AccountAvatar } from 'containers/wallet/components/accountPlugin';
-import { MintSelection, MintAvatar } from 'containers/wallet/components/mintPlugin';
-import { PoolAvatar } from 'containers/wallet/components/poolPlugin';
+import WalletButton from 'containers/wallet/plugins/walletButton';
+import WalletPlugin from 'containers/wallet/plugins/walletPlugin';
+import { AccountSelection, AccountSend, AccountReceive, AccountAvatar } from 'containers/wallet/plugins/accountPlugin';
+import { MintSelection, MintAvatar } from 'containers/wallet/plugins/mintPlugin';
+import { PoolAvatar } from 'containers/wallet/plugins/poolPlugin';
 
 // Main components
 import Header from './header';

@@ -186,7 +186,6 @@ class Swap extends Component {
     const { setError } = this.props;
     const { accountData, hopData } = this.state;
     let { address: srcAddress } = accountData;
-    console.log(hopData)
     return this.setState({ loading: true }, () => {
       return hopData.each(data => {
         const { dstMintAddress } = data || {}
@@ -276,7 +275,8 @@ class Swap extends Component {
                 style={{
                   background: 'url("https://source.unsplash.com/random")',
                   backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat'
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'cover',
                 }}
               >
                 <Grid container>

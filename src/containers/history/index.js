@@ -28,7 +28,6 @@ class History extends Component {
     super();
 
     this.state = {
-      route: '',
       accountData: []
     }
   }
@@ -36,17 +35,11 @@ class History extends Component {
   componentDidMount() {
     const { ui: { rightbar } } = this.props;
     if (rightbar) this.fetchData();
-    this.parseRoute();
   }
 
   componentDidUpdate(prevProps) {
-    const {
-      wallet: { accounts: prevAccounts },
-      ui: { rightbar: prevRightbar },
-      location: prevLocation
-    } = prevProps;
-    const { wallet: { accounts }, ui: { rightbar }, location } = this.props;
-    if (!isEqual(prevLocation, location)) this.parseRoute();
+    const { wallet: { accounts: prevAccounts }, ui: { rightbar: prevRightbar } } = prevProps;
+    const { wallet: { accounts }, ui: { rightbar } } = this.props;
     if (!isEqual(prevAccounts, accounts) && rightbar) return this.fetchData();
     if (!isEqual(prevRightbar, rightbar) && rightbar) return this.fetchData();
   }
@@ -71,12 +64,6 @@ class History extends Component {
     }).catch(er => {
       return serError(er);
     });
-  }
-
-  parseRoute = () => {
-    const { location: { pathname } } = this.props;
-    const route = pathname.split('/')[1];
-    return this.setState({ route });
   }
 
   render() {

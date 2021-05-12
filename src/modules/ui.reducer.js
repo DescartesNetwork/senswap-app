@@ -103,6 +103,7 @@ export const setError = (error) => {
 
       const parseError = (er) => {
         if (er instanceof Error) return er.message;
+        if (typeof er === 'string') return er;
         if (typeof er === 'object') return JSON.stringify(er);
         return er.toString();
       }
