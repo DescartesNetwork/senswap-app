@@ -14,6 +14,7 @@ import TextField from 'senswap-ui/textField';
 import Brand from 'senswap-ui/brand';
 import Divider from 'senswap-ui/divider';
 import CircularProgress from 'senswap-ui/circularProgress';
+import Link from 'senswap-ui/link';
 
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
@@ -117,6 +118,7 @@ class Swap extends Component {
           return this.setState({ askValue: ssjs.undecimalize(askAmount, askDecimals) });
         });
       }).catch(er => {
+        console.log(er)
         return this.setState({ loading: false }, () => {
           return setError(er);
         });
@@ -212,6 +214,14 @@ class Swap extends Component {
         });
       });
     });
+  }
+
+  onMax = () => {
+    const { accountData: { amount, mint } } = this.state;
+    const { decimals } = mint || {}
+    const value = ssjs.undecimalize(amount, decimals);
+    const pseudoEvent = { target: { value } }
+    return this.onBidValue(pseudoEvent);
   }
 
   renderAction = () => {
@@ -311,15 +321,10 @@ class Swap extends Component {
                             <Grid item style={{ paddingLeft: 0 }}>
                               <Divider orientation="vertical" />
                             </Grid>
-                          </Grid>,
-                          endAdornment: <Button
-                            size="small"
-                            color="primary"
-                          >
-                            <Typography>MAX</Typography>
-                          </Button>
+                          </Grid>
                         }}
-                        helperText={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals)) || 0} ${bidSymbol || ''}`}
+                        helperTextPrimary={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals)) || 0} ${bidSymbol || ''}`}
+                        helperTextSecondary={<Link color="primary" onClick={this.onMax} variant="body2">MAXIMUM</Link>}
                       />
                       <AccountSelection
                         visible={visibleAccountSelection}

@@ -101,11 +101,13 @@ export const setError = (error) => {
         return reject(er);
       }
 
-      console.log(typeof error)
-      const data = {
-        error: typeof error === 'object' ? JSON.stringify(error) : error.toString(),
-        visible: true
+      const parseError = (er) => {
+        if (er instanceof Error) return er.message;
+        if (typeof er === 'object') return JSON.stringify(er);
+        return er.toString();
       }
+
+      const data = { error: parseError(error), visible: true }
       dispatch({ type: SET_ERROR_OK, data });
       return resolve(data);
     });
