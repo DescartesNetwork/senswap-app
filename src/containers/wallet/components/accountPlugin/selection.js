@@ -41,7 +41,7 @@ class Selection extends Component {
     const { visible: prevVisible, wallet: prevWallet } = prevProps;
     const { visible, wallet } = this.props;
     if (!isEqual(prevVisible, visible) && visible) return this.fetchData();
-    if (!isEqual(prevWallet, wallet)) return this.fetchData();
+    if (!isEqual(prevWallet, wallet) && visible) return this.fetchData();
   }
 
   fetchData = () => {

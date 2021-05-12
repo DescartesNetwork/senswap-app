@@ -17,7 +17,6 @@ const defaultState = {
     role: 'user',
   },
   accounts: [],
-  lpts: [],
 }
 
 
@@ -187,61 +186,6 @@ export const unsetWallet = () => {
 }
 
 /**
- * Get secret key
- */
-export const UNLOCK_WALLET = 'UNLOCK_WALLET';
-export const UNLOCK_WALLET_PENDING = 'UNLOCK_WALLET_PENDING';
-export const UNLOCK_WALLET_OK = 'UNLOCK_WALLET_OK';
-export const UNLOCK_WALLET_FAIL = 'UNLOCK_WALLET_FAIL';
-
-export const unlockWallet = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UNLOCK_WALLET });
-
-      const { wallet: { unlock: { visible: prevVisible }, remembered } } = getState();
-      if (prevVisible) {
-        const er = 'There is another pending request';
-        dispatch({ type: UNLOCK_WALLET_FAIL, reason: er });
-        return reject(er);
-      }
-
-      const EMPTY_DATA = {
-        unlock: {
-          visible: false,
-          callback: (_er, _re) => { },
-        }
-      }
-      const callback = (er, password) => {
-        if (er) {
-          dispatch({ type: UNLOCK_WALLET_FAIL, data: { ...EMPTY_DATA }, reason: er });
-          return reject(er);
-        }
-        const keystore = session.get('keystore');
-        const account = ssjs.fromKeystore(keystore, password);
-        if (!account) {
-          er = 'Incorrect password';
-          dispatch({ type: UNLOCK_WALLET_FAIL, reason: er });
-          return reject(er);
-        }
-        const secretKey = Buffer.from(account.secretKey).toString('hex');
-        dispatch({ type: UNLOCK_WALLET_OK, data: { ...EMPTY_DATA } });
-        return resolve(secretKey);
-      }
-
-      // Remember me?
-      if (remembered) {
-        const password = session.get(remembered);
-        return callback(null, password);
-      }
-
-      const data = { unlock: { visible: true, callback } }
-      return dispatch({ type: UNLOCK_WALLET_PENDING, data });
-    });
-  }
-}
-
-/**
  * Reducder
  */
 // eslint-disable-next-line
@@ -266,12 +210,6 @@ export default (state = defaultState, action) => {
     case UNSET_WALLET_OK:
       return { ...state, ...action.data };
     case UNSET_WALLET_FAIL:
-      return { ...state, ...action.data };
-    case UNLOCK_WALLET_OK:
-      return { ...state, ...action.data };
-    case UNLOCK_WALLET_PENDING:
-      return { ...state, ...action.data };
-    case UNLOCK_WALLET_FAIL:
       return { ...state, ...action.data };
     default:
       return state;

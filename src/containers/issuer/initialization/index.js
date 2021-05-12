@@ -20,7 +20,7 @@ import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { updateWallet, unlockWallet } from 'modules/wallet.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 
 const EMPTY = {
   loading: false,
@@ -152,7 +152,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet, unlockWallet,
+  updateWallet,
 }, dispatch);
 
 export default withRouter(connect(

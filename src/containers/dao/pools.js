@@ -10,18 +10,18 @@ import Typography from 'senswap-ui/typography';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import { IconButton } from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
-import Switch from 'senswap-ui/switch';
 
 import { UpdateRounded, LanguageRounded } from 'senswap-ui/icons';
 
 import { PoolAvatar } from 'containers/wallet';
+import Interaction from './interaction';
 
 import styles from './styles';
 import utils from 'helpers/utils';
 import { getPools } from 'modules/pool.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 import { setError } from 'modules/ui.reducer';
-import { unlockWallet } from 'modules/wallet.reducer';
+
 
 const useStyles = makeStyles(theme => ({
   noWrap: {
@@ -30,11 +30,17 @@ const useStyles = makeStyles(theme => ({
   stretch: {
     flex: '1 1 auto',
   },
+  tableRow: {
+    cursor: 'pointer',
+    transition: theme.transitions.create(),
+    '&:hover': {
+      backgroundColor: theme.palette.background.secondary,
+    },
+  },
 }));
 
 function Row(props) {
-  const { data, onChange } = props;
-  console.log(data)
+  const { data, onClick } = props;
   const {
     address, state, vault,
     mint_s, mint_a, mint_b, mint_lpt,
@@ -51,28 +57,20 @@ function Row(props) {
   const icons = [iconA, iconB, iconS];
 
   const classes = useStyles();
-  const [checked, onChecked] = useState(state === 1);
 
-  const onActive = e => {
-    onChecked(e.target.checked);
-    return onChange(e.target.checked);
-  }
   const toExplorer = () => {
     return window.open(utils.explorer(address));
   }
 
   if (!state) return null;
-  return <TableRow>
-    <TableCell align="center">
-      <Switch checked={checked} onChange={onActive} color="primary" size="small" />
-    </TableCell>
+  return <TableRow className={classes.tableRow} onClick={onClick}>
     <TableCell>
       <Grid container className={classes.noWrap} alignItems="center">
         <Grid item>
           <PoolAvatar icons={icons} onClick={toExplorer} />
         </Grid>
         <Grid item>
-          <Typography>{`${symbolA || '.'}/${symbolB || '.'}${symbolS || '.'}`}</Typography>
+          <Typography>{`${symbolA || '.'}/${symbolB || '.'}/${symbolS || '.'}`}</Typography>
         </Grid>
       </Grid>
     </TableCell>
@@ -85,7 +83,7 @@ function Row(props) {
       <Typography>{utils.prettyNumber(ssjs.undecimalize(supply, decimals)) || 0}</Typography>
     </TableCell>
     <TableCell align="right">
-      <Typography>{utils.prettyNumber(ssjs.undecimalize(earn, decimalsS)) || 0}</Typography>
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(earn, decimalsS)) || 0} <span style={{ color: '#808191' }}>{symbolS}</span></Typography>
     </TableCell>
   </TableRow>
 }
@@ -99,6 +97,7 @@ class Pools extends Component {
       limit: 5,
       data: [],
       loading: false,
+      selected: -1,
     }
 
     this.swap = window.senswap.swap;
@@ -106,10 +105,6 @@ class Pools extends Component {
 
   componentDidMount() {
     return this.fetchData();
-  }
-
-  onRefresh = () => {
-    return this.fetchData(true);
   }
 
   fetchData = (force = false) => {
@@ -128,9 +123,21 @@ class Pools extends Component {
     });
   }
 
+  onRefresh = () => {
+    return this.fetchData(true);
+  }
+
+  onPool = (i) => {
+    return this.setState({ selected: i });
+  }
+
+  onClose = () => {
+    return this.setState({ selected: -1 });
+  }
+
   render() {
     const { classes } = this.props;
-    const { data, loading, lasttime } = this.state;
+    const { data, loading, lasttime, selected } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -150,12 +157,11 @@ class Pools extends Component {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell align="center">
+                <TableCell>
                   <IconButton size="small" onClick={this.onRefresh} disabled={loading}>
                     {loading ? <CircularProgress size={17} /> : <UpdateRounded />}
                   </IconButton>
                 </TableCell>
-                <TableCell />
                 <TableCell align="right">
                   <Typography variant="body2">Reserve</Typography>
                 </TableCell>
@@ -169,15 +175,18 @@ class Pools extends Component {
             </TableHead>
             <TableBody>
               {!data.length ? <TableRow>
-                <TableCell />
                 <TableCell>
-                  <Typography className={classes.subtitle}>No data</Typography>
+                  <Typography variant="caption">No data</Typography>
                 </TableCell>
                 <TableCell />
                 <TableCell />
                 <TableCell />
               </TableRow> : null}
-              {data.map((poolData, index) => <Row key={index} data={poolData} />)}
+              {data.map((poolData, i) => <Row
+                key={i}
+                data={poolData}
+                onClick={() => this.onPool(i)}
+              />)}
             </TableBody>
           </Table>
         </TableContainer>
@@ -185,10 +194,11 @@ class Pools extends Component {
       <Grid item xs={12}>
         <Grid container spacing={2} justify="flex-end">
           <Grid item>
-            <Typography className={classes.subtitle}>Last updated on: {utils.prettyDatetime(lasttime)}</Typography>
+            <Typography variant="caption">Last updated on: {utils.prettyDatetime(lasttime)}</Typography>
           </Grid>
         </Grid>
       </Grid>
+      <Interaction visible={selected >= 0} onClose={this.onClose} poolData={data[selected]} />
     </Grid>
   }
 }
@@ -204,7 +214,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   getPools,
   getPoolData,
   setError,
-  unlockWallet,
 }, dispatch);
 
 export default withRouter(connect(

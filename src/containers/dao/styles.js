@@ -12,22 +12,10 @@ export default theme => ({
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text'
   },
-  subtitle: {
-    fontSize: 10,
-    fontWeight: theme.typography.fontWeightLight,
-    color: theme.palette.text.secondary
+  paperInReceive: {
+    padding: theme.spacing(2),
+    backgroundColor: theme.palette.background.default,
+    border: '1px solid rgba(228, 228, 228, 0.1)',
+    borderRadius: theme.shape.borderRadius
   },
-  network: {
-    backgroundColor: theme.palette.grey[200],
-    borderRadius: theme.shape.borderRadius,
-  },
-  card: {
-    transition: theme.transitions.create(),
-    '&:hover': {
-      boxShadow: theme.shadows[6],
-    },
-  },
-  earn: {
-    marginRight: -10
-  }
 });
