@@ -51,6 +51,20 @@ class NewPools extends Component {
       let poolData = {}
       return getPoolData(poolAddress).then(data => {
         poolData = data;
+        const {
+          reserve_a: reserveA, mint_a: { ticket: ticketA, decimals: decimalsA },
+          reserve_b: reserveB, mint_b: { ticket: ticketB, decimals: decimalsB },
+          reserve_s: reserveS, mint_s: { ticket: ticketS, decimals: decimalsS }
+        } = poolData;
+        const syntheticData = [
+          [ssjs.undecimalize(reserveA, decimalsA), ticketA],
+          [ssjs.undecimalize(reserveB, decimalsB), ticketB],
+          [ssjs.undecimalize(reserveS, decimalsS), ticketS]
+        ];
+        return Promise.all(syntheticData.map(([balance, ticket]) => utils.fetchValue(balance, ticket)));
+      }).then(data => {
+        const usd = data.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
+        poolData.usd = usd;
         return window.senswap.wallet.getAccount();
       }).then(walletAddress => {
         const { mint_lpt: { address: mintAddress } } = poolData;
@@ -119,6 +133,7 @@ class NewPools extends Component {
           <CardPool
             icons={icons}
             symbols={symbols}
+            volume={poolData.usd}
             stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals)) || '0'}
             {...(!isLoggedIn ? { onConnect: openWallet } : null)}
             {...(isLP ? { onWithdraw: () => this.onOpenWithdraw(i) } : null)}

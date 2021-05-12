@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';

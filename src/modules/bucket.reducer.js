@@ -143,33 +143,33 @@ export const getPoolData = (poolAddress, force = false) => {
       }
 
       let { bucket: { [poolAddress]: poolData } } = getState();
-      if (!poolData || force) {
-        const { api: { base } } = configs;
-        return window.senswap.swap.getPoolData(poolAddress).then(re => {
-          poolData = { ...re }
-          return api.get(base + '/pool', { address: poolAddress });
-        }).then(({ data: re }) => {
-          const { mint_s, mint_a, mint_b, mint_lpt, ...others } = poolData;
-          const { mintS, mintA, mintB, mintLPT, ...someothers } = re;
-          poolData = {
-            ...others, ...someothers,
-            mint_s: { ...mint_s, ...mintS },
-            mint_a: { ...mint_a, ...mintA },
-            mint_b: { ...mint_b, ...mintB },
-            mint_lpt: { ...mint_lpt, ...mintLPT }
-          }
-          const data = { [poolAddress]: poolData }
-          dispatch({ type: GET_POOL_DATA_OK, data });
-          return resolve(poolData);
-        }).catch(er => {
-          dispatch({ type: GET_POOL_DATA_FAIL, reason: er.toString() });
-          return reject(er);
-        });
-      } else {
+      if (poolData && !force) {
         const data = { [poolAddress]: poolData };
         dispatch({ type: GET_POOL_DATA_OK, data });
         return resolve(poolData);
       }
+
+      const { api: { base } } = configs;
+      return window.senswap.swap.getPoolData(poolAddress).then(re => {
+        poolData = { ...re }
+        return api.get(base + '/pool', { address: poolAddress });
+      }).then(({ data: re }) => {
+        const { mint_s, mint_a, mint_b, mint_lpt, ...others } = poolData;
+        const { mintS, mintA, mintB, mintLPT, ...someothers } = re;
+        poolData = {
+          ...others, ...someothers,
+          mint_s: { ...mint_s, ...mintS },
+          mint_a: { ...mint_a, ...mintA },
+          mint_b: { ...mint_b, ...mintB },
+          mint_lpt: { ...mint_lpt, ...mintLPT }
+        }
+        const data = { [poolAddress]: poolData }
+        dispatch({ type: GET_POOL_DATA_OK, data });
+        return resolve(poolData);
+      }).catch(er => {
+        dispatch({ type: GET_POOL_DATA_FAIL, reason: er.toString() });
+        return reject(er);
+      });
     });
   }
 }

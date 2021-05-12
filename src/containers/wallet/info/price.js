@@ -58,7 +58,7 @@ class Price extends Component {
         return utils.fetchValue(balance, ticket);
       });
     }).then(data => {
-      const usd = data.map(({ value }) => value).reduce((a, b) => a + b, 0);
+      const usd = data.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
       const btc = data.map(({ btc }) => btc).reduce((a, b) => a + b, 0);
       return this.setState({ usd, btc, loading: false });
     }).catch(er => {
