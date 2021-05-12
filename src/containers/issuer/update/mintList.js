@@ -50,8 +50,8 @@ class MintList extends Component {
     let condition = {}
     if (search) condition = { '$or': [{ name: { '$regex': search, '$options': 'gi' } }, { symbol: { '$regex': search, '$options': 'gi' } }] }
     return this.setState({ loading: true }, () => {
-      return getMints(condition, 5, 0).then(mintIds => {
-        return Promise.all(mintIds.map(({ _id }) => getMint(_id)));
+      return getMints(condition, 5, 0).then(mintAddresses => {
+        return Promise.all(mintAddresses.map(({ address }) => getMint(address)));
       }).then(data => {
         return this.setState({ ...EMPTY, data }, callback);
       }).catch(er => {

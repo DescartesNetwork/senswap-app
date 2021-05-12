@@ -15,16 +15,16 @@ export const GET_POOL = 'GET_POOL';
 export const GET_POOL_OK = 'GET_POOL_OK';
 export const GET_POOL_FAIL = 'GET_POOL_FAIL';
 
-export const getPool = (_id, force = false) => {
+export const getPool = (address, force = false) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: GET_POOL });
 
-      let { pool: { [_id]: poolData } } = getState();
+      let { pool: { [address]: poolData } } = getState();
       if (!poolData || force) {
         const { api: { base } } = configs;
-        return api.get(base + '/pool', { _id }).then(({ data: poolData }) => {
-          const data = { [_id]: poolData }
+        return api.get(base + '/pool', { address }).then(({ data: poolData }) => {
+          const data = { [address]: poolData }
           dispatch({ type: GET_POOL_OK, data });
           return resolve(poolData);
         }).catch(er => {
@@ -32,7 +32,7 @@ export const getPool = (_id, force = false) => {
           return reject(er.toString());
         });
       } else {
-        const data = { [_id]: poolData }
+        const data = { [address]: poolData }
         dispatch({ type: GET_POOL_OK, data });
         return resolve(poolData);
       }
@@ -78,7 +78,7 @@ export const addPool = (pool) => {
 
       const { api: { base } } = configs;
       return api.post(base + '/pool', { pool }).then(({ data: poolData }) => {
-        const data = { [poolData._id]: poolData }
+        const data = { [poolData.address]: poolData }
         dispatch({ type: ADD_POOL_OK, data });
         return resolve(poolData);
       }).catch(er => {
@@ -103,7 +103,7 @@ export const updatePool = (pool, secretKey) => {
 
       const { api: { base } } = configs;
       return api.put(base + '/pool', { pool }, secretKey).then(({ data: poolData }) => {
-        const data = { [poolData._id]: poolData }
+        const data = { [poolData.address]: poolData }
         dispatch({ type: UPDATE_POOL_OK, data });
         return resolve(poolData);
       }).catch(er => {
@@ -128,7 +128,7 @@ export const deletePool = (pool, secretKey) => {
 
       const { api: { base } } = configs;
       return api.delete(base + '/pool', { pool }, secretKey).then(({ data: poolData }) => {
-        const data = { [poolData._id]: null }
+        const data = { [poolData.address]: null }
         dispatch({ type: DELETE_POOL_OK, data });
         return resolve(poolData);
       }).catch(er => {

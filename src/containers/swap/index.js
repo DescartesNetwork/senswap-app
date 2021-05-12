@@ -29,7 +29,7 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 import { getMintData, getPoolData } from 'modules/bucket.reducer';
-import { updateWallet } from 'modules/wallet.reducer';
+import { openWallet, updateWallet } from 'modules/wallet.reducer';
 
 class Swap extends Component {
   constructor() {
@@ -49,13 +49,13 @@ class Swap extends Component {
     this.swap = window.senswap.swap;
   }
 
-  _routing = (srcIds, dstIds) => {
-    for (let srcId of srcIds) {
-      for (let dstId of dstIds) {
-        if (srcId === dstId) return [srcId, dstId];
+  _routing = (srcAddresses, dstAddresses) => {
+    for (let srcAddress of srcAddresses) {
+      for (let dstAddress of dstAddresses) {
+        if (srcAddress === dstAddress) return [srcAddress, dstAddress];
       }
     }
-    return [srcIds[0], dstIds[0]];
+    return [srcAddresses[0], dstAddresses[0]];
   }
 
   routing = (srcMintAddress, dstMintAddress) => {
@@ -67,17 +67,17 @@ class Swap extends Component {
       const { getPool, getPools, getPoolData } = this.props;
       const srcCondition = { '$or': [{ mintS: srcMintAddress }, { mintA: srcMintAddress }, { mintB: srcMintAddress }] }
       const dstCondition = { '$or': [{ mintS: dstMintAddress }, { mintA: dstMintAddress }, { mintB: dstMintAddress }] }
-      let srcIds = [];
-      let dstIds = [];
+      let srcAddresses = [];
+      let dstAddresses = [];
       return getPools(srcCondition, -1, 0).then(data => {
         if (!data.length) throw new Error('Cannot find available pools');
-        srcIds = data.map(({ _id }) => _id);
+        srcAddresses = data.map(({ address }) => address);
         return getPools(dstCondition, -1, 0);
       }).then(data => {
         if (!data.length) throw new Error('Cannot find available pools');
-        dstIds = data.map(({ _id }) => _id);
-        const route = this._routing(srcIds, dstIds);
-        return route.each(_id => getPool(_id));
+        dstAddresses = data.map(({ address }) => address);
+        const route = this._routing(srcAddresses, dstAddresses);
+        return route.each(address => getPool(address));
       }).then(data => {
         if (data.length < 2) throw new Error('Cannot find available pools');
         return data.each(({ address }) => getPoolData(address));
@@ -215,12 +215,13 @@ class Swap extends Component {
   }
 
   renderAction = () => {
-    const { wallet: { user: { address } } } = this.props;
+    const { wallet: { user: { address } }, openWallet } = this.props;
     const { loading } = this.state;
     if (!ssjs.isAddress(address)) return <Button
       variant="contained"
       color="primary"
       size="large"
+      onClick={openWallet}
       fullWidth
     >
       <Typography>Connect Wallet</Typography>
@@ -394,7 +395,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  updateWallet,
+  updateWallet, openWallet,
   getPools, getPool,
   getMintData, getPoolData,
 }, dispatch);

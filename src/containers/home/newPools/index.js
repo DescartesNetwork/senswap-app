@@ -17,7 +17,7 @@ import sol from 'helpers/sol';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { openWallet } from 'modules/wallet.reducer';
-import { getPools, getPool } from 'modules/pool.reducer';
+import { getPools } from 'modules/pool.reducer';
 import { getPoolData, getAccountData } from 'modules/bucket.reducer';
 
 
@@ -69,11 +69,9 @@ class NewPools extends Component {
   }
 
   fetchData = () => {
-    const { setError, getPools, getPool } = this.props;
-    return getPools({}, 9, 0).then(poolIds => {
-      return poolIds.each(({ _id }) => getPool(_id), { skipError: true, skipIndex: true });
-    }).then(data => {
-      return data.each(({ address }) => this.getPoolDataAndAccountData(address), { skipError: true, skipIndex: true });
+    const { setError, getPools } = this.props;
+    return getPools({}, 9, 0).then(poolAddresses => {
+      return poolAddresses.each(({ address }) => this.getPoolDataAndAccountData(address), { skipError: true, skipIndex: true });
     }).then(data => {
       return this.setState({ data });
     }).catch(er => {
@@ -143,7 +141,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   openWallet,
-  getPools, getPool,
+  getPools,
   getPoolData, getAccountData,
 }, dispatch);
 

@@ -101,7 +101,11 @@ export const setError = (error) => {
         return reject(er);
       }
 
-      const data = { error: error.toString(), visible: true }
+      console.log(typeof error)
+      const data = {
+        error: typeof error === 'object' ? JSON.stringify(error) : error.toString(),
+        visible: true
+      }
       dispatch({ type: SET_ERROR_OK, data });
       return resolve(data);
     });

@@ -1,68 +1,91 @@
 import React, { Component, useState } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import IconButton from '@material-ui/core/IconButton';
-import Paper from '@material-ui/core/Paper';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import Switch from '@material-ui/core/Switch';
+import { withStyles, makeStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
+import { IconButton } from 'senswap-ui/button';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Switch from 'senswap-ui/switch';
 
-import { UpdateRounded } from '@material-ui/icons';
+import { UpdateRounded, LanguageRounded } from 'senswap-ui/icons';
 
-import { MintAvatar } from 'containers/wallet';
+import { PoolAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import utils from 'helpers/utils';
-import { getPools, getPool } from 'modules/pool.reducer';
+import { getPools } from 'modules/pool.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 import { setError } from 'modules/ui.reducer';
 import { unlockWallet } from 'modules/wallet.reducer';
 
+const useStyles = makeStyles(theme => ({
+  noWrap: {
+    flexWrap: 'nowrap',
+  },
+  stretch: {
+    flex: '1 1 auto',
+  },
+}));
 
 function Row(props) {
-  const { data: { state, address, reserve, lpt, mint }, onChange } = props;
+  const { data, onChange } = props;
+  console.log(data)
+  const {
+    address, state, vault,
+    mint_s, mint_a, mint_b, mint_lpt,
+    treasury_s, treasury_a, treasury_b,
+  } = data;
+  const { supply, decimals } = mint_lpt || {}
+  const { symbol: symbolS, icon: iconS, decimals: decimalsS } = mint_s || {}
+  const { symbol: symbolA, icon: iconA, decimals: decimalsA } = mint_a || {}
+  const { symbol: symbolB, icon: iconB, decimals: decimalsB } = mint_b || {}
+  const { amount: amountS } = treasury_s || {}
+  const { amount: amountA } = treasury_a || {}
+  const { amount: amountB } = treasury_b || {}
+  const { amount: earn } = vault || {}
+  const icons = [iconA, iconB, iconS];
+
+  const classes = useStyles();
   const [checked, onChecked] = useState(state === 1);
+
   const onActive = e => {
     onChecked(e.target.checked);
     return onChange(e.target.checked);
   }
+  const toExplorer = () => {
+    return window.open(utils.explorer(address));
+  }
 
   if (!state) return null;
-  const poolReserve = utils.prettyNumber(ssjs.undecimalize(reserve, mint.decimals));
-  const poolLPT = utils.prettyNumber(ssjs.undecimalize(lpt, 9));
-  const price = utils.prettyNumber(ssjs.div(ssjs.decimalize(lpt, mint.decimals), ssjs.decimalize(reserve, 9)));
-
   return <TableRow>
     <TableCell align="center">
       <Switch checked={checked} onChange={onActive} color="primary" size="small" />
     </TableCell>
     <TableCell>
-      <Typography>{address}</Typography>
-    </TableCell>
-    <TableCell>
-      <MintAvatar icon={mint.icon} title={mint.name} />
-    </TableCell>
-    <TableCell align="right">
-      <Typography>{poolReserve}</Typography>
-    </TableCell>
-    <TableCell align="right">
-      <Typography>{poolLPT}</Typography>
+      <Grid container className={classes.noWrap} alignItems="center">
+        <Grid item>
+          <PoolAvatar icons={icons} onClick={toExplorer} />
+        </Grid>
+        <Grid item>
+          <Typography>{`${symbolA || '.'}/${symbolB || '.'}${symbolS || '.'}`}</Typography>
+        </Grid>
+      </Grid>
     </TableCell>
     <TableCell align="right">
-      <Typography>{price}</Typography>
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(amountA, decimalsA)) || 0} <span style={{ color: '#808191' }}>{symbolA}</span></Typography>
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(amountB, decimalsB)) || 0} <span style={{ color: '#808191' }}>{symbolB}</span></Typography>
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(amountS, decimalsS)) || 0} <span style={{ color: '#808191' }}>{symbolS}</span></Typography>
+    </TableCell>
+    <TableCell align="right">
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(supply, decimals)) || 0}</Typography>
+    </TableCell>
+    <TableCell align="right">
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(earn, decimalsS)) || 0}</Typography>
     </TableCell>
   </TableRow>
 }
@@ -85,25 +108,16 @@ class Pools extends Component {
     return this.fetchData();
   }
 
-  componentDidUpdate(prevProps) {
-    const { networkAddress: prevNetworkAddress } = prevProps;
-    const { networkAddress } = this.props;
-    if (!isEqual(networkAddress, prevNetworkAddress)) this.fetchData();
-  }
-
   onRefresh = () => {
     return this.fetchData(true);
   }
 
   fetchData = (force = false) => {
-    const { networkAddress, getPools, getPool, getPoolData, setError } = this.props;
+    const { getPools, getPoolData, setError } = this.props;
     const { page, limit } = this.state
-    if (!ssjs.isAddress(networkAddress)) return this.setState({ lasttime: new Date() });
     return this.setState({ loading: true, lasttime: new Date() }, () => {
-      return getPools({ network: networkAddress }, limit, page + 1).then(data => {
-        return Promise.all(data.map(({ _id }) => getPool(_id)));
-      }).then(data => {
-        return Promise.all(data.map(({ address }) => getPoolData(address, force)));
+      return getPools({}, limit, page + 1).then(data => {
+        return data.each(({ address }) => getPoolData(address, force), { skipError: true, skipIndex: true });
       }).then(data => {
         return this.setState({ data, loading: false });
       }).catch(er => {
@@ -114,37 +128,32 @@ class Pools extends Component {
     });
   }
 
-  onActive = (data, nextState) => {
-    const { unlockWallet, setError } = this.props;
-    const action = nextState ? this.swap.thawPool : this.swap.freezePool;
-    const { network, address } = data;
-    return unlockWallet().then(secretKey => {
-      const payer = ssjs.fromSecretKey(secretKey);
-      return action(network, address, payer);
-    }).then(txId => {
-      return this.onRefresh();
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
   render() {
     const { classes } = this.props;
     const { data, loading, lasttime } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
-        <TableContainer component={Paper} className={classes.card} elevation={3}>
+        <Grid container spacing={1} alignItems="center" className={classes.noWrap}>
+          <Grid item>
+            <IconButton color="primary">
+              <LanguageRounded />
+            </IconButton>
+          </Grid>
+          <Grid item>
+            <Typography variant="h6" color="primary">Pools</Typography>
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
                 <TableCell align="center">
-                  <IconButton size="small" color="primary" onClick={this.onRefresh} disabled={loading}>
-                    {loading ? <CircularProgress size={21} /> : <UpdateRounded />}
+                  <IconButton size="small" onClick={this.onRefresh} disabled={loading}>
+                    {loading ? <CircularProgress size={17} /> : <UpdateRounded />}
                   </IconButton>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2">Pool</Typography>
                 </TableCell>
                 <TableCell />
                 <TableCell align="right">
@@ -154,21 +163,21 @@ class Pools extends Component {
                   <Typography variant="body2">LPT</Typography>
                 </TableCell>
                 <TableCell align="right">
-                  <Typography variant="body2">Price</Typography>
+                  <Typography variant="body2">Earn</Typography>
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {!data.length ? <TableRow>
+                <TableCell />
                 <TableCell>
                   <Typography className={classes.subtitle}>No data</Typography>
                 </TableCell>
+                <TableCell />
+                <TableCell />
+                <TableCell />
               </TableRow> : null}
-              {data.map(poolData => <Row
-                key={poolData.address}
-                data={poolData}
-                onChange={e => this.onActive(poolData, e)}
-              />)}
+              {data.map((poolData, index) => <Row key={index} data={poolData} />)}
             </TableBody>
           </Table>
         </TableContainer>
@@ -192,21 +201,11 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getPools, getPool,
+  getPools,
   getPoolData,
   setError,
   unlockWallet,
 }, dispatch);
-
-Pools.defaultProps = {
-  networkAddress: '',
-  readOnly: false,
-}
-
-Pools.propTypes = {
-  networkAddress: PropTypes.string,
-  readOnly: PropTypes.bool,
-}
 
 export default withRouter(connect(
   mapStateToProps,

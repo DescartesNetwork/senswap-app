@@ -15,16 +15,16 @@ export const GET_MINT = 'GET_MINT';
 export const GET_MINT_OK = 'GET_MINT_OK';
 export const GET_MINT_FAIL = 'GET_MINT_FAIL';
 
-export const getMint = (_id, force = false) => {
+export const getMint = (address, force = false) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: GET_MINT });
 
-      let { mint: { [_id]: mintData } } = getState();
+      let { mint: { [address]: mintData } } = getState();
       if (!mintData || force) {
         const { api: { base } } = configs;
-        return api.get(base + '/mint', { _id }).then(({ data: mintData }) => {
-          const data = { [_id]: mintData }
+        return api.get(base + '/mint', { address }).then(({ data: mintData }) => {
+          const data = { [address]: mintData }
           dispatch({ type: GET_MINT_OK, data });
           return resolve(JSON.parse(JSON.stringify(mintData)));
         }).catch(er => {
@@ -32,7 +32,7 @@ export const getMint = (_id, force = false) => {
           return reject(er.toString());
         });
       } else {
-        const data = { [_id]: mintData }
+        const data = { [address]: mintData }
         dispatch({ type: GET_MINT_OK, data });
         return resolve(mintData);
       }
@@ -84,7 +84,7 @@ export const addMint = (mint) => {
 
       const { api: { base } } = configs;
       return api.post(base + '/mint', { mint }, true).then(({ data: mintData }) => {
-        const data = { [mintData._id]: mintData }
+        const data = { [mintData.address]: mintData }
         dispatch({ type: ADD_MINT_OK, data });
         return resolve(mintData);
       }).catch(er => {
@@ -115,7 +115,7 @@ export const updateMint = (mint) => {
 
       const { api: { base } } = configs;
       return api.put(base + '/mint', { mint }, true).then(({ data: mintData }) => {
-        const data = { [mintData._id]: mintData }
+        const data = { [mintData.address]: mintData }
         dispatch({ type: UPDATE_MINT_OK, data });
         return resolve(mintData);
       }).catch(er => {
@@ -146,7 +146,7 @@ export const deleteMint = (mint) => {
 
       const { api: { base } } = configs;
       return api.delete(base + '/mint', { mint }, true).then(({ data: mintData }) => {
-        const data = { [mintData._id]: null }
+        const data = { [mintData.address]: null }
         dispatch({ type: DELETE_MINT_OK, data });
         return resolve(mintData);
       }).catch(er => {

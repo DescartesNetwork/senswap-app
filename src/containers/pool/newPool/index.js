@@ -26,7 +26,7 @@ import styles from './styles';
 import configs from 'configs';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
-import { getMints, getMint } from 'modules/mint.reducer';
+import { getMint } from 'modules/mint.reducer';
 import { addPool } from 'modules/pool.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
@@ -64,14 +64,12 @@ class NewPool extends Component {
     const { sol: { senAddress } } = configs;
     const {
       wallet: { accounts },
-      setError, getAccountData, getMints, getMint,
+      setError, getAccountData, getMint,
     } = this.props;
     const { accountData } = this.state;
     let newAccountData = [...accountData];
 
-    return getMints({ address: senAddress }).then(([{ _id }]) => {
-      return getMint(_id);
-    }).then(data => {
+    return getMint(senAddress).then(data => {
       newAccountData[0] = { mint: { ...data } }
       return accounts.each(accountAddress => {
         return getAccountData(accountAddress);
@@ -297,7 +295,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getMints, getMint,
+  getMint,
   addPool,
   updateWallet,
   getAccountData,

@@ -11,8 +11,10 @@ const PrivateRoute = ({ skipRole, component: Component, ...others }) => {
   const { basics: { permission } } = configs;
   const isAuthorized = skipRole || permission.includes(role);
   const isLogged = ssjs.isAddress(address) && isAuthorized;
-  return <Route {...others} render={props => isLogged ? <Component {...props} /> :
-    <Redirect to={{ pathname: '/home', state: { from: props.location } }} />}
+  return <Route {...others} render={props => {
+    if (isLogged) return <Component {...props} />
+    return <Redirect to={{ pathname: '/home', state: { from: props.location } }} />
+  }}
   />
 }
 

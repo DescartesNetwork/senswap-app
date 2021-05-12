@@ -72,7 +72,7 @@ class CardPool extends Component {
 
   render() {
     const { classes } = this.props;
-    const { icons, symbols, volume, apr, stake } = this.props;
+    const { icons, symbols, volume, apy, stake } = this.props;
 
     return <Card className={classes.card}>
       <CardContent className={classes.cardContent}>
@@ -101,10 +101,10 @@ class CardPool extends Component {
       <CardContent className={classes.cardInfo}>
         <Grid container spacing={1}>
           <Grid item xs={6}>
-            <Typography variant="body2">APR:</Typography>
+            <Typography variant="body2">APY:</Typography>
           </Grid>
           <Grid item xs={6}>
-            <Typography align="right" variant="body2"><strong>{apr}%</strong></Typography>
+            <Typography align="right" variant="body2"><strong>{apy}%</strong></Typography>
           </Grid>
           <Grid item xs={6}>
             <Typography variant="body2">Your stake:</Typography>
@@ -127,7 +127,7 @@ CardPool.defaultProps = {
   symbols: [],
   icons: [],
   volume: 0,
-  apr: 0,
+  apy: 0,
   stake: 0,
 }
 
@@ -135,7 +135,7 @@ CardPool.propsType = {
   symbols: PropTypes.arrayOf(PropTypes.string),
   icons: PropTypes.arrayOf(PropTypes.string),
   volume: PropTypes.number,
-  apr: PropTypes.number,
+  apy: PropTypes.number,
   stake: PropTypes.number,
   onConnect: PropTypes.func,
   onDeposit: PropTypes.func,

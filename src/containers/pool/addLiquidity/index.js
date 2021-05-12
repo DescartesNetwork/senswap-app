@@ -62,6 +62,7 @@ class AddLiquidity extends Component {
       ...EMPTY,
       index: 0,
       amounts: ['', '', ''],
+      lpt: 0
     });
   }
 
@@ -92,7 +93,7 @@ class AddLiquidity extends Component {
   estimateState = () => {
     const { setError, poolData } = this.props;
     const { amounts } = this.state;
-    if (amounts.every(amount => !amount)) return this.setState({ lpt: 0 });
+    if (amounts.every(amount => !parseFloat(amount))) return this.setState({ lpt: 0 });
     const [deltaS, deltaA, deltaB] = amounts.map((amount, index) => {
       let decimals = 9;
       const { mint_s, mint_a, mint_b } = poolData;
@@ -101,8 +102,9 @@ class AddLiquidity extends Component {
       if (index === 2) decimals = mint_b.decimals;
       return ssjs.decimalize(amount, decimals);
     });
-    const { reserve_s: reserveS, reserve_a: reserveA, reserve_b: reserveB } = poolData;
-    return oracle.rake(deltaS, deltaA, deltaB, reserveS, reserveA, reserveB).then(({ lpt }) => {
+    const { reserve_s, reserve_a, reserve_b, mint_lpt } = poolData;
+    const { supply } = mint_lpt || {}
+    return oracle.rake(deltaS, deltaA, deltaB, reserve_s, reserve_a, reserve_b, supply).then(({ lpt }) => {
       lpt = ssjs.undecimalize(lpt, 9);
       return this.setState({ lpt });
     }).catch(er => {
@@ -162,6 +164,7 @@ class AddLiquidity extends Component {
           return onClose();
         });
       }).catch(er => {
+        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
@@ -238,7 +241,7 @@ class AddLiquidity extends Component {
               size="large"
               endIcon={loading ? <CircularProgress size={17} /> : null}
               onClick={this.addLiquidity}
-              disabled={loading || amounts.every(e => !e)}
+              disabled={loading || amounts.every(e => !parseFloat(e))}
               fullWidth
             >
               <Typography>Deposit</Typography>

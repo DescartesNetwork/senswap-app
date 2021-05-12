@@ -42,7 +42,7 @@ class Selection extends Component {
   fetchData = () => {
     const { setError, getMints, getMint } = this.props;
     return getMints({}, 5, 0).then(data => {
-      return Promise.all(data.map(({ _id }) => getMint(_id)));
+      return Promise.all(data.map(({ address }) => getMint(address)));
     }).then(data => {
       return this.setState({ data })
     }).catch(er => {
@@ -61,7 +61,7 @@ class Selection extends Component {
         ]
       }
       return getMints(condition, 1000, 0).then(data => {
-        return Promise.all(data.map(({ _id }) => getMint(_id)));
+        return Promise.all(data.map(({ address }) => getMint(address)));
       }).then(data => {
         return this.setState({ loading: false, data });
       }).catch(er => {

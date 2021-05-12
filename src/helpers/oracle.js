@@ -8,15 +8,11 @@ const FEE_DECIMALS = global.BigInt(1000000000);
 
 const Oracle = {}
 
-Oracle.rake = (deltaS, deltaA, deltaB, reserveS, reserveA, reserveB) => {
+Oracle.rake = (deltaS, deltaA, deltaB, reserveS, reserveA, reserveB, reserveLPT) => {
   return new Promise((resolve, reject) => {
     if (!deltaS && !deltaA && !deltaB) return reject('Invalid amounts');
     if (!reserveS || !reserveA || !reserveB) return reject('Outdated pool');
-    const data = ssjs.rake(
-      deltaS, deltaA, deltaB,
-      reserveS, reserveA, reserveB,
-      FEE, FEE_DECIMALS
-    );
+    const data = ssjs.rake(deltaS, deltaA, deltaB, reserveS, reserveA, reserveB, reserveLPT);
     return resolve(data);
   });
 }
