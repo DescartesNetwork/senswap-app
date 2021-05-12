@@ -40,6 +40,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 function Row(props) {
+  const classes = useStyles();
   const { data, onClick } = props;
   const {
     address, state, vault,
@@ -55,8 +56,6 @@ function Row(props) {
   const { amount: amountB } = treasury_b || {}
   const { amount: earn } = vault || {}
   const icons = [iconA, iconB, iconS];
-
-  const classes = useStyles();
 
   const toExplorer = () => {
     return window.open(utils.explorer(address));

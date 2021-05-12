@@ -7,13 +7,18 @@ import { SecretKeyWallet, Coin98Wallet } from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 
 import LoginDialog from './loginDialog';
+import Watcher from './watcher';
+import WalletButton_ from './walletButton';
 
 import styles from './styles';
 import session from 'helpers/session';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { setWallet, updateWallet } from 'modules/wallet.reducer';
-import { getAccountData } from 'modules/bucket.reducer';
+import { getAccountData, getPoolData } from 'modules/bucket.reducer';
 
+
+export const BucketWatcher = Watcher;
+export const WalletButton = WalletButton_;
 
 class WalletPlugin extends Component {
 
@@ -21,7 +26,7 @@ class WalletPlugin extends Component {
     const {
       setError, setLoading, unsetLoading,
       setWallet, updateWallet,
-      getAccountData,
+      getAccountData, getPoolData,
     } = this.props;
 
     const wallet = this.reconnect();
@@ -29,13 +34,22 @@ class WalletPlugin extends Component {
 
     return setLoading().then(() => {
       return setWallet(wallet);
-    }).then(({ address }) => {
+    }).then(({ user: { address } }) => {
       window.senswap.splt.watch((er, re) => {
         if (er) return;
         const { type, address: changedAddress } = re;
         const { wallet: { accounts } } = this.props;
-        if (type === 'account' && accounts.includes(changedAddress))
+        if (type === 'account' && accounts.includes(changedAddress)) {
           return getAccountData(changedAddress, true);
+        }
+      });
+      window.senswap.swap.watch((er, re) => {
+        if (er) return;
+        const { type, address: changedAddress } = re;
+        const { bucket } = this.props;
+        if (type === 'pool' && bucket[changedAddress]) {
+          return getPoolData(changedAddress, true);
+        }
       });
       window.senswap.lamports.watch(address, (er, re) => {
         if (er) return;
@@ -72,7 +86,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setLoading, unsetLoading,
   setWallet, updateWallet,
-  getAccountData,
+  getAccountData, getPoolData,
 }, dispatch);
 
 export default withRouter(connect(

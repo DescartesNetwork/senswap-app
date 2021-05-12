@@ -10,8 +10,7 @@ import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 import Carousel from 'senswap-ui/carousel';
 
-import WalletButton from 'containers/wallet/plugins/walletButton';
-import WalletPlugin from 'containers/wallet/plugins/walletPlugin';
+import WalletPlugin, { BucketWatcher, WalletButton } from 'containers/wallet/plugins/walletPlugin';
 import { AccountSelection, AccountSend, AccountReceive, AccountAvatar } from 'containers/wallet/plugins/accountPlugin';
 import { MintSelection, MintAvatar } from 'containers/wallet/plugins/mintPlugin';
 import { PoolAvatar } from 'containers/wallet/plugins/poolPlugin';
@@ -82,7 +81,7 @@ export const configSenWallet = () => {
  * Wallet UI buttons, dialogs
  */
 export {
-  WalletPlugin, WalletButton,
+  WalletPlugin, WalletButton, BucketWatcher,
   AccountSelection, AccountSend, AccountReceive, AccountAvatar,
   MintSelection, MintAvatar,
   PoolAvatar

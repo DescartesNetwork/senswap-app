@@ -21,7 +21,7 @@ import { ArrowDropDownRounded } from 'senswap-ui/icons';
 import Header from './header';
 import Introduction from './introduction';
 import Details from './details';
-import { MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
+import { BucketWatcher, MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
 
 import styles from './styles';
 import oracle from 'helpers/oracle';
@@ -50,13 +50,13 @@ class Swap extends Component {
     this.swap = window.senswap.swap;
   }
 
-  _routing = (srcAddresses, dstAddresses) => {
-    for (let srcAddress of srcAddresses) {
-      for (let dstAddress of dstAddresses) {
-        if (srcAddress === dstAddress) return [srcAddress, dstAddress];
+  _routing = (srcPoolAddresses, dstPoolAddresses) => {
+    for (let srcPoolAddress of srcPoolAddresses) {
+      for (let dstPoolAddress of dstPoolAddresses) {
+        if (srcPoolAddress === dstPoolAddress) return [srcPoolAddress, dstPoolAddress];
       }
     }
-    return [srcAddresses[0], dstAddresses[0]];
+    return [srcPoolAddresses[0], dstPoolAddresses[0]];
   }
 
   routing = (srcMintAddress, dstMintAddress) => {
@@ -68,16 +68,16 @@ class Swap extends Component {
       const { getPool, getPools, getPoolData } = this.props;
       const srcCondition = { '$or': [{ mintS: srcMintAddress }, { mintA: srcMintAddress }, { mintB: srcMintAddress }] }
       const dstCondition = { '$or': [{ mintS: dstMintAddress }, { mintA: dstMintAddress }, { mintB: dstMintAddress }] }
-      let srcAddresses = [];
-      let dstAddresses = [];
+      let srcPoolAddresses = [];
+      let dstPoolAddresses = [];
       return getPools(srcCondition, -1, 0).then(data => {
         if (!data.length) throw new Error('Cannot find available pools');
-        srcAddresses = data.map(({ address }) => address);
+        srcPoolAddresses = data.map(({ address }) => address);
         return getPools(dstCondition, -1, 0);
       }).then(data => {
         if (!data.length) throw new Error('Cannot find available pools');
-        dstAddresses = data.map(({ address }) => address);
-        const route = this._routing(srcAddresses, dstAddresses);
+        dstPoolAddresses = data.map(({ address }) => address);
+        const route = this._routing(srcPoolAddresses, dstPoolAddresses);
         return route.each(address => getPool(address));
       }).then(data => {
         if (data.length < 2) throw new Error('Cannot find available pools');
@@ -99,31 +99,34 @@ class Swap extends Component {
     const { address: dstMintAddress, decimals: askDecimals } = mintData || {}
     if (!ssjs.isAddress(srcMintAddress) || !ssjs.isAddress(dstMintAddress)) return;
 
-    return this.setState({ loading: true }, () => {
-      return this.routing(srcMintAddress, dstMintAddress).then(([bidPoolData, askPoolData]) => {
-        if (inverse) return oracle.inverseCurve(
-          ssjs.decimalize(askValue, askDecimals),
-          srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
-        return oracle.curve(
-          ssjs.decimalize(bidValue, bidDecimals),
-          srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
-      }).then(data => {
-        let bidAmount = null;
-        let askAmount = null;
-        if (data.length === 1) [{ askAmount, bidAmount }] = data;
-        else if (data.length === 2) [{ bidAmount }, { askAmount }] = data;
-        else throw new Error('Cannot find available pools');
-        return this.setState({ loading: false, hopData: data }, () => {
-          if (inverse) return this.setState({ bidValue: ssjs.undecimalize(bidAmount, bidDecimals) });
-          return this.setState({ askValue: ssjs.undecimalize(askAmount, askDecimals) });
-        });
-      }).catch(er => {
-        console.log(er)
-        return this.setState({ loading: false }, () => {
-          return setError(er);
+    if (this.timeout) clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => {
+      return this.setState({ loading: true }, () => {
+        return this.routing(srcMintAddress, dstMintAddress).then(([bidPoolData, askPoolData]) => {
+          if (inverse) return oracle.inverseCurve(
+            ssjs.decimalize(askValue, askDecimals),
+            srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
+          return oracle.curve(
+            ssjs.decimalize(bidValue, bidDecimals),
+            srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
+        }).then(data => {
+          let bidAmount = null;
+          let askAmount = null;
+          if (data.length === 1) [{ askAmount, bidAmount }] = data;
+          else if (data.length === 2) [{ bidAmount }, { askAmount }] = data;
+          else throw new Error('Cannot find available pools');
+          return this.setState({ loading: false, hopData: data }, () => {
+            if (inverse) return this.setState({ bidValue: ssjs.undecimalize(bidAmount, bidDecimals) });
+            return this.setState({ askValue: ssjs.undecimalize(askAmount, askDecimals) });
+          });
+        }).catch(er => {
+          console.log(er)
+          return this.setState({ loading: false }, () => {
+            return setError(er);
+          });
         });
       });
-    });
+    }, 500);
   }
 
   onOpenAccountSelection = () => this.setState({ visibleAccountSelection: true });
@@ -134,7 +137,8 @@ class Swap extends Component {
 
   onAccountData = (accountData) => {
     return this.setState({ accountData, bidValue: '', askValue: '' }, () => {
-      return this.onCloseAccountSelection();
+      this.onCloseAccountSelection();
+      return this.estimateState();
     });
   }
 
@@ -143,7 +147,8 @@ class Swap extends Component {
     const { setError, getMintData } = this.props;
     return getMintData(mintAddress).then(mintData => {
       return this.setState({ mintData, bidValue: '', askValue: '' }, () => {
-        return this.onCloseMintSelection();
+        this.onCloseMintSelection();
+        return this.estimateState();
       });
     }).catch(er => {
       return setError(er);
@@ -260,6 +265,10 @@ class Swap extends Component {
     const { icon: askIcon, symbol: askSymbol } = askMintData || {};
 
     return <Grid container>
+      <BucketWatcher
+        addresses={hopData.map(({ poolData: { address } }) => address)}
+        onChange={() => this.estimateState()}
+      />
       <Grid item xs={12}>
         <Header />
       </Grid>

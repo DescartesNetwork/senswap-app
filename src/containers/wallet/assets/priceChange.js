@@ -2,12 +2,27 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ssjs from 'senswapjs';
 
+import { makeStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 
 import { ArrowDropDownRounded, ArrowDropUpRounded } from 'senswap-ui/icons';
 
+
+const useStyles = makeStyles(theme => ({
+  noWrap: {
+    flexWrap: 'nowrap',
+  },
+  stretch: {
+    flex: '1 1 auto',
+  },
+  opticalCorrection: {
+    marginLeft: -8
+  }
+}));
+
 function PriceChange(props) {
+  const classes = useStyles();
   const [priceChange, setPriceChange] = useState(0);
   const { ticket } = props;
   useEffect(() => {
@@ -18,8 +33,8 @@ function PriceChange(props) {
     });
   }, [ticket]);
 
-  return <Grid container spacing={0}>
-    <Grid item style={{ marginLeft: -8 }}> {/* Optical correction */}
+  return <Grid container spacing={0} className={classes.noWrap}>
+    <Grid item className={classes.opticalCorrection}>
       {priceChange < 0 ? < ArrowDropDownRounded
         style={{ color: priceChange < 0 ? '#FF7A68' : '#4FBF67' }}
       /> : <ArrowDropUpRounded
