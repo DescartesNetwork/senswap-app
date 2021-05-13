@@ -25,7 +25,7 @@ class Home extends Component {
       route: '',
       carouselData: [
         {
-          title: "Let's Swap with Sen",
+          title: "Let's swap with SEN",
           description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
           src: 'https://source.unsplash.com/random',
           action: <Button

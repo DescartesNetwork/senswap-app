@@ -23,7 +23,7 @@ class Introduction extends Component {
     return <Paper className={classes.paper}>
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant="h5">High transaction fees & slow confirmations?</Typography>
+          <Typography variant="h5">High fees & slow confirmations?</Typography>
         </Grid>
         <Grid item xs={12}>
           <Typography color="textSecondary">SenSwap is everything you need to turn it into a thing of the past. Let’s swap with low transaction fees and fast confirmation time.</Typography>

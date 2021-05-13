@@ -22,21 +22,16 @@ import { MintAvatar } from 'containers/wallet';
 import styles from './styles';
 import sol from 'helpers/sol';
 import utils from 'helpers/utils';
-import { setError } from 'modules/ui.reducer';
+import { setError, setSuccess } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 
-
-const EMPTY = {
-  loading: false,
-  txId: '',
-}
 
 class RemoveLiquidity extends Component {
   constructor() {
     super();
 
     this.state = {
-      ...EMPTY,
+      loading: false,
       amount: '',
     }
 
@@ -74,7 +69,10 @@ class RemoveLiquidity extends Component {
   }
 
   removeLiquidity = () => {
-    const { data: { pool, mint: { decimals } }, setError, onClose } = this.props;
+    const {
+      data: { pool, mint: { decimals } },
+      setError, setSuccess, onClose
+    } = this.props;
     const { amount } = this.state;
 
     const lpt = ssjs.decimalize(amount, decimals);
@@ -107,11 +105,12 @@ class RemoveLiquidity extends Component {
           window.senswap.wallet
         );
       }).then(({ txId }) => {
-        return this.setState({ ...EMPTY, txId }, () => {
-          return onClose();
+        return this.setState({ loading: false }, () => {
+          onClose();
+          return setSuccess('Remove liquidity successfully', utils.explorer(txId));
         });
       }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
+        return this.setState({ loading: false }, () => {
           return setError(er);
         });
       });
@@ -273,11 +272,10 @@ class RemoveLiquidity extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
+  setError, setSuccess,
   updateWallet,
 }, dispatch);
 
