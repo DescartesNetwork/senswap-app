@@ -7,35 +7,26 @@ class Personalization {
 
   // Favorite accounts
   getFavoriteAccounts = () => {
-    const { personalization } = storage.get(this.walletAddress) || {};
-    const { favouriteAccounts } = personalization || {};
+    const { favouriteAccounts } = storage.get(this.walletAddress) || {};
     return favouriteAccounts || [];
   }
   addFavoriteAccount = (accountAddress) => {
-    const { personalization, ...others } = storage.get(this.walletAddress) || {};
-    const { favouriteAccounts, ...someothers } = personalization || {};
+    const { favouriteAccounts, ...others } = storage.get(this.walletAddress) || {};
     let newFavAccAddr = favouriteAccounts || [];
     if (newFavAccAddr.includes(accountAddress)) return;
     newFavAccAddr.push(accountAddress);
     return storage.set(this.walletAddress, {
       ...others,
-      personalization: {
-        ...someothers,
-        favouriteAccounts: newFavAccAddr
-      }
+      favouriteAccounts: newFavAccAddr
     });
   }
   removeFavoriteAccount = (accountAddress) => {
-    const { personalization, ...others } = storage.get(this.walletAddress) || {};
-    const { favouriteAccounts, ...someothers } = personalization || {};
+    const { favouriteAccounts, ...others } = storage.get(this.walletAddress) || {};
     let newFavAccAddr = favouriteAccounts || [];
     newFavAccAddr = newFavAccAddr.filter(address => (address !== accountAddress));
     return storage.set(this.walletAddress, {
       ...others,
-      personalization: {
-        ...someothers,
-        favouriteAccounts: newFavAccAddr
-      }
+      favouriteAccounts: newFavAccAddr
     });
   }
 }
