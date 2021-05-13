@@ -26,12 +26,6 @@ Utils.prettyDatetime = (datetime) => {
   return dateformat(datetime, 'HH:MM, dd/mm/yyyy');
 }
 
-Utils.prettyName = (name, length) => {
-  if (!length) length = 15;
-  if (name.length > length) return name.slice(0, length - 1) + '...';
-  return name;
-}
-
 Utils.checkDevice = () => {
   var isMobile = false;
   if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent)

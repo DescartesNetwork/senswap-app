@@ -3,7 +3,7 @@ const db = window.localStorage;
 
 const storage = {}
 
-storage.convert = (value) => {
+storage._convert = (value) => {
   try {
     return JSON.parse(value);
   } catch (e) {
@@ -12,7 +12,7 @@ storage.convert = (value) => {
 }
 
 storage.set = (key, value) => {
-  let data = storage.convert(db.getItem(KEY));
+  let data = storage._convert(db.getItem(KEY));
   if (!data || typeof data !== 'object') {
     data = {}
     data[key] = value;
@@ -24,7 +24,7 @@ storage.set = (key, value) => {
 }
 
 storage.get = (key) => {
-  let data = storage.convert(db.getItem(KEY));
+  let data = storage._convert(db.getItem(KEY));
   if (!data || typeof data !== 'object') return null;
   return data[key];
 }
