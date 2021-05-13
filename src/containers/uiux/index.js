@@ -4,18 +4,18 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Backdrop from '@material-ui/core/Backdrop';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui//typography';
+import CircularProgress from 'senswap-ui//circularProgress';
+import Link from 'senswap-ui/link';
+
 import Snackbar from '@material-ui/core/Snackbar';
 import Alert from '@material-ui/lab/Alert';
-
-import { } from '@material-ui/icons';
+import Backdrop from '@material-ui/core/Backdrop';
 
 import styles from './styles';
-import { setScreen, setScroll, unsetError } from 'modules/ui.reducer';
+import { setScreen, setScroll, unsetError, unsetSuccess } from 'modules/ui.reducer';
 
 
 class UiUx extends Component {
@@ -54,7 +54,14 @@ class UiUx extends Component {
 
   render() {
     const { classes } = this.props;
-    const { ui: { error, visible, loading }, unsetError } = this.props;
+    const {
+      ui: {
+        error: { message: errorMsg, visible: errorVisible },
+        success: { message: successMsg, visible: successVisible, link: successLink },
+        loading
+      },
+      unsetError, unsetSuccess
+    } = this.props;
 
     return <Grid container spacing={2}>
       {/* Loading backdrop */}
@@ -70,9 +77,16 @@ class UiUx extends Component {
           </Grid>
         </Backdrop>
         {/* Error dialog */}
-        <Snackbar open={visible} onClose={unsetError} autoHideDuration={6000}>
+        <Snackbar open={errorVisible} onClose={unsetError} autoHideDuration={10000}>
           <Alert severity="error" onClose={unsetError} >
-            <Typography>{error}</Typography>
+            <Typography>{errorMsg}</Typography>
+          </Alert>
+        </Snackbar>
+        {/* Success dialog */}
+        <Snackbar open={successVisible} onClose={unsetSuccess} autoHideDuration={10000}>
+          <Alert severity="success" onClose={unsetSuccess} >
+            {successLink ? <Link href={successLink} style={{ color: '#edf7ed' }}>{successMsg} - check it out!</Link> :
+              <Typography>{successMsg}</Typography>}
           </Alert>
         </Snackbar>
       </Grid>
@@ -85,7 +99,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setScreen, setScroll, unsetError
+  setScreen, setScroll, unsetError, unsetSuccess
 }, dispatch);
 
 export default withRouter(connect(

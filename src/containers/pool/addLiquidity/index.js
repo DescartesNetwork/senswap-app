@@ -22,7 +22,7 @@ import Field from './field';
 import styles from './styles';
 import oracle from 'helpers/oracle';
 import utils from 'helpers/utils';
-import { setError } from 'modules/ui.reducer';
+import { setError, setSuccess } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
@@ -131,7 +131,7 @@ class AddLiquidity extends Component {
   addLiquidity = () => {
     const {
       wallet: { accounts }, poolData: { address: poolAddress },
-      updateWallet, setError, onClose
+      updateWallet, setError, setSuccess, onClose
     } = this.props;
     const { accountData, amounts } = this.state;
 
@@ -159,12 +159,11 @@ class AddLiquidity extends Component {
         if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
         return updateWallet({ accounts: newAccounts });
       }).then(re => {
-        console.log(txId);
         return this.setState({ ...EMPTY, txId }, () => {
-          return onClose();
+          onClose();
+          return setSuccess('Add liquidity successfully', utils.explorer(txId));
         });
       }).catch(er => {
-        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
@@ -261,7 +260,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
+  setError, setSuccess,
   updateWallet,
   getAccountData,
 }, dispatch);

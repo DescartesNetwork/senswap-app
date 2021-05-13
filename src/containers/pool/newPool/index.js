@@ -25,7 +25,7 @@ import Price from './price';
 import styles from './styles';
 import configs from 'configs';
 import utils from 'helpers/utils';
-import { setError } from 'modules/ui.reducer';
+import { setError, setSuccess } from 'modules/ui.reducer';
 import { getMint } from 'modules/mint.reducer';
 import { addPool } from 'modules/pool.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
@@ -115,7 +115,11 @@ class NewPool extends Component {
       ],
       amounts: [amountS, amountA, amountB]
     } = this.state;
-    const { wallet: { accounts }, setError, updateWallet, addPool, onClose } = this.props;
+    const {
+      wallet: { accounts },
+      setError, setSuccess,
+      updateWallet, addPool, onClose
+    } = this.props;
     if (!ssjs.isAddress(srcSAddress)) return setError('Please select primary token');
     if (!ssjs.isAddress(srcAAddress)) return setError('Please select token 1');
     if (!ssjs.isAddress(srcBAddress)) return setError('Please select token 2');
@@ -143,9 +147,9 @@ class NewPool extends Component {
       }).then(re => {
         return addPool({ address: poolAddress });
       }).then(re => {
-        console.log(txId)
         return this.setState({ ...EMPTY, txId }, () => {
-          return onClose();
+          onClose();
+          return setSuccess('Create a new pool successfully', utils.explorer(txId));
         });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {
@@ -294,7 +298,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
+  setError, setSuccess,
   getMint,
   addPool,
   updateWallet,

@@ -27,7 +27,7 @@ import styles from './styles';
 import oracle from 'helpers/oracle';
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
-import { setError } from 'modules/ui.reducer';
+import { setError, setSuccess } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 import { getMintData, getPoolData } from 'modules/bucket.reducer';
 import { openWallet, updateWallet } from 'modules/wallet.reducer';
@@ -188,7 +188,7 @@ class Swap extends Component {
   }
 
   executeSwap = () => {
-    const { setError } = this.props;
+    const { setError, setSuccess } = this.props;
     const { accountData, hopData } = this.state;
     let { address: srcAddress } = accountData;
     return this.setState({ loading: true }, () => {
@@ -209,9 +209,10 @@ class Swap extends Component {
             window.senswap.wallet
           );
         });
-      }).then(txId => {
-        console.log(txId)
-        return this.setState({ loading: false });
+      }).then(txIds => {
+        return this.setState({ loading: false }, () => {
+          return setSuccess('Swap successfully', utils.explorer(txIds[txIds.length - 1]));
+        });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
           return setError(er);
@@ -408,7 +409,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
+  setError, setSuccess,
   updateWallet, openWallet,
   getPools, getPool,
   getMintData, getPoolData,

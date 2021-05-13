@@ -20,7 +20,7 @@ import { PoolAvatar } from 'containers/wallet';
 import styles from './styles';
 import utils from 'helpers/utils';
 import sol from 'helpers/sol';
-import { setError } from 'modules/ui.reducer';
+import { setError, setSuccess } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 
 
@@ -70,12 +70,12 @@ class Interaction extends Component {
   }
 
   earn = () => {
-    const { setError, poolData, onClose } = this.props;
+    const { setError, setSuccess, poolData, onClose } = this.props;
     const { receiverAddress } = this.state;
     const { address: poolAddress, vault: { amount } } = poolData;
     return this.swap.earn(amount, poolAddress, receiverAddress, window.senswap.wallet).then(txId => {
-      console.log(txId);
-      return onClose();
+      onClose();
+      return setSuccess('Earn successfully', utils.explorer(txId));
     }).catch(er => {
       return setError(er);
     });
@@ -216,7 +216,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError,
+  setError, setSuccess,
   updateWallet,
 }, dispatch);
 

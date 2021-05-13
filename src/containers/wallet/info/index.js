@@ -18,7 +18,8 @@ import Price from './price';
 import { AccountSelection, AccountSend, AccountReceive } from 'containers/wallet';
 
 import styles from './styles';
-import { setError, toggleRightBar } from 'modules/ui.reducer';
+import utils from 'helpers/utils';
+import { setError, setSuccess, toggleRightBar } from 'modules/ui.reducer';
 
 
 class Info extends Component {
@@ -58,9 +59,9 @@ class Info extends Component {
   onCloseAccountSend = () => this.setState({ visibleAccountSend: false });
   onOpenAccountSend = () => this.setState({ visibleAccountSend: true });
   onTransactionData = ({ amount, from, to }) => {
-    const { setError } = this.props;
+    const { setError, setSuccess } = this.props;
     return this.transfer(amount, from, to).then(txId => {
-      console.log(txId);
+      setSuccess('Transfer successfully', utils.explorer(txId));
       return this.onCloseAccountSend();
     }).catch(er => {
       this.onCloseAccountSend();
@@ -90,7 +91,7 @@ class Info extends Component {
           </Grid>
         </Grid>
         <Grid item xs={12}>
-          <Drain size={1}/>
+          <Drain size={1} />
         </Grid>
         <Grid item xs={12} md={6}>
           <Price />
@@ -154,7 +155,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError, toggleRightBar,
+  setError, setSuccess, toggleRightBar,
 }, dispatch);
 
 export default withRouter(connect(

@@ -6,9 +6,15 @@
 const defaultState = {
   width: 0,
   type: 'xs',
-  error: '',
-  visible: false,
   loading: false,
+  error: {
+    message: '',
+    visible: false,
+  },
+  success: {
+    message: '',
+    visible: false,
+  },
   leftbar: window.innerWidth >= 600,
   rightbar: false,
 }
@@ -84,18 +90,18 @@ export const SET_ERROR = 'SET_ERROR';
 export const SET_ERROR_OK = 'SET_ERROR_OK';
 export const SET_ERROR_FAIL = 'SET_ERROR_FAIL';
 
-export const setError = (error) => {
+export const setError = (msg) => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_ERROR });
 
-      if (!error) {
+      if (!msg) {
         const er = 'Empty input';
         dispatch({ type: SET_ERROR_FAIL, reason: er });
         return reject(er);
       }
-      const { ui: { visible: prevVisible, error: prevError } } = getState();
-      if (prevVisible && error === prevError) {
+      const { ui: { error: { visible: prevVisible, message: prevMessage } } } = getState();
+      if (prevVisible && msg === prevMessage) {
         const er = 'There exists another error needed to handle first';
         dispatch({ type: SET_ERROR_FAIL, reason: er });
         return reject(er);
@@ -108,7 +114,7 @@ export const setError = (error) => {
         return er.toString();
       }
 
-      const data = { error: parseError(error), visible: true }
+      const data = { error: { messgae: parseError(msg), visible: true } }
       dispatch({ type: SET_ERROR_OK, data });
       return resolve(data);
     });
@@ -127,15 +133,72 @@ export const unsetError = () => {
     return new Promise((resolve, reject) => {
       dispatch({ type: UNSET_ERROR });
 
-      const { ui: { visible: prevVisible } } = getState();
+      const { ui: { error: { visible: prevVisible } } } = getState();
       if (!prevVisible) {
         const er = 'There is no error';
         dispatch({ type: UNSET_ERROR_FAIL, reason: er });
         return reject(er);
       }
 
-      const data = { error: '', visible: false }
+      const data = { error: { message: '', visible: false } }
       dispatch({ type: UNSET_ERROR_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
+ * Notify successs
+ */
+export const SET_SUCCESS = 'SET_SUCCESS';
+export const SET_SUCCESS_OK = 'SET_SUCCESS_OK';
+export const SET_SUCCESS_FAIL = 'SET_SUCCESS_FAIL';
+
+export const setSuccess = (msg, link = '') => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: SET_SUCCESS });
+
+      if (!msg) {
+        const er = 'Empty input';
+        dispatch({ type: SET_SUCCESS_FAIL, reason: er });
+        return reject(er);
+      }
+      const { ui: { success: { visible: prevVisible, message: prevMessage } } } = getState();
+      if (prevVisible && msg === prevMessage) {
+        const er = 'There exists another success needed to handle first';
+        dispatch({ type: SET_SUCCESS_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const data = { success: { message: msg, visible: true, link } }
+      dispatch({ type: SET_SUCCESS_OK, data });
+      return resolve(data);
+    });
+  }
+}
+
+/**
+ * Turn off success
+ */
+export const UNSET_SUCCESS = 'UNSET_SUCCESS';
+export const UNSET_SUCCESS_OK = 'UNSET_SUCCESS_OK';
+export const UNSET_SUCCESS_FAIL = 'UNSET_SUCCESS_FAIL';
+
+export const unsetSuccess = () => {
+  return (dispatch, getState) => {
+    return new Promise((resolve, reject) => {
+      dispatch({ type: UNSET_SUCCESS });
+
+      const { ui: { success: { visible: prevVisible } } } = getState();
+      if (!prevVisible) {
+        const er = 'There is no error';
+        dispatch({ type: UNSET_SUCCESS_FAIL, reason: er });
+        return reject(er);
+      }
+
+      const data = { success: { message: '', visible: false, link: '' } }
+      dispatch({ type: UNSET_SUCCESS_OK, data });
       return resolve(data);
     });
   }
@@ -256,6 +319,14 @@ export default (state = defaultState, action) => {
     case UNSET_ERROR_OK:
       return { ...state, ...action.data };
     case UNSET_ERROR_FAIL:
+      return { ...state, ...action.data };
+    case SET_SUCCESS_OK:
+      return { ...state, ...action.data };
+    case SET_SUCCESS_FAIL:
+      return { ...state, ...action.data };
+    case UNSET_SUCCESS_OK:
+      return { ...state, ...action.data };
+    case UNSET_SUCCESS_FAIL:
       return { ...state, ...action.data };
     case SET_LOADING_OK:
       return { ...state, ...action.data };
