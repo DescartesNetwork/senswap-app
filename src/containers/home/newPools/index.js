@@ -19,9 +19,12 @@ class NewPools extends Component {
     componentDidMount() {
         // solana.getHistoryTokenTransaction("GHjB1mY6WinFHy6kz81boVBmGoaM5PN37r75TLJfcU3c")
         //solana.getHistoryTokenTransaction("4EGz1FgjUauAz9PeaKz4FBhVBvDpuiLAsZZSWzeMxayE")
-        const timeFrom = moment().startOf('day').valueOf()
-        const timeTo = moment().endOf('day').valueOf()
+        let timeFrom = moment().startOf('day').valueOf()
+        let timeTo = moment().endOf('day').valueOf()
         //report.findAllTransactionByTime("52yrd8vkxUsoCcSkuQtBERNYuJ6ok5PFbf5MK6NqP8iY", timeFrom, timeTo)
+
+        timeFrom = moment().subtract(2, "hour")
+        timeTo = moment().endOf('day').valueOf()
         report.findAllTransactionByTime("8UaZw2jDhJzv5V53569JbCd3bD4BnyCfBH3sjwgajGS9", timeFrom, timeTo)
     }
 

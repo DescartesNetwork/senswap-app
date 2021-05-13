@@ -11,7 +11,7 @@ configs.development = {
   spltAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
   splataAddress: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
   swapAddress: 'BVK3vduDFLbPouYBPBd8gpKjHSaj88mN2aTMbjQaXPda',
-  senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
+  senAddress: 'D8UuF1jPr5gtxHvnVz3HpxP2UkgtxLs9vwz7ecaTkrGy',
   cluster: 'devnet',
 }
 
@@ -23,7 +23,7 @@ configs.staging = {
   spltAddress: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
   splataAddress: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL',
   swapAddress: 'BVK3vduDFLbPouYBPBd8gpKjHSaj88mN2aTMbjQaXPda',
-  senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
+  senAddress: 'D8UuF1jPr5gtxHvnVz3HpxP2UkgtxLs9vwz7ecaTkrGy',
   cluster: 'devnet',
 }
 
