@@ -98,11 +98,11 @@ class History extends Component {
         <Grid item xs={12}>
           <List>
             <EventItem />
-            <EventItem variant="swap" amount={10000} unit="SEN" />
-            <EventItem variant="send" amount={1.4917} unit="SOL" />
+            <EventItem variant="swap" description="10000 SEN" />
+            <EventItem variant="send" description="1.4917 SOL" />
             <EventItem variant="receive" />
             <EventItem variant="deposit" />
-            <EventItem variant="withdraw" amount={10} unit="WETH" />
+            <EventItem variant="withdraw" description="10 WETH" />
           </List>
         </Grid>
         <Grid item xs={12}>

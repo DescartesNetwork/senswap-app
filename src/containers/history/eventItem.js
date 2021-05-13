@@ -67,7 +67,7 @@ class EventItem extends Component {
   }
 
   render() {
-    const { classes, link, amount, unit } = this.props;
+    const { classes, link, description } = this.props;
 
     return <Fragment>
       <ListItem className={classes.listItem} alignItems="flex-start">
@@ -95,12 +95,12 @@ class EventItem extends Component {
                 style={{ color: '#4FBF67' }}
               >View on explorer</Link>
             </Grid>
-            {amount ? <Fragment>
+            {description ? <Fragment>
               <Grid item xs={12} >
                 <Drain size={1} />
               </Grid>
               <Grid item xs={12}>
-                <Typography>{utils.prettyNumber(amount)} {unit}</Typography>
+                <Typography>{description}</Typography>
               </Grid>
             </Fragment> : null}
           </Grid>
@@ -112,15 +112,13 @@ class EventItem extends Component {
 }
 
 EventItem.defaultProps = {
-  unit: 'Unknown',
-  amount: 0,
+  description: '',
   variant: 'default',
   link: ''
 }
 
 EventItem.propsType = {
-  unit: PropTypes.string,
-  amount: PropTypes.number,
+  description: PropTypes.string,
   variant: PropTypes.oneOf(['default', 'send', 'receive', 'swap', 'deposit', 'withdraw']),
   link: PropTypes.string,
 }

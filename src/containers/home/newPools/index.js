@@ -140,13 +140,6 @@ class NewPools extends Component {
     const isLoggedIn = ssjs.isAddress(address);
 
     return <Grid container spacing={2}>
-      {loading ? <Grid item xs={12}>
-        <Grid container justify="center">
-          <Grid item>
-            <CircularProgress />
-          </Grid>
-        </Grid>
-      </Grid> : null}
       {data.map((poolData, i) => {
         const {
           accountData,
@@ -177,7 +170,7 @@ class NewPools extends Component {
       </Grid>
       <Grid item xs={12}>
         <Grid container justify="center">
-          <Button onClick={this.onMore} disabled={loading}>
+          <Button onClick={this.onMore} disabled={loading} startIcon={loading ? <CircularProgress size={17} /> : null}>
             <Typography>See more</Typography>
           </Button>
         </Grid>

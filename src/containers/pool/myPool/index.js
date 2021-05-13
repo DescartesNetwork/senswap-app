@@ -90,7 +90,7 @@ class MyPool extends Component {
       {loading ? <Grid item xs={12}>
         <Grid container justify="center">
           <Grid item>
-            <CircularProgress />
+            <CircularProgress size={17} />
           </Grid>
         </Grid>
       </Grid> : null}

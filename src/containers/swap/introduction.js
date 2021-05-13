@@ -40,10 +40,10 @@ class Introduction extends Component {
         <Grid item xs={12}>
           <Grid container spacing={0}>
             <Grid item xs={12}>
-              <Link href="#">User Guide</Link>
+              <Link href="https://senswap.com/news">User Guide</Link>
             </Grid>
             <Grid item xs={12}>
-              <Link href="#">Have a problem? Just get in touch</Link>
+              <Link href="mailto:hello@descartes.network?subject=SenSwap%20App%20Problems">Have a problem? Just get in touch</Link>
             </Grid>
           </Grid>
         </Grid>
