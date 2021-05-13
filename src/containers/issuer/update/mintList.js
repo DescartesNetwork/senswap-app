@@ -4,19 +4,19 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 
-import { withStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Tooltip from '@material-ui/core/Tooltip';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import Menu from '@material-ui/core/Menu';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import Tooltip from 'senswap-ui/tooltip';
+import { IconButton } from 'senswap-ui/button';
+import { ListSubheader } from 'senswap-ui/list';
+import TextField from 'senswap-ui/textField';
+import CircularProgress from 'senswap-ui/circularProgress';
 
-import { UnfoldMoreRounded, EmojiObjectsRounded, SearchRounded } from '@material-ui/icons';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+
+import { UnfoldMoreRounded, SearchRounded } from '@material-ui/icons';
 
 import { MintAvatar } from 'containers/wallet';
 
@@ -135,18 +135,6 @@ class MintList extends Component {
           </MenuItem>
         })}
         {!data.length ? <ListSubheader disableSticky>No result</ListSubheader> : null}
-        <ListSubheader disableSticky>Your token not presented here</ListSubheader>
-        <MenuItem>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<EmojiObjectsRounded />}
-            to='/issuer/register-token'
-            fullWidth
-          >
-            <Typography>Register tokens</Typography>
-          </Button>
-        </MenuItem>
       </Menu>
     </Fragment>
   }
