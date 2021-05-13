@@ -114,7 +114,7 @@ export const setError = (msg) => {
         return er.toString();
       }
 
-      const data = { error: { messgae: parseError(msg), visible: true } }
+      const data = { error: { message: parseError(msg), visible: true } }
       dispatch({ type: SET_ERROR_OK, data });
       return resolve(data);
     });

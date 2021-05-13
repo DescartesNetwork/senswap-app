@@ -7,6 +7,10 @@ import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Typography from 'senswap-ui/typography';
+import Button from 'senswap-ui/button';
+import Drain from 'senswap-ui/drain';
 
 import AddLiquidity from 'containers/pool/addLiquidity';
 import RemoveLiquidity from 'containers/pool/removeLiquidity';
@@ -26,11 +30,14 @@ class LatestPromotion extends Component {
     super();
 
     this.state = {
+      loading: false,
       visibleDeposit: false,
       visibleWithdraw: false,
       poolData: {},
       accountData: {},
-      data: []
+      data: [],
+      page: 0,
+      limit: 6,
     }
   }
 
@@ -69,12 +76,25 @@ class LatestPromotion extends Component {
 
   fetchData = () => {
     const { setError, getPools } = this.props;
-    return getPools({}, 9, 0).then(poolAddresses => {
-      return poolAddresses.each(({ address }) => this.getPoolDataAndAccountData(address), { skipError: true, skipIndex: true });
-    }).then(data => {
-      return this.setState({ data });
-    }).catch(er => {
-      return setError(er);
+    const { data, page, limit } = this.state;
+    return this.setState({ loading: true }, () => {
+      return getPools({}, limit, page).then(poolAddresses => {
+        return poolAddresses.each(({ address }) => this.getPoolDataAndAccountData(address), { skipError: true, skipIndex: true });
+      }).then(re => {
+        const expandedData = data.concat(re);
+        return this.setState({ data: expandedData, loading: false });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
+      });
+    });
+  }
+
+  onMore = () => {
+    const { page } = this.state;
+    return this.setState({ page: page + 1 }, () => {
+      return this.fetchData();
     });
   }
 
@@ -98,11 +118,21 @@ class LatestPromotion extends Component {
 
   render() {
     const { wallet: { user: { address } }, openWallet } = this.props;
-    const { accountData, poolData, visibleDeposit, visibleWithdraw, data } = this.state;
+    const {
+      loading, visibleDeposit, visibleWithdraw,
+      accountData, poolData, data,
+    } = this.state;
 
     const isLoggedIn = ssjs.isAddress(address);
 
     return <Grid container spacing={2}>
+      {loading ? <Grid item xs={12}>
+        <Grid container justify="center">
+          <Grid item>
+            <CircularProgress />
+          </Grid>
+        </Grid>
+      </Grid> : null}
       {data.map((poolData, i) => {
         const {
           accountData,
@@ -127,6 +157,16 @@ class LatestPromotion extends Component {
       })}
       <AddLiquidity poolData={poolData} visible={visibleDeposit} onClose={this.onCloseDeposit} />
       <RemoveLiquidity data={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
+      <Grid item xs={12}>
+        <Drain size={1} />
+      </Grid>
+      <Grid item xs={12}>
+        <Grid container justify="center">
+          <Button onClick={this.onMore} disabled={loading}>
+            <Typography>See more</Typography>
+          </Button>
+        </Grid>
+      </Grid>
     </Grid>
   }
 }
@@ -134,7 +174,6 @@ class LatestPromotion extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({

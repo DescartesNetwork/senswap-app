@@ -23,10 +23,10 @@ class Introduction extends Component {
     return <Paper className={classes.paper}>
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant="h5">What is SenSwap?</Typography>
+          <Typography variant="h5">High transaction fees & slow confirmations?</Typography>
         </Grid>
         <Grid item xs={12}>
-          <Typography color="textSecondary">The safe, fast and most secure way to bring cross-chain assets to Binance chains.</Typography>
+          <Typography color="textSecondary">SenSwap is everything you need to turn it into a thing of the past. Let’s swap with slow transaction fees and faster confirmation times.</Typography>
         </Grid>
         <Grid item xs={12}>
           <Button
@@ -40,13 +40,10 @@ class Introduction extends Component {
         <Grid item xs={12}>
           <Grid container spacing={0}>
             <Grid item xs={12}>
-              <Link href="#">View Proof of Assets</Link>
-            </Grid>
-            <Grid item xs={12}>
               <Link href="#">User Guide</Link>
             </Grid>
             <Grid item xs={12}>
-              <Link href="#">Got a problem? Just get in touch</Link>
+              <Link href="#">Have a problem? Just get in touch</Link>
             </Grid>
           </Grid>
         </Grid>

@@ -21,8 +21,8 @@ class FeaturedPool extends Component {
     this.state = {
       carouselData: [
         {
-          title: "Let's swap with SenSwap",
-          description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
+          title: "About SenSwap Pools",
+          description: 'Get into a pool as simple as making a cup of instant coffee. You only need to add a single token (single-sided liquidity). Then, enjoy your time with SenSwap.',
           src: 'https://source.unsplash.com/random',
         },
         {

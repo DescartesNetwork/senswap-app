@@ -7,6 +7,7 @@ import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import AddLiquidity from 'containers/pool/addLiquidity';
 import RemoveLiquidity from 'containers/pool/removeLiquidity';
@@ -23,11 +24,12 @@ class MyPool extends Component {
     super();
 
     this.state = {
+      loading: false,
       visibleDeposit: false,
       visibleWithdraw: false,
       poolData: {},
       accountData: {},
-      data: []
+      data: [],
     }
   }
 
@@ -43,16 +45,20 @@ class MyPool extends Component {
 
   fetchData = () => {
     const { wallet: { accounts }, setError, getAccountData } = this.props;
-    return accounts.each(address => {
-      return getAccountData(address);
-    }, { skipError: true, skipIndex: true }).then(data => {
-      data = data.filter(({ pool }) => {
-        const { address } = pool || {};
-        return ssjs.isAddress(address);
+    return this.setState({ loading: true }, () => {
+      return accounts.each(address => {
+        return getAccountData(address);
+      }, { skipError: true, skipIndex: true }).then(data => {
+        data = data.filter(({ pool }) => {
+          const { address } = pool || {};
+          return ssjs.isAddress(address);
+        });
+        return this.setState({ data, loading: false });
+      }).catch(er => {
+        return this.setState({ loading: false }, () => {
+          return setError(er);
+        });
       });
-      return this.setState({ data });
-    }).catch(er => {
-      return setError(er);
     });
   }
 
@@ -75,10 +81,19 @@ class MyPool extends Component {
   }
 
   render() {
-    // const { classes } = this.props;
-    const { poolData, accountData, visibleDeposit, visibleWithdraw, data } = this.state;
+    const {
+      loading, visibleDeposit, visibleWithdraw,
+      poolData, accountData, data
+    } = this.state;
 
     return <Grid container spacing={2}>
+      {loading ? <Grid item xs={12}>
+        <Grid container justify="center">
+          <Grid item>
+            <CircularProgress />
+          </Grid>
+        </Grid>
+      </Grid> : null}
       {data.map((lptData, index) => {
         const {
           amount, mint: { decimals },
@@ -109,7 +124,6 @@ class MyPool extends Component {
 const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
-  bucket: state.bucket,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
