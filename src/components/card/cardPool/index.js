@@ -83,7 +83,7 @@ class CardPool extends Component {
             </AvatarGroup>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="subtitle1">{symbols.join('/')} Pool</Typography>
+            <Typography variant="subtitle1">{symbols.join(' x ')} Pool</Typography>
           </Grid>
         </Grid>
       </CardContent>

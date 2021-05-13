@@ -26,7 +26,7 @@ class Introduction extends Component {
           <Typography variant="h5">High transaction fees & slow confirmations?</Typography>
         </Grid>
         <Grid item xs={12}>
-          <Typography color="textSecondary">SenSwap is everything you need to turn it into a thing of the past. Let’s swap with slow transaction fees and faster confirmation times.</Typography>
+          <Typography color="textSecondary">SenSwap is everything you need to turn it into a thing of the past. Let’s swap with low transaction fees and fast confirmation time.</Typography>
         </Grid>
         <Grid item xs={12}>
           <Button

@@ -101,7 +101,7 @@ class LPTs extends Component {
               }
             } = lptData;
             const icons = [iconA, iconB, iconS];
-            const name = `${symbolA || '.'}/${symbolB || '.'}/${symbolS || '.'}`;
+            const name = `${symbolA || '.'} x ${symbolB || '.'} x ${symbolS || '.'}`;
             return <TableRow key={address} className={classes.tableRow}>
               <TableCell >
                 <Favorite />
