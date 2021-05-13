@@ -58,14 +58,6 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
         }
 
         const result = []
-        // transfer
-        //const signaturesss = ["SaPEysqz9e7BK111omHpC5nkLNqUgTf4WFXFikkWXbRAxeLBxj26KW2fncXMydfUP3kUyFZuyHzHYgxakB4DnYT"]
-        // withdraw - code 2
-        //const signaturesss = ["3KVS4kTQ5M6gWuwxwepXrwHkLS1rUiGrYcCpJRr12xrGaTL56c4F6vixmEkWwcWHLqjR48brSzmoWS1TLroes2nL"]
-        // deposit - code 1
-        const signaturesss = ["va5pv8gR13n71Bh1SrhVunNqpC36PHPhiu5yQDvgM1KNu156kTLxanZhC3fDMoz1wqGuJERwbTpzzQRWQX2sFFA"]
-
-
         for (const s of signatures) {
             const blockTime = s.blockTime
             const signature = s.signature
@@ -83,6 +75,7 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
             })
             const programId = programIds[0]
             //console.log("programId", programId)
+            if (programId !== configs.sol.spltAddress && programId !== configs.sol.swapAddress) continue
 
             const layout = new sb_abi.struct([
                 {key: 'code', type: 'u8'},
