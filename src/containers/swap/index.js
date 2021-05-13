@@ -120,7 +120,6 @@ class Swap extends Component {
             return this.setState({ askValue: ssjs.undecimalize(askAmount, askDecimals) });
           });
         }).catch(er => {
-          console.log(er)
           return this.setState({ loading: false }, () => {
             return setError(er);
           });

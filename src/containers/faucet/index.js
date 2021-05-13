@@ -103,7 +103,6 @@ class Faucet extends Component {
       }).then(({ txId }) => {
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
-        console.log(er)
         return this.setState({ ...EMPTY }, () => {
           return setError(er);
         });
