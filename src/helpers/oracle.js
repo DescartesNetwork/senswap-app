@@ -79,21 +79,21 @@ Oracle.inverseCurve = (askAmount, srcMintAddress, bidPoolData, dstMintAddress, a
   });
 }
 
-Oracle._parseTreasury = (mintAddress, poolData) => {
+Oracle._parseReserve = (mintAddress, poolData) => {
   const {
-    mint_s: { address: mintAddressS }, treasury_s,
-    mint_a: { address: mintAddressA }, treasury_a,
-    mint_b: { address: mintAddressB }, treasury_b,
+    mint_s: { address: mintAddressS }, reserve_s,
+    mint_a: { address: mintAddressA }, reserve_a,
+    mint_b: { address: mintAddressB }, reserve_b,
   } = poolData;
-  if (mintAddress === mintAddressS) return treasury_s;
-  if (mintAddress === mintAddressA) return treasury_a;
-  if (mintAddress === mintAddressB) return treasury_b;
+  if (mintAddress === mintAddressS) return reserve_s;
+  if (mintAddress === mintAddressA) return reserve_a;
+  if (mintAddress === mintAddressB) return reserve_b;
 }
 
 Oracle._directCurve = (bidAmount, srcMintAddress, dstMintAddress, poolData) => {
   return new Promise((resolve, reject) => {
-    const { amount: bidReserve } = Oracle._parseTreasury(srcMintAddress, poolData);
-    const { amount: askReserve } = Oracle._parseTreasury(dstMintAddress, poolData);
+    const bidReserve = Oracle._parseReserve(srcMintAddress, poolData);
+    const askReserve = Oracle._parseReserve(dstMintAddress, poolData);
 
     if (!bidReserve || !askReserve) return reject('Outdated pool');
 
@@ -125,8 +125,8 @@ Oracle._directCurve = (bidAmount, srcMintAddress, dstMintAddress, poolData) => {
 
 Oracle._inverseDirectCurve = (askAmount, srcMintAddress, dstMintAddress, poolData) => {
   return new Promise((resolve, reject) => {
-    const { amount: bidReserve } = Oracle._parseTreasury(srcMintAddress, poolData);
-    const { amount: askReserve } = Oracle._parseTreasury(dstMintAddress, poolData);
+    const bidReserve = Oracle._parseReserve(srcMintAddress, poolData);
+    const askReserve = Oracle._parseReserve(dstMintAddress, poolData);
 
     if (!bidReserve || !askReserve) return reject('Outdated pool');
     if (askAmount > askReserve) return reject('Cannot buy an amount larger than the available reserve');
