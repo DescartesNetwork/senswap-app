@@ -22,6 +22,7 @@ import Assets from './assets';
 
 import styles from './styles';
 import configs from 'configs';
+import WalletHeroImage from 'static/images/wallet-hero.png';
 
 
 /**
@@ -98,7 +99,7 @@ class Wallet extends Component {
         <Carousel data={[{
           subtitle: 'Unlock wallet',
           title: 'Please connect your wallet to continue',
-          src: 'https://source.unsplash.com/random',
+          src: WalletHeroImage,
           action: <Grid container>
             <Grid item>
               <WalletButton />

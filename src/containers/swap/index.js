@@ -32,6 +32,9 @@ import { getPools, getPool } from 'modules/pool.reducer';
 import { getMintData, getPoolData } from 'modules/bucket.reducer';
 import { openWallet, updateWallet } from 'modules/wallet.reducer';
 
+import SwapIntroductionImage from 'static/images/swap-introduction.png';
+
+
 class Swap extends Component {
   constructor() {
     super();
@@ -282,7 +285,7 @@ class Swap extends Component {
               <div
                 className={width < 960 ? classes.imageColumn : classes.imageRow}
                 style={{
-                  background: 'url("https://source.unsplash.com/random")',
+                  background: `url("${SwapIntroductionImage}")`,
                   backgroundPosition: 'center',
                   backgroundRepeat: 'no-repeat',
                   backgroundSize: 'cover',

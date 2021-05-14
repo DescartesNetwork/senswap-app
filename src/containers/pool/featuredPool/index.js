@@ -11,7 +11,13 @@ import Typography from 'senswap-ui/typography';
 import FeaturedCard from './featuredCard';
 
 import styles from './styles';
+import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
+
+import HomeHeroImage from 'static/images/home-hero.png';
+import FeaturedPoolImage1 from 'static/images/featured-pool-1.png';
+import FeaturedPoolImage2 from 'static/images/featured-pool-2.png';
+import FeaturedPoolImage3 from 'static/images/featured-pool-3.png';
 
 
 class FeaturedPool extends Component {
@@ -23,29 +29,24 @@ class FeaturedPool extends Component {
         {
           title: "About SenSwap Pools",
           description: 'Get into a pool as simple as making a cup of instant coffee. You only need to add a single token (single-sided liquidity). Then, enjoy your time with SenSwap.',
-          src: 'https://source.unsplash.com/random',
-        },
-        {
-          title: "About SenSwap Pools",
-          description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
-          src: 'https://source.unsplash.com/random',
+          src: HomeHeroImage,
         }
       ],
       featuredPoolData: [
         {
-          subtitle: 'Oct 26th - Nov 25th',
+          subtitle: utils.prettyDatetime(new Date()),
           title: 'BTC x SOL x SEN',
-          src: 'https://source.unsplash.com/random',
+          src: FeaturedPoolImage1,
         },
         {
-          subtitle: 'Oct 26th - Nov 25th',
+          subtitle: utils.prettyDatetime(new Date()),
           title: 'BTC x SOL x SEN',
-          src: 'https://source.unsplash.com/random',
+          src: FeaturedPoolImage2,
         },
         {
-          subtitle: 'Oct 26th - Nov 25th',
+          subtitle: utils.prettyDatetime(new Date()),
           title: 'BTC x SOL x SEN',
-          src: 'https://source.unsplash.com/random',
+          src: FeaturedPoolImage3,
         }
       ]
     }

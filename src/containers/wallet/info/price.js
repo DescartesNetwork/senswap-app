@@ -39,7 +39,7 @@ class Price extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { accounts, lamports }, serError, getAccountData } = this.props;
+    const { wallet: { accounts, lamports }, setError, getAccountData } = this.props;
 
     const solAccount = {
       amount: global.BigInt(lamports),
@@ -66,7 +66,7 @@ class Price extends Component {
         return this.setState({ usd, btc, loading: false });
       }).catch(er => {
         return this.setState({ loading: false }, () => {
-          return serError(er);
+          return setError(er);
         });
       });
     });

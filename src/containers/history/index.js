@@ -18,7 +18,7 @@ import { CardBalance } from 'components/card';
 import LatestActivity from './latestActivity';
 
 import styles from './styles';
-import { toggleRightBar } from 'modules/ui.reducer';
+import { setError, toggleRightBar } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
@@ -44,7 +44,7 @@ class History extends Component {
   }
 
   fetchData = () => {
-    const { wallet: { accounts, lamports }, serError, getAccountData } = this.props;
+    const { wallet: { accounts, lamports }, setError, getAccountData } = this.props;
 
     const solAccount = {
       amount: global.BigInt(lamports),
@@ -61,7 +61,7 @@ class History extends Component {
       accountData.unshift(solAccount);
       return this.setState({ accountData });
     }).catch(er => {
-      return serError(er);
+      return setError(er);
     });
   }
 
@@ -112,7 +112,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  toggleRightBar,
+  setError, toggleRightBar,
   getAccountData,
 }, dispatch);
 

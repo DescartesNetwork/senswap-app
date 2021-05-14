@@ -16,6 +16,8 @@ import NewPools from './newPools';
 
 import styles from './styles';
 
+import HomeHeroImage from 'static/images/home-hero.png';
+
 
 class Home extends Component {
   constructor() {
@@ -27,13 +29,44 @@ class Home extends Component {
         {
           title: "Let's swap with SEN",
           description: 'The #1 AMM built on Solana to enrich the proficiency of DeFi ecosystem',
-          src: 'https://source.unsplash.com/random',
+          src: HomeHeroImage,
           action: <Button
             variant="contained"
             color="secondary"
             size="large"
             component={RouterLink}
             to="/swap"
+            style={{ marginTop: 80 }}
+          >
+            <Typography>Swap now</Typography>
+          </Button>,
+        },
+        {
+          title: "Simulated Mesh Exchange (SME)",
+          description: 'Being the central token in the whole ecosystem, SEN connects all pools with constant fee and fixed complexity.',
+          src: HomeHeroImage,
+          action: <Button
+            variant="contained"
+            color="secondary"
+            size="large"
+            component={RouterLink}
+            to="/swap"
+            style={{ marginTop: 80 }}
+          >
+            <Typography>Swap now</Typography>
+          </Button>,
+        },
+        {
+          title: "Simulated Single Exposure (SSE)",
+          description: 'When an LP adds single-sided liquidity, the protocol will instantly divide the deposited amount into three portions and use two of them to compensate the unrepresented tokens.',
+          src: HomeHeroImage,
+          action: <Button
+            variant="contained"
+            color="secondary"
+            size="large"
+            component={RouterLink}
+            to="/swap"
+            style={{ marginTop: 80 }}
           >
             <Typography>Swap now</Typography>
           </Button>,
