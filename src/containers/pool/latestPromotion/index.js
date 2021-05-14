@@ -48,7 +48,9 @@ class LatestPromotion extends Component {
   componentDidUpdate(prevProps) {
     const { wallet: prevWallet } = prevProps;
     const { wallet } = this.props;
-    if (!isEqual(prevWallet, wallet)) return this.fetchData();
+    if (!isEqual(prevWallet, wallet)) return this.setState({ data: [] }, () => {
+      return this.fetchData();
+    });
   }
 
   getPoolDataAndAccountData = (poolAddress) => {
