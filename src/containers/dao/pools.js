@@ -45,15 +45,12 @@ function Row(props) {
   const {
     address, state, vault,
     mint_s, mint_a, mint_b, mint_lpt,
-    treasury_s, treasury_a, treasury_b,
+    reserve_s, reserve_a, reserve_b,
   } = data;
   const { supply, decimals } = mint_lpt || {}
   const { symbol: symbolS, icon: iconS, decimals: decimalsS } = mint_s || {}
   const { symbol: symbolA, icon: iconA, decimals: decimalsA } = mint_a || {}
   const { symbol: symbolB, icon: iconB, decimals: decimalsB } = mint_b || {}
-  const { amount: amountS } = treasury_s || {}
-  const { amount: amountA } = treasury_a || {}
-  const { amount: amountB } = treasury_b || {}
   const { amount: earn } = vault || {}
   const icons = [iconA, iconB, iconS];
 
@@ -74,9 +71,9 @@ function Row(props) {
       </Grid>
     </TableCell>
     <TableCell align="right">
-      <Typography>{utils.prettyNumber(ssjs.undecimalize(amountA, decimalsA)) || 0} <span style={{ color: '#808191' }}>{symbolA}</span></Typography>
-      <Typography>{utils.prettyNumber(ssjs.undecimalize(amountB, decimalsB)) || 0} <span style={{ color: '#808191' }}>{symbolB}</span></Typography>
-      <Typography>{utils.prettyNumber(ssjs.undecimalize(amountS, decimalsS)) || 0} <span style={{ color: '#808191' }}>{symbolS}</span></Typography>
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(reserve_a, decimalsA)) || 0} <span style={{ color: '#808191' }}>{symbolA}</span></Typography>
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(reserve_b, decimalsB)) || 0} <span style={{ color: '#808191' }}>{symbolB}</span></Typography>
+      <Typography>{utils.prettyNumber(ssjs.undecimalize(reserve_s, decimalsS)) || 0} <span style={{ color: '#808191' }}>{symbolS}</span></Typography>
     </TableCell>
     <TableCell align="right">
       <Typography>{utils.prettyNumber(ssjs.undecimalize(supply, decimals)) || 0}</Typography>

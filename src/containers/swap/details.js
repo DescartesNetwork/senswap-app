@@ -36,10 +36,10 @@ class Details extends Component {
   }
 
   parseReserve = (mintAddress, poolData) => {
-    const { mint_a, mint_b, mint_s, treasury_a, treasury_b, treasury_s } = poolData;
-    if (mintAddress === mint_a.address) return ssjs.undecimalize(treasury_a.amount, mint_a.decimals);
-    if (mintAddress === mint_b.address) return ssjs.undecimalize(treasury_b.amount, mint_b.decimals);
-    if (mintAddress === mint_s.address) return ssjs.undecimalize(treasury_s.amount, mint_s.decimals);
+    const { mint_a, mint_b, mint_s, reserve_a, reserve_b, reserve_s } = poolData;
+    if (mintAddress === mint_a.address) return ssjs.undecimalize(reserve_a, mint_a.decimals);
+    if (mintAddress === mint_b.address) return ssjs.undecimalize(reserve_b, mint_b.decimals);
+    if (mintAddress === mint_s.address) return ssjs.undecimalize(reserve_s, mint_s.decimals);
   }
 
   onAdvance = (index) => {
