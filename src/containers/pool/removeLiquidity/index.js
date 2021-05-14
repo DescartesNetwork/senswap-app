@@ -123,12 +123,12 @@ class RemoveLiquidity extends Component {
 
     const { amount: balance, pool, mint } = data;
     const { supply, decimals } = mint || {}
-    const { mint_s, mint_a, mint_b, treasury_s, treasury_a, treasury_b } = pool || {};
+    const { mint_s, mint_a, mint_b, reserve_s, reserve_a, reserve_b } = pool || {};
 
     const treasuries = [
-      { ...treasury_s, mint: { ...(treasury_s || {}).mint, ...mint_s } },
-      { ...treasury_a, mint: { ...(treasury_a || {}).mint, ...mint_a } },
-      { ...treasury_b, mint: { ...(treasury_b || {}).mint, ...mint_b } },
+      { reserve: reserve_s, mint: { ...mint_s } },
+      { reserve: reserve_a, mint: { ...mint_a } },
+      { reserve: reserve_b, mint: { ...mint_b } },
     ];
     const ratio = ssjs.div(ssjs.decimalize(amount, decimals), supply);
 
@@ -223,7 +223,7 @@ class RemoveLiquidity extends Component {
             <Paper className={classes.paper}>
               <Grid container>
                 {treasuries.map((treasuryData, index) => {
-                  const { amount: reserve, mint } = treasuryData;
+                  const { reserve, mint } = treasuryData;
                   const { icon, symbol, decimals } = mint;
                   return <Grid item key={index} xs={12}>
                     <Grid container alignItems="center" className={classes.noWrap}>
