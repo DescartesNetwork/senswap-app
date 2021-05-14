@@ -200,10 +200,12 @@ export const parseInstructionSplt = (accounts, code,/*TokenBalance[]*/preTokenBa
         amount = global.BigInt(pre.uiTokenAmount.amount) - global.BigInt(post.uiTokenAmount.amount)
 
         data.push({
+          owner: accounts[0],
           sourceAccount: source,
           mint: post.mint,
           amount: amount,
         }, {
+          owner: accounts[0],
           destAccount: dest,
           mint: post.mint,
           amount: amount,
