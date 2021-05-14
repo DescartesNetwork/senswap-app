@@ -8,7 +8,7 @@ let connection = null
 
 export const getConnection = () => {
     if (connection === undefined || connection == null) {
-        return new Connection('https://devnet.solana.com/')
+        return new Connection(configs.sol.node)
     }
     return connection
 }
@@ -28,9 +28,10 @@ const actionType = {
 
 /**
  *
- * @param timeFrom
- * @param timeTo
- * @returns {Promise<void>}
+ * @param address
+ * @param timeFrom <format seconds>
+ * @param timeTo <format seconds>
+ * @returns {Promise<[]>}
  */
 export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
     try {
@@ -46,7 +47,7 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
             }
             const transactions = await getConnection().getConfirmedSignaturesForAddress2(addr, options)
             for (const tx of transactions) {
-                const blockTime = tx.blockTime * 1000
+                const blockTime = tx.blockTime
                 if (blockTime > timeTo) continue
                 if (blockTime < timeFrom) {
                     isContinue = false
@@ -74,7 +75,7 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
                 return r.programId.toString()
             })
             const programId = programIds[0]
-            //console.log("programId", programId)
+            // console.log("programId", programId)
             if (programId !== configs.sol.spltAddress && programId !== configs.sol.swapAddress) continue
 
             const layout = new sb_abi.struct([
@@ -83,11 +84,12 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
             ]);
             layout.fromBuffer(confirmedTx.transaction.data);
             const {code} = layout.value
+            // console.log("code", code)
 
             const postTokenBalances = confirmedTx.meta.postTokenBalances
-            //console.log("postTokenBalances", postTokenBalances)
+            // console.log("postTokenBalances", postTokenBalances)
             const preTokenBalances = confirmedTx.meta.preTokenBalances
-            //console.log("preTokenBalances", preTokenBalances)
+            // console.log("preTokenBalances", preTokenBalances)
 
             let type
             switch (code) {
@@ -105,7 +107,7 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
             }
 
             let data
-            if (programId === configs.sol.senAddress) {
+            if (programId === configs.sol.swapAddress) {
                 data = parseInstruction(accounts, code, preTokenBalances, postTokenBalances)
                 result.push({...data, blockTime, type, signature})
                 continue
@@ -115,10 +117,9 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
             }
             data = parseInstructionSplt(accounts, code, preTokenBalances, postTokenBalances)
             result.push({...data, blockTime, type, signature})
-            continue
-
         }
-        console.log("result", result)
+        // console.log("result", result)
+        return result
     } catch (error) {
         throw new Error(error.message)
     }
@@ -207,6 +208,7 @@ export const parseInstructionSplt = (accounts, code,/*TokenBalance[]*/preTokenBa
                     mint: post.mint,
                     amount: amount,
                 })
+                break
             default:
                 console.log("code", code)
                 break
