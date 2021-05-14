@@ -21,7 +21,7 @@ import { setError } from 'modules/ui.reducer';
 import { getMintData } from 'modules/bucket.reducer';
 
 
-const ONE_DAY = 24 * 3600;
+const ONE_HOUR = 3600;
 
 class LatestActivity extends Component {
   constructor() {
@@ -30,7 +30,7 @@ class LatestActivity extends Component {
     this.state = {
       loading: false,
       timeTo: Math.ceil(Number(new Date()) / 1000),
-      timeFrom: Math.ceil(Number(new Date()) / 1000) - ONE_DAY,
+      timeFrom: Math.ceil(Number(new Date()) / 1000) - ONE_HOUR,
       data: []
     }
   }
@@ -92,7 +92,7 @@ class LatestActivity extends Component {
   onMore = () => {
     let { timeFrom, timeTo } = this.state;
     timeTo = timeFrom;
-    timeFrom = timeTo - ONE_DAY;
+    timeFrom = timeTo - ONE_HOUR;
     return this.setState({ timeFrom, timeTo }, () => {
       return this.fetchData();
     });
@@ -132,7 +132,8 @@ class LatestActivity extends Component {
   }
 
   render() {
-    const { data, loading } = this.state;
+    const { data, loading, timeFrom } = this.state;
+    const hours = Math.round((Math.ceil(Number(new Date()) / 1000) - timeFrom) / ONE_HOUR);
 
     return <Grid container>
       <Grid item xs={12} >
@@ -144,6 +145,13 @@ class LatestActivity extends Component {
         <Button onClick={this.onMore} startIcon={loading ? <CircularProgress size={17} /> : null} fullWidth>
           <Typography>See more</Typography>
         </Button>
+      </Grid>
+      <Grid item xs={12} style={{ marginTop: -24 }}>
+        <Grid container justify="center">
+          <Grid item>
+            <Typography variant="caption" color="textSecondary">{`(${hours} hour${hours === 1 ? '' : 's'} ago)`}</Typography>
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   }
