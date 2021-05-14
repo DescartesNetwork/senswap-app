@@ -115,8 +115,9 @@ export const setWallet = (wallet) => {
         data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
         return api.get(base + '/user', { address: data.user.address });
       }).then(re => {
+        if (re.data) return Promise.resolve(re);
         // Only add an account to db when its lamports > 0
-        if (re.data && data.lamports > 0) return Promise.resolve(re);
+        if (!data.lamports) return Promise.resolve({});
         return api.post(base + '/user', { user: { address: data.user.address } });
       }).then(({ data: re }) => {
         data.user = { ...data.user, ...re }
