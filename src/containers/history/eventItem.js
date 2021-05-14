@@ -67,7 +67,7 @@ class EventItem extends Component {
   }
 
   render() {
-    const { classes, link, description } = this.props;
+    const { classes, link, description, time } = this.props;
 
     return <Fragment>
       <ListItem className={classes.listItem} alignItems="flex-start">
@@ -84,14 +84,14 @@ class EventItem extends Component {
                   <Typography variant="subtitle1">{this.parseTitle()}</Typography>
                 </Grid>
                 <Grid item>
-                  <Typography variant="caption" color="textSecondary">{utils.prettyDatetime(new Date())}</Typography>
+                  <Typography variant="caption" color="textSecondary">{utils.prettyDatetime(time)}</Typography>
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={12}>
               <Link
                 variant="body2"
-                href={utils.explorer(link)}
+                href={link}
                 style={{ color: '#4FBF67' }}
               >View on explorer</Link>
             </Grid>
@@ -112,12 +112,14 @@ class EventItem extends Component {
 }
 
 EventItem.defaultProps = {
+  time: new Date(),
   description: '',
   variant: 'default',
   link: ''
 }
 
 EventItem.propsType = {
+  time: PropTypes.object,
   description: PropTypes.string,
   variant: PropTypes.oneOf(['default', 'send', 'receive', 'swap', 'deposit', 'withdraw']),
   link: PropTypes.string,

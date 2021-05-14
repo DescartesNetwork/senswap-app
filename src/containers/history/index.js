@@ -10,12 +10,11 @@ import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 import Drawer from 'senswap-ui/drawer';
 import Typography from 'senswap-ui/typography';
-import Button, { IconButton } from 'senswap-ui/button';
+import { IconButton } from 'senswap-ui/button';
 
 import { ArrowForwardIosRounded } from 'senswap-ui/icons';
 
 import { CardBalance } from 'components/card';
-import EventItem from './eventItem';
 import LatestActivity from './latestActivity';
 
 import styles from './styles';
@@ -97,11 +96,6 @@ class History extends Component {
         </Grid>
         <Grid item xs={12}>
           <LatestActivity />
-        </Grid>
-        <Grid item xs={12}>
-          <Button fullWidth>
-            <Typography>See more</Typography>
-          </Button>
         </Grid>
         <Grid item xs={12}>
           <Drain size={4} />

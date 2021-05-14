@@ -109,14 +109,14 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
       let data
       if (programId === configs.sol.swapAddress) {
         data = parseInstruction(accounts, code, preTokenBalances, postTokenBalances)
-        result.push({ ...data, blockTime, type, signature })
+        result.push({ data, blockTime, type, signature })
         continue
       }
       if (code === 3) {
         type = actionType._3_TRANSFER
       }
       data = parseInstructionSplt(accounts, code, preTokenBalances, postTokenBalances)
-      result.push({ ...data, blockTime, type, signature })
+      result.push({ data, blockTime, type, signature })
     }
     // console.log("result", result)
     return result
