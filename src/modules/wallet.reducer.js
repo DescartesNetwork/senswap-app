@@ -117,7 +117,7 @@ export const setWallet = (wallet) => {
       }).then(re => {
         if (re.data) return Promise.resolve(re);
         // Only add an account to db when its lamports > 0
-        if (!data.lamports) return Promise.resolve({});
+        if (!data.lamports) return Promise.resolve({ daya: {} });
         return api.post(base + '/user', { user: { address: data.user.address } });
       }).then(({ data: re }) => {
         data.user = { ...data.user, ...re }
@@ -125,7 +125,7 @@ export const setWallet = (wallet) => {
         return resolve(data);
       }).catch(er => {
         dispatch({ type: SET_WALLET_FAIL, reason: er.toString() });
-        return reject(er.toString());
+        return reject(er);
       });
     });
   }
