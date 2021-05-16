@@ -9,6 +9,7 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import TextField from 'senswap-ui/textField';
 import Button, { IconButton } from 'senswap-ui/button';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import { VpnKeyRounded, PowerRounded } from 'senswap-ui/icons';
 
@@ -22,6 +23,7 @@ class SecretKey extends Component {
     super();
 
     this.state = {
+      loading: false,
       secretKey: '',
     }
   }
@@ -31,16 +33,18 @@ class SecretKey extends Component {
     return this.setState({ secretKey });
   }
 
-  connect = () => {
+  connect = async () => {
     const { setError, setWallet } = this.props;
     const { secretKey } = this.state;
     if (!secretKey) return setError('The secret key cannot be empty');
     const wallet = new SecretKeyWallet(secretKey);
-    return setWallet(wallet).then(re => {
-      // Do nothing
-    }).catch(er => {
-      return setError(er);
-    });
+    this.setState({ loading: true });
+    try {
+      await setWallet(wallet);
+    } catch (er) {
+      setError(er);
+    }
+    return this.setState({ loading: false });
   }
 
   onGen = () => {
@@ -51,7 +55,7 @@ class SecretKey extends Component {
 
   render() {
     const { classes } = this.props;
-    const { secretKey } = this.state;
+    const { loading, secretKey } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -77,7 +81,11 @@ class SecretKey extends Component {
           value={secretKey}
           InputProps={{
             endAdornment: <Grid item>
-              <Button onClick={this.connect} startIcon={<PowerRounded />}>
+              <Button
+                onClick={this.connect}
+                startIcon={loading ? <CircularProgress size={17} /> : <PowerRounded />}
+                disabled={loading}
+              >
                 <Typography>Connect</Typography>
               </Button>
             </Grid>

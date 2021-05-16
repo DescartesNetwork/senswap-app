@@ -12,6 +12,7 @@ import TextField from 'senswap-ui/textField';
 import Button, { IconButton } from 'senswap-ui/button';
 import Link from 'senswap-ui/link';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import {
   PublishRounded, DescriptionRounded, PowerRounded,
@@ -34,7 +35,9 @@ class KeyStore extends Component {
       filename: '',
       keystore: {},
       newKeystore: {},
+      loading: false,
       visible: false,
+      visiblePassword: false,
     }
   }
 
@@ -62,7 +65,8 @@ class KeyStore extends Component {
 
   onNewPassword = (e) => {
     const newPassword = e.target.value || '';
-    return this.setState({ newPassword });
+    const newKeystore = ssjs.gen(newPassword);
+    return this.setState({ newPassword, newKeystore });
   }
 
   onVisiblePassword = () => {
@@ -70,26 +74,19 @@ class KeyStore extends Component {
     return this.setState({ visiblePassword: !visiblePassword });
   }
 
-  connect = () => {
+  connect = async () => {
     const { password, keystore } = this.state;
     const { setError, setWallet } = this.props;
     if (!keystore) return setError('Please upload your keystore');
     if (!password) return setError('Please enter your password to unlock your wallet');
     const wallet = new KeystoreWallet(keystore, password);
-    return setWallet(wallet).then(re => {
-      // Do nothing
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  onGen = () => {
-    const { newPassword } = this.state;
-    const { setError } = this.props;
-    if (!newPassword) return setError('Invalid input');
-    const newKeystore = ssjs.gen(newPassword);
-    if (!newKeystore) return setError('Cannot create a keystore');
-    return this.setState({ newKeystore });
+    this.setState({ loading: true });
+    try {
+      await setWallet(wallet);
+    } catch (er) {
+      setError(er);
+    }
+    return this.setState({ loading: false });
   }
 
   onDownload = () => {
@@ -98,17 +95,15 @@ class KeyStore extends Component {
     return fileDownload(JSON.stringify(newKeystore), `senwallet-keystore-${newKeystore.publicKey}.json`);
   }
 
-  onOpen = () => {
-    return this.setState({ visible: true });
-  }
-
-  onClose = () => {
-    return this.setState({ visible: false });
-  }
+  onOpen = () => this.setState({ visible: true });
+  onClose = () => this.setState({ visible: false });
 
   render() {
     const { classes } = this.props;
-    const { password, newPassword, newKeystore, filename, visible, visiblePassword } = this.state;
+    const {
+      loading, visible, visiblePassword,
+      password, newPassword, newKeystore, filename
+    } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -133,7 +128,7 @@ class KeyStore extends Component {
           value={filename}
           InputProps={{
             endAdornment: <Grid item>
-              <Button onClick={this.onUpload} startIcon={<PublishRounded />}>
+              <Button onClick={this.onUpload} startIcon={<PublishRounded />} >
                 <Typography>Upload</Typography>
               </Button>
             </Grid>,
@@ -158,7 +153,12 @@ class KeyStore extends Component {
           onChange={this.onPassword}
           InputProps={{
             endAdornment: <Grid item>
-              <Button onClick={this.connect} startIcon={<PowerRounded />}>
+              <Button
+                color="primary"
+                onClick={this.connect}
+                startIcon={loading ? <CircularProgress size={17} /> : <PowerRounded />}
+                disabled={loading}
+              >
                 <Typography>Connect</Typography>
               </Button>
             </Grid>
@@ -187,7 +187,7 @@ class KeyStore extends Component {
         <DialogContent>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography>The password is used to encrypt your keystore. You will need this password to unlock your keystore in demands.</Typography>
+              <Typography>The password is used to encrypt your keystore. You will need this password to unlock your keystore later.</Typography>
             </Grid>
             <Grid item xs={12}>
               <TextField
@@ -205,24 +205,14 @@ class KeyStore extends Component {
               />
             </Grid>
             <Grid item xs={12}>
-              <Grid container spacing={2} alignItems="center" justify="flex-end" className={classes.noWrap}>
-                <Grid item>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    onClick={this.onGen}
-                    disabled={!newPassword}
-                  >
-                    <Typography>Create</Typography>
-                  </Button>
-                </Grid>
+              <Grid container justify="flex-end">
                 <Grid item>
                   <Button
                     variant="contained"
                     color="primary"
                     startIcon={<GetAppRounded />}
                     onClick={this.onDownload}
-                    disabled={!newKeystore.publicKey}
+                    disabled={!newKeystore || !newKeystore.publicKey}
                   >
                     <Typography>Download</Typography>
                   </Button>

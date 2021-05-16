@@ -10,6 +10,7 @@ import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 import Avatar from 'senswap-ui/avatar';
 import Link from 'senswap-ui/link';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import { PowerRounded } from 'senswap-ui/icons';
 
@@ -20,21 +21,31 @@ import { setWallet } from 'modules/wallet.reducer';
 
 
 class Coin98 extends Component {
+  constructor() {
+    super();
 
-  connect = () => {
+    this.state = {
+      loading: false,
+    }
+  }
+
+  connect = async () => {
     const { setError, setWallet } = this.props;
     const { coin98 } = window;
     if (!coin98) return setError('Coin98 Wallet is not installed');
+    this.setState({ loading: true });
     const wallet = new Coin98Wallet();
-    return setWallet(wallet).then(re => {
-      // Do nothing
-    }).catch(er => {
-      return setError(er);
-    });
+    try {
+      await setWallet(wallet);
+    } catch (er) {
+      setError(er);
+    }
+    return this.setState({ loading: false });
   }
 
   render() {
     const { classes } = this.props;
+    const { loading } = this.state;
 
     return <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -55,8 +66,9 @@ class Coin98 extends Component {
           variant="contained"
           color="primary"
           onClick={this.connect}
-          startIcon={<PowerRounded />}
           size="large"
+          startIcon={loading ? <CircularProgress size={17} /> : <PowerRounded />}
+          disabled={loading}
           fullWidth
         >
           <Typography>Connect Coin98 Wallet</Typography>
