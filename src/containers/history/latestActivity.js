@@ -61,7 +61,7 @@ class LatestActivity extends Component {
         return resolve({ data: re, ...others });
       }).catch(er => {
         return reject(er);
-      })
+      });
     });
   }
 
@@ -146,7 +146,7 @@ class LatestActivity extends Component {
           <Typography>See more</Typography>
         </Button>
       </Grid>
-      <Grid item xs={12} style={{ marginTop: -24 }}>
+      <Grid item xs={12} style={{ marginTop: -20 }}>
         <Grid container justify="center">
           <Grid item>
             <Typography variant="caption" color="textSecondary">{`(${hours} hour${hours === 1 ? '' : 's'} ago)`}</Typography>
