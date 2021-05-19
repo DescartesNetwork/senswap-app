@@ -53,65 +53,57 @@ class NewPools extends Component {
     });
   }
 
-  getPoolDataAndAccountData = (poolAddress) => {
-    const { getPoolData, getAccountData } = this.props;
-    if (!window.senswap.wallet) return getPoolData(poolAddress);
-    return new Promise((resolve, reject) => {
-      let poolData = {}
-      return getPoolData(poolAddress).then(data => {
-        poolData = data;
-        const {
-          reserve_a: reserveA, mint_a: { ticket: ticketA, decimals: decimalsA },
-          reserve_b: reserveB, mint_b: { ticket: ticketB, decimals: decimalsB },
-          reserve_s: reserveS, mint_s: { ticket: ticketS, decimals: decimalsS }
-        } = poolData;
-        const syntheticData = [
-          [ssjs.undecimalize(reserveA, decimalsA), ticketA],
-          [ssjs.undecimalize(reserveB, decimalsB), ticketB],
-          [ssjs.undecimalize(reserveS, decimalsS), ticketS]
-        ];
-        return Promise.all(syntheticData.map(([balance, ticket]) => utils.fetchValue(balance, ticket)));
-      }).then(data => {
-        const usd = data.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
-        poolData.usd = usd;
-        return window.senswap.wallet.getAccount();
-      }).then(walletAddress => {
-        const { mint_lpt: { address: mintAddress } } = poolData;
-        return sol.scanAccount(mintAddress, walletAddress);
-      }).then(({ address, state }) => {
-        if (state) return getAccountData(address);
-        return Promise.resolve({});
-      }).then(accountData => {
-        poolData.accountData = accountData;
-        return resolve(poolData);
-      }).catch(er => {
-        return reject(er);
-      });
-    });
+  getPoolDataAndAccountData = async (poolAddress) => {
+    const {
+      setError, getPoolData, getAccountData,
+      wallet: { user: { address: walletAddress } }
+    } = this.props;
+    try {
+      let poolData = await getPoolData(poolAddress);
+      const {
+        reserve_a: reserveA, mint_a: { ticket: ticketA, decimals: decimalsA },
+        reserve_b: reserveB, mint_b: { ticket: ticketB, decimals: decimalsB },
+        reserve_s: reserveS, mint_s: { ticket: ticketS, decimals: decimalsS }
+      } = poolData;
+      const syntheticData = [
+        [ssjs.undecimalize(reserveA, decimalsA), ticketA],
+        [ssjs.undecimalize(reserveB, decimalsB), ticketB],
+        [ssjs.undecimalize(reserveS, decimalsS), ticketS]
+      ];
+      const data = await Promise.all(syntheticData.map(([balance, ticket]) => utils.fetchValue(balance, ticket)));
+      const usd = data.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
+      poolData.usd = usd;
+      const { mint_lpt: { address: mintAddress } } = poolData;
+      if (!ssjs.isAddress(walletAddress)) return poolData;
+      const { address: accountAddress, state } = await sol.scanAccount(mintAddress, walletAddress);
+      if (!state) return poolData;
+      const accountData = await getAccountData(accountAddress);
+      poolData.accountData = accountData;
+      return poolData;
+    } catch (er) {
+      await setError(er);
+      return {}
+    }
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const { setError, getPools } = this.props;
     const { data, page, limit } = this.state;
-    return this.setState({ loading: true }, () => {
-      return getPools({}, limit, page).then(poolAddresses => {
-        return poolAddresses.each(({ address }) => this.getPoolDataAndAccountData(address), { skipError: true, skipIndex: true });
-      }).then(re => {
-        const expandedData = data.concat(re);
-        return this.setState({ data: expandedData, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    try {
+      this.setState({ loading: true });
+      const poolAddresses = await getPools({}, limit, page);
+      const re = await Promise.all(poolAddresses.map(({ address }) => this.getPoolDataAndAccountData(address)));
+      const expandedData = data.concat(re);
+      return this.setState({ data: expandedData, loading: false });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ loading: false });
+    }
   }
 
   onMore = () => {
     const { page } = this.state;
-    return this.setState({ page: page + 1 }, () => {
-      return this.fetchData();
-    });
+    return this.setState({ page: page + 1 }, this.fetchData);
   }
 
   onOpenDeposit = (i) => {
@@ -133,22 +125,23 @@ class NewPools extends Component {
   }
 
   render() {
-    const { wallet: { user: { address } }, openWallet } = this.props;
+    const { wallet: { user: { address: walletAddress } }, openWallet } = this.props;
     const {
       loading, visibleDeposit, visibleWithdraw,
       accountData, poolData, data,
     } = this.state;
 
-    const isLoggedIn = ssjs.isAddress(address);
+    const isLoggedIn = ssjs.isAddress(walletAddress);
 
     return <Grid container spacing={2}>
       {data.map((poolData, i) => {
         const {
-          accountData,
+          address: poolAddress, accountData,
           mint_s: { icon: iconS, symbol: symbolS, decimals },
           mint_a: { icon: iconA, symbol: symbolA },
           mint_b: { icon: iconB, symbol: symbolB },
         } = poolData;
+        if (!ssjs.isAddress(poolAddress)) return null;
         const { address: accountAddress, amount } = accountData || {}
         const isLP = ssjs.isAddress(accountAddress);
         const icons = [iconA, iconB, iconS];
