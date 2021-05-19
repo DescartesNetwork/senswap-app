@@ -48,9 +48,7 @@ class LatestPromotion extends Component {
   componentDidUpdate(prevProps) {
     const { wallet: prevWallet } = prevProps;
     const { wallet } = this.props;
-    if (!isEqual(prevWallet, wallet)) return this.setState({ data: [] }, () => {
-      return this.fetchData();
-    });
+    if (!isEqual(prevWallet, wallet)) return this.setState({ data: [] }, this.fetchData);
   }
 
   getPoolDataAndAccountData = async (poolAddress) => {
@@ -150,6 +148,7 @@ class LatestPromotion extends Component {
           <CardPool
             icons={icons}
             symbols={symbols}
+            volume={poolData.usd}
             stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals)) || '0'}
             {...(!isLoggedIn ? { onConnect: openWallet } : null)}
             {...(isLP ? { onWithdraw: () => this.onOpenWithdraw(i) } : null)}
