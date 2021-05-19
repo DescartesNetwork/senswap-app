@@ -22,6 +22,7 @@ import Field from './field';
 import styles from './styles';
 import oracle from 'helpers/oracle';
 import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
@@ -38,7 +39,6 @@ class AddLiquidity extends Component {
 
     this.state = {
       ...EMPTY,
-
       index: 0,
       amounts: ['', '', ''],
       accountData: [],
@@ -62,35 +62,37 @@ class AddLiquidity extends Component {
       ...EMPTY,
       index: 0,
       amounts: ['', '', ''],
-      lpt: 0
+      lpt: 0,
     });
   }
 
-  fetchData = () => {
-    const { poolData, wallet: { accounts }, getAccountData, setError } = this.props;
+  fetchData = async () => {
+    const {
+      poolData, wallet: { user: { address: walletAddress } },
+      getAccountData, setError
+    } = this.props;
     const { mint_s, mint_a, mint_b } = poolData;
-    const { address: mintAddressS } = mint_s || {}
-    const { address: mintAddressA } = mint_a || {}
-    const { address: mintAddressB } = mint_b || {}
-    let mintAddresses = [mintAddressS, mintAddressA, mintAddressB];
-    return this.setState({ loading: true }, () => {
-      return accounts.each(accounAddress => {
-        return getAccountData(accounAddress);
-      }, { skipError: true, skipIndex: true }).then(accountData => {
-        accountData = mintAddresses.map(mintAddress => {
-          const [re] = accountData.filter(({ mint: { address } }) => mintAddress === address);
-          return re;
-        })
-        return this.setState({ accountData, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    let mintData = [mint_s, mint_a, mint_b];
+
+    try {
+      this.setState({ loading: true });
+      let accountData = [];
+      for (let mintDatum of mintData) {
+        const { address: mintAddress } = mintDatum || {}
+        let accountDatum = await sol.scanAccount(mintAddress, walletAddress);
+        const { state, address: accountAddress } = accountDatum || {}
+        if (!state) accountDatum = { address: '', amount: 0n, mint: mintDatum };
+        else accountDatum = await getAccountData(accountAddress);
+        accountData.push(accountDatum);
+      }
+      return this.setState({ accountData, loading: false });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ loading: false });
+    }
   }
 
-  estimateState = () => {
+  estimateState = async () => {
     const { setError, poolData } = this.props;
     const { amounts } = this.state;
     if (amounts.every(amount => !parseFloat(amount))) return this.setState({ lpt: 0 });
@@ -104,12 +106,12 @@ class AddLiquidity extends Component {
     });
     const { reserve_s, reserve_a, reserve_b, mint_lpt } = poolData;
     const { supply } = mint_lpt || {}
-    return oracle.rake(deltaS, deltaA, deltaB, reserve_s, reserve_a, reserve_b, supply).then(({ lpt }) => {
-      lpt = ssjs.undecimalize(lpt, 9);
-      return this.setState({ lpt });
-    }).catch(er => {
+    try {
+      const { lpt } = await oracle.rake(deltaS, deltaA, deltaB, reserve_s, reserve_a, reserve_b, supply);
+      return this.setState({ lpt: ssjs.undecimalize(lpt, 9) });
+    } catch (er) {
       return setError(er);
-    });
+    }
   }
 
   onAmount = (i, value) => {
@@ -128,7 +130,7 @@ class AddLiquidity extends Component {
     return this.setState({ amounts: newAmounts }, this.estimateState);
   }
 
-  addLiquidity = () => {
+  addLiquidity = async () => {
     const {
       wallet: { accounts }, poolData: { address: poolAddress },
       updateWallet, setError, setSuccess, onClose
@@ -137,7 +139,6 @@ class AddLiquidity extends Component {
 
     if (!ssjs.isAddress(poolAddress)) return setError('Invalid pool address');
 
-    let txId = '';
     const info = accountData.zip(amounts);
     const [[accountDataS, amountS], [accountDataA, amountA], [accountDataB, amountB]] = info;
     const { address: srcAddressS, mint: { decimals: decimalsS } } = accountDataS || { mint: { decimals: 9 } }
@@ -147,28 +148,24 @@ class AddLiquidity extends Component {
     const deltaA = ssjs.decimalize(amountA, decimalsA);
     const deltaB = ssjs.decimalize(amountB, decimalsB);
 
-    return this.setState({ loading: true }, () => {
-      return this.swap.addLiquidity(
+    try {
+      this.setState({ loading: true });
+      const { txId, lptAddress } = await this.swap.addLiquidity(
         deltaS, deltaA, deltaB,
         poolAddress,
         srcAddressS, srcAddressA, srcAddressB,
         window.senswap.wallet
-      ).then(({ txId: re, lptAddress }) => {
-        txId = re;
-        const newAccounts = [...accounts];
-        if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
-        return this.setState({ ...EMPTY, txId }, () => {
-          onClose();
-          return setSuccess('Add liquidity successfully', utils.explorer(txId));
-        });
-      }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
-      });
-    });
+      );
+      const newAccounts = [...accounts];
+      if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
+      await updateWallet({ accounts: newAccounts });
+      onClose();
+      await setSuccess('Add liquidity successfully', utils.explorer(txId));
+      return this.setState({ ...EMPTY, txId });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ ...EMPTY });
+    }
   }
 
   render() {

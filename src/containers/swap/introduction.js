@@ -6,11 +6,11 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import Button from 'senswap-ui/button';
+// import Button from 'senswap-ui/button';
 import Paper from 'senswap-ui/paper';
 import Link from 'senswap-ui/link';
 
-import { MovieFilterRounded } from 'senswap-ui/icons';
+// import { MovieFilterRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 

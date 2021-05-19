@@ -154,7 +154,7 @@ export const SET_SUCCESS = 'SET_SUCCESS';
 export const SET_SUCCESS_OK = 'SET_SUCCESS_OK';
 export const SET_SUCCESS_FAIL = 'SET_SUCCESS_FAIL';
 
-export const setSuccess = (msg, link = '') => {
+export const setSuccess = (msg, link = '#') => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_SUCCESS });
