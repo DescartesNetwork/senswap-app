@@ -98,7 +98,7 @@ class Wallet extends Component {
       <Grid item xs={12}>
         <Carousel data={[{
           subtitle: 'Unlock wallet',
-          title: 'Please connect your wallet to continue',
+          title: 'Please connect wallet to continue',
           src: WalletHeroImage,
           action: <Grid container>
             <Grid item>
