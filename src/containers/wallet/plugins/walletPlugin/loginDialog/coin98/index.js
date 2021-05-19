@@ -32,7 +32,7 @@ class Coin98 extends Component {
   connect = async () => {
     const { setError, setWallet } = this.props;
     const { coin98 } = window;
-    if (!coin98) return setError('Coin98 Wallet is not installed');
+    if (!coin98) return setError('Coin98 Wallet is not installed. If this is the first time you install Coin98 wallet, please restart your browser to finish the setup.');
     this.setState({ loading: true });
     const wallet = new Coin98Wallet();
     try {
