@@ -21,6 +21,7 @@ import { ArrowDropDownRounded } from 'senswap-ui/icons';
 import Header from './header';
 import Introduction from './introduction';
 import Details from './details';
+import From from './from';
 import { BucketWatcher, MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
 
 import styles from './styles';
@@ -312,6 +313,7 @@ class Swap extends Component {
                       <Drain />
                     </Grid>
                     <Grid item xs={12}>
+                      <From />
                       <TextField
                         variant="contained"
                         label="From"

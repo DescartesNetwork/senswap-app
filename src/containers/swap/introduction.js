@@ -28,7 +28,7 @@ class Introduction extends Component {
         <Grid item xs={12}>
           <Typography color="textSecondary">SenSwap is everything you need to turn it into a thing of the past. Let’s swap with low transaction fees and fast confirmation time.</Typography>
         </Grid>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Button
             variant="contained"
             color="primary"
@@ -36,7 +36,7 @@ class Introduction extends Component {
           >
             <Typography>Introduction Video</Typography>
           </Button>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <Grid container spacing={0}>
             <Grid item xs={12}>
