@@ -13,20 +13,18 @@ import Button from 'senswap-ui/button';
 import TextField from 'senswap-ui/textField';
 import Divider from 'senswap-ui/divider';
 import CircularProgress from 'senswap-ui/circularProgress';
-import Link from 'senswap-ui/link';
 
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
 import { MintAvatar, MintSelection } from 'containers/wallet';
 
 import styles from './styles';
-import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
-class From extends Component {
+class To extends Component {
   constructor() {
     super();
 
@@ -89,14 +87,14 @@ class From extends Component {
   render() {
     const { classes } = this.props;
     const { loading, visible, accountData, value } = this.state;
-    const { amount, mint } = accountData || {}
-    const { icon, symbol, decimals } = mint || {}
+    const { mint } = accountData || {}
+    const { icon, symbol } = mint || {}
 
     return <Grid container>
       <Grid item xs={12}>
         <TextField
           variant="contained"
-          label="From"
+          label="To"
           placeholder="0"
           value={value}
           onChange={this.onValue}
@@ -109,7 +107,7 @@ class From extends Component {
                   endIcon={<ArrowDropDownRounded />}
                   onClick={this.onOpen}
                 >
-                  <Typography>{symbol || 'Select'}</Typography>
+                  <Typography>{symbol || 'Select'} </Typography>
                 </Button>
               </Grid>
               <Grid item style={{ paddingLeft: 0 }}>
@@ -117,8 +115,6 @@ class From extends Component {
               </Grid>
             </Grid>
           }}
-          helperTextPrimary={`Available: ${utils.prettyNumber(ssjs.undecimalize(amount, decimals)) || 0} ${symbol || ''}`}
-          helperTextSecondary={<Link color="primary" onClick={this.onMax} variant="body2">MAXIMUM</Link>}
         />
         <MintSelection
           visible={visible}
@@ -138,15 +134,15 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getAccountData,
+  getAccountData
 }, dispatch);
 
-From.defaultProps = {
+To.defaultProps = {
   value: '',
   onChange: () => { },
 }
 
-From.propTypes = {
+To.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
 }
@@ -154,4 +150,4 @@ From.propTypes = {
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(From)));
+)(withStyles(styles)(To)));

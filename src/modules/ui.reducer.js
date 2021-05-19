@@ -192,7 +192,7 @@ export const unsetSuccess = () => {
 
       const { ui: { success: { visible: prevVisible } } } = getState();
       if (!prevVisible) {
-        const er = 'There is no error';
+        const er = 'There is no success';
         dispatch({ type: UNSET_SUCCESS_FAIL, reason: er });
         return reject(er);
       }
