@@ -43,23 +43,36 @@ class MyPool extends Component {
     if (!isEqual(prevWallet, wallet)) return this.fetchData();
   }
 
-  fetchData = () => {
-    const { wallet: { accounts }, setError, getAccountData } = this.props;
-    return this.setState({ loading: true }, () => {
-      return accounts.each(address => {
-        return getAccountData(address);
-      }, { skipError: true, skipIndex: true }).then(data => {
-        data = data.filter(({ pool }) => {
-          const { address } = pool || {};
-          return ssjs.isAddress(address);
-        });
-        return this.setState({ data, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+  fetchData = async () => {
+    const { wallet: { accounts }, getAccountData } = this.props;
+    this.setState({ loading: true });
+    let data = [];
+    for (let accountAddress of accounts) {
+      try {
+        const accountData = await getAccountData(accountAddress);
+        const { pool: poolData } = accountData || {}
+        const { address: poolAddress } = poolData || {}
+        if (!ssjs.isAddress(poolAddress)) continue;
+        const {
+          reserve_a: reserveA, mint_a: { ticket: ticketA, decimals: decimalsA },
+          reserve_b: reserveB, mint_b: { ticket: ticketB, decimals: decimalsB },
+          reserve_s: reserveS, mint_s: { ticket: ticketS, decimals: decimalsS }
+        } = poolData;
+        const syntheticData = [
+          [ssjs.undecimalize(reserveA, decimalsA), ticketA],
+          [ssjs.undecimalize(reserveB, decimalsB), ticketB],
+          [ssjs.undecimalize(reserveS, decimalsS), ticketS]
+        ];
+        const re = await Promise.all(syntheticData.map(([balance, ticket]) => utils.fetchValue(balance, ticket)));
+        const usd = re.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
+        accountData.pool.usd = usd;
+        data.push(accountData);
+        this.setState({ data: [...data] });
+      } catch (er) {
+        // Nothing
+      }
+    }
+    return this.setState({ loading: false });
   }
 
   onOpenDeposit = (index) => {
@@ -87,17 +100,11 @@ class MyPool extends Component {
     } = this.state;
 
     return <Grid container spacing={2}>
-      {loading ? <Grid item xs={12}>
-        <Grid container justify="center">
-          <Grid item>
-            <CircularProgress size={17} />
-          </Grid>
-        </Grid>
-      </Grid> : null}
       {data.map((lptData, index) => {
         const {
           amount, mint: { decimals },
           pool: {
+            usd,
             mint_s: { icon: iconS, symbol: symbolS },
             mint_a: { icon: iconA, symbol: symbolA },
             mint_b: { icon: iconB, symbol: symbolB },
@@ -110,6 +117,7 @@ class MyPool extends Component {
             stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals))}
             icons={icons}
             symbols={symbols}
+            volume={usd || 0}
             onDeposit={() => this.onOpenDeposit(index)}
             onWithdraw={() => this.onOpenWithdraw(index)}
           />
@@ -117,6 +125,13 @@ class MyPool extends Component {
       })}
       <AddLiquidity poolData={poolData} visible={visibleDeposit} onClose={this.onCloseDeposit} />
       <RemoveLiquidity data={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
+      {loading ? <Grid item xs={12}>
+        <Grid container justify="center">
+          <Grid item>
+            <CircularProgress size={17} />
+          </Grid>
+        </Grid>
+      </Grid> : null}
     </Grid>
   }
 }
