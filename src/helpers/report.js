@@ -66,7 +66,7 @@ export const findAllTransactionByTime = async (address, timeFrom, timeTo) => {
       if (confirmedTx == null) continue
 
       const accounts = []
-      confirmedTx.transaction.compileMessage().accountKeys.map(key => {
+      confirmedTx.transaction.compileMessage().accountKeys.forEach(key => {
         accounts.push(key.toString())
       })
       if (accounts.length <= 0) continue

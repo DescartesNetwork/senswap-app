@@ -29,7 +29,7 @@ class Accounts extends Component {
     super();
 
     this.state = {
-      limit: 6,
+      limit: 5,
       page: 0,
       loading: false,
       data: [],
@@ -55,7 +55,7 @@ class Accounts extends Component {
     }
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
     const { limit, page } = this.state;
 
@@ -72,24 +72,20 @@ class Accounts extends Component {
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount] });
-    return this.setState({ loading: true }, () => {
-      const sortedAccounts = this.sortFavourite(accounts);
-      const inPageAccounts = sortedAccounts.slice(page * limit, (page + 1) * limit);
-      return inPageAccounts.each(accountAddress => {
-        return getAccountData(accountAddress);
-      }, { skipError: true, skipIndex: true }).then(data => {
-        data = data.filter(({ pool }) => {
-          const { address: poolAddress } = pool || {};
-          return !ssjs.isAddress(poolAddress);
-        });
-        data.unshift(solAccount);
-        return this.setState({ data, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    this.setState({ data: [], loading: true });
+    let data = [];
+    const sortedAccounts = this.sortFavourite(accounts);
+    const inPageAccounts = sortedAccounts.slice(page * limit, (page + 1) * limit);
+    for (const accountAddress of inPageAccounts) {
+      try {
+        const accountData = await getAccountData(accountAddress);
+        const { pool } = accountData;
+        const { address: poolAddress } = pool || {}
+        if (!ssjs.isAddress(poolAddress)) data.push(accountData);
+      } catch (er) { /* Skip error */ }
+    }
+    data.unshift(solAccount);
+    return this.setState({ data, loading: false });
   }
 
   fetchFavourite = () => {
