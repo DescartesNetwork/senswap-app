@@ -6,11 +6,11 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import Button from 'senswap-ui/button';
+// import Button from 'senswap-ui/button';
 import Paper from 'senswap-ui/paper';
 import Link from 'senswap-ui/link';
 
-import { MovieFilterRounded } from 'senswap-ui/icons';
+// import { MovieFilterRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
 
@@ -28,7 +28,7 @@ class Introduction extends Component {
         <Grid item xs={12}>
           <Typography color="textSecondary">SenSwap is everything you need to turn it into a thing of the past. Let’s swap with low transaction fees and fast confirmation time.</Typography>
         </Grid>
-        <Grid item xs={12}>
+        {/* <Grid item xs={12}>
           <Button
             variant="contained"
             color="primary"
@@ -36,7 +36,7 @@ class Introduction extends Component {
           >
             <Typography>Introduction Video</Typography>
           </Button>
-        </Grid>
+        </Grid> */}
         <Grid item xs={12}>
           <Grid container spacing={0}>
             <Grid item xs={12}>

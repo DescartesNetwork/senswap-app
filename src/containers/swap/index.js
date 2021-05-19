@@ -10,18 +10,16 @@ import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 import Drain from 'senswap-ui/drain';
 import Paper from 'senswap-ui/paper';
-import TextField from 'senswap-ui/textField';
 import Brand from 'senswap-ui/brand';
 import Divider from 'senswap-ui/divider';
 import CircularProgress from 'senswap-ui/circularProgress';
-import Link from 'senswap-ui/link';
-
-import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
 import Header from './header';
 import Introduction from './introduction';
+import From from './from';
+import To from './to';
 import Details from './details';
-import { BucketWatcher, MintAvatar, MintSelection, AccountSelection } from 'containers/wallet';
+import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
 import oracle from 'helpers/oracle';
@@ -29,7 +27,7 @@ import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
-import { getMintData, getPoolData } from 'modules/bucket.reducer';
+import { getPoolData } from 'modules/bucket.reducer';
 import { openWallet, updateWallet } from 'modules/wallet.reducer';
 
 import SwapIntroductionImage from 'static/images/swap-introduction.png';
@@ -41,11 +39,9 @@ class Swap extends Component {
 
     this.state = {
       txId: '',
-      visibleAccountSelection: false,
-      visibleMintSelection: false,
-      accountData: {},
-      mintData: {},
+      bidAccountData: {},
       bidValue: '',
+      askAccountData: {},
       askValue: '',
       hopData: [],
     }
@@ -62,113 +58,82 @@ class Swap extends Component {
     return [srcPoolAddresses[0], dstPoolAddresses[0]];
   }
 
-  routing = (srcMintAddress, dstMintAddress) => {
-    return new Promise((resolve, reject) => {
-      if (!ssjs.isAddress(srcMintAddress)) return reject('Invalid source mint address');
-      if (!ssjs.isAddress(dstMintAddress)) return reject('Invalid destination mint address');
-      if (srcMintAddress === dstMintAddress) return reject('The pools is identical');
+  routing = async (srcMintAddress, dstMintAddress) => {
+    if (!ssjs.isAddress(srcMintAddress)) throw new Error('Invalid source mint address');
+    if (!ssjs.isAddress(dstMintAddress)) throw new Error('Invalid destination mint address');
+    if (srcMintAddress === dstMintAddress) throw new Error('The pools is identical');
 
-      const { getPool, getPools, getPoolData } = this.props;
-      const srcCondition = { '$or': [{ mintS: srcMintAddress }, { mintA: srcMintAddress }, { mintB: srcMintAddress }] }
-      const dstCondition = { '$or': [{ mintS: dstMintAddress }, { mintA: dstMintAddress }, { mintB: dstMintAddress }] }
-      let srcPoolAddresses = [];
-      let dstPoolAddresses = [];
-      return getPools(srcCondition, -1, 0).then(data => {
-        if (!data.length) throw new Error('Cannot find available pools');
-        srcPoolAddresses = data.map(({ address }) => address);
-        return getPools(dstCondition, -1, 0);
-      }).then(data => {
-        if (!data.length) throw new Error('Cannot find available pools');
-        dstPoolAddresses = data.map(({ address }) => address);
-        const route = this._routing(srcPoolAddresses, dstPoolAddresses);
-        return route.each(address => getPool(address));
-      }).then(data => {
-        if (data.length < 2) throw new Error('Cannot find available pools');
-        return data.each(({ address }) => getPoolData(address));
-      }).then(data => {
-        if (data.length < 2) throw new Error('Cannot find available pools');
-        return resolve(data);
-      }).catch(er => {
-        return reject(er);
-      });
-    });
+    const { getPool, getPools, getPoolData } = this.props;
+    const srcCondition = { '$or': [{ mintS: srcMintAddress }, { mintA: srcMintAddress }, { mintB: srcMintAddress }] }
+    const dstCondition = { '$or': [{ mintS: dstMintAddress }, { mintA: dstMintAddress }, { mintB: dstMintAddress }] }
+
+    const srcData = await getPools(srcCondition, -1, 0);
+    if (!srcData.length) throw new Error('Cannot find available pools');
+    const srcPoolAddresses = srcData.map(({ address }) => address);
+
+    const dstData = await getPools(dstCondition, -1, 0);
+    if (!dstData.length) throw new Error('Cannot find available pools');
+    const dstPoolAddresses = dstData.map(({ address }) => address);
+
+    const route = this._routing(srcPoolAddresses, dstPoolAddresses);
+    let data = await Promise.all(route.map(address => getPool(address)));
+    if (data.length < 2) throw new Error('Cannot find available pools');
+    data = await Promise.all(data.map(({ address }) => getPoolData(address)));
+    if (data.length < 2) throw new Error('Cannot find available pools');
+
+    return data;
   }
 
-  estimateState = (inverse = false) => {
+  estimateState = async (inverse = false) => {
     const { setError } = this.props;
-    const { accountData, mintData, bidValue, askValue } = this.state;
-    const { mint } = accountData;
-    const { address: srcMintAddress, decimals: bidDecimals } = mint || {}
-    const { address: dstMintAddress, decimals: askDecimals } = mintData || {}
+    const { bidAccountData, askAccountData, bidValue, askValue } = this.state;
+    const { mint: bidMintData } = bidAccountData || {}
+    const { mint: askMintData } = askAccountData || {}
+    const { address: srcMintAddress, decimals: bidDecimals } = bidMintData || {}
+    const { address: dstMintAddress, decimals: askDecimals } = askMintData || {}
     if (!ssjs.isAddress(srcMintAddress) || !ssjs.isAddress(dstMintAddress)) return;
 
     if (this.timeout) clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => {
-      return this.setState({ loading: true }, () => {
-        return this.routing(srcMintAddress, dstMintAddress).then(([bidPoolData, askPoolData]) => {
-          if (inverse) return oracle.inverseCurve(
-            ssjs.decimalize(askValue, askDecimals),
-            srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
-          return oracle.curve(
-            ssjs.decimalize(bidValue, bidDecimals),
-            srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
-        }).then(data => {
-          let bidAmount = null;
-          let askAmount = null;
-          if (data.length === 1) [{ askAmount, bidAmount }] = data;
-          else if (data.length === 2) [{ bidAmount }, { askAmount }] = data;
-          else throw new Error('Cannot find available pools');
-          return this.setState({ loading: false, hopData: data }, () => {
-            if (inverse) return this.setState({ bidValue: ssjs.undecimalize(bidAmount, bidDecimals) });
-            return this.setState({ askValue: ssjs.undecimalize(askAmount, askDecimals) });
-          });
-        }).catch(er => {
-          return this.setState({ loading: false }, () => {
-            return setError(er);
-          });
-        });
-      });
+    this.timeout = setTimeout(async () => {
+      this.setState({ loading: true });
+      try {
+        const [bidPoolData, askPoolData] = await this.routing(srcMintAddress, dstMintAddress);
+
+        let data = [];
+        if (inverse) data = await oracle.inverseCurve(
+          ssjs.decimalize(askValue, askDecimals),
+          srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
+        else data = await oracle.curve(
+          ssjs.decimalize(bidValue, bidDecimals),
+          srcMintAddress, bidPoolData, dstMintAddress, askPoolData);
+
+        let bidAmount = null;
+        let askAmount = null;
+        if (data.length === 1) [{ askAmount, bidAmount }] = data;
+        else if (data.length === 2) [{ bidAmount }, { askAmount }] = data;
+        else throw new Error('Cannot find available pools');
+
+        let state = { loading: false, hopData: data }
+        if (inverse) state.bidValue = ssjs.undecimalize(bidAmount, bidDecimals);
+        else state.askValue = ssjs.undecimalize(askAmount, askDecimals);
+        return this.setState({ ...state });
+      } catch (er) {
+        await setError(er);
+        return this.setState({ loading: false });
+      }
     }, 500);
   }
 
-  onOpenAccountSelection = () => this.setState({ visibleAccountSelection: true });
-  onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
-
-  onOpenMintSelection = () => this.setState({ visibleMintSelection: true });
-  onCloseMintSelection = () => this.setState({ visibleMintSelection: false });
-
-  onAccountData = (accountData) => {
-    return this.setState({ accountData, bidValue: '', askValue: '' }, () => {
-      this.onCloseAccountSelection();
-      return this.estimateState();
-    });
+  onBidData = ({ accountData, value }) => {
+    return this.setState({
+      bidAccountData: accountData, bidValue: value, askValue: ''
+    }, () => this.estimateState(false));
   }
 
-  onMintData = (data) => {
-    const { address: mintAddress } = data;
-    const { setError, getMintData } = this.props;
-    return getMintData(mintAddress).then(mintData => {
-      return this.setState({ mintData, bidValue: '', askValue: '' }, () => {
-        this.onCloseMintSelection();
-        return this.estimateState();
-      });
-    }).catch(er => {
-      return setError(er);
-    });
-  }
-
-  onBidValue = (e) => {
-    const bidValue = e.target.value || '';
-    return this.setState({ bidValue }, () => {
-      return this.estimateState();
-    });
-  }
-
-  onAskValue = (e) => {
-    const askValue = e.target.value || '';
-    return this.setState({ askValue }, () => {
-      return this.estimateState(true);
-    });
+  onAskData = ({ accountData, value }) => {
+    return this.setState({
+      askAccountData: accountData, bidValue: '', askValue: value
+    }, () => this.estimateState(true));
   }
 
   onAutogenDestinationAddress = (mintAddress) => {
@@ -191,8 +156,8 @@ class Swap extends Component {
 
   executeSwap = () => {
     const { setError, setSuccess } = this.props;
-    const { accountData, hopData } = this.state;
-    let { address: srcAddress } = accountData;
+    const { bidAccountData, hopData } = this.state;
+    let { address: srcAddress } = bidAccountData;
     return this.setState({ loading: true }, () => {
       return hopData.each(data => {
         const { dstMintAddress } = data || {}
@@ -223,14 +188,6 @@ class Swap extends Component {
     });
   }
 
-  onMax = () => {
-    const { accountData: { amount, mint } } = this.state;
-    const { decimals } = mint || {}
-    const value = ssjs.undecimalize(amount, decimals);
-    const pseudoEvent = { target: { value } }
-    return this.onBidValue(pseudoEvent);
-  }
-
   renderAction = () => {
     const { wallet: { user: { address } }, openWallet } = this.props;
     const { loading } = this.state;
@@ -258,14 +215,7 @@ class Swap extends Component {
 
   render() {
     const { classes, ui: { width } } = this.props;
-    const {
-      visibleAccountSelection, visibleMintSelection,
-      accountData: { amount: balance, mint: bidMintData }, mintData: askMintData,
-      bidValue, askValue, hopData,
-    } = this.state;
-
-    const { icon: bidIcon, symbol: bidSymbol, decimals } = bidMintData || {};
-    const { icon: askIcon, symbol: askSymbol } = askMintData || {};
+    const { bidValue, askValue, hopData } = this.state;
 
     return <Grid container>
       <BucketWatcher
@@ -312,69 +262,10 @@ class Swap extends Component {
                       <Drain />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField
-                        variant="contained"
-                        label="From"
-                        placeholder="0"
-                        value={bidValue}
-                        onChange={this.onBidValue}
-                        InputProps={{
-                          startAdornment: <Grid container className={classes.noWrap}>
-                            <Grid item>
-                              <Button
-                                size="small"
-                                startIcon={<MintAvatar icon={bidIcon} />}
-                                endIcon={<ArrowDropDownRounded />}
-                                onClick={this.onOpenAccountSelection}
-                              >
-                                <Typography>{bidSymbol || 'Select'}</Typography>
-                              </Button>
-                            </Grid>
-                            <Grid item style={{ paddingLeft: 0 }}>
-                              <Divider orientation="vertical" />
-                            </Grid>
-                          </Grid>
-                        }}
-                        helperTextPrimary={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals)) || 0} ${bidSymbol || ''}`}
-                        helperTextSecondary={<Link color="primary" onClick={this.onMax} variant="body2">MAXIMUM</Link>}
-                      />
-                      <AccountSelection
-                        visible={visibleAccountSelection}
-                        onClose={this.onCloseAccountSelection}
-                        onChange={this.onAccountData}
-                        solana={false}
-                      />
+                      <From onChange={this.onBidData} value={bidValue} />
                     </Grid>
                     <Grid item xs={12}>
-                      <TextField
-                        variant="contained"
-                        label="To"
-                        placeholder="0"
-                        value={askValue}
-                        onChange={this.onAskValue}
-                        InputProps={{
-                          startAdornment: <Grid container className={classes.noWrap}>
-                            <Grid item>
-                              <Button
-                                size="small"
-                                startIcon={<MintAvatar icon={askIcon} />}
-                                endIcon={<ArrowDropDownRounded />}
-                                onClick={this.onOpenMintSelection}
-                              >
-                                <Typography>{askSymbol || 'Select'} </Typography>
-                              </Button>
-                            </Grid>
-                            <Grid item style={{ paddingLeft: 0 }}>
-                              <Divider orientation="vertical" />
-                            </Grid>
-                          </Grid>
-                        }}
-                      />
-                      <MintSelection
-                        visible={visibleMintSelection}
-                        onChange={this.onMintData}
-                        onClose={this.onCloseMintSelection}
-                      />
+                      <To onChange={this.onAskData} value={askValue} />
                     </Grid>
                     <Grid item xs={12} >
                       <Divider />
@@ -414,7 +305,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setSuccess,
   updateWallet, openWallet,
   getPools, getPool,
-  getMintData, getPoolData,
+  getPoolData,
 }, dispatch);
 
 export default withRouter(connect(

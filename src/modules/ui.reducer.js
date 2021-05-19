@@ -154,7 +154,7 @@ export const SET_SUCCESS = 'SET_SUCCESS';
 export const SET_SUCCESS_OK = 'SET_SUCCESS_OK';
 export const SET_SUCCESS_FAIL = 'SET_SUCCESS_FAIL';
 
-export const setSuccess = (msg, link = '') => {
+export const setSuccess = (msg, link = '#') => {
   return (dispatch, getState) => {
     return new Promise((resolve, reject) => {
       dispatch({ type: SET_SUCCESS });
@@ -192,7 +192,7 @@ export const unsetSuccess = () => {
 
       const { ui: { success: { visible: prevVisible } } } = getState();
       if (!prevVisible) {
-        const er = 'There is no error';
+        const er = 'There is no success';
         dispatch({ type: UNSET_SUCCESS_FAIL, reason: er });
         return reject(er);
       }
