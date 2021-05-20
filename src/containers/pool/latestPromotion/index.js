@@ -149,7 +149,7 @@ class LatestPromotion extends Component {
             icons={icons}
             symbols={symbols}
             volume={poolData.usd}
-            stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals)) || '0'}
+            stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals))}
             {...(!isLoggedIn ? { onConnect: openWallet } : null)}
             {...(isLP ? { onWithdraw: () => this.onOpenWithdraw(i) } : null)}
             onDeposit={() => this.onOpenDeposit(i)}

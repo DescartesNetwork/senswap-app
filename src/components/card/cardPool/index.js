@@ -106,12 +106,14 @@ class CardPool extends Component {
           <Grid item xs={6}>
             <Typography align="right" variant="body2"><strong>{apy}%</strong></Typography>
           </Grid>
-          <Grid item xs={6}>
-            <Typography variant="body2">Your stake:</Typography>
-          </Grid>
-          <Grid item xs={6}>
-            <Typography align="right" variant="body2"><strong>{stake}</strong></Typography>
-          </Grid>
+          {stake ? <Fragment>
+            <Grid item xs={6}>
+              <Typography variant="body2">Your stake:</Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography align="right" variant="body2"><strong>{stake}</strong></Typography>
+            </Grid>
+          </Fragment> : null}
         </Grid>
       </CardContent>
       <CardContent className={classes.cardAction}>
