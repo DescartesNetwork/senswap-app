@@ -9,7 +9,7 @@ import Typography from 'senswap-ui/typography';
 import Button, { IconButton } from 'senswap-ui/button';
 import Badge from 'senswap-ui/badge';
 
-import { AccountBalanceWalletOutlined, NotificationsOutlined, ExpandMoreRounded } from 'senswap-ui/icons';
+import { AccountBalanceWalletOutlined, NotificationsOutlined } from 'senswap-ui/icons';
 
 import { AccountAvatar } from 'containers/wallet';
 
@@ -52,7 +52,7 @@ class WalletButton extends Component {
       </Grid>
       <Grid item>
         <IconButton size="small" component={RouterLink} to="/wallet">
-          <ExpandMoreRounded />
+          <AccountBalanceWalletOutlined />
         </IconButton>
       </Grid>
     </Fragment>
