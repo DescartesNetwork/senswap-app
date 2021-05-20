@@ -197,7 +197,7 @@ export const unsetSuccess = () => {
         return reject(er);
       }
 
-      const data = { success: { message: '', visible: false, link: '' } }
+      const data = { success: { message: '', visible: false, link: '#' } }
       dispatch({ type: UNSET_SUCCESS_OK, data });
       return resolve(data);
     });

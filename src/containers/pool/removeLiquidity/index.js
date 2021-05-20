@@ -68,7 +68,7 @@ class RemoveLiquidity extends Component {
     });
   }
 
-  removeLiquidity = () => {
+  removeLiquidity = async () => {
     const {
       data: { pool, mint: { decimals } },
       setError, setSuccess, onClose
@@ -87,34 +87,22 @@ class RemoveLiquidity extends Component {
     if (!ssjs.isAddress(mintAddressA)) return setError('Invalid secondary mint address');
     if (!ssjs.isAddress(mintAddressB)) return setError('Invalid secondary mint address');
 
-    let dstAddressS = '';
-    let dstAddressA = '';
-    let dstAddressB = '';
-    return this.setState({ loading: true }, () => {
-      return this.onAutogenDestinationAddress(mintAddressS).then(accountAddress => {
-        dstAddressS = accountAddress;
-        return this.onAutogenDestinationAddress(mintAddressA);
-      }).then(accountAddress => {
-        dstAddressA = accountAddress;
-        return this.onAutogenDestinationAddress(mintAddressB);
-      }).then(accountAddress => {
-        dstAddressB = accountAddress;
-        return this.swap.removeLiquidity(
-          lpt, poolAddress,
-          dstAddressS, dstAddressA, dstAddressB,
-          window.senswap.wallet
-        );
-      }).then(({ txId }) => {
-        return this.setState({ loading: false }, () => {
-          onClose();
-          return setSuccess('Remove liquidity successfully', utils.explorer(txId));
-        });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    try {
+      this.setState({ loading: true });
+      const dstAddressS = await this.onAutogenDestinationAddress(mintAddressS);
+      const dstAddressA = await this.onAutogenDestinationAddress(mintAddressA);
+      const dstAddressB = await this.onAutogenDestinationAddress(mintAddressB);
+      const { txId } = await this.swap.removeLiquidity(
+        lpt, poolAddress,
+        dstAddressS, dstAddressA, dstAddressB,
+        window.senswap.wallet
+      );
+      await setSuccess('Remove liquidity successfully', utils.explorer(txId));
+      return this.setState({ loading: false }, onClose);
+    } catch (er) {
+      await setError(er);
+      return this.setState({ loading: false });
+    }
   }
 
   render() {
@@ -123,12 +111,12 @@ class RemoveLiquidity extends Component {
 
     const { amount: balance, pool, mint } = data;
     const { supply, decimals } = mint || {}
-    const { mint_s, mint_a, mint_b, treasury_s, treasury_a, treasury_b } = pool || {};
+    const { mint_s, mint_a, mint_b, reserve_s, reserve_a, reserve_b } = pool || {};
 
     const treasuries = [
-      { ...treasury_s, mint: { ...(treasury_s || {}).mint, ...mint_s } },
-      { ...treasury_a, mint: { ...(treasury_a || {}).mint, ...mint_a } },
-      { ...treasury_b, mint: { ...(treasury_b || {}).mint, ...mint_b } },
+      { reserve: reserve_s, mint: mint_s },
+      { reserve: reserve_a, mint: mint_a },
+      { reserve: reserve_b, mint: mint_b },
     ];
     const ratio = ssjs.div(ssjs.decimalize(amount, decimals), supply);
 
@@ -223,8 +211,8 @@ class RemoveLiquidity extends Component {
             <Paper className={classes.paper}>
               <Grid container>
                 {treasuries.map((treasuryData, index) => {
-                  const { amount: reserve, mint } = treasuryData;
-                  const { icon, symbol, decimals } = mint;
+                  const { reserve, mint } = treasuryData || {}
+                  const { icon, symbol, decimals } = mint || {}
                   return <Grid item key={index} xs={12}>
                     <Grid container alignItems="center" className={classes.noWrap}>
                       <Grid item className={classes.stretch}>
