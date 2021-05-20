@@ -49,13 +49,33 @@ class Swap extends Component {
     this.swap = window.senswap.swap;
   }
 
-  _routing = (srcPoolAddresses, dstPoolAddresses) => {
+  _routing = async (srcPoolAddresses, dstPoolAddresses) => {
+    const { getPoolData } = this.props;
+
+    let maxSrcPoolData = { reserve_s: global.BigInt(0) }
+    let maxDstPoolData = { reserve_s: global.BigInt(0) }
+
     for (let srcPoolAddress of srcPoolAddresses) {
+      const srcPoolData = await getPoolData(srcPoolAddress);
+      const { state: srcState, reserve_s: srcReserve } = srcPoolData || {}
+      if (srcState !== 1 || srcReserve <= 0) continue;
+      const { reserve_s: maxSrcReserve } = maxSrcPoolData || {}
+      if (maxSrcReserve < srcReserve) maxSrcPoolData = srcPoolData;
+
       for (let dstPoolAddress of dstPoolAddresses) {
+        const dstPoolData = await getPoolData(dstPoolAddress);
+        const { state: dstState, reserve_s: dstReserve } = dstPoolData || {}
+        if (dstState !== 1 || dstReserve <= 0) continue;
+        const { reserve_s: maxDstReserve } = maxDstPoolData || {}
+        if (maxDstReserve < dstReserve) maxDstPoolData = dstPoolData;
+
         if (srcPoolAddress === dstPoolAddress) return [srcPoolAddress, dstPoolAddress];
       }
     }
-    return [srcPoolAddresses[0], dstPoolAddresses[0]];
+
+    const { address: srcPoolAddress } = maxSrcPoolData;
+    const { address: dstPoolAddress } = maxDstPoolData;
+    return [srcPoolAddress, dstPoolAddress];
   }
 
   routing = async (srcMintAddress, dstMintAddress) => {
@@ -75,7 +95,7 @@ class Swap extends Component {
     if (!dstData.length) throw new Error('Cannot find available pools');
     const dstPoolAddresses = dstData.map(({ address }) => address);
 
-    const route = this._routing(srcPoolAddresses, dstPoolAddresses);
+    const route = await this._routing(srcPoolAddresses, dstPoolAddresses);
     let data = await Promise.all(route.map(address => getPool(address)));
     if (data.length < 2) throw new Error('Cannot find available pools');
     data = await Promise.all(data.map(({ address }) => getPoolData(address)));
