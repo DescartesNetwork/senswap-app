@@ -178,10 +178,10 @@ Oracle._inverseRoutingCurve = (askAmount, srcMintAddress, bidPoolData, dstMintAd
     const { sol: { senAddress } } = configs;
     let data = [{}, {}];
     return Oracle._inverseDirectCurve(askAmount, senAddress, dstMintAddress, askPoolData).then(([re]) => {
-      data[0] = re;
+      data[1] = re;
       return Oracle._inverseDirectCurve(re.bidAmount, srcMintAddress, senAddress, bidPoolData);
     }).then(([re]) => {
-      data[1] = re;
+      data[0] = re;
       return resolve(data);
     }).catch(er => {
       return reject(er);

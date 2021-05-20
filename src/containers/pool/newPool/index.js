@@ -25,6 +25,7 @@ import Price from './price';
 import styles from './styles';
 import configs from 'configs';
 import utils from 'helpers/utils';
+import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getMint } from 'modules/mint.reducer';
 import { addPool } from 'modules/pool.reducer';
@@ -32,25 +33,24 @@ import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
-const EMPTY = {
-  txId: '',
-  loading: false,
-}
-
 class NewPool extends Component {
   constructor() {
     super();
 
     this.state = {
-      ...EMPTY,
+      loading: false,
       accountData: [{}, {}, {}],
       index: 0,
       amounts: ['', '', ''],
       visibleAccountSelection: false,
     }
 
-    this.wallet = window.senswap.wallet;
     this.swap = window.senswap.swap;
+  }
+
+  componentDidMount() {
+    const { visible } = this.props;
+    if (visible) this.fetchData();
   }
 
   componentDidUpdate(prevProps) {
@@ -60,28 +60,29 @@ class NewPool extends Component {
     if (!isEqual(prevVisible, visible) && visible) this.fetchData();
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const { sol: { senAddress } } = configs;
     const {
-      wallet: { accounts },
+      wallet: { user: { address: walletAddress } },
       setError, getAccountData, getMint,
     } = this.props;
     const { accountData } = this.state;
     let newAccountData = [...accountData];
-
-    return getMint(senAddress).then(data => {
-      newAccountData[0] = { mint: { ...data } }
-      return accounts.each(accountAddress => {
-        return getAccountData(accountAddress);
-      }, { skipError: true, skipIndex: true });
-    }).then(data => {
-      const senData = data.filter(({ mint: { address } }) => (address === senAddress))[0];
-      if (!senData) return;
-      newAccountData[0] = senData;
-      return this.setState({ accountData: newAccountData });
-    }).catch(er => {
-      return setError(er);
-    });
+    try {
+      this.setState({ loading: true });
+      let data = await sol.scanAccount(senAddress, walletAddress);
+      const { state, address: accountAddress } = data || {}
+      if (!state) {
+        const mintData = await getMint(senAddress);
+        data = { address: '', amount: 0n, mint: mintData };
+      }
+      else data = await getAccountData(accountAddress);
+      newAccountData[0] = data;
+      return this.setState({ loading: false, accountData: newAccountData });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ loading: false });
+    }
   }
 
   onOpenAccountSelection = (index) => this.setState({ index, visibleAccountSelection: true });
@@ -106,7 +107,7 @@ class NewPool extends Component {
     return this.setState({ amounts: newAmounts });
   }
 
-  newPool = () => {
+  newPool = async () => {
     const {
       accountData: [
         { address: srcSAddress, mint: { decimals: decimalsS } },
@@ -129,34 +130,23 @@ class NewPool extends Component {
     const reserveB = ssjs.decimalize(amountB, decimalsB);
     if (!reserveS || !reserveA || !reserveB) return setError('Invalid amount');
 
-    let txId = '';
-    let poolAddress = '';
-    let lptAddress = '';
-    return this.setState({ loading: true }, () => {
-      return this.swap.initializePool(
+    try {
+      this.setState({ loading: true });
+      const { txId, poolAddress, lptAddress } = await this.swap.initializePool(
         reserveS, reserveA, reserveB,
         srcSAddress, srcAAddress, srcBAddress,
-        this.wallet
-      ).then(re => {
-        txId = re.txId;
-        poolAddress = re.poolAddress;
-        lptAddress = re.lptAddress;
-        const newAccounts = [...accounts];
-        if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
-        return addPool({ address: poolAddress });
-      }).then(re => {
-        return this.setState({ ...EMPTY, txId }, () => {
-          onClose();
-          return setSuccess('Create a new pool successfully', utils.explorer(txId));
-        });
-      }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
-      });
-    });
+        window.senswap.wallet
+      );
+      const newAccounts = [...accounts];
+      if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
+      await updateWallet({ accounts: newAccounts });
+      await addPool({ address: poolAddress });
+      await setSuccess('Create a new pool successfully', utils.explorer(txId));
+      return this.setState({ loading: false }, onClose);
+    } catch (er) {
+      await setError(er);
+      return this.setState({ loading: false });
+    }
   }
 
   renderSENRole = () => {
@@ -207,7 +197,7 @@ class NewPool extends Component {
                     </Grid>
                   </Grid>
                   <Grid item xs={12}>
-                    <Typography>Explain how to get SEN here</Typography>
+                    <Typography>You can swap your tokens to get SEN on our platform.</Typography>
                   </Grid>
                 </Grid>
               </Paper>

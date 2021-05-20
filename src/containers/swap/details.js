@@ -24,7 +24,7 @@ class Details extends Component {
     super();
 
     this.state = {
-      selected: -1
+      visibles: []
     }
   }
 
@@ -43,13 +43,15 @@ class Details extends Component {
   }
 
   onAdvance = (index) => {
-    const { selected } = this.state;
-    return this.setState({ selected: selected >= 0 ? -1 : index });
+    const { visibles } = this.state;
+    const newVisibles = [...visibles];
+    newVisibles[index] = !newVisibles[index];
+    return this.setState({ visibles: newVisibles });
   }
 
   render() {
     const { classes, hopData } = this.props;
-    const { selected } = this.state;
+    const { visibles } = this.state;
     if (!hopData || !hopData.length) return null;
 
     return <Grid container>
@@ -88,7 +90,7 @@ class Details extends Component {
                 <Typography color="textSecondary">Slippage</Typography>
                 <Typography>{utils.prettyNumber(ssjs.undecimalize(slippage, 9) * 100)}%</Typography>
               </Grid>
-              {selected === index ? <Fragment>
+              {visibles[index] ? <Fragment>
                 <Grid item xs={12}>
                   <Divider />
                 </Grid>
@@ -102,10 +104,10 @@ class Details extends Component {
                 </Grid>
               </Fragment> : null}
               <Grid item xs={12} style={{ padding: 0 }}>
-                <Grid container justify="flex-end">
+                <Grid container justify="center">
                   <Grid item>
                     <IconButton size="small" onClick={() => this.onAdvance(index)}>
-                      {selected === index ? <ExpandLessRounded fontSize="small" color="disabled" /> : <ExpandMoreRounded fontSize="small" color="disabled" />}
+                      {visibles[index] ? <ExpandLessRounded fontSize="small" color="disabled" /> : <ExpandMoreRounded fontSize="small" color="disabled" />}
                     </IconButton>
                   </Grid>
                 </Grid>

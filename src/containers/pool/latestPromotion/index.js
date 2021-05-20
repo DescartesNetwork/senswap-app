@@ -134,12 +134,12 @@ class LatestPromotion extends Component {
     return <Grid container spacing={2}>
       {data.map((poolData, i) => {
         const {
-          address: poolAddress, accountData,
+          address: poolAddress,state, accountData,
           mint_s: { icon: iconS, symbol: symbolS, decimals },
           mint_a: { icon: iconA, symbol: symbolA },
           mint_b: { icon: iconB, symbol: symbolB },
         } = poolData;
-        if (!ssjs.isAddress(poolAddress)) return null;
+        if (!ssjs.isAddress(poolAddress) || state !== 1) return null;
         const { address: accountAddress, amount } = accountData || {}
         const isLP = ssjs.isAddress(accountAddress);
         const icons = [iconA, iconB, iconS];

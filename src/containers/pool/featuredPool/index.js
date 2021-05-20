@@ -13,6 +13,7 @@ import FeaturedCard from './featuredCard';
 import styles from './styles';
 import utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
+import { getPools, getPool } from 'modules/pool.reducer';
 
 import HomeHeroImage from 'static/images/home-hero.png';
 import FeaturedPoolImage1 from 'static/images/featured-pool-1.png';
@@ -32,23 +33,34 @@ class FeaturedPool extends Component {
           src: HomeHeroImage,
         }
       ],
-      featuredPoolData: [
-        {
-          subtitle: utils.prettyDatetime(new Date()),
-          title: 'BTC x SOL x SEN',
-          src: FeaturedPoolImage1,
-        },
-        {
-          subtitle: utils.prettyDatetime(new Date()),
-          title: 'BTC x SOL x SEN',
-          src: FeaturedPoolImage2,
-        },
-        {
-          subtitle: utils.prettyDatetime(new Date()),
-          title: 'BTC x SOL x SEN',
-          src: FeaturedPoolImage3,
+      featuredPoolData: []
+    }
+  }
+
+  componentDidMount() {
+    this.fetchData();
+  }
+
+  fetchData = async () => {
+    const { setError, getPools, getPool } = this.props;
+    const images = [FeaturedPoolImage1, FeaturedPoolImage2, FeaturedPoolImage3];
+    try {
+      const poolAddresses = await getPools({}, 3, 0);
+      const poolData = await Promise.all(poolAddresses.map(({ address }) => getPool(address)));
+      const featuredPoolData = poolData.map((poolDatum, index) => {
+        const { mintA, mintB, mintS, createdAt } = poolDatum || {}
+        const { symbol: symbolA } = mintA || {}
+        const { symbol: symbolB } = mintB || {}
+        const { symbol: symbolS } = mintS || {}
+        return {
+          subtitle: utils.prettyDatetime(new Date(createdAt)),
+          title: `${symbolA} x ${symbolB} x ${symbolS}`,
+          src: images[index % images.length]
         }
-      ]
+      });
+      return this.setState({ featuredPoolData });
+    } catch (er) {
+      return setError(er);
     }
   }
 
@@ -76,10 +88,12 @@ class FeaturedPool extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  pool: state.pool,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  setError
+  setError,
+  getPools, getPool,
 }, dispatch);
 
 export default withRouter(connect(
