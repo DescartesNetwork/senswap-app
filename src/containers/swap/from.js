@@ -118,7 +118,11 @@ class From extends Component {
             </Grid>
           }}
           helperTextPrimary={`Available: ${utils.prettyNumber(ssjs.undecimalize(amount, decimals)) || 0} ${symbol || ''}`}
-          helperTextSecondary={<Link color="primary" onClick={this.onMax} variant="body2">MAXIMUM</Link>}
+          helperTextSecondary={<Grid container justify="flex-end">
+            <Grid item>
+              <Link color="primary" onClick={this.onMax} variant="body2">MAXIMUM</Link>
+            </Grid>
+          </Grid>}
         />
         <MintSelection
           visible={visible}

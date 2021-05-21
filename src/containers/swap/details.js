@@ -86,7 +86,7 @@ class Details extends Component {
                 <Typography color="textSecondary">Ratio</Typography>
                 <Typography>{utils.prettyNumber(ratio)}</Typography>
               </Grid>
-              <Grid item xs={12} sm={4}>
+              <Grid item xs={6} sm={4}>
                 <Typography color="textSecondary">Slippage</Typography>
                 <Typography>{utils.prettyNumber(ssjs.undecimalize(slippage, 9) * 100)}%</Typography>
               </Grid>

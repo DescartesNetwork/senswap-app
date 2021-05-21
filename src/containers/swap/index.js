@@ -43,6 +43,7 @@ class Swap extends Component {
       bidValue: '',
       askAccountData: {},
       askValue: '',
+      slippage: 0.01,
       hopData: [],
     }
 
@@ -144,6 +145,15 @@ class Swap extends Component {
     }, 500);
   }
 
+  estimateLimit = (askAmount) => {
+    const { slippage } = this.state;
+    if (slippage < 0) return global.BigInt(0);
+    const maxSlippage = ssjs.decimalize(slippage, 9);
+    const decimals = ssjs.decimalize(1, 9);
+    const limit = askAmount + askAmount * maxSlippage / decimals;
+    return limit;
+  }
+
   onBidData = ({ accountData, value }) => {
     return this.setState({
       bidAccountData: accountData, bidValue: value, askValue: ''
@@ -154,6 +164,10 @@ class Swap extends Component {
     return this.setState({
       askAccountData: accountData, bidValue: '', askValue: value
     }, () => this.estimateState(true));
+  }
+
+  onSlippage = (slippage) => {
+    return this.setState({ slippage });
   }
 
   onAutogenDestinationAddress = (mintAddress) => {
@@ -185,11 +199,14 @@ class Swap extends Component {
       }).then(dstAddresses => {
         const data = hopData.zip(dstAddresses);
         return data.each(data => {
-          const [{ bidAmount, poolData: { address: poolAddress } }, dstAddress] = data;
+          const [{ bidAmount, askAmount, poolData: { address: poolAddress } }, dstAddress] = data;
           const _srcAddress = srcAddress;
           srcAddress = dstAddress;
+          const limit = this.estimateLimit(askAmount);
+          console.log(askAmount, limit)
           return this.swap.swap(
             bidAmount,
+            limit,
             poolAddress,
             _srcAddress,
             dstAddress,
@@ -235,7 +252,7 @@ class Swap extends Component {
 
   render() {
     const { classes, ui: { width } } = this.props;
-    const { bidValue, askValue, hopData } = this.state;
+    const { bidValue, askValue, slippage, hopData } = this.state;
 
     return <Grid container>
       <BucketWatcher
@@ -285,7 +302,10 @@ class Swap extends Component {
                       <From onChange={this.onBidData} value={bidValue} />
                     </Grid>
                     <Grid item xs={12}>
-                      <To onChange={this.onAskData} value={askValue} />
+                      <To
+                        onSlippage={this.onSlippage} slippage={slippage}
+                        onChange={this.onAskData} value={askValue}
+                      />
                     </Grid>
                     <Grid item xs={12} >
                       <Divider />

@@ -13,6 +13,7 @@ import Button from 'senswap-ui/button';
 import TextField from 'senswap-ui/textField';
 import Divider from 'senswap-ui/divider';
 import CircularProgress from 'senswap-ui/circularProgress';
+import Link from 'senswap-ui/link';
 
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
@@ -70,14 +71,6 @@ class To extends Component {
     return this.setState({ value }, this.returnData);
   }
 
-  onMax = () => {
-    const { accountData: { amount, mint } } = this.state;
-    const { decimals } = mint || {}
-    const value = ssjs.undecimalize(amount, decimals);
-    const pseudoEvent = { target: { value } }
-    return this.onValue(pseudoEvent);
-  }
-
   returnData = () => {
     const { onChange } = this.props;
     const { accountData, value } = this.state;
@@ -85,7 +78,7 @@ class To extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, onSlippage, slippage } = this.props;
     const { loading, visible, accountData, value } = this.state;
     const { mint } = accountData || {}
     const { icon, symbol } = mint || {}
@@ -115,6 +108,39 @@ class To extends Component {
               </Grid>
             </Grid>
           }}
+          helperTextPrimary="Max slippage"
+          helperTextSecondary={
+            <Grid container justify="flex-end" className={classes.noWrap}>
+              <Grid item>
+                <Link
+                  color={slippage === 0.01 ? 'primary' : 'textSecondary'}
+                  onClick={() => onSlippage(0.01)}
+                  variant="body2"
+                >1%</Link>
+              </Grid>
+              <Grid item>
+                <Link
+                  color={slippage === 0.05 ? 'primary' : 'textSecondary'}
+                  onClick={() => onSlippage(0.05)}
+                  variant="body2"
+                >5%</Link>
+              </Grid>
+              <Grid item>
+                <Link
+                  color={slippage === 0.1 ? 'primary' : 'textSecondary'}
+                  onClick={() => onSlippage(0.1)}
+                  variant="body2"
+                >10%</Link>
+              </Grid>
+              <Grid item>
+                <Link
+                  color={slippage === -1 ? 'primary' : 'textSecondary'}
+                  onClick={() => onSlippage(-1)}
+                  variant="body2"
+                >Fee</Link>
+              </Grid>
+            </Grid>
+          }
         />
         <MintSelection
           visible={visible}
@@ -138,12 +164,16 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 To.defaultProps = {
+  slippage: 0.01,
   value: '',
+  onSlippage: () => { },
   onChange: () => { },
 }
 
 To.propTypes = {
+  limit: PropTypes.number,
   value: PropTypes.string,
+  onLimit: PropTypes.func,
   onChange: PropTypes.func,
 }
 
