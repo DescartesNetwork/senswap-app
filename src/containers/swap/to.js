@@ -137,7 +137,7 @@ class To extends Component {
                   color={slippage === -1 ? 'primary' : 'textSecondary'}
                   onClick={() => onSlippage(-1)}
                   variant="body2"
-                >Fee</Link>
+                >Free</Link>
               </Grid>
             </Grid>
           }
