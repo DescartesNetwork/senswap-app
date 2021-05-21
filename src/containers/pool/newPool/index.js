@@ -121,6 +121,8 @@ class NewPool extends Component {
       setError, setSuccess,
       updateWallet, addPool, onClose
     } = this.props;
+    const { sol: { foundationAddress } } = configs;
+
     if (!ssjs.isAddress(srcSAddress)) return setError('Please select primary token');
     if (!ssjs.isAddress(srcAAddress)) return setError('Please select token 1');
     if (!ssjs.isAddress(srcBAddress)) return setError('Please select token 2');
@@ -135,7 +137,7 @@ class NewPool extends Component {
       const { txId, poolAddress, lptAddress } = await this.swap.initializePool(
         reserveS, reserveA, reserveB,
         srcSAddress, srcAAddress, srcBAddress,
-        window.senswap.wallet
+        foundationAddress, window.senswap.wallet
       );
       const newAccounts = [...accounts];
       if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
