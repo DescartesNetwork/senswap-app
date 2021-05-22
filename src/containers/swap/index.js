@@ -203,7 +203,6 @@ class Swap extends Component {
           const _srcAddress = srcAddress;
           srcAddress = dstAddress;
           const limit = this.estimateLimit(askAmount);
-          console.log(askAmount, limit)
           return this.swap.swap(
             bidAmount,
             limit,
