@@ -5,38 +5,32 @@ import configs from 'configs';
 
 const SOL = {}
 
-SOL.isMintLPTAddress = (mintAuthorityAddress, freezeAuthorityAddress) => {
-  return new Promise((resolve, _) => {
-    const { sol: { swapAddress } } = configs;
-    return ssjs.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress, swapAddress).then(poolAddress => {
-      if (!ssjs.isAddress(poolAddress)) return resolve(false);
-      return resolve(poolAddress);
-    }).catch(er => {
-      return resolve(false);
-    });
-  });
+SOL.isMintLPTAddress = async (mintAuthorityAddress, freezeAuthorityAddress) => {
+  const { sol: { swapAddress } } = configs;
+  try {
+    const poolAddress = await ssjs.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress, swapAddress);
+    if (!ssjs.isAddress(poolAddress)) return false;
+    return poolAddress;
+  }
+  catch (er) {
+    return false;
+  }
 }
 
-SOL.scanAccount = (mintAddress, walletAddress) => {
-  return new Promise((resolve, reject) => {
-    if (!ssjs.isAddress(mintAddress)) return reject('Invalid token address');
+SOL.scanAccount = async (mintAddress, walletAddress) => {
+  if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid token address');
 
-    const splt = window.senswap.splt;
-    const spltAddress = splt.spltProgramId.toBase58();
-    const splataAddress = splt.splataProgramId.toBase58();
+  const splt = window.senswap.splt;
+  const spltAddress = splt.spltProgramId.toBase58();
+  const splataAddress = splt.splataProgramId.toBase58();
 
-    let data = { address: '', state: 0 }
-    return ssjs.deriveAssociatedAddress(walletAddress, mintAddress, spltAddress, splataAddress).then(re => {
-      data.address = re;
-      return splt.getAccountData(data.address);
-    }).then(re => {
-      data = { ...data, ...re };
-      return resolve(data);
-    }).catch(er => {
-      if (data.address) return resolve(data);
-      return reject(er);
-    });
-  });
+  let data = { address: '', state: 0 }
+  data.address = await ssjs.deriveAssociatedAddress(walletAddress, mintAddress, spltAddress, splataAddress);
+  try {
+    const accountData = await splt.getAccountData(data.address);
+    data = { ...data, ...accountData }
+  } catch (er) {/* Nothing */ }
+  return data;
 }
 
 SOL.newAccount = (mintAddress) => {

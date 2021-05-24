@@ -25,7 +25,7 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropTokens } from 'modules/faucet.reducer';
-import { getMintData, getAccountData } from 'modules/bucket.reducer';
+import { getMintData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -73,14 +73,11 @@ class Faucet extends Component {
     return new Promise((resolve, reject) => {
       if (!mintAddress) return reject('Unknown token');
       const { wallet: { accounts }, updateWallet } = this.props;
-      let accountAddress = null;
       return sol.newAccount(mintAddress).then(({ address }) => {
-        accountAddress = address;
         const newAccounts = [...accounts];
-        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
-        return resolve(accountAddress);
+        if (!newAccounts.includes(address)) newAccounts.push(address);
+        updateWallet({ accounts: newAccounts });
+        return resolve(address);
       }).catch(er => {
         return reject(er);
       });
@@ -180,7 +177,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
   getWhiteList, airdropTokens,
-  getMintData, getAccountData,
+  getMintData,
 }, dispatch);
 
 export default withRouter(connect(

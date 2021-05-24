@@ -141,7 +141,7 @@ class NewPool extends Component {
       );
       const newAccounts = [...accounts];
       if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
-      await updateWallet({ accounts: newAccounts });
+      updateWallet({ accounts: newAccounts });
       await addPool({ address: poolAddress });
       await setSuccess('Create a new pool successfully', utils.explorer(txId));
       return this.setState({ loading: false }, onClose);

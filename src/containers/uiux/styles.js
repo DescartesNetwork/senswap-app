@@ -1,6 +1,9 @@
+import configs from 'configs';
+
 // eslint-disable-next-line
 export default theme => {
-  console.log(theme);
+  const { env } = configs;
+  if (env === 'development') console.log(theme);
   return {
     noWrap: {
       flexWrap: 'nowrap',

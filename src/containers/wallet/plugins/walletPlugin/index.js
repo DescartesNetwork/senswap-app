@@ -22,7 +22,7 @@ export const WalletButton = WalletButton_;
 
 class WalletPlugin extends Component {
 
-  componentDidMount() {
+  async componentDidMount() {
     const {
       setError, setLoading, unsetLoading,
       setWallet, updateWallet,
@@ -32,9 +32,9 @@ class WalletPlugin extends Component {
     const wallet = this.reconnect();
     if (!wallet) return;
 
-    return setLoading().then(() => {
-      return setWallet(wallet);
-    }).then(({ user: { address } }) => {
+    try {
+      await setLoading();
+      const { user: { address } } = await setWallet(wallet);
       window.senswap.splt.watch((er, re) => {
         if (er) return;
         const { type, address: changedAddress } = re;
@@ -55,11 +55,11 @@ class WalletPlugin extends Component {
         if (er) return;
         return updateWallet({ lamports: re });
       });
-    }).catch(er => {
-      return setError(er);
-    }).finally(() => {
-      return unsetLoading();
-    });
+    } catch (er) {
+      await setError(er);
+    } finally {
+      await unsetLoading();
+    }
   }
 
   reconnect = () => {

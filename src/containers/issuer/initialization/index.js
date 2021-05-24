@@ -66,7 +66,6 @@ class InitializeMint extends Component {
     if (supply < 1 || supply > 1000000000000) return setError('Total supply must be grearer than0, and less than or equal to 1000000000000');
 
     const mintAddress = mint.publicKey.toBase58();
-    let txId = null;
     let accountAddress = null;
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     const wallet = window.senswap.wallet;
@@ -78,12 +77,10 @@ class InitializeMint extends Component {
       }).then(({ address, txId }) => {
         accountAddress = address;
         return this.splt.mintTo(totalSupply, mintAddress, accountAddress, wallet);
-      }).then(refTxId => {
-        txId = refTxId;
+      }).then(txId => {
         const newAccounts = [...accounts];
         if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
+        updateWallet({ accounts: newAccounts });
         return this.setState({ ...EMPTY, txId });
       }).catch(er => {
         return this.setState({ ...EMPTY }, () => {

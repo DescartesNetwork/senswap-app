@@ -161,6 +161,7 @@ class Swap extends Component {
   }
 
   onAskData = ({ accountData, value }) => {
+    console.log(accountData, value);
     return this.setState({
       askAccountData: accountData, bidValue: '', askValue: value
     }, () => this.estimateState(true));
@@ -174,14 +175,11 @@ class Swap extends Component {
     return new Promise((resolve, reject) => {
       if (!mintAddress) return reject('Unknown token');
       const { wallet: { accounts }, updateWallet } = this.props;
-      let accountAddress = null;
       return sol.newAccount(mintAddress).then(({ address }) => {
-        accountAddress = address;
         const newAccounts = [...accounts];
-        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
-        return resolve(accountAddress);
+        if (!newAccounts.includes(address)) newAccounts.push(address);
+        updateWallet({ accounts: newAccounts });
+        return resolve(address);
       }).catch(er => {
         return reject(er);
       });
