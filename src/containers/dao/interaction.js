@@ -36,19 +36,14 @@ class Interaction extends Component {
     this.swap = window.senswap.swap;
   }
 
-  onAutogenDestinationAddress = (mintAddress) => {
-    return new Promise((resolve, reject) => {
-      if (!mintAddress) return reject('Unknown token');
-      const { wallet: { accounts }, updateWallet } = this.props;
-      return sol.newAccount(mintAddress).then(({ address }) => {
-        const newAccounts = [...accounts];
-        if (!newAccounts.includes(address)) newAccounts.push(address);
-        updateWallet({ accounts: newAccounts });
-        return resolve(address);
-      }).catch(er => {
-        return reject(er);
-      });
-    });
+  onAutogenDestinationAddress = async (mintAddress) => {
+    if (!mintAddress) throw new Error('Unknown token');
+    const { wallet: { accounts }, updateWallet } = this.props;
+    const { address } = await sol.newAccount(mintAddress);
+    const newAccounts = [...accounts];
+    if (!newAccounts.includes(address)) newAccounts.push(address);
+    updateWallet({ accounts: newAccounts });
+    return address;
   }
 
   onAddress = (e) => {
@@ -56,14 +51,15 @@ class Interaction extends Component {
     return this.setState({ receiverAddress });
   }
 
-  onGenerate = () => {
+  onGenerate = async () => {
     const { setError, poolData } = this.props;
     const { mint_s: { address } } = poolData;
-    return this.onAutogenDestinationAddress(address).then(receiverAddress => {
+    try {
+      const receiverAddress = await this.onAutogenDestinationAddress(address);
       return this.setState({ receiverAddress });
-    }).catch(er => {
+    } catch (er) {
       return setError(er);
-    });
+    }
   }
 
   earn = () => {

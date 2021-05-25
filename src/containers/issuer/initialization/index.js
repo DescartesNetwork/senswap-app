@@ -55,7 +55,7 @@ class InitializeMint extends Component {
     return this.setState({ decimals, ...EMPTY });
   }
 
-  onCreate = () => {
+  onCreate = async () => {
     const { mint, supply: refSupply, decimals: refDecimals } = this.state;
     const { wallet: { accounts }, setError, updateWallet } = this.props;
 
@@ -66,28 +66,22 @@ class InitializeMint extends Component {
     if (supply < 1 || supply > 1000000000000) return setError('Total supply must be grearer than0, and less than or equal to 1000000000000');
 
     const mintAddress = mint.publicKey.toBase58();
-    let accountAddress = null;
     const totalSupply = global.BigInt(supply) * global.BigInt(10 ** decimals);
     const wallet = window.senswap.wallet;
-    return this.setState({ loading: true }, () => {
-      return wallet.getAccount().then(payerAddress => {
-        return this.splt.initializeMint(decimals, payerAddress, null, mint, wallet);
-      }).then(txId => {
-        return sol.newAccount(mintAddress);
-      }).then(({ address, txId }) => {
-        accountAddress = address;
-        return this.splt.mintTo(totalSupply, mintAddress, accountAddress, wallet);
-      }).then(txId => {
-        const newAccounts = [...accounts];
-        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        updateWallet({ accounts: newAccounts });
-        return this.setState({ ...EMPTY, txId });
-      }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
-      });
-    });
+    this.setState({ loading: true });
+    try {
+      const payerAddress = await wallet.getAccount();
+      await this.splt.initializeMint(decimals, payerAddress, null, mint, wallet);
+      const { address: accountAddress } = await sol.newAccount(mintAddress);
+      const txId = await this.splt.mintTo(totalSupply, mintAddress, accountAddress, wallet);
+      const newAccounts = [...accounts];
+      if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
+      updateWallet({ accounts: newAccounts });
+      return this.setState({ ...EMPTY, txId });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ ...EMPTY });
+    }
   }
 
   render() {

@@ -21,7 +21,7 @@ import { MintAvatar, MintSelection } from 'containers/wallet';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { getAccountData } from 'modules/bucket.reducer';
+import { getMintData, getAccountData } from 'modules/bucket.reducer';
 
 
 class To extends Component {
@@ -52,13 +52,20 @@ class To extends Component {
 
   onMintData = async (mintData) => {
     const { address: mintAddress } = mintData;
-    const { setError, getAccountData, wallet: { user: { address: walletAddress } } } = this.props;
+    const {
+      setError, getMintData, getAccountData,
+      wallet: { user: { address: walletAddress } }
+    } = this.props;
     try {
       this.setState({ loading: true }, this.onClose);
       let accountData = await sol.scanAccount(mintAddress, walletAddress);
       const { state, address: accountAddress } = accountData || {}
-      if (!state) accountData = { address: '', amount: 0n, mint: mintData };
+      if (!state) {
+        const data = await getMintData(mintAddress);
+        accountData = { address: '', amount: 0n, mint: { ...data, ...mintData } }
+      }
       else accountData = await getAccountData(accountAddress);
+
       return this.setState({ loading: false, accountData, value: '' }, this.returnData);
     } catch (er) {
       return setError(er);
@@ -159,7 +166,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getAccountData
+  getMintData, getAccountData
 }, dispatch);
 
 To.defaultProps = {

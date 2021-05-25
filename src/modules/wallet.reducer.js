@@ -88,8 +88,8 @@ export const setWallet = (wallet) => {
     // Configs
     const { api: { base } } = configs;
     const lamports = window.senswap.lamports;
-    const connection = window.senswap.splt.connection;
-    const spltPromgramId = window.senswap.splt.spltProgramId;
+    const connection = window.senswap.splt._splt.connection;
+    const spltPromgramId = window.senswap.splt._splt.spltProgramId;
     const data = {
       user: { address: '' },
       lamports: 0,
@@ -107,8 +107,8 @@ export const setWallet = (wallet) => {
       data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
       const { data: mints } = await api.get(base + '/mints', { condition: {}, limit: -1, page: 0 });
       const derivedAccountAddresses = await Promise.all(mints.map(({ address: mintAddress }) => {
-        const spltAddress = window.senswap.splt.spltProgramId.toBase58();
-        const splataAddress = window.senswap.splt.splataProgramId.toBase58();
+        const spltAddress = window.senswap.splt._splt.spltProgramId.toBase58();
+        const splataAddress = window.senswap.splt._splt.splataProgramId.toBase58();
         return ssjs.deriveAssociatedAddress(data.user.address, mintAddress, spltAddress, splataAddress);
       }));
       data.accounts = data.accounts.filter(accountAddress => derivedAccountAddresses.includes(accountAddress));

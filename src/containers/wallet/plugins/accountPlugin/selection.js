@@ -53,6 +53,7 @@ class Selection extends Component {
     const solAccount = {
       address,
       amount: global.BigInt(lamports),
+      owner: address,
       mint: {
         decimals: 9,
         name: 'Solana',

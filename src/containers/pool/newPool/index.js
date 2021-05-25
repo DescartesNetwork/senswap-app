@@ -245,7 +245,13 @@ class NewPool extends Component {
                       </Grid>
                     }}
                     helperTextPrimary={`Available ${utils.prettyNumber(ssjs.undecimalize(amount, decimals))} ${symbol || ''}`}
-                    helperTextSecondary={<Price ticket={ticket} />}
+                    helperTextSecondary={<Grid container justify="flex-end">
+                      <Grid item>
+                        <Typography variant="caption">
+                          <Price ticket={ticket} />
+                        </Typography>
+                      </Grid>
+                    </Grid>}
                     fullWidth
                   />
                 </Grid>

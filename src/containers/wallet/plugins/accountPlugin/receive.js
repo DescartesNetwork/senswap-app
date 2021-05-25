@@ -44,7 +44,7 @@ class Receive extends Component {
 
   render() {
     const { classes } = this.props;
-    const { visible, data: { address, amount: balance, mint }, onClose } = this.props;
+    const { visible, data: { owner, amount: balance, mint }, onClose } = this.props;
     const { copied } = this.state;
     const { icon, name, ticket, symbol, decimals } = mint || {}
 
@@ -94,9 +94,9 @@ class Receive extends Component {
                   <TextField
                     variant="contained"
                     label={`${symbol} Receiver Address`}
-                    value={address}
+                    value={owner}
                     InputProps={{
-                      endAdornment: <CopyToClipboard text={address} onCopy={this.onCopy}>
+                      endAdornment: <CopyToClipboard text={owner} onCopy={this.onCopy}>
                         <Tooltip
                           open={copied}
                           title="Copied"
@@ -118,7 +118,7 @@ class Receive extends Component {
                   <Drain size={1} />
                 </Grid>
                 <Grid item>
-                  <QRCode value={address} size={140} bgColor="#161920" fgColor="#ffffff" />
+                  <QRCode value={owner} size={140} bgColor="#161920" fgColor="#ffffff" />
                 </Grid>
                 <Grid item xs={12} >
                   <Drain size={1} />

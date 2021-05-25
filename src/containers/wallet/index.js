@@ -72,7 +72,7 @@ export const configSenWallet = () => {
   // Global access
   const { sol: { node, spltAddress, splataAddress, swapAddress } } = configs;
   window.senswap = {
-    splt: new ssjs.SPLT(spltAddress, splataAddress, node),
+    splt: new ssjs.LiteSPLT(spltAddress, splataAddress, node),
     swap: new ssjs.LiteSwap(swapAddress, spltAddress, splataAddress, node),
     lamports: new ssjs.Lamports(node),
   }

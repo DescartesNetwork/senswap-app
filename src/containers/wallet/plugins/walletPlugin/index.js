@@ -32,8 +32,10 @@ class WalletPlugin extends Component {
     const wallet = this.reconnect();
     if (!wallet) return;
 
+    console.log(wallet)
+
+    await setLoading();
     try {
-      await setLoading();
       const { user: { address } } = await setWallet(wallet);
       window.senswap.splt.watch((er, re) => {
         if (er) return;
@@ -57,9 +59,8 @@ class WalletPlugin extends Component {
       });
     } catch (er) {
       await setError(er);
-    } finally {
-      await unsetLoading();
     }
+    await unsetLoading();
   }
 
   reconnect = () => {
