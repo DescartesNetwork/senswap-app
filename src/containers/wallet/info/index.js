@@ -30,7 +30,6 @@ class Info extends Component {
     super();
 
     this.state = {
-      mark: 'send',
       accountData: {},
       visibleAccountSelection: false,
       visibleAccountSend: false,
@@ -42,12 +41,10 @@ class Info extends Component {
   }
 
   onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
-  onOpenAccountSelection = (mark) => this.setState({ mark, visibleAccountSelection: true });
+  onOpenAccountSelection = () => this.setState({ visibleAccountSelection: true });
   onAccountData = (accountData) => {
-    const { mark } = this.state;
     return this.setState({ accountData }, () => {
-      if (mark === 'send') this.onOpenAccountSend();
-      if (mark === 'receive') this.onOpenAccountReceive();
+      this.onOpenAccountSend();
       return this.onCloseAccountSelection();
     });
   }
@@ -58,7 +55,7 @@ class Info extends Component {
     const { setError, setSuccess, getAccountData } = this.props;
     if (!ssjs.isAddress(to)) return setError('Invalid destination address');
 
-    // Transfer lamport
+    // Transfer lamports
     if (!ssjs.isAddress(from)) {
       amount = amount.toString();
       const txId = await this.lamports.transfer(amount, to, window.senswap.wallet);
@@ -138,7 +135,7 @@ class Info extends Component {
                 color="primary"
                 startIcon={<FlightTakeoffRounded />}
                 size="large"
-                onClick={() => this.onOpenAccountSelection('send')}
+                onClick={this.onOpenAccountSelection}
                 fullWidth
               >
                 <Typography>Send</Typography>
@@ -149,7 +146,7 @@ class Info extends Component {
                 variant="outlined"
                 startIcon={<FlightLandRounded />}
                 size="large"
-                onClick={() => this.onOpenAccountSelection('receive')}
+                onClick={this.onOpenAccountReceive}
                 fullWidth
               >
                 <Typography>Receive</Typography>
