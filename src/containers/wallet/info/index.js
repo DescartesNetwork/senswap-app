@@ -81,7 +81,6 @@ class Info extends Component {
       const { address: accountAddress } = await getAccountData(to);
       if (!ssjs.isAddress(accountAddress)) throw new Error('The destination is wallet address');
     } catch (er) {
-      console.log(to)
       try {
         const { address: dstAddress } = await sol.newAccount(mintAddress, to);
         to = dstAddress;

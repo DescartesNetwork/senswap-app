@@ -176,7 +176,7 @@ export const parseInstruction = (accounts, code,/*TokenBalance[]*/preTokenBalanc
         })
         break
       default:
-        console.log("code", code)
+        // console.log("code", code)
         break
     }
     return data
@@ -212,7 +212,7 @@ export const parseInstructionSplt = (accounts, code,/*TokenBalance[]*/preTokenBa
         })
         break
       default:
-        console.log("code", code)
+        // console.log("code", code)
         break
     }
     return data
