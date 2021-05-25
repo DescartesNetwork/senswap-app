@@ -59,7 +59,7 @@ class Details extends Component {
         <Typography variant="caption" color="textSecondary">Swap Details</Typography>
       </Grid>
       {hopData.map((data, index) => {
-        const { srcMintAddress, dstMintAddress, poolData, fee, ratio, slippage } = data;
+        const { srcMintAddress, dstMintAddress, poolData, fee, ratio } = data;
         return <Grid item key={index} xs={12}>
           <Paper className={classes.details}>
             <Grid container>
@@ -78,17 +78,13 @@ class Details extends Component {
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={6}>
                 <Typography color="textSecondary">Fee</Typography>
                 <Typography>{utils.prettyNumber(ssjs.undecimalize(fee, 9) * 100)}%</Typography>
               </Grid>
-              <Grid item xs={6} sm={4}>
+              <Grid item xs={6}>
                 <Typography color="textSecondary">Ratio</Typography>
                 <Typography>{utils.prettyNumber(ratio)}</Typography>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography color="textSecondary">Slippage</Typography>
-                <Typography>{utils.prettyNumber(ssjs.undecimalize(slippage, 9) * 100)}%</Typography>
               </Grid>
               {visibles[index] ? <Fragment>
                 <Grid item xs={12}>
