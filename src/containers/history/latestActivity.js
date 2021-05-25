@@ -70,7 +70,6 @@ class LatestActivity extends Component {
     const { timeTo, timeFrom } = this.state;
     return this.setState({ loading: true }, () => {
       return findAllTransactionByTime(address, timeFrom, timeTo).then(data => {
-        console.log(data)
         return data.each(txData => {
           if (txData.type === 'transfer') {
             if (txData.data[0].owner === address) txData.type = 'send';

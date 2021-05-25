@@ -32,8 +32,6 @@ class WalletPlugin extends Component {
     const wallet = this.reconnect();
     if (!wallet) return;
 
-    console.log(wallet)
-
     await setLoading();
     try {
       const { user: { address } } = await setWallet(wallet);
