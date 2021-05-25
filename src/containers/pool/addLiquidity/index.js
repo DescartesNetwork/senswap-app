@@ -158,7 +158,7 @@ class AddLiquidity extends Component {
       );
       const newAccounts = [...accounts];
       if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
-      await updateWallet({ accounts: newAccounts });
+      updateWallet({ accounts: newAccounts });
       onClose();
       await setSuccess('Add liquidity successfully', utils.explorer(txId));
       return this.setState({ ...EMPTY, txId });

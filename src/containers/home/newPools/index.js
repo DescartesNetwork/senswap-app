@@ -53,11 +53,12 @@ class NewPools extends Component {
 
   getPoolDataAndAccountData = async (poolAddress) => {
     const {
-      setError, getPoolData, getAccountData,
+      getPoolData, getAccountData,
       wallet: { user: { address: walletAddress } }
     } = this.props;
+    let poolData = {}
     try {
-      let poolData = await getPoolData(poolAddress);
+      poolData = await getPoolData(poolAddress);
       const {
         reserve_a: reserveA, mint_a: { ticket: ticketA, decimals: decimalsA },
         reserve_b: reserveB, mint_b: { ticket: ticketB, decimals: decimalsB },
@@ -78,10 +79,8 @@ class NewPools extends Component {
       const accountData = await getAccountData(accountAddress);
       poolData.accountData = accountData;
       return poolData;
-    } catch (er) {
-      await setError(er);
-      return {}
-    }
+    } catch (er) { /* Nothing */ }
+    return poolData;
   }
 
   fetchData = async () => {
@@ -135,12 +134,13 @@ class NewPools extends Component {
       {data.map((poolData, i) => {
         const {
           address: poolAddress, state, accountData,
-          mint_s: { icon: iconS, symbol: symbolS, decimals },
-          mint_a: { icon: iconA, symbol: symbolA },
-          mint_b: { icon: iconB, symbol: symbolB },
+          mint_s: mintS, mint_a: mintA, mint_b: mintB,
         } = poolData;
         if (!ssjs.isAddress(poolAddress) || state !== 1) return null;
         const { address: accountAddress, amount } = accountData || {}
+        const { icon: iconS, symbol: symbolS, decimals } = mintS || {}
+        const { icon: iconA, symbol: symbolA } = mintA || {}
+        const { icon: iconB, symbol: symbolB } = mintB || {}
         const isLP = ssjs.isAddress(accountAddress);
         const icons = [iconA, iconB, iconS];
         const symbols = [symbolA, symbolB, symbolS];

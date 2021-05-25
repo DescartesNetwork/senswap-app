@@ -137,6 +137,7 @@ class Swap extends Component {
         let state = { loading: false, hopData: data }
         if (inverse) state.bidValue = ssjs.undecimalize(bidAmount, bidDecimals);
         else state.askValue = ssjs.undecimalize(askAmount, askDecimals);
+        
         return this.setState({ ...state });
       } catch (er) {
         await setError(er);
@@ -150,7 +151,7 @@ class Swap extends Component {
     if (slippage < 0) return global.BigInt(0);
     const maxSlippage = ssjs.decimalize(slippage, 9);
     const decimals = ssjs.decimalize(1, 9);
-    const limit = askAmount + askAmount * maxSlippage / decimals;
+    const limit = askAmount - askAmount * maxSlippage / decimals;
     return limit;
   }
 
@@ -170,58 +171,50 @@ class Swap extends Component {
     return this.setState({ slippage });
   }
 
-  onAutogenDestinationAddress = (mintAddress) => {
-    return new Promise((resolve, reject) => {
-      if (!mintAddress) return reject('Unknown token');
-      const { wallet: { accounts }, updateWallet } = this.props;
-      let accountAddress = null;
-      return sol.newAccount(mintAddress).then(({ address }) => {
-        accountAddress = address;
-        const newAccounts = [...accounts];
-        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
-        return resolve(accountAddress);
-      }).catch(er => {
-        return reject(er);
-      });
-    });
+  onAutogenDestinationAddress = async (mintAddress) => {
+    if (!mintAddress) throw new Error('Unknown token');
+    const { wallet: { accounts }, updateWallet } = this.props;
+    const { address } = await sol.newAccount(mintAddress);
+    const newAccounts = [...accounts];
+    if (!newAccounts.includes(address)) newAccounts.push(address);
+    updateWallet({ accounts: newAccounts });
+    return address;
   }
 
-  executeSwap = () => {
+  executeSwap = async () => {
     const { setError, setSuccess } = this.props;
     const { bidAccountData, hopData } = this.state;
     let { address: srcAddress } = bidAccountData;
-    return this.setState({ loading: true }, () => {
-      return hopData.each(data => {
-        const { dstMintAddress } = data || {}
-        return this.onAutogenDestinationAddress(dstMintAddress);
-      }).then(dstAddresses => {
-        const data = hopData.zip(dstAddresses);
-        return data.each(data => {
-          const [{ bidAmount, askAmount, poolData: { address: poolAddress } }, dstAddress] = data;
-          const _srcAddress = srcAddress;
-          srcAddress = dstAddress;
-          const limit = this.estimateLimit(askAmount);
-          return this.swap.swap(
-            bidAmount,
-            limit,
-            poolAddress,
-            _srcAddress,
-            dstAddress,
-            window.senswap.wallet
-          );
-        });
-      }).then(txIds => {
-        return this.setState({ loading: false }, () => {
-          return setSuccess('Swap successfully', utils.explorer(txIds[txIds.length - 1]));
-        });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+
+    this.setState({ loading: true });
+    try {
+      let dstAddresses = [];
+      for (let { dstMintAddress } of hopData) {
+        const dstAddress = await this.onAutogenDestinationAddress(dstMintAddress);
+        dstAddresses.push(dstAddress);
+      }
+      const data = hopData.zip(dstAddresses);
+      let txIds = []
+      for (let datum of data) {
+        const [{ bidAmount, askAmount, poolData: { address: poolAddress } }, dstAddress] = datum;
+        const _srcAddress = srcAddress;
+        srcAddress = dstAddress;
+        const limit = this.estimateLimit(askAmount);
+        const txId = await this.swap.swap(
+          bidAmount,
+          limit,
+          poolAddress,
+          _srcAddress,
+          dstAddress,
+          window.senswap.wallet
+        );
+        txIds.push(txId);
+      }
+      await setSuccess('Swap successfully', utils.explorer(txIds[txIds.length - 1]));
+    } catch (er) {
+      await setError(er);
+    }
+    return this.setState({ loading: false });
   }
 
   renderAction = () => {

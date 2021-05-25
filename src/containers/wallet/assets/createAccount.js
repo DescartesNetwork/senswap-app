@@ -78,8 +78,7 @@ class CreateAccount extends Component {
       return this.splt.initializeAccount(address, mintAddress, this.wallet).then(txId => {
         const newAccounts = [...accounts];
         if (!newAccounts.includes(address)) newAccounts.push(address);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
+        updateWallet({ accounts: newAccounts });
         return this.setState({ loading: false }, () => {
           return onClose();
         });
