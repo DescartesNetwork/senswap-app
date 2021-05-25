@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -19,6 +20,8 @@ import { AccountSelection, AccountSend, AccountReceive } from 'containers/wallet
 
 import styles from './styles';
 import utils from 'helpers/utils';
+import sol from 'helpers/sol';
+import { getAccountData } from 'modules/bucket.reducer';
 import { setError, setSuccess, toggleRightBar } from 'modules/ui.reducer';
 
 
@@ -38,13 +41,6 @@ class Info extends Component {
     this.lamports = window.senswap.lamports;
   }
 
-  transfer = (amount, from, to) => {
-    const wallet = window.senswap.wallet;
-    if (from) return this.splt.transfer(amount, from, to, wallet);
-    amount = amount.toString();
-    return this.lamports.transfer(amount, to, wallet);
-  }
-
   onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
   onOpenAccountSelection = (mark) => this.setState({ mark, visibleAccountSelection: true });
   onAccountData = (accountData) => {
@@ -58,15 +54,49 @@ class Info extends Component {
 
   onCloseAccountSend = () => this.setState({ visibleAccountSend: false });
   onOpenAccountSend = () => this.setState({ visibleAccountSend: true });
-  onTransactionData = ({ amount, from, to }) => {
-    const { setError, setSuccess } = this.props;
-    return this.transfer(amount, from, to).then(txId => {
-      setSuccess('Transfer successfully', utils.explorer(txId));
+  onTransactionData = async ({ amount, from, to }) => {
+    const { setError, setSuccess, getAccountData } = this.props;
+    if (!ssjs.isAddress(to)) return setError('Invalid destination address');
+
+    // Transfer lamport
+    if (!ssjs.isAddress(from)) {
+      amount = amount.toString();
+      const txId = await this.lamports.transfer(amount, to, window.senswap.wallet);
+      await setSuccess('Transfer successfully', utils.explorer(txId));
       return this.onCloseAccountSend();
-    }).catch(er => {
-      this.onCloseAccountSend();
+    }
+
+    // Validate source address
+    let mintAddress = null;
+    try {
+      const { mint } = await getAccountData(from) || {};
+      const { address } = mint || {};
+      if (!ssjs.isAddress(address)) return setError('Invalid source address');
+      mintAddress = address;
+    } catch (er) {
       return setError(er);
-    });
+    }
+    // Check type of destination either wallet address or account address
+    try {
+      const { address: accountAddress } = await getAccountData(to);
+      if (!ssjs.isAddress(accountAddress)) throw new Error('The destination is wallet address');
+    } catch (er) {
+      console.log(to)
+      try {
+        const { address: dstAddress } = await sol.newAccount(mintAddress, to);
+        to = dstAddress;
+      } catch (er) {
+        return setError(er);
+      }
+    }
+    // Transfer token
+    try {
+      const txId = await this.splt.transfer(amount, from, to, window.senswap.wallet);
+      await setSuccess('Transfer successfully', utils.explorer(txId));
+    } catch (er) {
+      await setError(er);
+    }
+    return this.onCloseAccountSend();
   }
 
   onCloseAccountReceive = () => this.setState({ visibleAccountReceive: false });
@@ -155,6 +185,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getAccountData,
   setError, setSuccess, toggleRightBar,
 }, dispatch);
 

@@ -25,7 +25,7 @@ import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getWhiteList, airdropTokens } from 'modules/faucet.reducer';
-import { getMintData, getAccountData } from 'modules/bucket.reducer';
+import { getMintData } from 'modules/bucket.reducer';
 
 
 const EMPTY = {
@@ -69,45 +69,34 @@ class Faucet extends Component {
     return this.setState({ mintAddress });
   }
 
-  onAutogenDestinationAddress = (mintAddress) => {
-    return new Promise((resolve, reject) => {
-      if (!mintAddress) return reject('Unknown token');
-      const { wallet: { accounts }, updateWallet } = this.props;
-      let accountAddress = null;
-      return sol.newAccount(mintAddress).then(({ address }) => {
-        accountAddress = address;
-        const newAccounts = [...accounts];
-        if (!newAccounts.includes(accountAddress)) newAccounts.push(accountAddress);
-        return updateWallet({ accounts: newAccounts });
-      }).then(re => {
-        return resolve(accountAddress);
-      }).catch(er => {
-        return reject(er);
-      });
-    });
+  onAutogenDestinationAddress = async (mintAddress) => {
+    if (!mintAddress) throw new Error('Unknown token');
+    const { wallet: { accounts }, updateWallet } = this.props;
+    const { address } = await sol.newAccount(mintAddress);
+    const newAccounts = [...accounts];
+    if (!newAccounts.includes(address)) newAccounts.push(address);
+    updateWallet({ accounts: newAccounts });
+    return address;
   }
 
-  onAirdrop = () => {
+  onAirdrop = async () => {
     const { wallet: { user }, setError, airdropTokens } = this.props;
     const { mintAddress } = this.state;
     if (!ssjs.isAddress(mintAddress)) return setError('Invalid token address');
 
-    return this.setState({ loading: true }, () => {
-      const connection = window.senswap.splt.connection;
-      const publicKey = ssjs.fromAddress(user.address);
-      const amount = 10 ** 9;
-      return connection.requestAirdrop(publicKey, amount).then(re => {
-        return this.onAutogenDestinationAddress(mintAddress);
-      }).then(dstAddress => {
-        return airdropTokens(dstAddress, mintAddress);
-      }).then(({ txId }) => {
-        return this.setState({ ...EMPTY, txId });
-      }).catch(er => {
-        return this.setState({ ...EMPTY }, () => {
-          return setError(er);
-        });
-      });
-    });
+    this.setState({ loading: true });
+    const connection = window.senswap.splt._splt.connection;
+    const publicKey = ssjs.fromAddress(user.address);
+    const amount = 10 ** 9;
+    try {
+      await connection.requestAirdrop(publicKey, amount);
+      const dstAddress = await this.onAutogenDestinationAddress(mintAddress);
+      const { txId } = await airdropTokens(dstAddress, mintAddress);
+      return this.setState({ ...EMPTY, txId });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ ...EMPTY });
+    }
   }
 
   render() {
@@ -180,7 +169,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   updateWallet,
   getWhiteList, airdropTokens,
-  getMintData, getAccountData,
+  getMintData,
 }, dispatch);
 
 export default withRouter(connect(

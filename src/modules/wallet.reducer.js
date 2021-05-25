@@ -29,20 +29,18 @@ export const OPEN_WALLET_FAIL = 'OPEN_WALLET_FAIL';
 
 export const openWallet = () => {
   return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: OPEN_WALLET });
+    dispatch({ type: OPEN_WALLET });
 
-      const { wallet: { visible } } = getState();
-      if (visible) {
-        const er = 'Wallet is already opened';
-        dispatch({ type: OPEN_WALLET_FAIL, reason: er });
-        return reject(er);
-      }
+    const { wallet: { visible } } = getState();
+    if (visible) {
+      const er = 'Wallet is already opened';
+      dispatch({ type: OPEN_WALLET_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { visible: true };
-      dispatch({ type: OPEN_WALLET_OK, data });
-      return resolve(data);
-    });
+    const data = { visible: true };
+    dispatch({ type: OPEN_WALLET_OK, data });
+    return data;
   }
 }
 
@@ -55,20 +53,18 @@ export const CLOSE_WALLET_FAIL = 'CLOSE_WALLET_FAIL';
 
 export const closeWallet = () => {
   return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: CLOSE_WALLET });
+    dispatch({ type: CLOSE_WALLET });
 
-      const { wallet: { visible } } = getState();
-      if (!visible) {
-        const er = 'Wallet is already closed';
-        dispatch({ type: CLOSE_WALLET_FAIL, reason: er });
-        return reject(er);
-      }
+    const { wallet: { visible } } = getState();
+    if (!visible) {
+      const er = 'Wallet is already closed';
+      dispatch({ type: CLOSE_WALLET_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { visible: false };
-      dispatch({ type: CLOSE_WALLET_OK, data });
-      return resolve(data);
-    });
+    const data = { visible: false };
+    dispatch({ type: CLOSE_WALLET_OK, data });
+    return data;
   }
 }
 
@@ -80,54 +76,55 @@ export const SET_WALLET_OK = 'SET_WALLET_OK';
 export const SET_WALLET_FAIL = 'SET_WALLET_FAIL';
 
 export const setWallet = (wallet) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_WALLET });
+  return async dispatch => {
+    dispatch({ type: SET_WALLET });
 
-      if (!wallet) {
-        const er = 'Invalid wallet instance';
-        dispatch({ type: SET_WALLET_FAIL, reason: er });
-        return reject(er);
+    if (!wallet) {
+      const er = 'Invalid wallet instance';
+      dispatch({ type: SET_WALLET_FAIL, reason: er });
+      throw new Error(er);
+    }
+
+    // Configs
+    const { api: { base } } = configs;
+    const lamports = window.senswap.lamports;
+    const connection = window.senswap.splt._splt.connection;
+    const spltPromgramId = window.senswap.splt._splt.spltProgramId;
+    const data = {
+      user: { address: '' },
+      lamports: 0,
+      accounts: [],
+      visible: false
+    }
+    // Set wallet
+    window.senswap.wallet = wallet;
+    // Fetch mint accounts and lpt accounts
+    try {
+      data.user.address = await wallet.getAccount();
+      data.lamports = await lamports.get(data.user.address);
+      const ownerPublicKey = ssjs.fromAddress(data.user.address);
+      const { value } = await connection.getTokenAccountsByOwner(ownerPublicKey, { programId: spltPromgramId });
+      data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
+      const { data: mints } = await api.get(base + '/mints', { condition: {}, limit: -1, page: 0 });
+      const derivedAccountAddresses = await Promise.all(mints.map(({ address: mintAddress }) => {
+        const spltAddress = window.senswap.splt._splt.spltProgramId.toBase58();
+        const splataAddress = window.senswap.splt._splt.splataProgramId.toBase58();
+        return ssjs.deriveAssociatedAddress(data.user.address, mintAddress, spltAddress, splataAddress);
+      }));
+      data.accounts = data.accounts.filter(accountAddress => derivedAccountAddresses.includes(accountAddress));
+      // Add user to database
+      let userData = await api.get(base + '/user', { address: data.user.address });
+      if (!userData.data && data.lamports) {
+        userData = await api.post(base + '/user', { user: { address: data.user.address } });
       }
-
-      const { api: { base } } = configs;
-      const lamports = window.senswap.lamports;
-      const connection = window.senswap.splt.connection;
-      const spltPromgramId = window.senswap.splt.spltProgramId;
-      const data = {
-        user: { address: '' },
-        lamports: 0,
-        accounts: [],
-        visible: false
-      }
-
-      // Set wallet
-      window.senswap.wallet = wallet;
-      // Fetch mint accounts and lpt accounts
-      return wallet.getAccount().then(address => {
-        data.user.address = address;
-        return lamports.get(address);
-      }).then(lamports => {
-        data.lamports = lamports;
-        const ownerPublicKey = ssjs.fromAddress(data.user.address);
-        return connection.getTokenAccountsByOwner(ownerPublicKey, { programId: spltPromgramId });
-      }).then(({ value }) => {
-        data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
-        return api.get(base + '/user', { address: data.user.address });
-      }).then(re => {
-        if (re.data) return Promise.resolve(re);
-        // Only add an account to db when its lamports > 0
-        if (!data.lamports) return Promise.resolve({ daya: {} });
-        return api.post(base + '/user', { user: { address: data.user.address } });
-      }).then(({ data: re }) => {
-        data.user = { ...data.user, ...re }
-        dispatch({ type: SET_WALLET_OK, data });
-        return resolve(data);
-      }).catch(er => {
-        dispatch({ type: SET_WALLET_FAIL, reason: er.toString() });
-        return reject(er);
-      });
-    });
+      data.user = { ...data.user, ...userData.data }
+      // Success
+      dispatch({ type: SET_WALLET_OK, data });
+      return data;
+    } catch (er) {
+      dispatch({ type: SET_WALLET_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 
@@ -140,19 +137,17 @@ export const UPDATE_WALLET_FAIL = 'UPDATE_WALLET_FAIL';
 
 export const updateWallet = (data) => {
   return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UPDATE_WALLET });
+    dispatch({ type: UPDATE_WALLET });
 
-      if (!data) {
-        const er = 'Invalid data';
-        dispatch({ type: UPDATE_WALLET_FAIL, reason: er });
-        return reject(er);
-      }
+    if (!data) {
+      const er = 'Invalid data';
+      dispatch({ type: UPDATE_WALLET_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      data = JSON.parse(JSON.stringify(data));
-      dispatch({ type: UPDATE_WALLET_OK, data });
-      return resolve(data);
-    });
+    data = JSON.parse(JSON.stringify(data));
+    dispatch({ type: UPDATE_WALLET_OK, data });
+    return data;
   }
 }
 

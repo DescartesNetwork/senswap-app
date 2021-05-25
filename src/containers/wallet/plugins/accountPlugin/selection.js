@@ -44,15 +44,16 @@ class Selection extends Component {
     if (!isEqual(prevWallet, wallet) && visible) return this.fetchData();
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const {
       wallet: { user: { address }, lamports, accounts },
-      solana, lpt, getAccountData
+      solana, getAccountData
     } = this.props;
 
     const solAccount = {
       address,
       amount: global.BigInt(lamports),
+      owner: address,
       mint: {
         decimals: 9,
         name: 'Solana',
@@ -64,31 +65,23 @@ class Selection extends Component {
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
     let accountData = [];
-    return this.setState({ loading: true }, () => {
-      return accounts.each(accountAddress => {
-        return getAccountData(accountAddress);
-      }, { skipError: true, skipIndex: true }).then(data => {
-        accountData = data;
-        return Promise.all(accountData.map(({ mint }) => {
-          const {
-            mint_authority: mintAuthorityAddress,
-            freeze_authority: freezeAuthorityAddress,
-          } = mint || {};
-          if (lpt) return false;
-          return sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
-        }));
-      }).then(flags => {
-        // Filter lpt accounts
-        accountData = accountData.filter((_, index) => !flags[index]);
-        // Add SOL also
-        if (solana) accountData.unshift(solAccount);
-        return this.setState({ data: accountData, searchedData: accountData, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    this.setState({ loading: true });
+    for (let accountAddress of accounts) {
+      try {
+        const data = await getAccountData(accountAddress);
+        const { mint } = data;
+        const {
+          mint_authority: mintAuthorityAddress,
+          freeze_authority: freezeAuthorityAddress,
+        } = mint || {};
+        const poolAddress = await sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
+        if (!ssjs.isAddress(poolAddress)) accountData.push(data);
+      } catch (er) {
+        // Nothing
+      }
+    }
+    if (solana) accountData.unshift(solAccount);
+    return this.setState({ data: accountData, searchedData: accountData, loading: false });
   }
 
   onSearch = (e) => {
@@ -202,7 +195,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 Selection.defaultProps = {
   solana: true,
-  lpt: false,
   visible: false,
   onChange: () => { },
   onClose: () => { },
@@ -210,7 +202,6 @@ Selection.defaultProps = {
 
 Selection.propTypes = {
   solana: PropTypes.bool,
-  lpt: PropTypes.bool,
   visible: PropTypes.bool,
   onChange: PropTypes.func,
   onClose: PropTypes.func,
