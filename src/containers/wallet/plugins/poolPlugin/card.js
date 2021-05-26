@@ -139,7 +139,7 @@ class PoolCard extends Component {
       >
         <Typography>Withdraw</Typography>
       </Button>
-      <RemoveLiquidity data={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
+      <RemoveLiquidity accountData={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
     </Grid>)
     // Result
     return render;
