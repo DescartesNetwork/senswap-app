@@ -132,7 +132,7 @@ CardBalance.defaultProps = {
   accountData: []
 }
 
-CardBalance.propsType = {
+CardBalance.propTypes = {
   address: PropTypes.string,
   accountData: PropTypes.array
 }

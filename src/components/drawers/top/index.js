@@ -54,7 +54,7 @@ TopDrawer.defaultProps = {
   onClose: () => { },
 }
 
-TopDrawer.propsTypes = {
+TopDrawer.propTypes = {
   visible: PropTypes.bool.isRequired,
   onOpen: PropTypes.func,
   onClose: PropTypes.func,
