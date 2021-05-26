@@ -145,6 +145,7 @@ class LatestPromotion extends Component {
         const symbols = [symbolA, symbolB, symbolS];
         return <Grid item key={i} xs={12} md={6} lg={4}>
           <CardPool
+            address={poolAddress}
             icons={icons}
             symbols={symbols}
             volume={poolData.usd}

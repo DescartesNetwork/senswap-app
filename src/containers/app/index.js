@@ -51,7 +51,7 @@ class App extends Component {
                   <Switch>
                     <Redirect exact from='/' to='/home' />
                     <Route path='/home' component={Home} />
-                    <Route exact path='/swap' component={Swap} />
+                    <Route exact path='/swap/:poolAddress?' component={Swap} />
                     <Route path='/pool' component={Pool} />
                     <Route exact path='/faucet' component={Faucet} />
                     <PrivateRoute path='/issuer' component={Issuer} />

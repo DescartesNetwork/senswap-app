@@ -3,6 +3,7 @@ import ssjs from 'senswapjs';
 import configs from 'configs';
 import session from 'helpers/session';
 import api from 'helpers/api';
+import sol from 'helpers/sol';
 
 
 /**
@@ -17,6 +18,7 @@ const defaultState = {
     role: 'user',
   },
   accounts: [],
+  lpts: [],
 }
 
 
@@ -88,30 +90,48 @@ export const setWallet = (wallet) => {
     // Configs
     const { api: { base } } = configs;
     const lamports = window.senswap.lamports;
-    const connection = window.senswap.splt._splt.connection;
-    const spltPromgramId = window.senswap.splt._splt.spltProgramId;
+    const splt = window.senswap.splt;
+    const connection = splt._splt.connection;
+    const spltPromgramId = splt._splt.spltProgramId;
     const data = {
       user: { address: '' },
       lamports: 0,
       accounts: [],
+      lpts: [],
       visible: false
     }
     // Set wallet
     window.senswap.wallet = wallet;
-    // Fetch mint accounts and lpt accounts
     try {
+      // Fetch general address & lamports
       data.user.address = await wallet.getAccount();
       data.lamports = await lamports.get(data.user.address);
+      // Fetch mint accounts and lpt accounts
       const ownerPublicKey = ssjs.fromAddress(data.user.address);
       const { value } = await connection.getTokenAccountsByOwner(ownerPublicKey, { programId: spltPromgramId });
-      data.accounts = value.map(({ pubkey }) => pubkey.toBase58());
+      const full = value.map(({ pubkey }) => pubkey.toBase58());
+      // Filter mint accounts
       const { data: mints } = await api.get(base + '/mints', { condition: {}, limit: -1, page: 0 });
       const derivedAccountAddresses = await Promise.all(mints.map(({ address: mintAddress }) => {
         const spltAddress = window.senswap.splt._splt.spltProgramId.toBase58();
         const splataAddress = window.senswap.splt._splt.splataProgramId.toBase58();
         return ssjs.deriveAssociatedAddress(data.user.address, mintAddress, spltAddress, splataAddress);
       }));
-      data.accounts = data.accounts.filter(accountAddress => derivedAccountAddresses.includes(accountAddress));
+      data.accounts = full.filter(accountAddress => derivedAccountAddresses.includes(accountAddress));
+      // Filter lpt accounts
+      let { data: pools } = await api.get(base + '/pools', { condition: {}, limit: -1, page: 0 });
+      pools = pools.map(({ address: poolAddress }) => poolAddress);
+      const rest = full.filter(accountAddress => !data.accounts.includes(accountAddress));
+      for (let accountAddress of rest) {
+        try {
+          const accountData = await splt.getAccountData(accountAddress);
+          const { mint } = accountData;
+          const { mint_authority, freeze_authority } = mint || {};
+          const poolAddress = await sol.isMintLPTAddress(mint_authority, freeze_authority);
+          if (!ssjs.isAddress(poolAddress) || !pools.includes(poolAddress)) continue;
+          data.lpts.push(accountAddress);
+        } catch (er) { /* Nothing */ }
+      }
       // Add user to database
       let userData = await api.get(base + '/user', { address: data.user.address });
       if (!userData.data && data.lamports) {

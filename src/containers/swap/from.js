@@ -40,13 +40,23 @@ class From extends Component {
 
   componentDidMount = () => {
     const { value } = this.props;
-    this.setState({ value });
+    this.setState({ value }, this.onDesireMintAddress);
   }
 
   componentDidUpdate = (prevProps) => {
-    const { value: prevValue } = prevProps;
-    const { value } = this.props;
+    const {
+      value: prevValue, mintAddress: prevMintAddress,
+      wallet: { user: { address: prevAddress } },
+    } = prevProps;
+    const { value, wallet: { user: { address } }, mintAddress } = this.props;
     if (!isEqual(prevValue, value)) this.setState({ value });
+    if (!isEqual(prevMintAddress, mintAddress)) this.onDesireMintAddress();
+    if (!isEqual(prevAddress, address)) this.onDesireMintAddress();
+  }
+
+  onDesireMintAddress = () => {
+    const { mintAddress } = this.props;
+    if (ssjs.isAddress(mintAddress)) return this.onMintData({ address: mintAddress });
   }
 
   onOpen = () => this.setState({ visible: true });
@@ -55,6 +65,7 @@ class From extends Component {
   onMintData = async (mintData) => {
     const { address: mintAddress } = mintData;
     const { setError, getAccountData, wallet: { user: { address: walletAddress } } } = this.props;
+    if (!ssjs.isAddress(walletAddress)) return;
     try {
       this.setState({ loading: true }, this.onClose);
       let accountData = await sol.scanAccount(mintAddress, walletAddress);
@@ -63,7 +74,8 @@ class From extends Component {
       else accountData = await getAccountData(accountAddress);
       return this.setState({ loading: false, accountData, value: '' }, this.returnData);
     } catch (er) {
-      return setError(er);
+      await setError(er);
+      return this.setState({ loading: false });
     }
   }
 
@@ -105,7 +117,7 @@ class From extends Component {
               <Grid item>
                 <Button
                   size="small"
-                  startIcon={loading ? <CircularProgress size={17} /> : <MintAvatar icon={icon} />}
+                  startIcon={loading ? <CircularProgress size={32} /> : <MintAvatar icon={icon} />}
                   endIcon={<ArrowDropDownRounded />}
                   onClick={this.onOpen}
                 >
@@ -146,11 +158,13 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 From.defaultProps = {
+  mintAddress: '',
   value: '',
   onChange: () => { },
 }
 
 From.propTypes = {
+  mintAddress: PropTypes.string,
   value: PropTypes.string,
   onChange: PropTypes.func,
 }

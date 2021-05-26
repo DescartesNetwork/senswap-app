@@ -39,15 +39,16 @@ class Selection extends Component {
     if (!isEqual(prevVisible, visible) && visible) return this.fetchData();
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const { setError, getMints, getMint } = this.props;
-    return getMints({}, 5, 0).then(data => {
-      return Promise.all(data.map(({ address }) => getMint(address)));
-    }).then(data => {
-      return this.setState({ data })
-    }).catch(er => {
+    this.setState({ loading: true });
+    try {
+      let data = await getMints({}, 5, 0);
+      data = await Promise.all(data.map(({ address }) => getMint(address)));
+      return this.setState({ data, loading: false });
+    } catch (er) {
       return setError(er);
-    });
+    }
   }
 
   onSearch = (e) => {

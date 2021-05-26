@@ -2,17 +2,19 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import Button from 'senswap-ui/button';
+import Button, { IconButton } from 'senswap-ui/button';
 import Drain from 'senswap-ui/drain';
 import Paper from 'senswap-ui/paper';
-import Brand from 'senswap-ui/brand';
 import Divider from 'senswap-ui/divider';
 import CircularProgress from 'senswap-ui/circularProgress';
+
+import { SwapCallsRounded } from 'senswap-ui/icons';
 
 import Header from './header';
 import Introduction from './introduction';
@@ -30,14 +32,14 @@ import { getPools, getPool } from 'modules/pool.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
 import { openWallet, updateWallet } from 'modules/wallet.reducer';
 
-import SwapIntroductionImage from 'static/images/swap-introduction.png';
-
 
 class Swap extends Component {
   constructor() {
     super();
 
     this.state = {
+      desiredPoolAddress: '',
+      mintAddresses: [],
       txId: '',
       bidAccountData: {},
       bidValue: '',
@@ -50,9 +52,36 @@ class Swap extends Component {
     this.swap = window.senswap.swap;
   }
 
-  _routing = async (srcPoolAddresses, dstPoolAddresses) => {
-    const { getPoolData } = this.props;
+  componentDidMount() {
+    this.parseParams();
+  }
 
+  componentDidUpdate(prevProps) {
+    const { match: { params: prevParams } } = prevProps;
+    const { match: { params } } = this.props;
+    if (!isEqual(prevParams, params)) this.parseParams();
+  }
+
+  parseParams = async () => {
+    const { match: { params: { poolAddress } }, setError, getPoolData } = this.props;
+    if (!ssjs.isAddress(poolAddress)) return;
+    try {
+      const data = await getPoolData(poolAddress);
+      const { address, mint_a, mint_b } = data || {};
+      if (!ssjs.isAddress(address)) return setError('Cannot load pool data');
+      const { address: mintAddressA } = mint_a || {};
+      const { address: mintAddressB } = mint_b || {};
+      if (!ssjs.isAddress(mintAddressA)) return setError('Cannot load token data');
+      if (!ssjs.isAddress(mintAddressB)) return setError('Cannot load token data');
+      const mintAddresses = [mintAddressA, mintAddressB];
+      return this.setState({ desiredPoolAddress: poolAddress, mintAddresses });
+    } catch (er) {
+      return setError(er);
+    }
+  }
+
+  estimateTheBestPool = async (srcPoolAddresses, dstPoolAddresses) => {
+    const { getPoolData } = this.props;
     let maxSrcPoolData = { reserve_s: global.BigInt(0) }
     let maxDstPoolData = { reserve_s: global.BigInt(0) }
 
@@ -69,7 +98,6 @@ class Swap extends Component {
         if (dstState !== 1 || dstReserve <= 0) continue;
         const { reserve_s: maxDstReserve } = maxDstPoolData || {}
         if (maxDstReserve < dstReserve) maxDstPoolData = dstPoolData;
-
         if (srcPoolAddress === dstPoolAddress) return [srcPoolAddress, dstPoolAddress];
       }
     }
@@ -96,7 +124,7 @@ class Swap extends Component {
     if (!dstData.length) throw new Error('Cannot find available pools');
     const dstPoolAddresses = dstData.map(({ address }) => address);
 
-    const route = await this._routing(srcPoolAddresses, dstPoolAddresses);
+    const route = await this.estimateTheBestPool(srcPoolAddresses, dstPoolAddresses);
     let data = await Promise.all(route.map(address => getPool(address)));
     if (data.length < 2) throw new Error('Cannot find available pools');
     data = await Promise.all(data.map(({ address }) => getPoolData(address)));
@@ -137,7 +165,7 @@ class Swap extends Component {
         let state = { loading: false, hopData: data }
         if (inverse) state.bidValue = ssjs.undecimalize(bidAmount, bidDecimals);
         else state.askValue = ssjs.undecimalize(askAmount, askDecimals);
-        
+
         return this.setState({ ...state });
       } catch (er) {
         await setError(er);
@@ -169,6 +197,12 @@ class Swap extends Component {
 
   onSlippage = (slippage) => {
     return this.setState({ slippage });
+  }
+
+  onSwitch = () => {
+    const { mintAddresses } = this.state;
+    const newMintAddresses = [mintAddresses[1], mintAddresses[0]];
+    return this.setState({ mintAddresses: newMintAddresses });
   }
 
   onAutogenDestinationAddress = async (mintAddress) => {
@@ -243,8 +277,11 @@ class Swap extends Component {
   }
 
   render() {
-    const { classes, ui: { width } } = this.props;
-    const { bidValue, askValue, slippage, hopData } = this.state;
+    const { classes } = this.props;
+    const {
+      mintAddresses,
+      bidValue, askValue, slippage, hopData
+    } = this.state;
 
     return <Grid container>
       <BucketWatcher
@@ -259,61 +296,44 @@ class Swap extends Component {
       </Grid>
       <Grid item xs={12} md={8}>
         <Paper className={classes.paper}>
-          <Grid container>
-            <Grid item xs={12} md={4}>
-              <div
-                className={width < 960 ? classes.imageColumn : classes.imageRow}
-                style={{
-                  background: `url("${SwapIntroductionImage}")`,
-                  backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: 'cover',
-                }}
-              >
-                <Grid container>
-                  <Grid item xs={12} >
-                    <Brand />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Drain size={8} />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="h2">Let's Swap</Typography>
+          <Grid container justify="center">
+            <Grid item xs={11}>
+              <Grid container>
+                <Grid item xs={12}>
+                  <From
+                    mintAddress={mintAddresses[0]}
+                    onChange={this.onBidData} value={bidValue}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container justify="center">
+                    <Grid item>
+                      <IconButton size="small" onClick={this.onSwitch}>
+                        <SwapCallsRounded />
+                      </IconButton>
+                    </Grid>
                   </Grid>
                 </Grid>
-              </div>
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <Grid container justify="center">
-                <Grid item xs={11}>
-                  <Grid container>
-                    <Grid item xs={12}>
-                      <Drain />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <From onChange={this.onBidData} value={bidValue} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <To
-                        onSlippage={this.onSlippage} slippage={slippage}
-                        onChange={this.onAskData} value={askValue}
-                      />
-                    </Grid>
-                    <Grid item xs={12} >
-                      <Divider />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Details hopData={hopData} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Drain size={1} />
-                    </Grid>
-                    <Grid item xs={12}>
-                      {this.renderAction()}
-                    </Grid>
-                    <Grid item xs={12} />
-                  </Grid>
+                <Grid item xs={12}>
+                  <To
+                    mintAddress={mintAddresses[1]}
+                    onSlippage={this.onSlippage} slippage={slippage}
+                    onChange={this.onAskData} value={askValue}
+                  />
                 </Grid>
+                <Grid item xs={12} >
+                  <Divider />
+                </Grid>
+                <Grid item xs={12}>
+                  <Details hopData={hopData} />
+                </Grid>
+                <Grid item xs={12}>
+                  <Drain size={1} />
+                </Grid>
+                <Grid item xs={12}>
+                  {this.renderAction()}
+                </Grid>
+                <Grid item xs={12} />
               </Grid>
             </Grid>
           </Grid>

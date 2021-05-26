@@ -11,7 +11,10 @@ import Paper from 'senswap-ui/paper';
 import { IconButton } from 'senswap-ui/button';
 import Divider from 'senswap-ui/divider';
 
-import { ArrowForwardRounded, ExpandLessRounded, ExpandMoreRounded } from 'senswap-ui/icons';
+import {
+  ArrowForwardRounded, ExpandLessRounded, ExpandMoreRounded,
+  ArrowDropDownRounded
+} from 'senswap-ui/icons';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -59,7 +62,7 @@ class Details extends Component {
         <Typography variant="caption" color="textSecondary">Swap Details</Typography>
       </Grid>
       {hopData.map((data, index) => {
-        const { srcMintAddress, dstMintAddress, poolData, fee, ratio } = data;
+        const { srcMintAddress, dstMintAddress, poolData, fee, ratio, slippage } = data;
         return <Grid item key={index} xs={12}>
           <Paper className={classes.details}>
             <Grid container>
@@ -78,13 +81,42 @@ class Details extends Component {
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item xs={6}>
-                <Typography color="textSecondary">Fee</Typography>
-                <Typography>{utils.prettyNumber(ssjs.undecimalize(fee, 9) * 100)}%</Typography>
+              <Grid item>
+                <Grid container spacing={0} direction="column" style={{ paddingRight: 16 }}>
+                  <Grid item>
+                    <Typography color="textSecondary">Fee</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography>{utils.prettyNumber(ssjs.undecimalize(fee, 9) * 100)}%</Typography>
+                  </Grid>
+                </Grid>
               </Grid>
-              <Grid item xs={6}>
-                <Typography color="textSecondary">Ratio</Typography>
-                <Typography>{utils.prettyNumber(ratio)}</Typography>
+              <Grid item>
+                <Grid container spacing={0} direction="column" style={{ paddingRight: 16 }}>
+                  <Grid item>
+                    <Typography color="textSecondary">Offering Price</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography>{utils.prettyNumber(ratio)} <span className={classes.unit}>{this.parseSymbol(dstMintAddress, poolData)}/{this.parseSymbol(srcMintAddress, poolData)}</span></Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item>
+                <Grid container spacing={0} direction="column" style={{ paddingRight: 16 }}>
+                  <Grid item>
+                    <Typography color="textSecondary">Price Change</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Grid container spacing={0} className={classes.noWrap}>
+                      <Grid item className={classes.opticalCorrection}>
+                        < ArrowDropDownRounded style={{ color: "#FF7A68" }} />
+                      </Grid>
+                      <Grid item>
+                        <Typography style={{ color: "#FF7A68" }}>{utils.prettyNumber(ssjs.undecimalize(slippage, 9) * 100)}%</Typography>
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </Grid>
               </Grid>
               {visibles[index] ? <Fragment>
                 <Grid item xs={12}>
