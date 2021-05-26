@@ -44,12 +44,12 @@ class MyPool extends Component {
   }
 
   fetchData = async () => {
-    const { wallet: { accounts }, getAccountData } = this.props;
+    const { wallet: { lpts }, getAccountData } = this.props;
     this.setState({ loading: true });
     let data = [];
-    for (let accountAddress of accounts) {
+    for (let lptAddress of lpts) {
       try {
-        const accountData = await getAccountData(accountAddress);
+        const accountData = await getAccountData(lptAddress);
         const { pool: poolData } = accountData || {}
         const { address: poolAddress } = poolData || {}
         if (!ssjs.isAddress(poolAddress)) continue;
@@ -104,7 +104,7 @@ class MyPool extends Component {
         const {
           amount, mint: { decimals },
           pool: {
-            usd,
+            address: poolAddress, usd,
             mint_s: { icon: iconS, symbol: symbolS },
             mint_a: { icon: iconA, symbol: symbolA },
             mint_b: { icon: iconB, symbol: symbolB },
@@ -114,6 +114,7 @@ class MyPool extends Component {
         const symbols = [symbolA, symbolB, symbolS];
         return <Grid item key={index} xs={12} md={6} lg={4}>
           <CardPool
+            address={poolAddress}
             stake={utils.prettyNumber(ssjs.undecimalize(amount, decimals))}
             icons={icons}
             symbols={symbols}

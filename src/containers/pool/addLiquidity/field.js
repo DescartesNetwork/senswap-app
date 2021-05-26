@@ -94,7 +94,12 @@ class Field extends Component {
           }}
           readOnly={!added}
           helperTextPrimary={added ? `Available: ${utils.prettyNumber(ssjs.undecimalize(amount, decimals))} ${symbol || ''}` : null}
-          helperTextSecondary={added ? <Link color="primary" variant="body2" onClick={this.onMax}>MAXIMUM</Link> : null}
+          helperTextSecondary={added ? <Grid container justify="flex-end">
+            <Grid item>
+              <Link color="primary" variant="body2" onClick={this.onMax}>MAXIMUM</Link>
+            </Grid>
+          </Grid>
+            : null}
           fullWidth
         />
       </Grid>

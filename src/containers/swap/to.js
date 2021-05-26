@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -38,13 +39,23 @@ class To extends Component {
 
   componentDidMount = () => {
     const { value } = this.props;
-    this.setState({ value });
+    this.setState({ value }, this.onDesireMintAddress);
   }
 
   componentDidUpdate = (prevProps) => {
-    const { value: prevValue } = prevProps;
-    const { value } = this.props;
+    const {
+      value: prevValue, mintAddress: prevMintAddress,
+      wallet: { user: { address: prevAddress } },
+    } = prevProps;
+    const { value, wallet: { user: { address } }, mintAddress } = this.props;
     if (!isEqual(prevValue, value)) this.setState({ value });
+    if (!isEqual(prevMintAddress, mintAddress)) this.onDesireMintAddress();
+    if (!isEqual(prevAddress, address)) this.onDesireMintAddress();
+  }
+
+  onDesireMintAddress = () => {
+    const { mintAddress } = this.props;
+    if (ssjs.isAddress(mintAddress)) return this.onMintData({ address: mintAddress });
   }
 
   onOpen = () => this.setState({ visible: true });
@@ -102,7 +113,7 @@ class To extends Component {
               <Grid item>
                 <Button
                   size="small"
-                  startIcon={loading ? <CircularProgress size={17} /> : <MintAvatar icon={icon} />}
+                  startIcon={loading ? <CircularProgress size={32} /> : <MintAvatar icon={icon} />}
                   endIcon={<ArrowDropDownRounded />}
                   onClick={this.onOpen}
                 >
@@ -170,6 +181,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 To.defaultProps = {
+  mintAddress: '',
   slippage: 0.01,
   value: '',
   onSlippage: () => { },
@@ -177,6 +189,7 @@ To.defaultProps = {
 }
 
 To.propTypes = {
+  mintAddress: PropTypes.string,
   limit: PropTypes.number,
   value: PropTypes.string,
   onLimit: PropTypes.func,

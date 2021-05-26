@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { Link as RouterLink } from 'react-router-dom';
 import numeral from 'numeral';
 
 import { withStyles } from 'senswap-ui/styles';
@@ -8,9 +9,13 @@ import Card, { CardContent } from 'senswap-ui/card';
 import Typography from 'senswap-ui/typography';
 import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import Divider from 'senswap-ui/divider';
-import Button from 'senswap-ui/button';
+import Button, { IconButton } from 'senswap-ui/button';
+import Tooltip from 'senswap-ui/tooltip';
 
-import { AccountBalanceWalletOutlined, InputRounded, OpenInNewRounded } from 'senswap-ui/icons';
+import {
+  AccountBalanceWalletOutlined, InputRounded, OpenInNewRounded,
+  OfflineBoltRounded,
+} from 'senswap-ui/icons';
 
 import styles from './styles';
 
@@ -71,16 +76,29 @@ class CardPool extends Component {
   }
 
   render() {
-    const { classes } = this.props;
-    const { icons, symbols, volume, apy, stake } = this.props;
+    const {
+      classes, address,
+      icons, symbols, volume, apy, stake
+    } = this.props;
 
     return <Card className={classes.card}>
       <CardContent className={classes.cardContent}>
         <Grid container>
           <Grid item xs={12}>
-            <AvatarGroup max={3}>
-              {icons.map((icon, i) => <Avatar key={i} size="small" src={icon} />)}
-            </AvatarGroup>
+            <Grid container className={classes.noWrap}>
+              <Grid item className={classes.stretch}>
+                <AvatarGroup max={3}>
+                  {icons.map((icon, i) => <Avatar key={i} size="small" src={icon} />)}
+                </AvatarGroup>
+              </Grid>
+              <Grid item>
+                <Tooltip title="Quick Swap">
+                  <IconButton to={`/swap/${address}`} component={RouterLink}>
+                    <OfflineBoltRounded />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={12}>
             <Typography variant="subtitle1">{symbols.join(' x ')} Pool</Typography>
@@ -134,6 +152,7 @@ CardPool.defaultProps = {
 }
 
 CardPool.propsType = {
+  address: PropTypes.string.isRequired,
   symbols: PropTypes.arrayOf(PropTypes.string),
   icons: PropTypes.arrayOf(PropTypes.string),
   volume: PropTypes.number,

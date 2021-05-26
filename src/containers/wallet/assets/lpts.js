@@ -43,25 +43,23 @@ class LPTs extends Component {
     if (!isEqual(prevWallet, wallet)) return this.fetchData();
   }
 
-  fetchData = () => {
-    const { wallet: { accounts }, getAccountData } = this.props;
-
-    if (!accounts || !accounts.length) return this.setState({ data: [] });
-    return this.setState({ loading: true }, () => {
-      return accounts.each(accountAddress => {
-        return getAccountData(accountAddress);
-      }, { skipError: true, skipIndex: true }).then(data => {
-        data = data.filter(({ pool }) => {
-          const { address: poolAddress } = pool || {};
-          return ssjs.isAddress(poolAddress);
-        });
-        return this.setState({ data, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+  fetchData = async () => {
+    const { wallet: { lpts }, getAccountData } = this.props;
+    this.setState({ loading: true });
+    let data = [];
+    for (let lptAddress of lpts) {
+      try {
+        const accountData = await getAccountData(lptAddress);
+        const { pool: poolData } = accountData || {}
+        const { address: poolAddress } = poolData || {}
+        if (!ssjs.isAddress(poolAddress)) continue;
+        data.push(accountData);
+        this.setState({ data: [...data] });
+      } catch(er){
+        // Nothing
+      }
+    }
+    return this.setState({ loading: false });
   }
 
   render() {
