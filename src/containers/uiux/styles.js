@@ -1,9 +1,6 @@
-import configs from 'configs';
-
 // eslint-disable-next-line
 export default theme => {
-  const { env } = configs;
-  if (env === 'development') console.log(theme);
+  window.senswap.theme = theme; // You can log this var for development
   return {
     noWrap: {
       flexWrap: 'nowrap',
