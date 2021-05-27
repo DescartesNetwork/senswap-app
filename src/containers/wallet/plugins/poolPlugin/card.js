@@ -15,6 +15,8 @@ import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import Divider from 'senswap-ui/divider';
 import Button from 'senswap-ui/button';
 
+import Skeleton from '@material-ui/lab/Skeleton';
+
 import { AccountBalanceWalletOutlined, InputRounded, OfflineBoltRounded } from 'senswap-ui/icons';
 
 import AddLiquidity from 'containers/pool/addLiquidity';
@@ -138,7 +140,8 @@ class PoolCard extends Component {
     // Pool data
     const { data } = this.state;
     const { address: poolAddress, state, accountData, mint_s, mint_a, mint_b } = data;
-    if (!ssjs.isAddress(poolAddress) || state !== 1) return null;
+    if (!ssjs.isAddress(poolAddress)) return <Skeleton variant="rect" height={350} className={classes.card} />;
+    if (state !== 1) return null;
     // Extract mints
     const { amount } = accountData || {}
     const { icon: iconS, symbol: symbolS, decimals } = mint_s || {}
@@ -167,7 +170,7 @@ class PoolCard extends Component {
                   variant="outlined"
                   size="small"
                   component={RouterLink}
-                  to={`/pool/${poolAddress}`}
+                  to={`/board/${poolAddress}`}
                 >
                   <Typography variant="caption" color="textSecondary">Details</Typography>
                 </Button>

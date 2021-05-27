@@ -21,6 +21,8 @@ const defaultState = {
   lpts: [],
 }
 
+const MAX_ACCOUNTS = 100;
+
 
 /**
  * Open wallet
@@ -122,7 +124,9 @@ export const setWallet = (wallet) => {
       let { data: pools } = await api.get(base + '/pools', { condition: {}, limit: -1, page: 0 });
       pools = pools.map(({ address: poolAddress }) => poolAddress);
       const rest = full.filter(accountAddress => !data.accounts.includes(accountAddress));
+      let counter = 0;
       for (let accountAddress of rest) {
+        if (counter++ > MAX_ACCOUNTS) break;
         try {
           const accountData = await splt.getAccountData(accountAddress);
           const { mint } = accountData;

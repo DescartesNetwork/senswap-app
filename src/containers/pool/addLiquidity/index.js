@@ -127,8 +127,8 @@ class AddLiquidity extends Component {
 
     if (!ssjs.isAddress(poolAddress)) return setError('Invalid pool address');
 
-    const info = accountData.zip(amounts);
-    const [[accountDataS, amountS], [accountDataA, amountA], [accountDataB, amountB]] = info;
+    const [accountDataS, accountDataA, accountDataB] = accountData;
+    const [amountS, amountA, amountB] = amounts;
     const { address: srcAddressS, mint: { decimals: decimalsS } } = accountDataS || { mint: { decimals: 9 } }
     const { address: srcAddressA, mint: { decimals: decimalsA } } = accountDataA || { mint: { decimals: 9 } }
     const { address: srcAddressB, mint: { decimals: decimalsB } } = accountDataB || { mint: { decimals: 9 } }

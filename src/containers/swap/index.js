@@ -240,14 +240,9 @@ class Swap extends Component {
     this.setState({ loading: true });
     let txIds = [];
     try {
-      let dstAddresses = [];
-      for (let { dstMintAddress } of hopData) {
-        const dstAddress = await this.onAutogenDestinationAddress(dstMintAddress);
-        dstAddresses.push(dstAddress);
-      }
-      const data = hopData.zip(dstAddresses);
-      for (let datum of data) {
-        const [{ bidAmount, askAmount, poolData: { address: poolAddress } }, dstAddress] = datum;
+      for (let data of hopData) {
+        const { bidAmount, askAmount, poolData: { address: poolAddress }, dstMintAddress } = data;
+        const dstAddress = await this.onAutogenDestinationAddress(dstMintAddress);;
         const _srcAddress = srcAddress;
         srcAddress = dstAddress;
         const limit = this.estimateLimit(askAmount);
@@ -266,7 +261,6 @@ class Swap extends Component {
       txIds.push('error');
       await setError(er);
     }
-    console.log(txIds)
     return this.setState({ loading: false, txIds });
   }
 

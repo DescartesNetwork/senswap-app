@@ -10,7 +10,6 @@
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.2.2",
-    "async": "^3.2.0",
     "axios": "^0.21.0",
     "connected-react-router": "^6.9.1",
     "dateformat": "^4.3.1",

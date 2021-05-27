@@ -11,12 +11,13 @@ function Price(props) {
   const [price, setPrice] = useState(0);
   const { amount, ticket } = props;
   useEffect(() => {
-    return ssjs.parseCGK(ticket).then(({ price }) => {
-      setPrice(price);
-      setUSD(price * amount);
-    }).catch(er => {
-      // Do nothing
-    });
+    return (async () => {
+      try {
+        const { price } = await ssjs.parseCGK(ticket);
+        setPrice(price);
+        setUSD(price * amount);
+      } catch (er) { /* Do nothing */ }
+    })();
   }, [amount, ticket]);
 
   return <Fragment>

@@ -38,38 +38,35 @@ class Price extends Component {
     if (!isEqual(prevAccounts, accounts)) this.fetchData();
   }
 
-  fetchData = () => {
-    const { wallet: { accounts, lamports }, setError, getAccountData } = this.props;
+  fetchData = async () => {
+    const { wallet: { accounts, lamports }, getAccountData } = this.props;
 
-    const solAccount = {
+    this.setState({ loading: true });
+    let data = [{
       amount: global.BigInt(lamports),
       mint: { decimals: 9, ticket: 'solana' }
+    }];
+    for (const accountAddress of accounts) {
+      try {
+        const accountData = await getAccountData(accountAddress);
+        const { pool, mint } = accountData;
+        const { address: poolAddress } = pool || {}
+        const { ticket } = mint || {}
+        if (!ssjs.isAddress(poolAddress) && ticket) data.push(accountData);
+      } catch (er) { /* Nothing */ }
     }
-
-    return this.setState({ loading: true }, () => {
-      return accounts.each(accountAddress => {
-        return getAccountData(accountAddress);
-      }, { skipError: true, skipIndex: true }).then(data => {
-        data = data.filter(({ pool, mint }) => {
-          const { address: poolAddress } = pool || {}
-          const { ticket } = mint || {}
-          return !ssjs.isAddress(poolAddress) && ticket;
-        });
-        data.unshift(solAccount);
-        return data.each(({ amount, mint: { decimals, ticket } }) => {
-          const balance = ssjs.undecimalize(amount, decimals);
-          return utils.fetchValue(balance, ticket);
-        });
-      }).then(data => {
-        const usd = data.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
-        const btc = data.map(({ btc }) => btc).reduce((a, b) => a + b, 0);
-        return this.setState({ usd, btc, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    let btc = 0;
+    let usd = 0;
+    for (const datum of data) {
+      try {
+        const { amount, mint: { ticket, decimals } } = datum;
+        const balance = ssjs.undecimalize(amount, decimals);
+        const { btc: b, usd: u } = await utils.fetchValue(balance, ticket);
+        btc = btc + b;
+        usd = usd + u;
+      } catch (er) { /* Nothing */ }
+    }
+    return this.setState({ usd, btc, loading: false });
   }
 
   render() {
