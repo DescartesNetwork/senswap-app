@@ -355,7 +355,6 @@ class Swap extends Component {
                 <Grid item xs={12}>
                   {this.renderAction()}
                 </Grid>
-                <Grid item xs={12} />
               </Grid>
             </Grid>
           </Grid>
