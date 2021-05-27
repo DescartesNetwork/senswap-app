@@ -20,7 +20,7 @@ class Reserve extends Component {
     return <Paper className={classes.paper}>
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant="subtitle1" color="textSecondary">Reference</Typography>
+          <Typography variant="subtitle1" color="textSecondary">Reserves</Typography>
         </Grid>
       </Grid>
     </Paper>

@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -55,12 +56,13 @@ class Board extends Component {
     const { data } = this.state;
     const { address: poolAddress } = data;
 
+    if (!ssjs.isAddress(poolAddress)) return null;
     return <Grid container>
       <Grid item xs={12}>
         <Header poolData={data} />
       </Grid>
       <Grid item xs={12}>
-        <Drain />
+        <Drain size={1} />
       </Grid>
       <Grid item xs={12} md={6}>
         <TVL poolAddress={poolAddress} />
@@ -81,10 +83,10 @@ class Board extends Component {
       <Grid item xs={12} sm={6} md={4}>
         <Grid container>
           <Grid item xs={12}>
-            <Price poolAddress={poolAddress} />
+            <Price poolData={data} />
           </Grid>
           <Grid item xs={12}>
-            <Reference poolAddress={poolAddress} />
+            <Reference poolData={data} />
           </Grid>
         </Grid>
       </Grid>

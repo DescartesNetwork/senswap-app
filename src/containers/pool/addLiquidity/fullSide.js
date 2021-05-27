@@ -92,7 +92,6 @@ class FullSide extends Component {
   }
 
   render() {
-    const { classes } = this.props;
     const { loading, amounts, accountData } = this.state;
 
     return <Grid container spacing={2} justify="center">
