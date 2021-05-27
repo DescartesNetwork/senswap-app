@@ -183,14 +183,32 @@ class Swap extends Component {
   }
 
   onBidData = ({ accountData, value }) => {
+    const { mintAddresses } = this.state;
+    const { mint } = accountData || {}
+    const { address: mintAddress } = mint || {}
+    const newMintAddresses = [...mintAddresses];
+    newMintAddresses[0] = mintAddress;
     return this.setState({
-      bidAccountData: accountData, bidValue: value, askValue: '', txIds: []
+      bidAccountData: accountData,
+      bidValue: value,
+      askValue: '',
+      txIds: [],
+      mintAddresses: newMintAddresses
     }, () => this.estimateState(false));
   }
 
   onAskData = ({ accountData, value }) => {
+    const { mintAddresses } = this.state;
+    const { mint } = accountData || {}
+    const { address: mintAddress } = mint || {}
+    const newMintAddresses = [...mintAddresses];
+    newMintAddresses[1] = mintAddress;
     return this.setState({
-      askAccountData: accountData, bidValue: '', askValue: value, txIds: []
+      askAccountData: accountData,
+      bidValue: '',
+      askValue: value,
+      txIds: [],
+      mintAddresses: newMintAddresses
     }, () => this.estimateState(true));
   }
 

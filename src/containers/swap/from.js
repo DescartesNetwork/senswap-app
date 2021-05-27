@@ -57,6 +57,7 @@ class From extends Component {
   onDesireMintAddress = () => {
     const { mintAddress } = this.props;
     if (ssjs.isAddress(mintAddress)) return this.onMintData({ address: mintAddress });
+    else return this.setState({ accountData: {} }, this.returnData);
   }
 
   onOpen = () => this.setState({ visible: true });
