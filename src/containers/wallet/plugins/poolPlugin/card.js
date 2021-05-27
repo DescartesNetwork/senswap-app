@@ -35,7 +35,6 @@ class PoolCard extends Component {
     this.state = {
       loading: false,
       visibleDeposit: false,
-      visibleWithdraw: false,
       data: {},
     }
   }
@@ -85,13 +84,10 @@ class PoolCard extends Component {
   onOpenDeposit = () => this.setState({ visibleDeposit: true });
   onCloseDeposit = () => this.setState({ visibleDeposit: false });
 
-  onOpenWithdraw = () => this.setState({ visibleWithdraw: true });
-  onCloseWithdraw = () => this.setState({ visibleWithdraw: false });
-
   onAction = () => {
-    const { data, visibleDeposit, visibleWithdraw } = this.state;
+    const { data, visibleDeposit } = this.state;
     // Empty
-    const { address: poolAddress, accountData } = data;
+    const { address: poolAddress } = data;
     if (!ssjs.isAddress(poolAddress)) return null;
     // Connect wallet
     const { wallet: { user: { address: walletAddress } }, openWallet } = this.props;
@@ -173,7 +169,7 @@ class PoolCard extends Component {
                   component={RouterLink}
                   to={`/pool/${poolAddress}`}
                 >
-                  <Typography color="textSecondary">Details</Typography>
+                  <Typography variant="caption" color="textSecondary">Details</Typography>
                 </Button>
               </Grid>
             </Grid>
