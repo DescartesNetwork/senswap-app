@@ -195,7 +195,7 @@ class PoolCard extends Component {
             <Typography variant="body2">TVL</Typography>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="h4">${numeral(tvl).format('0.0[00]a')} </Typography>
+            <Typography variant="h4">${numeral(tvl).format('0.0[0]a')} </Typography>
           </Grid>
         </Grid>
       </CardContent>

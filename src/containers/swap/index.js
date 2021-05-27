@@ -40,7 +40,6 @@ class Swap extends Component {
     this.state = {
       desiredPoolAddress: '',
       mintAddresses: [],
-      txId: '',
       bidAccountData: {},
       bidValue: '',
       askAccountData: {},
@@ -277,7 +276,7 @@ class Swap extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, ui: { type } } = this.props;
     const {
       mintAddresses,
       bidValue, askValue, slippage, hopData
@@ -295,7 +294,10 @@ class Swap extends Component {
         <Drain />
       </Grid>
       <Grid item xs={12} md={8}>
-        <Paper className={classes.paper}>
+        <Paper className={classes.paper} style={{
+          paddingLeft: type !== 'xs' ? 32 : 16,
+          paddingRight: type !== 'xs' ? 32 : 16,
+        }}>
           <Grid container justify="center">
             <Grid item xs={11}>
               <Grid container>

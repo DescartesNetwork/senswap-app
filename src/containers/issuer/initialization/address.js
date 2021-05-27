@@ -36,23 +36,24 @@ class MintAddress extends Component {
     if (this.cancel) this.cancel();
   }
 
-  onAddress = () => {
+  onAddress = async () => {
     const { prefix } = this.state;
     const { setError, onChange } = this.props;
     if (this.cancel) this.cancel();
     onChange(null); // Clear previous address
-    return ssjs.createPrefixedAccount(prefix, (address, cancel) => {
-      this.cancel = cancel;
-      return this.setState({ address });
-    }).then(account => {
+    try {
+      const account = await ssjs.createPrefixedAccount(prefix, (address, cancel) => {
+        this.cancel = cancel;
+        return this.setState({ address });
+      });
       const address = account.publicKey.toBase58();
       const secretKey = Buffer(account.secretKey).toString('hex');
       return this.setState({ address, secretKey }, () => {
         return onChange(secretKey);
       });
-    }).catch(er => {
+    } catch (er) {
       return setError(er);
-    });
+    }
   }
 
   onPrefix = (e) => {

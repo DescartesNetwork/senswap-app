@@ -89,8 +89,6 @@ class Pools extends Component {
     super();
 
     this.state = {
-      page: -1,
-      limit: 5,
       data: [],
       loading: false,
       selected: -1,
@@ -103,20 +101,23 @@ class Pools extends Component {
     return this.fetchData();
   }
 
-  fetchData = (force = false) => {
+  fetchData = async (force = false) => {
     const { getPools, getPoolData, setError } = this.props;
-    const { page, limit } = this.state
-    return this.setState({ loading: true, lasttime: new Date() }, () => {
-      return getPools({}, limit, page + 1).then(data => {
-        return data.each(({ address }) => getPoolData(address, force), { skipError: true, skipIndex: true });
-      }).then(data => {
-        return this.setState({ data, loading: false });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    this.setState({ loading: true, lasttime: new Date() });
+    try {
+      const pools = await getPools({}, -1, 0);
+      let data = [];
+      for (let { address } of pools) {
+        try {
+          const poolData = await getPoolData(address, force);
+          data.push(poolData);
+        } catch (er) { /* Nothing */ }
+      }
+      return this.setState({ data, loading: false });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ loading: false });
+    }
   }
 
   onRefresh = () => {

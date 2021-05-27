@@ -22,7 +22,7 @@ export default theme => ({
     marginLeft: -8
   },
   unit: {
-    fontSize: 10,
+    fontSize: 8,
     color: '#808191'
   }
 });
