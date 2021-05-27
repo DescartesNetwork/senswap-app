@@ -20,6 +20,7 @@ import Pool from 'containers/pool';
 import Faucet from 'containers/faucet';
 import Issuer from 'containers/issuer';
 import DAO from 'containers/dao';
+import Board from 'containers/board';
 
 // CSS
 import styles from './styles';
@@ -53,6 +54,7 @@ class App extends Component {
                     <Route path='/home' component={Home} />
                     <Route exact path='/swap/:poolAddress?' component={Swap} />
                     <Route path='/pool' component={Pool} />
+                    <Route exact path='/board/:poolAddress' component={Board} />
                     <Route exact path='/faucet' component={Faucet} />
                     <PrivateRoute path='/issuer' component={Issuer} />
                     <PrivateRoute path='/dao' component={DAO} />

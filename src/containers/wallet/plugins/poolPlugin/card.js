@@ -167,7 +167,7 @@ class PoolCard extends Component {
                   variant="outlined"
                   size="small"
                   component={RouterLink}
-                  to={`/pool/${poolAddress}`}
+                  to={`/board/${poolAddress}`}
                 >
                   <Typography variant="caption" color="textSecondary">Details</Typography>
                 </Button>
