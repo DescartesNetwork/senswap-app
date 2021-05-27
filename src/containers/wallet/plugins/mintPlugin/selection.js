@@ -33,22 +33,40 @@ class Selection extends Component {
     }
   }
 
+  async componentDidMount() {
+    const { always } = this.props;
+    if (always) this.fetchOne();
+  }
+
   componentDidUpdate(prevProps) {
-    const { visible: prevVisible } = prevProps;
-    const { visible } = this.props;
-    if (!isEqual(prevVisible, visible) && visible) return this.fetchData();
+    const { visible: prevVisible, condition: prevCondition } = prevProps;
+    const { visible, condition } = this.props;
+    if (!isEqual(prevVisible, visible) && visible) this.fetchData();
+    if (!isEqual(prevCondition, condition)) {
+      if (!visible) this.fetchOne()
+      else this.fetchData();
+    }
   }
 
   fetchData = async () => {
-    const { setError, getMints, getMint } = this.props;
+    const { setError, getMints, getMint, condition } = this.props;
     this.setState({ loading: true });
     try {
-      let data = await getMints({}, 5, 0);
+      let data = await getMints(condition, 5, 0);
       data = await Promise.all(data.map(({ address }) => getMint(address)));
       return this.setState({ data, loading: false });
     } catch (er) {
       return setError(er);
     }
+  }
+
+  fetchOne = async () => {
+    const { getMints, getMint, onChange, condition } = this.props;
+    try {
+      const [{ address }] = await getMints(condition, 1, 0);
+      const data = await getMint(address);
+      return onChange(data);
+    } catch (er) {/* Nothing */ }
   }
 
   onSearch = (e) => {
@@ -89,7 +107,7 @@ class Selection extends Component {
       <DialogTitle>
         <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
-            <Typography variant="h6"><strong>Search</strong></Typography>
+            <Typography variant="h6"><strong>Token List</strong></Typography>
           </Grid>
           <Grid item>
             <IconButton onClick={onClose} edge="end">
@@ -122,7 +140,6 @@ class Selection extends Component {
                     <TableCell >
                       <Typography variant="caption">No token</Typography>
                     </TableCell>
-                    <TableCell />
                   </TableRow> : null}
                   {data.map(mintData => {
                     const { address, icon, name, symbol } = mintData;
@@ -139,9 +156,6 @@ class Selection extends Component {
                             <Typography color="textSecondary">{symbol}</Typography>
                           </Grid>
                         </Grid>
-                      </TableCell>
-                      <TableCell>
-                        <Typography>{address}</Typography>
                       </TableCell>
                     </TableRow>
                   })}
@@ -169,12 +183,16 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 Selection.defaultProps = {
   visible: false,
+  always: false,
+  condition: {},
   onChange: () => { },
   onClose: () => { },
 }
 
 Selection.propTypes = {
   visible: PropTypes.bool,
+  always: PropTypes.bool,
+  condition: PropTypes.object,
   onChange: PropTypes.func,
   onClose: PropTypes.func,
 }

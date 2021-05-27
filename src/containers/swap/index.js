@@ -25,7 +25,6 @@ import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
 import oracle from 'helpers/oracle';
-import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
@@ -40,13 +39,13 @@ class Swap extends Component {
     this.state = {
       desiredPoolAddress: '',
       mintAddresses: [],
-      txId: '',
       bidAccountData: {},
       bidValue: '',
       askAccountData: {},
       askValue: '',
       slippage: 0.01,
       hopData: [],
+      txIds: [],
     }
 
     this.swap = window.senswap.swap;
@@ -184,14 +183,32 @@ class Swap extends Component {
   }
 
   onBidData = ({ accountData, value }) => {
+    const { mintAddresses } = this.state;
+    const { mint } = accountData || {}
+    const { address: mintAddress } = mint || {}
+    const newMintAddresses = [...mintAddresses];
+    newMintAddresses[0] = mintAddress;
     return this.setState({
-      bidAccountData: accountData, bidValue: value, askValue: ''
+      bidAccountData: accountData,
+      bidValue: value,
+      askValue: '',
+      txIds: [],
+      mintAddresses: newMintAddresses
     }, () => this.estimateState(false));
   }
 
   onAskData = ({ accountData, value }) => {
+    const { mintAddresses } = this.state;
+    const { mint } = accountData || {}
+    const { address: mintAddress } = mint || {}
+    const newMintAddresses = [...mintAddresses];
+    newMintAddresses[1] = mintAddress;
     return this.setState({
-      askAccountData: accountData, bidValue: '', askValue: value
+      askAccountData: accountData,
+      bidValue: '',
+      askValue: value,
+      txIds: [],
+      mintAddresses: newMintAddresses
     }, () => this.estimateState(true));
   }
 
@@ -216,11 +233,12 @@ class Swap extends Component {
   }
 
   executeSwap = async () => {
-    const { setError, setSuccess } = this.props;
+    const { setError } = this.props;
     const { bidAccountData, hopData } = this.state;
     let { address: srcAddress } = bidAccountData;
 
     this.setState({ loading: true });
+    let txIds = [];
     try {
       let dstAddresses = [];
       for (let { dstMintAddress } of hopData) {
@@ -228,7 +246,6 @@ class Swap extends Component {
         dstAddresses.push(dstAddress);
       }
       const data = hopData.zip(dstAddresses);
-      let txIds = []
       for (let datum of data) {
         const [{ bidAmount, askAmount, poolData: { address: poolAddress } }, dstAddress] = datum;
         const _srcAddress = srcAddress;
@@ -243,12 +260,14 @@ class Swap extends Component {
           window.senswap.wallet
         );
         txIds.push(txId);
+        this.setState({ txIds });
       }
-      await setSuccess('Swap successfully', utils.explorer(txIds[txIds.length - 1]));
     } catch (er) {
+      txIds.push('error');
       await setError(er);
     }
-    return this.setState({ loading: false });
+    console.log(txIds)
+    return this.setState({ loading: false, txIds });
   }
 
   renderAction = () => {
@@ -277,9 +296,9 @@ class Swap extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, ui: { type } } = this.props;
     const {
-      mintAddresses,
+      mintAddresses, txIds,
       bidValue, askValue, slippage, hopData
     } = this.state;
 
@@ -295,7 +314,10 @@ class Swap extends Component {
         <Drain />
       </Grid>
       <Grid item xs={12} md={8}>
-        <Paper className={classes.paper}>
+        <Paper className={classes.paper} style={{
+          paddingLeft: type !== 'xs' ? 32 : 16,
+          paddingRight: type !== 'xs' ? 32 : 16,
+        }}>
           <Grid container justify="center">
             <Grid item xs={11}>
               <Grid container>
@@ -325,7 +347,7 @@ class Swap extends Component {
                   <Divider />
                 </Grid>
                 <Grid item xs={12}>
-                  <Details hopData={hopData} />
+                  <Details hopData={hopData} txIds={txIds} />
                 </Grid>
                 <Grid item xs={12}>
                   <Drain size={1} />
@@ -333,7 +355,6 @@ class Swap extends Component {
                 <Grid item xs={12}>
                   {this.renderAction()}
                 </Grid>
-                <Grid item xs={12} />
               </Grid>
             </Grid>
           </Grid>

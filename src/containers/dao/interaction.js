@@ -62,16 +62,17 @@ class Interaction extends Component {
     }
   }
 
-  earn = () => {
+  earn = async () => {
     const { setError, setSuccess, poolData, onClose } = this.props;
     const { receiverAddress } = this.state;
-    const { address: poolAddress, vault: { amount } } = poolData;
-    return this.swap.earn(amount, poolAddress, receiverAddress, window.senswap.wallet).then(txId => {
-      onClose();
-      return setSuccess('Earn successfully', utils.explorer(txId));
-    }).catch(er => {
-      return setError(er);
-    });
+    try {
+      const { address: poolAddress, vault: { amount } } = poolData;
+      const txId = await this.swap.earn(amount, poolAddress, receiverAddress, window.senswap.wallet);
+      await setSuccess('Earn successfully', utils.explorer(txId));
+    } catch (er) {
+      await setError(er);
+    }
+    return onClose();
   }
 
   render() {

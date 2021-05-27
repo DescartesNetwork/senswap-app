@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
-import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -43,26 +42,19 @@ class History extends Component {
     if (!isEqual(prevRightbar, rightbar) && rightbar) return this.fetchData();
   }
 
-  fetchData = () => {
-    const { wallet: { accounts, lamports }, setError, getAccountData } = this.props;
-
-    const solAccount = {
+  fetchData = async () => {
+    const { wallet: { accounts, lamports }, getAccountData } = this.props;
+    let accountData = [{
       amount: global.BigInt(lamports),
       mint: { decimals: 9, ticket: 'solana' }
+    }];
+    for (let accountAddress of accounts) {
+      try {
+        const data = await getAccountData(accountAddress);
+        accountData.push(data);
+      } catch (er) { /* Nothing */ }
     }
-
-    return accounts.each(accountAddress => {
-      return getAccountData(accountAddress);
-    }, { skipError: true, skipIndex: true }).then(data => {
-      let accountData = data.filter(({ pool }) => {
-        const { address: poolAddress } = pool || {}
-        return !ssjs.isAddress(poolAddress);
-      });
-      accountData.unshift(solAccount);
-      return this.setState({ accountData });
-    }).catch(er => {
-      return setError(er);
-    });
+    return this.setState({ accountData });
   }
 
   render() {

@@ -49,20 +49,21 @@ class CardBalance extends Component {
     return this.setState({ censored: !censored });
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const { accountData } = this.props;
-    return this.setState({ loading: true }, () => {
-      return accountData.filter(({ mint: { ticket } }) => ticket).each(({ amount, mint: { decimals, ticket } }) => {
+    this.setState({ loading: true });
+    try {
+      let data = accountData.filter(({ mint: { ticket } }) => ticket);
+      data = await Promise.all(data.map(({ amount, mint: { decimals, ticket } }) => {
         const balance = ssjs.undecimalize(amount, decimals);
         return utils.fetchValue(balance, ticket);
-      }).then(data => {
-        const usd = data.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
-        const btc = data.map(({ btc }) => btc).reduce((a, b) => a + b, 0);
-        return this.setState({ usd, btc, error: '', loading: false });
-      }).catch(er => {
-        return this.setState({ error: er.toString(), usd: 0, btc: 0, loading: false });
-      });
-    });
+      }));
+      const usd = data.map(({ usd }) => usd).reduce((a, b) => a + b, 0);
+      const btc = data.map(({ btc }) => btc).reduce((a, b) => a + b, 0);
+      return this.setState({ usd, btc, error: '', loading: false });
+    } catch (er) {
+      return this.setState({ error: er.toString(), usd: 0, btc: 0, loading: false });
+    }
   }
 
   render() {
@@ -132,7 +133,7 @@ CardBalance.defaultProps = {
   accountData: []
 }
 
-CardBalance.propsType = {
+CardBalance.propTypes = {
   address: PropTypes.string,
   accountData: PropTypes.array
 }
