@@ -33,29 +33,40 @@ class Selection extends Component {
     }
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     const { always } = this.props;
-    if (always) this.fetchData();
+    if (always) this.fetchOne();
   }
 
   componentDidUpdate(prevProps) {
-    const { visible: prevVisible } = prevProps;
-    const { visible } = this.props;
+    const { visible: prevVisible, condition: prevCondition } = prevProps;
+    const { visible, condition } = this.props;
     if (!isEqual(prevVisible, visible) && visible) this.fetchData();
+    if (!isEqual(prevCondition, condition)) {
+      if (!visible) this.fetchOne()
+      else this.fetchData();
+    }
   }
 
   fetchData = async () => {
-    const { setError, getMints, getMint, always, condition } = this.props;
+    const { setError, getMints, getMint, condition } = this.props;
     this.setState({ loading: true });
     try {
       let data = await getMints(condition, 5, 0);
       data = await Promise.all(data.map(({ address }) => getMint(address)));
-      return this.setState({ data, loading: false }, () => {
-        if (always && data.length) this.onChange(data[0].address);
-      });
+      return this.setState({ data, loading: false });
     } catch (er) {
       return setError(er);
     }
+  }
+
+  fetchOne = async () => {
+    const { getMints, getMint, onChange, condition } = this.props;
+    try {
+      const [{ address }] = await getMints(condition, 1, 0);
+      const data = await getMint(address);
+      return onChange(data);
+    } catch (er) {/* Nothing */ }
   }
 
   onSearch = (e) => {
