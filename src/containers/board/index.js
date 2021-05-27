@@ -17,6 +17,7 @@ import Reserve from './reserve';
 import Price from './price';
 import Reference from './reference';
 import Action from './action';
+import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
@@ -58,6 +59,7 @@ class Board extends Component {
 
     if (!ssjs.isAddress(poolAddress)) return null;
     return <Grid container>
+      <BucketWatcher addresses={[poolAddress]} onChange={this.fetchData} />
       <Grid item xs={12}>
         <Header poolData={data} />
       </Grid>
@@ -76,7 +78,7 @@ class Board extends Component {
             <ROI poolAddress={poolAddress} />
           </Grid>
           <Grid item xs={12}>
-            <Reserve poolAddress={poolAddress} />
+            <Reserve poolData={data} />
           </Grid>
         </Grid>
       </Grid>

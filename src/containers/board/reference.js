@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import numeral from 'numeral';
 import ssjs from 'senswapjs';
 
 import { withStyles, makeStyles } from 'senswap-ui/styles';
@@ -42,7 +43,7 @@ function Price(props) {
   }, [ticket]);
   return <Grid container className={classes.noWrap} alignItems="flex-end">
     <Grid item className={classes.stretch}>
-      <Typography variant="h5">${price}</Typography>
+      <Typography variant="h5">${numeral(price).format('0.0[0]')}</Typography>
     </Grid>
     <Grid item>
       <Grid container spacing={0} className={classes.noWrap}>
@@ -56,7 +57,7 @@ function Price(props) {
         <Grid item>
           <Typography
             style={{ color: priceChange < 0 ? '#FF7A68' : '#4FBF67' }}
-          >{Math.abs(priceChange)}%</Typography>
+          >{numeral(Math.abs(priceChange)).format('0.0[0]')}%</Typography>
         </Grid>
       </Grid>
     </Grid>

@@ -7,7 +7,6 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import Paper from 'senswap-ui/paper';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 
 import styles from './styles';
@@ -23,44 +22,44 @@ class ROI extends Component {
             <TableHead>
               <TableRow>
                 <TableCell align="left">
-                  <Typography variant="body2">Timestamp</Typography>
+                  <Typography variant="body2" color="textSecondary">ROI</Typography>
                 </TableCell>
                 <TableCell align="left">
-                  <Typography variant="body2">ROI</Typography>
+                  <Typography variant="body2" color="textSecondary">Duration</Typography>
                 </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               <TableRow>
                 <TableCell>
-                  <Typography>1d</Typography>
+                  <Typography>No data</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography>No data</Typography>
+                  <Typography>1d</Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
+                <TableCell>
+                  <Typography>No data</Typography>
+                </TableCell>
                 <TableCell>
                   <Typography>7d</Typography>
                 </TableCell>
+              </TableRow>
+              <TableRow>
                 <TableCell>
                   <Typography>No data</Typography>
                 </TableCell>
-              </TableRow>
-              <TableRow>
                 <TableCell>
                   <Typography>30d</Typography>
                 </TableCell>
-                <TableCell>
-                  <Typography>No data</Typography>
-                </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <Typography>1y</Typography>
+                  <Typography>No data</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography>No data</Typography>
+                  <Typography>1y</Typography>
                 </TableCell>
               </TableRow>
             </TableBody>
