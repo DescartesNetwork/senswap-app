@@ -29,7 +29,7 @@ class Accounts extends Component {
     super();
 
     this.state = {
-      limit: 2,
+      limit: 5,
       page: 0,
       loading: false,
       data: [],
