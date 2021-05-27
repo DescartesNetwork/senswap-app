@@ -24,5 +24,12 @@ export default theme => ({
   unit: {
     fontSize: 8,
     color: '#808191'
+  },
+  // Status
+  success: {
+    color: theme.palette.success.main,
+  },
+  failed: {
+    color: theme.palette.error.main,
   }
 });

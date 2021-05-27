@@ -13,16 +13,11 @@ import Card, { CardContent } from 'senswap-ui/card';
 import Typography from 'senswap-ui/typography';
 import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import Divider from 'senswap-ui/divider';
-import Button, { IconButton } from 'senswap-ui/button';
-import Tooltip from 'senswap-ui/tooltip';
+import Button from 'senswap-ui/button';
 
-import {
-  AccountBalanceWalletOutlined, InputRounded, OpenInNewRounded,
-  OfflineBoltRounded,
-} from 'senswap-ui/icons';
+import { AccountBalanceWalletOutlined, InputRounded, OfflineBoltRounded } from 'senswap-ui/icons';
 
 import AddLiquidity from 'containers/pool/addLiquidity';
-import RemoveLiquidity from 'containers/pool/removeLiquidity';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
@@ -112,37 +107,34 @@ class PoolCard extends Component {
         <Typography>Connect Wallet</Typography>
       </Button>
     </Grid>
-    // Deposit
-    const { address: accountAddress } = accountData || {}
-    const isLP = ssjs.isAddress(accountAddress);
-    let render = [<Grid item xs={isLP ? 6 : 12} key="deposit">
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<InputRounded />}
-        size="large"
-        onClick={this.onOpenDeposit}
-        fullWidth
-      >
-        <Typography>Deposit</Typography>
-      </Button>
-      <AddLiquidity poolData={data} visible={visibleDeposit} onClose={this.onCloseDeposit} />
-    </Grid>]
-    // Withdraw
-    if (isLP) render.push(<Grid item xs={6} key="withdraw">
-      <Button
-        variant="outlined"
-        startIcon={<OpenInNewRounded />}
-        size="large"
-        onClick={this.onOpenWithdraw}
-        fullWidth
-      >
-        <Typography>Withdraw</Typography>
-      </Button>
-      <RemoveLiquidity accountData={accountData} visible={visibleWithdraw} onClose={this.onCloseWithdraw} />
-    </Grid>)
-    // Result
-    return render;
+    // Deposit & Quick swap
+    return <Fragment>
+      <Grid item xs={6}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<InputRounded />}
+          size="large"
+          onClick={this.onOpenDeposit}
+          fullWidth
+        >
+          <Typography>Deposit</Typography>
+        </Button>
+        <AddLiquidity poolData={data} visible={visibleDeposit} onClose={this.onCloseDeposit} />
+      </Grid>
+      <Grid item xs={6}>
+        <Button
+          variant="outlined"
+          startIcon={<OfflineBoltRounded />}
+          size="large"
+          component={RouterLink}
+          to={`/swap/${poolAddress}`}
+          fullWidth
+        >
+          <Typography>Swap</Typography>
+        </Button>
+      </Grid>
+    </Fragment>
   }
 
   render() {
@@ -175,16 +167,19 @@ class PoolCard extends Component {
                 </AvatarGroup>
               </Grid>
               <Grid item>
-                <Tooltip title="Quick Swap">
-                  <IconButton to={`/swap/${poolAddress}`} component={RouterLink} edge="end">
-                    <OfflineBoltRounded />
-                  </IconButton>
-                </Tooltip>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  component={RouterLink}
+                  to={`/pool/${poolAddress}`}
+                >
+                  <Typography color="textSecondary">Details</Typography>
+                </Button>
               </Grid>
             </Grid>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="subtitle1">{symbols.join(' x ')} Pool</Typography>
+            <Typography variant="subtitle1">{symbols.join(' x ')}</Typography>
           </Grid>
         </Grid>
       </CardContent>
