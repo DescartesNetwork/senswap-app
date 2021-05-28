@@ -33,6 +33,7 @@ class Reserve extends Component {
           <Typography variant="subtitle1" color="textSecondary">Reserves</Typography>
         </Grid>
         <Grid item xs={12}>
+          {/* Your chart here */}
           <Typography>{reserveA} {symbolA}</Typography>
           <Typography>{reserveB} {symbolB}</Typography>
           <Typography>{reserveS} {symbolS}</Typography>
