@@ -33,19 +33,11 @@ class Selection extends Component {
     }
   }
 
-  async componentDidMount() {
-    const { always } = this.props;
-    if (always) this.fetchOne();
-  }
-
   componentDidUpdate(prevProps) {
     const { visible: prevVisible, condition: prevCondition } = prevProps;
     const { visible, condition } = this.props;
     if (!isEqual(prevVisible, visible) && visible) this.fetchData();
-    if (!isEqual(prevCondition, condition)) {
-      if (!visible) this.fetchOne()
-      else this.fetchData();
-    }
+    if (!isEqual(prevCondition, condition) && visible) this.fetchData();
   }
 
   fetchData = async () => {
@@ -60,14 +52,15 @@ class Selection extends Component {
     }
   }
 
-  fetchOne = async () => {
-    const { getMints, getMint, onChange, condition } = this.props;
-    try {
-      const [{ address }] = await getMints(condition, 1, 0);
-      const data = await getMint(address);
-      return onChange(data);
-    } catch (er) {/* Nothing */ }
-  }
+  // fetchOne = async () => {
+  //   const { getMints, getMint, onChange, condition } = this.props;
+  //   try {
+  //     const [{ address }] = await getMints(condition, 1, 0);
+  //     const data = await getMint(address);
+  //     console.log(data)
+  //     return onChange(data);
+  //   } catch (er) { /* Nothing */ }
+  // }
 
   onSearch = (e) => {
     const search = e.target.value || '';
@@ -174,6 +167,7 @@ const mapStateToProps = state => ({
   ui: state.ui,
   bucket: state.bucket,
   wallet: state.wallet,
+  mint: state.mint,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
@@ -183,7 +177,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 Selection.defaultProps = {
   visible: false,
-  always: false,
   condition: {},
   onChange: () => { },
   onClose: () => { },
@@ -191,7 +184,6 @@ Selection.defaultProps = {
 
 Selection.propTypes = {
   visible: PropTypes.bool,
-  always: PropTypes.bool,
   condition: PropTypes.object,
   onChange: PropTypes.func,
   onClose: PropTypes.func,
