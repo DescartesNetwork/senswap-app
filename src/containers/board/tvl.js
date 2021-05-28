@@ -22,6 +22,9 @@ class TVL extends Component {
         <Grid item xs={12}>
           <Typography variant="subtitle1" color="textSecondary">TVL</Typography>
         </Grid>
+        <Grid item xs={12}>
+          {/* Your code here */}
+        </Grid>
       </Grid>
     </Paper>
   }
