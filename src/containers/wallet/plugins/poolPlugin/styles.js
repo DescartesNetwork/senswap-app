@@ -31,4 +31,11 @@ export default theme => ({
   cardAction: {
     padding: `${theme.spacing(2)}px ${theme.spacing(3)}px !important`,
   },
+  tableRow: {
+    cursor: 'pointer',
+    transition: theme.transitions.create(),
+    '&:hover': {
+      backgroundColor: theme.palette.background.secondary,
+    },
+  },
 });

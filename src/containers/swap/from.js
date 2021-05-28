@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
@@ -17,7 +16,7 @@ import Link from 'senswap-ui/link';
 
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
-import { MintAvatar, MintSelection } from 'containers/wallet';
+import { MintAvatar, PoolSelection } from 'containers/wallet';
 
 import styles from './styles';
 import utils from 'helpers/utils';
@@ -33,77 +32,51 @@ class From extends Component {
     this.state = {
       loading: false,
       visible: false,
-      accountData: {},
-      value: '',
     }
-  }
-
-  componentDidMount = () => {
-    const { value } = this.props;
-    this.setState({ value }, this.onDesireMintAddress);
-  }
-
-  componentDidUpdate = (prevProps) => {
-    const {
-      value: prevValue, mintAddress: prevMintAddress,
-      wallet: { user: { address: prevAddress } },
-    } = prevProps;
-    const { value, wallet: { user: { address } }, mintAddress } = this.props;
-    if (!isEqual(prevValue, value)) this.setState({ value });
-    if (!isEqual(prevMintAddress, mintAddress)) this.onDesireMintAddress();
-    if (!isEqual(prevAddress, address)) this.onDesireMintAddress();
-  }
-
-  onDesireMintAddress = () => {
-    const { mintAddress } = this.props;
-    if (ssjs.isAddress(mintAddress)) return this.onMintData({ address: mintAddress });
-    else return this.setState({ accountData: {} }, this.returnData);
   }
 
   onOpen = () => this.setState({ visible: true });
   onClose = () => this.setState({ visible: false });
 
-  onMintData = async (mintData) => {
+  onData = async ({ mintData, poolData }) => {
+    const {
+      wallet: { user: { address: walletAddress } },
+      setError, getAccountData, onChange, value
+    } = this.props;
     const { address: mintAddress } = mintData;
-    const { setError, getAccountData, wallet: { user: { address: walletAddress } } } = this.props;
     if (!ssjs.isAddress(walletAddress)) return;
+    this.setState({ loading: true }, this.onClose);
     try {
-      this.setState({ loading: true }, this.onClose);
       let accountData = await sol.scanAccount(mintAddress, walletAddress);
       const { state, address: accountAddress } = accountData || {}
       if (!state) accountData = { address: '', amount: 0n, mint: mintData };
       else accountData = await getAccountData(accountAddress);
-      return this.setState({ loading: false, accountData, value: '' }, this.returnData);
+      onChange({ accountData, poolData, value });
     } catch (er) {
       await setError(er);
-      return this.setState({ loading: false });
     }
+    return this.setState({ loading: false });
   }
 
   onValue = (e) => {
+    const { onChange, accountData, poolData } = this.props;
     const value = e.target.value || '';
-    return this.setState({ value }, this.returnData);
+    return onChange({ accountData, poolData, value });
   }
 
   onMax = () => {
-    const { accountData: { amount, mint } } = this.state;
+    const { accountData: { amount, mint } } = this.props;
     const { decimals } = mint || {}
     const value = ssjs.undecimalize(amount, decimals);
     const pseudoEvent = { target: { value } }
     return this.onValue(pseudoEvent);
   }
 
-  returnData = () => {
-    const { onChange } = this.props;
-    const { accountData, value } = this.state;
-    return onChange({ accountData, value });
-  }
-
   render() {
-    const { classes } = this.props;
-    const { loading, visible, accountData, value } = this.state;
-    const { amount, mint } = accountData || {}
-    const { icon, symbol, decimals } = mint || {}
+    const { classes, poolData, accountData, value } = this.props;
+    const { loading, visible } = this.state;
+    const { amount, mint: mintData } = accountData || {}
+    const { icon, symbol, decimals } = mintData || {}
 
     return <Grid container>
       <Grid item xs={12}>
@@ -137,10 +110,12 @@ class From extends Component {
             </Grid>
           </Grid>}
         />
-        <MintSelection
+        <PoolSelection
           visible={visible}
-          onChange={this.onMintData}
+          onChange={this.onData}
           onClose={this.onClose}
+          poolData={poolData}
+          mintData={mintData}
         />
       </Grid>
     </Grid>
@@ -159,13 +134,15 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
 From.defaultProps = {
-  mintAddress: '',
+  accountData: {},
+  poolData: {},
   value: '',
   onChange: () => { },
 }
 
 From.propTypes = {
-  mintAddress: PropTypes.string,
+  accountData: PropTypes.object,
+  poolData: PropTypes.object,
   value: PropTypes.string,
   onChange: PropTypes.func,
 }

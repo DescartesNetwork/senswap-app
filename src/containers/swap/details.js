@@ -114,7 +114,7 @@ class Details extends Component {
     const { srcMintAddress, dstMintAddress, poolData, ratio } = data;
     return <Grid container spacing={0} direction="column" style={{ paddingRight: 16 }}>
       <Grid item>
-        <Typography color="textSecondary">Offering Price</Typography>
+        <Typography variant="caption" color="textSecondary">Offering Price</Typography>
       </Grid>
       <Grid item>
         <Typography>{utils.prettyNumber(ratio)} <span className={classes.unit}>{this.parseSymbol(dstMintAddress, poolData)}/{this.parseSymbol(srcMintAddress, poolData)}</span></Typography>
@@ -127,7 +127,7 @@ class Details extends Component {
     const { slippage } = data;
     return <Grid container spacing={0} direction="column" style={{ paddingRight: 16 }}>
       <Grid item>
-        <Typography color="textSecondary">Price Change</Typography>
+        <Typography variant="caption" color="textSecondary">Price Change</Typography>
       </Grid>
       <Grid item>
         <Grid container spacing={0} className={classes.noWrap}>
@@ -146,7 +146,7 @@ class Details extends Component {
     const { fee } = data;
     return <Grid container spacing={0} direction="column" style={{ paddingRight: 16 }}>
       <Grid item>
-        <Typography color="textSecondary">Fee</Typography>
+        <Typography variant="caption" color="textSecondary">Fee</Typography>
       </Grid>
       <Grid item>
         <Typography>{utils.prettyNumber(ssjs.undecimalize(fee, 9) * 100)}%</Typography>

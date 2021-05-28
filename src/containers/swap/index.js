@@ -28,7 +28,7 @@ import oracle from 'helpers/oracle';
 import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
-import { getPoolData } from 'modules/bucket.reducer';
+import { getPoolData, getAccountData, getMintData } from 'modules/bucket.reducer';
 import { openWallet, updateWallet } from 'modules/wallet.reducer';
 
 
@@ -37,15 +37,19 @@ class Swap extends Component {
     super();
 
     this.state = {
-      desiredPoolAddress: '',
-      mintAddresses: [],
+
+      bidPoolData: {},
       bidAccountData: {},
       bidValue: '',
+
+      askPoolData: {},
       askAccountData: {},
       askValue: '',
+
       slippage: 0.01,
       hopData: [],
       txIds: [],
+
     }
 
     this.swap = window.senswap.swap;
@@ -56,9 +60,10 @@ class Swap extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { match: { params: prevParams } } = prevProps;
-    const { match: { params } } = this.props;
+    const { match: { params: prevParams }, wallet: { user: prevUser } } = prevProps;
+    const { match: { params }, wallet: { user } } = this.props;
     if (!isEqual(prevParams, params)) this.parseParams();
+    if (!isEqual(prevUser, user)) this.parseParams();
   }
 
   parseParams = async () => {
@@ -72,10 +77,34 @@ class Swap extends Component {
       const { address: mintAddressB } = mint_b || {};
       if (!ssjs.isAddress(mintAddressA)) return setError('Cannot load token data');
       if (!ssjs.isAddress(mintAddressB)) return setError('Cannot load token data');
-      const mintAddresses = [mintAddressA, mintAddressB];
-      return this.setState({ desiredPoolAddress: poolAddress, mintAddresses });
+      const bidAccountData = await this.fetchAccountData(mintAddressA);
+      const askAccountData = await this.fetchAccountData(mintAddressB);
+      return this.setState({
+        bidPoolData: data, bidAccountData,
+        askPoolData: data, askAccountData
+      });
     } catch (er) {
       return setError(er);
+    }
+  }
+
+  fetchAccountData = async (mintAddress) => {
+    const {
+      wallet: { user: { address: walletAddress } },
+      setError, getAccountData, getMintData
+    } = this.props;
+    if (!ssjs.isAddress(mintAddress) || !ssjs.isAddress(walletAddress)) return {}
+    try {
+      const { address, state } = await sol.scanAccount(mintAddress, walletAddress);
+      if (!ssjs.isAddress(address) || !state) {
+        const mintData = await getMintData(mintAddress);
+        return { address: '', mint: mintData }
+      }
+      const accountData = await getAccountData(address);
+      return accountData;
+    } catch (er) {
+      await setError(er);
+      return {}
     }
   }
 
@@ -182,33 +211,23 @@ class Swap extends Component {
     return limit;
   }
 
-  onBidData = ({ accountData, value }) => {
-    const { mintAddresses } = this.state;
-    const { mint } = accountData || {}
-    const { address: mintAddress } = mint || {}
-    const newMintAddresses = [...mintAddresses];
-    newMintAddresses[0] = mintAddress;
+  onBidData = ({ accountData, poolData, value }) => {
     return this.setState({
       bidAccountData: accountData,
       bidValue: value,
+      bidPoolData: poolData,
       askValue: '',
       txIds: [],
-      mintAddresses: newMintAddresses
     }, () => this.estimateState(false));
   }
 
-  onAskData = ({ accountData, value }) => {
-    const { mintAddresses } = this.state;
-    const { mint } = accountData || {}
-    const { address: mintAddress } = mint || {}
-    const newMintAddresses = [...mintAddresses];
-    newMintAddresses[1] = mintAddress;
+  onAskData = ({ accountData, poolData, value }) => {
     return this.setState({
-      askAccountData: accountData,
       bidValue: '',
+      askAccountData: accountData,
       askValue: value,
+      askPoolData: poolData,
       txIds: [],
-      mintAddresses: newMintAddresses
     }, () => this.estimateState(true));
   }
 
@@ -217,9 +236,15 @@ class Swap extends Component {
   }
 
   onSwitch = () => {
-    const { mintAddresses } = this.state;
-    const newMintAddresses = [mintAddresses[1], mintAddresses[0]];
-    return this.setState({ mintAddresses: newMintAddresses });
+    const { bidAccountData, bidPoolData, askAccountData, askPoolData } = this.state;
+    return this.setState({
+      bidValue: '',
+      bidAccountData: askAccountData,
+      bidPoolData: askPoolData,
+      askValue: '',
+      askAccountData: bidAccountData,
+      askPoolData: bidPoolData,
+    }, () => this.estimateState(false));
   }
 
   onAutogenDestinationAddress = async (mintAddress) => {
@@ -292,8 +317,9 @@ class Swap extends Component {
   render() {
     const { classes, ui: { type } } = this.props;
     const {
-      mintAddresses, txIds,
-      bidValue, askValue, slippage, hopData
+      bidPoolData, bidAccountData, bidValue,
+      askPoolData, askAccountData, askValue,
+      txIds, slippage, hopData,
     } = this.state;
 
     return <Grid container>
@@ -317,7 +343,8 @@ class Swap extends Component {
               <Grid container>
                 <Grid item xs={12}>
                   <From
-                    mintAddress={mintAddresses[0]}
+                    accountData={bidAccountData}
+                    poolData={bidPoolData}
                     onChange={this.onBidData} value={bidValue}
                   />
                 </Grid>
@@ -332,7 +359,8 @@ class Swap extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <To
-                    mintAddress={mintAddresses[1]}
+                    accountData={askAccountData}
+                    poolData={askPoolData}
                     onSlippage={this.onSlippage} slippage={slippage}
                     onChange={this.onAskData} value={askValue}
                   />
@@ -372,7 +400,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setSuccess,
   updateWallet, openWallet,
   getPools, getPool,
-  getPoolData,
+  getPoolData, getAccountData, getMintData,
 }, dispatch);
 
 export default withRouter(connect(
