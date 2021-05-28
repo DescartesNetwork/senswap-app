@@ -27,7 +27,7 @@ import styles from './styles';
 import oracle from 'helpers/oracle';
 import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
-import { getPools, getPool } from 'modules/pool.reducer';
+import { getPools } from 'modules/pool.reducer';
 import { getPoolData, getAccountData, getMintData } from 'modules/bucket.reducer';
 import { openWallet, updateWallet } from 'modules/wallet.reducer';
 
@@ -37,6 +37,7 @@ class Swap extends Component {
     super();
 
     this.state = {
+      defaultPoolAddress: '',
 
       bidPoolData: {},
       bidAccountData: {},
@@ -49,7 +50,6 @@ class Swap extends Component {
       slippage: 0.01,
       hopData: [],
       txIds: [],
-
     }
 
     this.swap = window.senswap.swap;
@@ -80,9 +80,10 @@ class Swap extends Component {
       const bidAccountData = await this.fetchAccountData(mintAddressA);
       const askAccountData = await this.fetchAccountData(mintAddressB);
       return this.setState({
+        defaultPoolAddress: poolAddress,
         bidPoolData: data, bidAccountData,
         askPoolData: data, askAccountData
-      });
+      }, () => this.estimateState(false));
     } catch (er) {
       return setError(er);
     }
@@ -108,62 +109,12 @@ class Swap extends Component {
     }
   }
 
-  estimateTheBestPool = async (srcPoolAddresses, dstPoolAddresses) => {
-    const { getPoolData } = this.props;
-    let maxSrcPoolData = { reserve_s: global.BigInt(0) }
-    let maxDstPoolData = { reserve_s: global.BigInt(0) }
-
-    for (let srcPoolAddress of srcPoolAddresses) {
-      const srcPoolData = await getPoolData(srcPoolAddress);
-      const { state: srcState, reserve_s: srcReserve } = srcPoolData || {}
-      if (srcState !== 1 || srcReserve <= 0) continue;
-      const { reserve_s: maxSrcReserve } = maxSrcPoolData || {}
-      if (maxSrcReserve < srcReserve) maxSrcPoolData = srcPoolData;
-
-      for (let dstPoolAddress of dstPoolAddresses) {
-        const dstPoolData = await getPoolData(dstPoolAddress);
-        const { state: dstState, reserve_s: dstReserve } = dstPoolData || {}
-        if (dstState !== 1 || dstReserve <= 0) continue;
-        const { reserve_s: maxDstReserve } = maxDstPoolData || {}
-        if (maxDstReserve < dstReserve) maxDstPoolData = dstPoolData;
-        if (srcPoolAddress === dstPoolAddress) return [srcPoolAddress, dstPoolAddress];
-      }
-    }
-
-    const { address: srcPoolAddress } = maxSrcPoolData;
-    const { address: dstPoolAddress } = maxDstPoolData;
-    return [srcPoolAddress, dstPoolAddress];
-  }
-
-  routing = async (srcMintAddress, dstMintAddress) => {
-    if (!ssjs.isAddress(srcMintAddress)) throw new Error('Invalid source mint address');
-    if (!ssjs.isAddress(dstMintAddress)) throw new Error('Invalid destination mint address');
-    if (srcMintAddress === dstMintAddress) throw new Error('The pools is identical');
-
-    const { getPool, getPools, getPoolData } = this.props;
-    const srcCondition = { '$or': [{ mintS: srcMintAddress }, { mintA: srcMintAddress }, { mintB: srcMintAddress }] }
-    const dstCondition = { '$or': [{ mintS: dstMintAddress }, { mintA: dstMintAddress }, { mintB: dstMintAddress }] }
-
-    const srcData = await getPools(srcCondition, -1, 0);
-    if (!srcData.length) throw new Error('Cannot find available pools');
-    const srcPoolAddresses = srcData.map(({ address }) => address);
-
-    const dstData = await getPools(dstCondition, -1, 0);
-    if (!dstData.length) throw new Error('Cannot find available pools');
-    const dstPoolAddresses = dstData.map(({ address }) => address);
-
-    const route = await this.estimateTheBestPool(srcPoolAddresses, dstPoolAddresses);
-    let data = await Promise.all(route.map(address => getPool(address)));
-    if (data.length < 2) throw new Error('Cannot find available pools');
-    data = await Promise.all(data.map(({ address }) => getPoolData(address)));
-    if (data.length < 2) throw new Error('Cannot find available pools');
-
-    return data;
-  }
-
   estimateState = async (inverse = false) => {
     const { setError } = this.props;
-    const { bidAccountData, askAccountData, bidValue, askValue } = this.state;
+    const {
+      bidAccountData, bidValue, bidPoolData,
+      askAccountData, askValue, askPoolData
+    } = this.state;
     const { mint: bidMintData } = bidAccountData || {}
     const { mint: askMintData } = askAccountData || {}
     const { address: srcMintAddress, decimals: bidDecimals } = bidMintData || {}
@@ -174,8 +125,6 @@ class Swap extends Component {
     this.timeout = setTimeout(async () => {
       this.setState({ loading: true });
       try {
-        const [bidPoolData, askPoolData] = await this.routing(srcMintAddress, dstMintAddress);
-
         let data = [];
         if (inverse) data = await oracle.inverseCurve(
           ssjs.decimalize(askValue, askDecimals),
@@ -321,6 +270,8 @@ class Swap extends Component {
       askPoolData, askAccountData, askValue,
       txIds, slippage, hopData,
     } = this.state;
+    const { address: bidPoolAddress } = bidPoolData || {}
+    const { address: askPoolAddress } = askPoolData || {}
 
     return <Grid container>
       <BucketWatcher
@@ -346,6 +297,7 @@ class Swap extends Component {
                     accountData={bidAccountData}
                     poolData={bidPoolData}
                     onChange={this.onBidData} value={bidValue}
+                    refPoolAddress={askPoolAddress}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -363,6 +315,7 @@ class Swap extends Component {
                     poolData={askPoolData}
                     onSlippage={this.onSlippage} slippage={slippage}
                     onChange={this.onAskData} value={askValue}
+                    refPoolAddress={bidPoolAddress}
                   />
                 </Grid>
                 <Grid item xs={12} >
@@ -399,7 +352,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setSuccess,
   updateWallet, openWallet,
-  getPools, getPool,
+  getPools,
   getPoolData, getAccountData, getMintData,
 }, dispatch);
 

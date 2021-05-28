@@ -64,7 +64,7 @@ class To extends Component {
   }
 
   render() {
-    const { classes, poolData, accountData, onSlippage, slippage, value } = this.props;
+    const { classes, accountData, onSlippage, slippage, value, refPoolAddress } = this.props;
     const { loading, visible } = this.state;
     const { mint: mintData } = accountData || {}
     const { icon, symbol } = mintData || {}
@@ -132,8 +132,9 @@ class To extends Component {
           visible={visible}
           onChange={this.onData}
           onClose={this.onClose}
-          poolData={poolData}
+          refPoolAddresses={[]}
           mintData={mintData}
+          refPoolAddress={refPoolAddress}
         />
       </Grid>
     </Grid>
@@ -158,6 +159,7 @@ To.defaultProps = {
   value: '',
   onSlippage: () => { },
   onChange: () => { },
+  refPoolAddress: '',
 }
 
 To.propTypes = {
@@ -167,6 +169,7 @@ To.propTypes = {
   value: PropTypes.string,
   onLimit: PropTypes.func,
   onChange: PropTypes.func,
+  refPoolAddress: PropTypes.string,
 }
 
 export default withRouter(connect(

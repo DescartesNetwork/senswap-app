@@ -73,7 +73,7 @@ class From extends Component {
   }
 
   render() {
-    const { classes, poolData, accountData, value } = this.props;
+    const { classes, accountData, value, refPoolAddress } = this.props;
     const { loading, visible } = this.state;
     const { amount, mint: mintData } = accountData || {}
     const { icon, symbol, decimals } = mintData || {}
@@ -114,8 +114,9 @@ class From extends Component {
           visible={visible}
           onChange={this.onData}
           onClose={this.onClose}
-          poolData={poolData}
+          refPoolAddresses={[]}
           mintData={mintData}
+          refPoolAddress={refPoolAddress}
         />
       </Grid>
     </Grid>
@@ -138,6 +139,7 @@ From.defaultProps = {
   poolData: {},
   value: '',
   onChange: () => { },
+  refPoolAddress: '',
 }
 
 From.propTypes = {
@@ -145,6 +147,7 @@ From.propTypes = {
   poolData: PropTypes.object,
   value: PropTypes.string,
   onChange: PropTypes.func,
+  refPoolAddress: PropTypes.string,
 }
 
 export default withRouter(connect(

@@ -10,13 +10,16 @@ import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import { IconButton } from 'senswap-ui/button';
+import Button, { IconButton } from 'senswap-ui/button';
 import TextField from 'senswap-ui/textField';
-import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
+import Dialog, { DialogTitle, DialogContent, DialogActions } from 'senswap-ui/dialog';
 import Table, { TableBody, TableCell, TableContainer, TableRow } from 'senswap-ui/table';
 import CircularProgress from 'senswap-ui/circularProgress';
+import Drain from 'senswap-ui/drain';
 
-import { CloseRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
+import {
+  CloseRounded, ArrowDropDownRounded, CheckCircleOutlineRounded,
+} from 'senswap-ui/icons';
 
 import { MintAvatar, MintSelection, PoolAvatar } from 'containers/wallet';
 
@@ -31,6 +34,7 @@ class Selection extends Component {
     super();
 
     this.state = {
+      selectedPoolAddress: '',
       visibleMintSelection: false,
       loading: false,
       mintData: {},
@@ -39,15 +43,21 @@ class Selection extends Component {
   }
 
   componentDidMount() {
-    const { mintData } = this.props;
+    const { mintData, refPoolAddress } = this.props;
     this.onMintData(mintData);
+    this.setState({ selectedPoolAddress: refPoolAddress });
   }
 
   componentDidUpdate(prevProps) {
-    const { mintData: prevMintData, visible: prevVisible } = prevProps;
-    const { mintData, visible } = this.props;
+    const {
+      mintData: prevMintData,
+      visible: prevVisible,
+      refPoolAddress: prevRefPoolAddress
+    } = prevProps;
+    const { mintData, visible, refPoolAddress } = this.props;
     if (!isEqual(prevVisible, visible) && visible) this.onMintData(mintData);
     if (!isEqual(prevMintData, mintData)) this.onMintData({ mintData });
+    if (!isEqual(prevRefPoolAddress, refPoolAddress)) this.setState({ selectedPoolAddress: refPoolAddress });
   }
 
   fetchData = async (condition) => {
@@ -65,7 +75,7 @@ class Selection extends Component {
           data.push(poolData);
         } catch (er) { /* Nothing */ }
       }
-      return this.setState({ data, loading: false });
+      return this.setState({ data, loading: false }, this.sortPools);
     } catch (er) {
       await setError(er);
       return this.setState({ loading: false });
@@ -74,7 +84,11 @@ class Selection extends Component {
 
   fetchPoolStat = async (poolData) => {
     const stat = { tvl: 0, roi: 0 }
-    const { address: poolAddress, mint_a, mint_b, mint_s, reserve_a, reserve_b, reserve_s } = poolData;
+    const {
+      address: poolAddress,
+      mint_a, mint_b, mint_s,
+      reserve_a, reserve_b, reserve_s
+    } = poolData;
     if (!ssjs.isAddress(poolAddress)) return stat;
     const { ticket: ticketA, decimals: decimalsA } = mint_a || {};
     const { ticket: ticketB, decimals: decimalsB } = mint_b || {};
@@ -89,6 +103,19 @@ class Selection extends Component {
     return stat;
   }
 
+  sortPools = () => {
+    const { refPoolAddress } = this.props;
+    const { data, selectedPoolAddress } = this.state;
+    const recommendedPools = data.filter(({ address }) => refPoolAddress === address);
+    const otherPools = data.filter(({ address }) => refPoolAddress !== address);
+    const poolData = recommendedPools.concat(otherPools);
+    const { address: poolAddress } = poolData[0] || {}
+    return this.setState({
+      selectedPoolAddress: selectedPoolAddress || poolAddress,
+      data: poolData
+    });
+  }
+
   openMintSelection = () => this.setState({ visibleMintSelection: true });
   closeMintSelection = () => this.setState({ visibleMintSelection: false });
 
@@ -97,33 +124,27 @@ class Selection extends Component {
     this.closeMintSelection();
     this.setState({ mintData });
     const { address: mintAddress } = mintData || {};
-    if (!ssjs.isAddress(mintAddress)) return this.setState({ data: [] });
+    if (!ssjs.isAddress(mintAddress)) return this.setState({ data: [] }, this.openMintSelection);
     const condition = { '$or': [{ mintS: mintAddress }, { mintA: mintAddress }, { mintB: mintAddress }] }
     if (!visible) return;
     return this.fetchData(condition);
   }
 
   onSelect = (poolAddress) => {
-    const { onChange } = this.props;
-    const { mintData, data } = this.state;
-    const [poolData] = data.filter(({ address }) => address === poolAddress);
-    return onChange({ mintData, poolData });
+    return this.setState({ selectedPoolAddress: poolAddress });
   }
 
-  sortPools = () => {
-    const { poolData } = this.props;
-    const { data } = this.state;
-    const { address: poolAddress } = poolData || {}
-    const poolAddresses = []
-    if (ssjs.isAddress(poolAddress)) poolAddresses.push(poolAddress);
-    const recommendedPools = data.filter(({ address }) => poolAddresses.includes(address));
-    const otherPools = data.filter(({ address }) => !poolAddresses.includes(address));
-    return { recommendedPools, otherPools }
+  onOk = () => {
+    const { onChange } = this.props;
+    const { mintData, data, selectedPoolAddress } = this.state;
+    const [poolData] = data.filter(({ address }) => address === selectedPoolAddress);
+    return onChange({ mintData, poolData });
   }
 
   renderPools = (data) => {
     const { classes } = this.props;
-    return data.map(poolData => {
+    const { selectedPoolAddress } = this.state;
+    return data.map((poolData, index) => {
       const { address, mint_a, mint_b, mint_s, roi, tvl } = poolData;
       if (!ssjs.isAddress(address)) return null;
       const { icon: iconA, symbol: symbolA } = mint_a || {};
@@ -132,12 +153,21 @@ class Selection extends Component {
       const icons = [iconA, iconB, iconS];
       return <TableRow key={address} className={classes.tableRow} onClick={() => this.onSelect(address)}>
         <TableCell >
-          <Grid container className={classes.noWrap} alignItems="center">
+          <Grid container className={classes.noWrap} alignItems="center" spacing={1}>
+            {selectedPoolAddress === address ? <Grid item>
+              <IconButton size="small">
+                <CheckCircleOutlineRounded
+                  fontSize="small"
+                  className={!index ? classes.recommended : classes.warning}
+                />
+              </IconButton>
+            </Grid> : null}
             <Grid item>
               <PoolAvatar icons={icons} />
             </Grid>
             <Grid item>
               <Typography>{`${symbolA} x ${symbolB} x ${symbolS}`}</Typography>
+              {!index ? <Typography variant="caption" className={classes.recommended}>Highly recommended pool</Typography> : null}
             </Grid>
           </Grid>
         </TableCell>
@@ -149,6 +179,10 @@ class Selection extends Component {
           <Typography variant="caption" color="textSecondary">TVL</Typography>
           <Typography>${numeral(tvl).format('0.0[0]a')}</Typography>
         </TableCell>
+        <TableCell>
+          <Typography variant="caption" color="textSecondary">Pool Address</Typography>
+          <Typography>{address.substring(0, 3) + '...' + address.substring(address.length - 3, address.length)}</Typography>
+        </TableCell>
       </TableRow>
     });
   }
@@ -156,9 +190,7 @@ class Selection extends Component {
   render() {
     const { classes, visible, onClose } = this.props;
     const { loading, visibleMintSelection, mintData, data } = this.state;
-
     const { icon, name, symbol } = mintData || {}
-    const { recommendedPools, otherPools } = this.sortPools();
 
     return <Dialog open={visible} onClose={onClose} fullWidth>
       <DialogTitle>
@@ -174,7 +206,7 @@ class Selection extends Component {
         </Grid>
       </DialogTitle>
       <DialogContent>
-        <Grid container spacing={2}>
+        <Grid container>
           <Grid item xs={12}>
             <TextField
               variant="contained"
@@ -182,7 +214,7 @@ class Selection extends Component {
               value={name || 'Select Token'}
               onClick={this.openMintSelection}
               InputProps={{
-                startAdornment: loading ? <CircularProgress size={17} /> : <MintAvatar icon={icon} />,
+                startAdornment: <MintAvatar icon={icon} />,
                 endAdornment: <IconButton size="small" onClick={this.openMintSelection}>
                   <ArrowDropDownRounded />
                 </IconButton>,
@@ -197,18 +229,19 @@ class Selection extends Component {
             />
           </Grid>
           <Grid item xs={12}>
+            <Drain size={1} />
+          </Grid>
+          <Grid item xs={12}>
             <TableContainer>
               <Table>
                 <TableBody>
                   <TableRow>
-                    <TableCell >
-                      <Typography variant="caption">{!data.length ? 'No pool' : `${symbol} appears in ${data.length} pool(s)`}</Typography>
+                    <TableCell colSpan={4}>
+                      {loading ? <CircularProgress size={17} /> :
+                        <Typography variant="caption">{!data.length ? 'No pool' : `${symbol} appears in ${data.length} pool(s). Please select your pool to continue.`}</Typography>}
                     </TableCell>
-                    <TableCell />
-                    <TableCell />
                   </TableRow>
-                  {this.renderPools(recommendedPools)}
-                  {this.renderPools(otherPools)}
+                  {this.renderPools(data)}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -216,7 +249,17 @@ class Selection extends Component {
           <Grid item xs={12} />
         </Grid>
       </DialogContent>
-    </Dialog>
+      <DialogActions className={classes.dialogAction}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={this.onOk}
+          fullWidth
+        >
+          <Typography>OK</Typography>
+        </Button>
+      </DialogActions>
+    </Dialog >
   }
 }
 
@@ -235,7 +278,7 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 Selection.defaultProps = {
   mintData: {},
-  poolData: {},
+  refPoolAddress: '',
   visible: false,
   onChange: () => { },
   onClose: () => { },
@@ -243,7 +286,7 @@ Selection.defaultProps = {
 
 Selection.propTypes = {
   mintData: PropTypes.object,
-  poolData: PropTypes.object,
+  refPoolAddress: PropTypes.string,
   visible: PropTypes.bool,
   onChange: PropTypes.func,
   onClose: PropTypes.func,

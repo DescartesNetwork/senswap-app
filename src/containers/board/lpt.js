@@ -12,7 +12,7 @@ import Paper from 'senswap-ui/paper';
 import styles from './styles';
 
 
-class Action extends Component {
+class LPT extends Component {
 
   render() {
     const { classes } = this.props;
@@ -20,7 +20,7 @@ class Action extends Component {
     return <Paper className={classes.paper}>
       <Grid container>
         <Grid item xs={12}>
-          <Typography variant="subtitle1" color="textSecondary">Action</Typography>
+          <Typography variant="subtitle1" color="textSecondary">Liquidity Provision</Typography>
         </Grid>
       </Grid>
     </Paper>
@@ -34,11 +34,11 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
 }, dispatch);
 
-Action.propTypes = {
+LPT.propTypes = {
   poolAddress: PropTypes.string.isRequired,
 }
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(Action)));
+)(withStyles(styles)(LPT)));
