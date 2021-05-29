@@ -13,11 +13,11 @@ import Typography from 'senswap-ui/typography';
 import Paper from 'senswap-ui/paper';
 import Button from 'senswap-ui/button';
 import Divider from 'senswap-ui/divider';
-import Avatar from 'senswap-ui/avatar';
 import Drain from 'senswap-ui/drain';
 
-import { SwapCallsRounded, HelpOutlineRounded } from 'senswap-ui/icons';
+import { SwapCallsRounded } from 'senswap-ui/icons';
 
+import { MintAvatar } from 'containers/wallet';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
@@ -115,12 +115,10 @@ class Balance extends Component {
             <Grid item xs={12}>
               <Grid container className={classes.noWrap} alignItems="center">
                 <Grid item>
-                  <Avatar src={icon} className={classes.icon} >
-                    <HelpOutlineRounded />
-                  </Avatar>
+                  <MintAvatar icon={icon} />
                 </Grid>
                 <Grid item className={classes.stretch}>
-                  <Typography>{symbol}</Typography>
+                  <Typography variant="subtitle1">{symbol}</Typography>
                 </Grid>
                 <Grid item>
                   <Grid container direction="column" spacing={1}>
