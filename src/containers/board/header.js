@@ -40,9 +40,7 @@ class Header extends Component {
         <PoolAvatar icons={this.parseIcon()} />
       </Grid>
       <Grid item xs={12}>
-        <Typography variant="h4">
-          {this.parseName()}
-        </Typography>
+        <Typography variant="h4">{this.parseName()}</Typography>
       </Grid>
     </Grid>
   }

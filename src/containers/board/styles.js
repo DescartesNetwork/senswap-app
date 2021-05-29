@@ -7,7 +7,8 @@ export default theme => ({
     flex: '1 1 auto',
   },
   paper: {
-    padding: theme.spacing(2)
+    padding: theme.spacing(4),
+    borderRadius: theme.shape.borderRadius * 2
   },
   icon: {
     width: theme.spacing(3),
