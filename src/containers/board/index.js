@@ -68,10 +68,10 @@ class Board extends Component {
         <Drain size={1} />
       </Grid>
       <Grid item xs={12} md={6}>
-        <LPT poolAddress={poolAddress} />
+        <LPT poolData={data} />
       </Grid>
       <Grid item xs={12} md={6}>
-        <Balance poolAddress={poolAddress} />
+        <Balance poolData={data} />
       </Grid>
       <Grid item xs={12} md={6}>
         <TVL poolAddress={poolAddress} />
