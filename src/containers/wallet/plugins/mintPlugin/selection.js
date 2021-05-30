@@ -1,14 +1,16 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
+import numeral from 'numeral';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-import { IconButton } from 'senswap-ui/button';
+import Button, { IconButton } from 'senswap-ui/button';
 import TextField from 'senswap-ui/textField';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Table, { TableBody, TableCell, TableContainer, TableRow } from 'senswap-ui/table';
@@ -16,87 +18,109 @@ import CircularProgress from 'senswap-ui/circularProgress';
 
 import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
 
-import { MintAvatar } from 'containers/wallet';
+import { MintAvatar, WSOL, BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
+import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
 import { getMints, getMint } from 'modules/mint.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
+
 
 class Selection extends Component {
   constructor() {
     super();
 
     this.state = {
+      visibleWSOL: false,
       loading: false,
       search: '',
       data: [],
     }
   }
 
-  componentDidUpdate(prevProps) {
-    const { visible: prevVisible, condition: prevCondition } = prevProps;
+  componentDidMount() {
     const { visible, condition } = this.props;
-    if (!isEqual(prevVisible, visible) && visible) this.fetchData();
-    if (!isEqual(prevCondition, condition) && visible) this.fetchData();
+    if (visible) this.fetchData(condition);
   }
 
-  fetchData = async () => {
-    const { setError, getMints, getMint, condition } = this.props;
+  componentDidUpdate(prevProps) {
+    const {
+      visible: prevVisible, condition: prevCondition,
+      wallet: { accounts: prevAccounts }
+    } = prevProps;
+    const { visible, condition, wallet: { accounts } } = this.props;
+    if (!isEqual(prevVisible, visible) && visible) this.fetchData(condition);
+    if (!isEqual(prevCondition, condition) && visible) this.fetchData(condition);
+    if (!isEqual(prevAccounts, accounts) && visible) this.fetchData(condition);
+  }
+
+  fetchData = async (condition = {}, limit = 5) => {
+    const {
+      setError, getMints, getMint, getAccountData,
+      wallet: { user: { address: walletAddress } }
+    } = this.props;
     this.setState({ loading: true });
     try {
-      let data = await getMints(condition, 5, 0);
-      data = await Promise.all(data.map(({ address }) => getMint(address)));
+      let mints = await getMints(condition, limit, 0);
+      mints = await Promise.all(mints.map(({ address }) => getMint(address)));
+      let data = [];
+      for (const mintData of mints) {
+        try {
+          const { address: mintAddress } = mintData;
+          if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid mint address');
+          if (!ssjs.isAddress(walletAddress)) throw new Error('Invalid wallet address');
+          const { address: accountAddress, state } = await sol.scanAccount(mintAddress, walletAddress);
+          if (!state) throw new Error('Invalid state');
+          const accountData = await getAccountData(accountAddress);
+          data.push(accountData);
+        } catch (er) {
+          data.push({ address: '', amount: global.BigInt(0), mint: mintData });
+        }
+      }
       return this.setState({ data, loading: false });
     } catch (er) {
       return setError(er);
     }
   }
 
-  // fetchOne = async () => {
-  //   const { getMints, getMint, onChange, condition } = this.props;
-  //   try {
-  //     const [{ address }] = await getMints(condition, 1, 0);
-  //     const data = await getMint(address);
-  //     console.log(data)
-  //     return onChange(data);
-  //   } catch (er) { /* Nothing */ }
-  // }
-
   onSearch = (e) => {
     const search = e.target.value || '';
-    const { setError, getMints, getMint } = this.props;
-    return this.setState({ loading: true, search }, () => {
-      const condition = !search ? {} : {
-        '$or': [
-          { symbol: { '$regex': search, '$options': 'gi' } },
-          { name: { '$regex': search, '$options': 'gi' } }
-        ]
-      }
-      return getMints(condition, 1000, 0).then(data => {
-        return Promise.all(data.map(({ address }) => getMint(address)));
-      }).then(data => {
-        return this.setState({ loading: false, data });
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
+    const condition = !search ? {} : {
+      '$or': [
+        { symbol: { '$regex': search, '$options': 'gi' } },
+        { name: { '$regex': search, '$options': 'gi' } }
+      ]
+    }
+    const limit = !search ? 5 : 1;
+    return this.setState({ search }, () => {
+      return this.fetchData(condition, limit);
     });
   }
 
-  onChange = (expectedAddress) => {
+  onChange = (mintAddress) => {
     const { onChange } = this.props;
     const { data } = this.state;
-    const [mintData] = data.filter(({ address }) => expectedAddress === address);
+    const mints = data.map(({ mint }) => mint);
+    const [mintData] = mints.filter(({ address }) => mintAddress === address);
     return onChange(mintData);
   }
 
+  onWSOL = (e) => {
+    e.stopPropagation();
+    const { visibleWSOL } = this.state;
+    return this.setState({ visibleWSOL: !visibleWSOL });
+  }
+
   render() {
-    const { classes } = this.props;
-    const { visible, onClose } = this.props;
-    const { loading, search, data } = this.state;
+    const { classes, condition, visible, onClose } = this.props;
+    const { loading, search, data, visibleWSOL } = this.state;
 
     return <Dialog open={visible} onClose={onClose} fullWidth>
+      <BucketWatcher
+        addresses={data.filter(({ address }) => ssjs.isAddress(address)).map(({ address }) => address)}
+        onChange={search ? () => this.onSearch({ target: { value: search } }) : () => this.fetchData(condition)}
+      />
       <DialogTitle>
         <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
@@ -134,23 +158,39 @@ class Selection extends Component {
                       <Typography variant="caption">No token</Typography>
                     </TableCell>
                   </TableRow> : null}
-                  {data.map(mintData => {
-                    const { address, icon, name, symbol } = mintData;
-                    return <TableRow key={address} className={classes.tableRow} onClick={() => this.onChange(address)}>
-                      <TableCell>
-                        <Grid container className={classes.noWrap} alignItems="center">
-                          <Grid item>
-                            <MintAvatar icon={icon} />
+                  {data.map((accountData, index) => {
+                    const { amount, mint } = accountData || {};
+                    const { address: mintAddress, icon, name, symbol, decimals } = mint || {};
+                    const balance = ssjs.undecimalize(amount, decimals);
+                    return <Fragment key={index}>
+                      <TableRow className={classes.tableRow} onClick={() => this.onChange(mintAddress)}>
+                        <TableCell>
+                          <Grid container className={classes.noWrap} alignItems="center">
+                            <Grid item>
+                              <MintAvatar icon={icon} />
+                            </Grid>
+                            <Grid item>
+                              <Typography>{name}</Typography>
+                              <Typography variant="caption" color="textSecondary">Your Balance: {numeral(balance).format('0,0.[000000]')} {symbol}</Typography>
+                            </Grid>
                           </Grid>
-                          <Grid item>
-                            <Typography>{name}</Typography>
-                          </Grid>
-                          <Grid item>
-                            <Typography color="textSecondary">{symbol}</Typography>
-                          </Grid>
-                        </Grid>
-                      </TableCell>
-                    </TableRow>
+                        </TableCell>
+                        {ssjs.DEFAULT_WSOL === mintAddress ? <TableCell>
+                          <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={this.onWSOL}
+                          >
+                            <Typography>Wrap/Unwrap SOL</Typography>
+                          </Button>
+                        </TableCell> : <TableCell />}
+                      </TableRow>
+                      {ssjs.DEFAULT_WSOL === mintAddress && visibleWSOL ? <TableRow>
+                        <TableCell colSpan={2}>
+                          <WSOL />
+                        </TableCell>
+                      </TableRow> : null}
+                    </Fragment>
                   })}
                 </TableBody>
               </Table>
@@ -173,6 +213,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getMints, getMint,
+  getAccountData,
 }, dispatch);
 
 Selection.defaultProps = {

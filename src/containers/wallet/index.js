@@ -11,7 +11,7 @@ import Carousel from 'senswap-ui/carousel';
 
 import WalletPlugin, { BucketWatcher, WalletButton } from 'containers/wallet/plugins/walletPlugin';
 import { AccountSelection, AccountSend, AccountReceive, AccountAvatar } from 'containers/wallet/plugins/accountPlugin';
-import { MintSelection, MintAvatar } from 'containers/wallet/plugins/mintPlugin';
+import { MintSelection, MintAvatar, WSOL } from 'containers/wallet/plugins/mintPlugin';
 import { PoolAvatar, PoolCard, PoolSelection } from 'containers/wallet/plugins/poolPlugin';
 
 // Main components
@@ -48,7 +48,7 @@ export const configSenWallet = () => {
 export {
   WalletPlugin, WalletButton, BucketWatcher,
   AccountSelection, AccountSend, AccountReceive, AccountAvatar,
-  MintSelection, MintAvatar,
+  MintSelection, MintAvatar, WSOL,
   PoolAvatar, PoolCard, PoolSelection,
 }
 
