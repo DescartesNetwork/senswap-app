@@ -8,7 +8,7 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 
-import { PoolAvatar } from 'containers/wallet';
+import { WalletButton, PoolAvatar } from 'containers/wallet';
 
 import styles from './styles';
 
@@ -35,9 +35,18 @@ class Header extends Component {
   }
 
   render() {
+    const { classes } = this.props;
+
     return <Grid container>
       <Grid item xs={12}>
-        <PoolAvatar icons={this.parseIcon()} />
+        <Grid container className={classes.noWrap} alignItems="center">
+          <Grid item className={classes.stretch}>
+            <PoolAvatar icons={this.parseIcon()} />
+          </Grid>
+          <Grid item>
+            <WalletButton />
+          </Grid>
+        </Grid>
       </Grid>
       <Grid item xs={12}>
         <Typography variant="h4">{this.parseName()}</Typography>

@@ -55,6 +55,7 @@ class Board extends Component {
   }
 
   render() {
+    const { wallet: { user: { address: walletAddress } } } = this.props;
     const { data } = this.state;
     const { address: poolAddress } = data;
 
@@ -67,12 +68,12 @@ class Board extends Component {
       <Grid item xs={12}>
         <Drain size={1} />
       </Grid>
-      <Grid item xs={12} md={6}>
+      {ssjs.isAddress(walletAddress) ? <Grid item xs={12} md={6}>
         <LPT poolData={data} />
-      </Grid>
-      <Grid item xs={12} md={6}>
+      </Grid> : null}
+      {ssjs.isAddress(walletAddress) ? <Grid item xs={12} md={6}>
         <Balance poolData={data} />
-      </Grid>
+      </Grid> : null}
       <Grid item xs={12} md={6}>
         <TVL poolAddress={poolAddress} />
       </Grid>
