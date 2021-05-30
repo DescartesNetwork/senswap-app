@@ -107,7 +107,9 @@ class Selection extends Component {
     const { refPoolAddress } = this.props;
     const { data, selectedPoolAddress } = this.state;
     const recommendedPools = data.filter(({ address }) => refPoolAddress === address);
-    const otherPools = data.filter(({ address }) => refPoolAddress !== address);
+    const otherPools = data
+      .filter(({ address }) => refPoolAddress !== address)
+      .sort(({ reserve_s: a }, { reserve_s: b }) => Number(b - a));
     const poolData = recommendedPools.concat(otherPools);
     const { address: poolAddress } = poolData[0] || {}
     return this.setState({
@@ -238,7 +240,7 @@ class Selection extends Component {
                   <TableRow>
                     <TableCell colSpan={4}>
                       {loading ? <CircularProgress size={17} /> :
-                        <Typography variant="caption">{!data.length ? 'No pool' : `${symbol} appears in ${data.length} pool(s). Please select your pool to continue.`}</Typography>}
+                        <Typography variant="caption">{`${symbol} appears in ${data.length} pool(s). ${data.length ? 'Please select your pool to continue.' : ''}`}</Typography>}
                     </TableCell>
                   </TableRow>
                   {this.renderPools(data)}

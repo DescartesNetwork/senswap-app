@@ -35,7 +35,7 @@ class ROI extends Component {
                   <Typography>No data</Typography>
                 </TableCell>
                 <TableCell>
-                  <Typography>1d</Typography>
+                  <Typography>24h</Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -52,6 +52,14 @@ class ROI extends Component {
                 </TableCell>
                 <TableCell>
                   <Typography>30d</Typography>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <Typography>No data</Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography>90d</Typography>
                 </TableCell>
               </TableRow>
               <TableRow>
