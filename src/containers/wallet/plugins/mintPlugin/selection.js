@@ -130,14 +130,14 @@ class Selection extends Component {
               <Table>
                 <TableBody>
                   {!data.length ? <TableRow>
-                    <TableCell >
+                    <TableCell>
                       <Typography variant="caption">No token</Typography>
                     </TableCell>
                   </TableRow> : null}
                   {data.map(mintData => {
                     const { address, icon, name, symbol } = mintData;
                     return <TableRow key={address} className={classes.tableRow} onClick={() => this.onChange(address)}>
-                      <TableCell >
+                      <TableCell>
                         <Grid container className={classes.noWrap} alignItems="center">
                           <Grid item>
                             <MintAvatar icon={icon} />
