@@ -38,8 +38,8 @@ class WalletPlugin extends Component {
       window.senswap.splt.watch((er, re) => {
         if (er) return;
         const { type, address: changedAddress } = re;
-        const { wallet: { accounts } } = this.props;
-        if (type === 'account' && accounts.includes(changedAddress)) {
+        const { wallet: { accounts, lpts } } = this.props;
+        if (type === 'account' && [...accounts, ...lpts].includes(changedAddress)) {
           return getAccountData(changedAddress, true);
         }
       });

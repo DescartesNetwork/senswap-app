@@ -48,11 +48,12 @@ class FeaturedPool extends Component {
       const poolAddresses = await getPools({}, 3, 0);
       const poolData = await Promise.all(poolAddresses.map(({ address }) => getPool(address)));
       const featuredPoolData = poolData.map((poolDatum, index) => {
-        const { mintA, mintB, mintS, createdAt } = poolDatum || {}
+        const { address, mintA, mintB, mintS, createdAt } = poolDatum || {}
         const { symbol: symbolA } = mintA || {}
         const { symbol: symbolB } = mintB || {}
         const { symbol: symbolS } = mintS || {}
         return {
+          address,
           subtitle: utils.prettyDatetime(new Date(createdAt)),
           title: `${symbolA} x ${symbolB} x ${symbolS}`,
           src: images[index % images.length]
@@ -62,6 +63,11 @@ class FeaturedPool extends Component {
     } catch (er) {
       return setError(er);
     }
+  }
+
+  toBoard = (poolAddress) => {
+    const { history } = this.props;
+    return history.push(`/board/${poolAddress}`);
   }
 
   render() {
@@ -77,8 +83,8 @@ class FeaturedPool extends Component {
           <Grid item xs={12}>
             <Typography variant="subtitle1">Featured Pools</Typography>
           </Grid>
-          {featuredPoolData.map((data, i) => <Grid item key={i} xs={12}>
-            <FeaturedCard {...data} />
+          {featuredPoolData.map(({ address, ...others }, i) => <Grid item key={i} xs={12}>
+            <FeaturedCard {...others} onClick={() => this.toBoard(address)} />
           </Grid>)}
         </Grid>
       </Grid>

@@ -15,9 +15,13 @@ import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
 import Paper from 'senswap-ui/paper';
 
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+
 import { CloseRounded, ArrowDownwardRounded } from 'senswap-ui/icons';
 
-import Field from './field';
+import SingleSide from './singleSide';
+import FullSide from './fullSide';
 
 import styles from './styles';
 import oracle from 'helpers/oracle';
@@ -28,17 +32,13 @@ import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
 
-const EMPTY = {
-  loading: false,
-  txId: '',
-}
-
 class AddLiquidity extends Component {
   constructor() {
     super();
 
     this.state = {
-      ...EMPTY,
+      loading: false,
+      mode: 0, // 0: single side, 1: full side
       index: 0,
       amounts: ['', '', ''],
       accountData: [],
@@ -59,7 +59,7 @@ class AddLiquidity extends Component {
     if (!isEqual(prevPoolData, poolData) && visible) return this.fetchData();
     if (!isEqual(prevVisible, visible) && visible) return this.fetchData();
     if (!isEqual(prevVisible, visible) && !visible) return this.setState({
-      ...EMPTY,
+      loading: false,
       index: 0,
       amounts: ['', '', ''],
       lpt: 0,
@@ -114,21 +114,9 @@ class AddLiquidity extends Component {
     }
   }
 
-  onAmount = (i, value) => {
-    const { amounts } = this.state;
-    let newAmounts = [...amounts];
-    newAmounts[i] = value;
-    return this.setState({ amounts: newAmounts }, this.estimateState);
-  }
+  onMode = (e, mode) => this.setState({ mode });
 
-  onMax = (index) => {
-    const { accountData, amounts } = this.state;
-    const { amount, mint } = accountData[index] || {}
-    const { decimals } = mint || {}
-    let newAmounts = [...amounts];
-    newAmounts[index] = ssjs.undecimalize(amount, decimals);
-    return this.setState({ amounts: newAmounts }, this.estimateState);
-  }
+  onAmounts = (amounts) => this.setState({ amounts }, this.estimateState);
 
   addLiquidity = async () => {
     const {
@@ -139,8 +127,8 @@ class AddLiquidity extends Component {
 
     if (!ssjs.isAddress(poolAddress)) return setError('Invalid pool address');
 
-    const info = accountData.zip(amounts);
-    const [[accountDataS, amountS], [accountDataA, amountA], [accountDataB, amountB]] = info;
+    const [accountDataS, accountDataA, accountDataB] = accountData;
+    const [amountS, amountA, amountB] = amounts;
     const { address: srcAddressS, mint: { decimals: decimalsS } } = accountDataS || { mint: { decimals: 9 } }
     const { address: srcAddressA, mint: { decimals: decimalsA } } = accountDataA || { mint: { decimals: 9 } }
     const { address: srcAddressB, mint: { decimals: decimalsB } } = accountDataB || { mint: { decimals: 9 } }
@@ -148,8 +136,8 @@ class AddLiquidity extends Component {
     const deltaA = ssjs.decimalize(amountA, decimalsA);
     const deltaB = ssjs.decimalize(amountB, decimalsB);
 
+    this.setState({ loading: true });
     try {
-      this.setState({ loading: true });
       const { txId, lptAddress } = await this.swap.addLiquidity(
         deltaS, deltaA, deltaB,
         poolAddress,
@@ -158,19 +146,18 @@ class AddLiquidity extends Component {
       );
       const newAccounts = [...accounts];
       if (!newAccounts.includes(lptAddress)) newAccounts.push(lptAddress);
-      updateWallet({ accounts: newAccounts });
       onClose();
+      updateWallet({ accounts: newAccounts });
       await setSuccess('Add liquidity successfully', utils.explorer(txId));
-      return this.setState({ ...EMPTY, txId });
     } catch (er) {
       await setError(er);
-      return this.setState({ ...EMPTY });
     }
+    return this.setState({ loading: false });
   }
 
   render() {
-    const { classes, visible, onClose } = this.props;
-    const { loading, amounts, accountData, lpt } = this.state;
+    const { classes, visible, onClose, poolData } = this.props;
+    const { loading, mode, amounts, lpt } = this.state;
 
     return <Dialog open={visible} onClose={onClose} fullWidth>
       <DialogTitle>
@@ -188,22 +175,31 @@ class AddLiquidity extends Component {
       <DialogContent>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-            <Typography>Simulated Single Expossure. <span style={{ color: '#808191' }}>Instead of depositing proportionally the amount of three tokens, SSE allows you to deposit even one token. The pool will automatically re-balance itself.</span></Typography>
-          </Grid>
-          <Grid item xs={12}>
             <Typography>Liquidity provider incentive. <span style={{ color: '#808191' }}>Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed by withdrawing your liquidity.</span></Typography>
           </Grid>
+          {mode === 0 ? <Grid item xs={12}>
+            <Typography>Simulated Single Expossure. <span style={{ color: '#808191' }}>Instead of depositing proportionally the amount of three tokens, SSE allows you to deposit even one token. The pool will automatically re-balance itself.</span></Typography>
+          </Grid> : null}
           <Grid item xs={12}>
-            <Drain size={2} />
+            <Drain size={1} />
           </Grid>
-          {accountData.map((data, index) => <Grid item key={index} xs={12}>
-            <Field
-              accountData={data}
-              value={amounts[index]}
-              onChange={value => this.onAmount(index, value)}
-            />
+          <Grid item xs={12}>
+            <Tabs
+              value={mode}
+              onChange={this.onMode}
+              indicatorColor="primary"
+              variant="fullWidth"
+            >
+              <Tab label="Single Side" />
+              <Tab label="Full Side" />
+            </Tabs>
           </Grid>
-          )}
+          {mode === 0 ? <Grid item xs={12}>
+            <SingleSide poolData={poolData} onChange={this.onAmounts} />
+          </Grid> : null}
+          {mode === 1 ? <Grid item xs={12}>
+            <FullSide poolData={poolData} onChange={this.onAmounts} />
+          </Grid> : null}
           {lpt ? <Fragment>
             <Grid item xs={12}>
               <Grid container justify="center">

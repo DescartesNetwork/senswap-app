@@ -47,46 +47,41 @@ class LatestActivity extends Component {
     if (!isEqual(prevRightbar, rightbar) && rightbar) return this.fetchData();
   }
 
-  fetchMint = (txData) => {
+  fetchMint = async (txData) => {
     const { getMintData } = this.props;
-    return new Promise((resolve, reject) => {
-      return Promise.all(txData.data.map(({ mint }) => {
-        return getMintData(mint);
-      })).then(mintData => {
-        const { data, ...others } = txData;
-        const re = data.map((each, index) => {
-          const { mint, ...someothers } = each;
-          return { mint: mintData[index], ...someothers }
-        });
-        return resolve({ data: re, ...others });
-      }).catch(er => {
-        return reject(er);
-      });
+    const { data, ...others } = txData;
+    const mintData = await Promise.all(data.map(({ mint }) => getMintData(mint)));
+    const re = data.map((each, index) => {
+      const { mint, ...someothers } = each;
+      return { mint: mintData[index], ...someothers }
     });
+    return { data: re, ...others }
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const { wallet: { user: { address } }, setError } = this.props;
     const { timeTo, timeFrom } = this.state;
-    return this.setState({ loading: true }, () => {
-      return findAllTransactionByTime(address, timeFrom, timeTo).then(data => {
-        return data.each(txData => {
-          if (txData.type === 'transfer') {
-            if (txData.data[0].owner === address) txData.type = 'send';
-            else txData.type = 'receive';
-          }
-          return this.fetchMint(txData);
-        }, { skipError: true, skipIndex: true });
-      }).then(re => {
-        const { data } = this.state;
-        const expandedData = data.concat(re);
-        return this.setState({ data: expandedData, loading: false })
-      }).catch(er => {
-        return this.setState({ loading: false }, () => {
-          return setError(er);
-        });
-      });
-    });
+    this.setState({ loading: true });
+    try {
+      const txs = await findAllTransactionByTime(address, timeFrom, timeTo);
+      let expandedData = [];
+      for (let txData of txs) {
+        if (txData.type === 'transfer') {
+          if (txData.data[0].owner === address) txData.type = 'send';
+          else txData.type = 'receive';
+        }
+        try {
+          const re = await this.fetchMint(txData);
+          expandedData.push(re);
+        } catch (er) { /* Nothing */ }
+      }
+      const { data } = this.state;
+      expandedData = data.concat(expandedData);
+      return this.setState({ data: expandedData, loading: false });
+    } catch (er) {
+      await setError(er);
+      return this.setState({ loading: false });
+    }
   }
 
   onMore = () => {

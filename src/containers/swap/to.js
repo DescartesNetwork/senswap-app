@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
@@ -17,12 +16,12 @@ import Link from 'senswap-ui/link';
 
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
-import { MintAvatar, MintSelection } from 'containers/wallet';
+import { MintAvatar, PoolSelection } from 'containers/wallet';
 
 import styles from './styles';
 import sol from 'helpers/sol';
 import { setError } from 'modules/ui.reducer';
-import { getMintData, getAccountData } from 'modules/bucket.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 
 class To extends Component {
@@ -32,73 +31,43 @@ class To extends Component {
     this.state = {
       loading: false,
       visible: false,
-      accountData: {},
-      value: '',
     }
-  }
-
-  componentDidMount = () => {
-    const { value } = this.props;
-    this.setState({ value }, this.onDesireMintAddress);
-  }
-
-  componentDidUpdate = (prevProps) => {
-    const {
-      value: prevValue, mintAddress: prevMintAddress,
-      wallet: { user: { address: prevAddress } },
-    } = prevProps;
-    const { value, wallet: { user: { address } }, mintAddress } = this.props;
-    if (!isEqual(prevValue, value)) this.setState({ value });
-    if (!isEqual(prevMintAddress, mintAddress)) this.onDesireMintAddress();
-    if (!isEqual(prevAddress, address)) this.onDesireMintAddress();
-  }
-
-  onDesireMintAddress = () => {
-    const { mintAddress } = this.props;
-    if (ssjs.isAddress(mintAddress)) return this.onMintData({ address: mintAddress });
   }
 
   onOpen = () => this.setState({ visible: true });
   onClose = () => this.setState({ visible: false });
 
-  onMintData = async (mintData) => {
-    const { address: mintAddress } = mintData;
+  onData = async ({ mintData, poolData }) => {
     const {
-      setError, getMintData, getAccountData,
-      wallet: { user: { address: walletAddress } }
+      wallet: { user: { address: walletAddress } },
+      setError, getAccountData, onChange, value
     } = this.props;
+    const { address: mintAddress } = mintData;
+    if (!ssjs.isAddress(walletAddress)) return;
+    this.setState({ loading: true }, this.onClose);
     try {
-      this.setState({ loading: true }, this.onClose);
       let accountData = await sol.scanAccount(mintAddress, walletAddress);
       const { state, address: accountAddress } = accountData || {}
-      if (!state) {
-        const data = await getMintData(mintAddress);
-        accountData = { address: '', amount: 0n, mint: { ...data, ...mintData } }
-      }
+      if (!state) accountData = { address: '', amount: 0n, mint: mintData };
       else accountData = await getAccountData(accountAddress);
-
-      return this.setState({ loading: false, accountData, value: '' }, this.returnData);
+      onChange({ accountData, poolData, value });
     } catch (er) {
-      return setError(er);
+      await setError(er);
     }
+    return this.setState({ loading: false });
   }
 
   onValue = (e) => {
+    const { onChange, accountData, poolData } = this.props;
     const value = e.target.value || '';
-    return this.setState({ value }, this.returnData);
-  }
-
-  returnData = () => {
-    const { onChange } = this.props;
-    const { accountData, value } = this.state;
-    return onChange({ accountData, value });
+    return onChange({ accountData, poolData, value });
   }
 
   render() {
-    const { classes, onSlippage, slippage } = this.props;
-    const { loading, visible, accountData, value } = this.state;
-    const { mint } = accountData || {}
-    const { icon, symbol } = mint || {}
+    const { classes, accountData, onSlippage, slippage, value, refPoolAddress } = this.props;
+    const { loading, visible } = this.state;
+    const { mint: mintData } = accountData || {}
+    const { icon, symbol } = mintData || {}
 
     return <Grid container>
       <Grid item xs={12}>
@@ -159,10 +128,13 @@ class To extends Component {
             </Grid>
           }
         />
-        <MintSelection
+        <PoolSelection
           visible={visible}
-          onChange={this.onMintData}
+          onChange={this.onData}
           onClose={this.onClose}
+          refPoolAddresses={[]}
+          mintData={mintData}
+          refPoolAddress={refPoolAddress}
         />
       </Grid>
     </Grid>
@@ -177,23 +149,27 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getMintData, getAccountData
+  getAccountData
 }, dispatch);
 
 To.defaultProps = {
-  mintAddress: '',
+  accountData: {},
+  poolData: {},
   slippage: 0.01,
   value: '',
   onSlippage: () => { },
   onChange: () => { },
+  refPoolAddress: '',
 }
 
 To.propTypes = {
-  mintAddress: PropTypes.string,
+  accountData: PropTypes.object,
+  poolData: PropTypes.object,
   limit: PropTypes.number,
   value: PropTypes.string,
   onLimit: PropTypes.func,
   onChange: PropTypes.func,
+  refPoolAddress: PropTypes.string,
 }
 
 export default withRouter(connect(

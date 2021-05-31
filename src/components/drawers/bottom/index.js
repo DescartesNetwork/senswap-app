@@ -54,7 +54,7 @@ BottomDrawer.defaultProps = {
   onClose: () => { },
 }
 
-BottomDrawer.propsTypes = {
+BottomDrawer.propTypes = {
   visible: PropTypes.bool.isRequired,
   onOpen: PropTypes.func,
   onClose: PropTypes.func,

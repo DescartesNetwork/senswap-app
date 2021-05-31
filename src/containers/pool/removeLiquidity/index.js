@@ -44,7 +44,7 @@ class RemoveLiquidity extends Component {
   }
 
   onPercentage = (percentage) => {
-    const { data: { amount: balance, mint } } = this.props;
+    const { accountData: { amount: balance, mint } } = this.props;
     const { decimals } = mint || {}
     const amount = ssjs.undecimalize(balance, decimals) * percentage;
     return this.setState({ amount });
@@ -62,7 +62,7 @@ class RemoveLiquidity extends Component {
 
   removeLiquidity = async () => {
     const {
-      data: { pool, mint: { decimals } },
+      accountData: { pool, mint: { decimals } },
       setError, setSuccess, onClose
     } = this.props;
     const { amount } = this.state;
@@ -98,10 +98,10 @@ class RemoveLiquidity extends Component {
   }
 
   render() {
-    const { classes, data, visible, onClose } = this.props;
+    const { classes, accountData, visible, onClose } = this.props;
     const { loading, amount } = this.state;
 
-    const { amount: balance, pool, mint } = data;
+    const { amount: balance, pool, mint } = accountData;
     const { supply, decimals } = mint || {}
     const { mint_s, mint_a, mint_b, reserve_s, reserve_a, reserve_b } = pool || {};
 
@@ -261,13 +261,13 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 RemoveLiquidity.defaultProps = {
   visible: false,
-  data: {},
+  accountData: {},
   onClose: () => { },
 }
 
 RemoveLiquidity.propTypes = {
   visible: PropTypes.bool,
-  data: PropTypes.object,
+  accountData: PropTypes.object,
   onClose: PropTypes.func,
 }
 

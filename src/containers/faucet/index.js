@@ -48,20 +48,17 @@ class Faucet extends Component {
     this.fetchData()
   }
 
-  fetchData = () => {
+  fetchData = async () => {
     const { setError, getWhiteList, getMintData } = this.props;
-    return getWhiteList().then(re => {
-      return Promise.all(re.map(mintAddress => {
-        return getMintData(mintAddress);
-      }));
-    }).then(data => {
-      return this.setState({ data }, () => {
-        const pseudoEvent = { target: { value: data[0].address } };
-        return this.onSelect(pseudoEvent);
-      });
-    }).catch(er => {
+    try {
+      const whitelist = await getWhiteList();
+      const data = await Promise.all(whitelist.map(mintAddress => getMintData(mintAddress)));
+      const pseudoEvent = { target: { value: data[0].address } };
+      this.onSelect(pseudoEvent);
+      return this.setState({ data });
+    } catch (er) {
       return setError(er);
-    });
+    }
   }
 
   onSelect = (e) => {

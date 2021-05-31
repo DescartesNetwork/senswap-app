@@ -25,11 +25,10 @@ import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
 import oracle from 'helpers/oracle';
-import utils from 'helpers/utils';
 import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
-import { getPools, getPool } from 'modules/pool.reducer';
-import { getPoolData } from 'modules/bucket.reducer';
+import { getPools } from 'modules/pool.reducer';
+import { getPoolData, getAccountData, getMintData } from 'modules/bucket.reducer';
 import { openWallet, updateWallet } from 'modules/wallet.reducer';
 
 
@@ -38,15 +37,19 @@ class Swap extends Component {
     super();
 
     this.state = {
-      desiredPoolAddress: '',
-      mintAddresses: [],
-      txId: '',
+      defaultPoolAddress: '',
+
+      bidPoolData: {},
       bidAccountData: {},
       bidValue: '',
+
+      askPoolData: {},
       askAccountData: {},
       askValue: '',
+
       slippage: 0.01,
       hopData: [],
+      txIds: [],
     }
 
     this.swap = window.senswap.swap;
@@ -57,9 +60,10 @@ class Swap extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { match: { params: prevParams } } = prevProps;
-    const { match: { params } } = this.props;
+    const { match: { params: prevParams }, wallet: { user: prevUser } } = prevProps;
+    const { match: { params }, wallet: { user } } = this.props;
     if (!isEqual(prevParams, params)) this.parseParams();
+    if (!isEqual(prevUser, user)) this.parseParams();
   }
 
   parseParams = async () => {
@@ -73,69 +77,44 @@ class Swap extends Component {
       const { address: mintAddressB } = mint_b || {};
       if (!ssjs.isAddress(mintAddressA)) return setError('Cannot load token data');
       if (!ssjs.isAddress(mintAddressB)) return setError('Cannot load token data');
-      const mintAddresses = [mintAddressA, mintAddressB];
-      return this.setState({ desiredPoolAddress: poolAddress, mintAddresses });
+      const bidAccountData = await this.fetchAccountData(mintAddressA);
+      const askAccountData = await this.fetchAccountData(mintAddressB);
+      return this.setState({
+        defaultPoolAddress: poolAddress,
+        bidPoolData: data, bidAccountData,
+        askPoolData: data, askAccountData
+      }, () => this.estimateState(false));
     } catch (er) {
       return setError(er);
     }
   }
 
-  estimateTheBestPool = async (srcPoolAddresses, dstPoolAddresses) => {
-    const { getPoolData } = this.props;
-    let maxSrcPoolData = { reserve_s: global.BigInt(0) }
-    let maxDstPoolData = { reserve_s: global.BigInt(0) }
-
-    for (let srcPoolAddress of srcPoolAddresses) {
-      const srcPoolData = await getPoolData(srcPoolAddress);
-      const { state: srcState, reserve_s: srcReserve } = srcPoolData || {}
-      if (srcState !== 1 || srcReserve <= 0) continue;
-      const { reserve_s: maxSrcReserve } = maxSrcPoolData || {}
-      if (maxSrcReserve < srcReserve) maxSrcPoolData = srcPoolData;
-
-      for (let dstPoolAddress of dstPoolAddresses) {
-        const dstPoolData = await getPoolData(dstPoolAddress);
-        const { state: dstState, reserve_s: dstReserve } = dstPoolData || {}
-        if (dstState !== 1 || dstReserve <= 0) continue;
-        const { reserve_s: maxDstReserve } = maxDstPoolData || {}
-        if (maxDstReserve < dstReserve) maxDstPoolData = dstPoolData;
-        if (srcPoolAddress === dstPoolAddress) return [srcPoolAddress, dstPoolAddress];
+  fetchAccountData = async (mintAddress) => {
+    const {
+      wallet: { user: { address: walletAddress } },
+      setError, getAccountData, getMintData
+    } = this.props;
+    if (!ssjs.isAddress(mintAddress) || !ssjs.isAddress(walletAddress)) return {}
+    try {
+      const { address, state } = await sol.scanAccount(mintAddress, walletAddress);
+      if (!ssjs.isAddress(address) || !state) {
+        const mintData = await getMintData(mintAddress);
+        return { address: '', mint: mintData }
       }
+      const accountData = await getAccountData(address);
+      return accountData;
+    } catch (er) {
+      await setError(er);
+      return {}
     }
-
-    const { address: srcPoolAddress } = maxSrcPoolData;
-    const { address: dstPoolAddress } = maxDstPoolData;
-    return [srcPoolAddress, dstPoolAddress];
-  }
-
-  routing = async (srcMintAddress, dstMintAddress) => {
-    if (!ssjs.isAddress(srcMintAddress)) throw new Error('Invalid source mint address');
-    if (!ssjs.isAddress(dstMintAddress)) throw new Error('Invalid destination mint address');
-    if (srcMintAddress === dstMintAddress) throw new Error('The pools is identical');
-
-    const { getPool, getPools, getPoolData } = this.props;
-    const srcCondition = { '$or': [{ mintS: srcMintAddress }, { mintA: srcMintAddress }, { mintB: srcMintAddress }] }
-    const dstCondition = { '$or': [{ mintS: dstMintAddress }, { mintA: dstMintAddress }, { mintB: dstMintAddress }] }
-
-    const srcData = await getPools(srcCondition, -1, 0);
-    if (!srcData.length) throw new Error('Cannot find available pools');
-    const srcPoolAddresses = srcData.map(({ address }) => address);
-
-    const dstData = await getPools(dstCondition, -1, 0);
-    if (!dstData.length) throw new Error('Cannot find available pools');
-    const dstPoolAddresses = dstData.map(({ address }) => address);
-
-    const route = await this.estimateTheBestPool(srcPoolAddresses, dstPoolAddresses);
-    let data = await Promise.all(route.map(address => getPool(address)));
-    if (data.length < 2) throw new Error('Cannot find available pools');
-    data = await Promise.all(data.map(({ address }) => getPoolData(address)));
-    if (data.length < 2) throw new Error('Cannot find available pools');
-
-    return data;
   }
 
   estimateState = async (inverse = false) => {
     const { setError } = this.props;
-    const { bidAccountData, askAccountData, bidValue, askValue } = this.state;
+    const {
+      bidAccountData, bidValue, bidPoolData,
+      askAccountData, askValue, askPoolData
+    } = this.state;
     const { mint: bidMintData } = bidAccountData || {}
     const { mint: askMintData } = askAccountData || {}
     const { address: srcMintAddress, decimals: bidDecimals } = bidMintData || {}
@@ -146,8 +125,6 @@ class Swap extends Component {
     this.timeout = setTimeout(async () => {
       this.setState({ loading: true });
       try {
-        const [bidPoolData, askPoolData] = await this.routing(srcMintAddress, dstMintAddress);
-
         let data = [];
         if (inverse) data = await oracle.inverseCurve(
           ssjs.decimalize(askValue, askDecimals),
@@ -183,15 +160,23 @@ class Swap extends Component {
     return limit;
   }
 
-  onBidData = ({ accountData, value }) => {
+  onBidData = ({ accountData, poolData, value }) => {
     return this.setState({
-      bidAccountData: accountData, bidValue: value, askValue: ''
+      bidAccountData: accountData,
+      bidValue: value,
+      bidPoolData: poolData,
+      askValue: '',
+      txIds: [],
     }, () => this.estimateState(false));
   }
 
-  onAskData = ({ accountData, value }) => {
+  onAskData = ({ accountData, poolData, value }) => {
     return this.setState({
-      askAccountData: accountData, bidValue: '', askValue: value
+      bidValue: '',
+      askAccountData: accountData,
+      askValue: value,
+      askPoolData: poolData,
+      txIds: [],
     }, () => this.estimateState(true));
   }
 
@@ -200,9 +185,15 @@ class Swap extends Component {
   }
 
   onSwitch = () => {
-    const { mintAddresses } = this.state;
-    const newMintAddresses = [mintAddresses[1], mintAddresses[0]];
-    return this.setState({ mintAddresses: newMintAddresses });
+    const { bidAccountData, bidPoolData, askAccountData, askPoolData } = this.state;
+    return this.setState({
+      bidValue: '',
+      bidAccountData: askAccountData,
+      bidPoolData: askPoolData,
+      askValue: '',
+      askAccountData: bidAccountData,
+      askPoolData: bidPoolData,
+    }, () => this.estimateState(false));
   }
 
   onAutogenDestinationAddress = async (mintAddress) => {
@@ -216,21 +207,16 @@ class Swap extends Component {
   }
 
   executeSwap = async () => {
-    const { setError, setSuccess } = this.props;
+    const { setError } = this.props;
     const { bidAccountData, hopData } = this.state;
     let { address: srcAddress } = bidAccountData;
 
     this.setState({ loading: true });
+    let txIds = [];
     try {
-      let dstAddresses = [];
-      for (let { dstMintAddress } of hopData) {
-        const dstAddress = await this.onAutogenDestinationAddress(dstMintAddress);
-        dstAddresses.push(dstAddress);
-      }
-      const data = hopData.zip(dstAddresses);
-      let txIds = []
-      for (let datum of data) {
-        const [{ bidAmount, askAmount, poolData: { address: poolAddress } }, dstAddress] = datum;
+      for (let data of hopData) {
+        const { bidAmount, askAmount, poolData: { address: poolAddress }, dstMintAddress } = data;
+        const dstAddress = await this.onAutogenDestinationAddress(dstMintAddress);;
         const _srcAddress = srcAddress;
         srcAddress = dstAddress;
         const limit = this.estimateLimit(askAmount);
@@ -243,12 +229,13 @@ class Swap extends Component {
           window.senswap.wallet
         );
         txIds.push(txId);
+        this.setState({ txIds });
       }
-      await setSuccess('Swap successfully', utils.explorer(txIds[txIds.length - 1]));
     } catch (er) {
+      txIds.push('error');
       await setError(er);
     }
-    return this.setState({ loading: false });
+    return this.setState({ loading: false, txIds });
   }
 
   renderAction = () => {
@@ -277,15 +264,26 @@ class Swap extends Component {
   }
 
   render() {
-    const { classes } = this.props;
+    const { classes, ui: { type }, getAccountData } = this.props;
     const {
-      mintAddresses,
-      bidValue, askValue, slippage, hopData
+      bidPoolData, bidAccountData, bidValue,
+      askPoolData, askAccountData, askValue,
+      txIds, slippage, hopData,
     } = this.state;
+    const { address: bidAccountAddress } = bidAccountData || {}
+    const { address: bidPoolAddress } = bidPoolData || {}
+    const { address: askPoolAddress } = askPoolData || {}
 
     return <Grid container>
       <BucketWatcher
-        addresses={hopData.map(({ poolData: { address } }) => address)}
+        addresses={[bidAccountAddress]}
+        onChange={async () => {
+          const newBidAccountData = await getAccountData(bidAccountAddress);
+          return this.setState({ bidAccountData: newBidAccountData })
+        }}
+      />
+      <BucketWatcher
+        addresses={[bidPoolAddress, askPoolAddress]}
         onChange={() => this.estimateState()}
       />
       <Grid item xs={12}>
@@ -295,14 +293,19 @@ class Swap extends Component {
         <Drain />
       </Grid>
       <Grid item xs={12} md={8}>
-        <Paper className={classes.paper}>
+        <Paper className={classes.paper} style={{
+          paddingLeft: type !== 'xs' ? 32 : 16,
+          paddingRight: type !== 'xs' ? 32 : 16,
+        }}>
           <Grid container justify="center">
             <Grid item xs={11}>
               <Grid container>
                 <Grid item xs={12}>
                   <From
-                    mintAddress={mintAddresses[0]}
+                    accountData={bidAccountData}
+                    poolData={bidPoolData}
                     onChange={this.onBidData} value={bidValue}
+                    refPoolAddress={askPoolAddress}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -316,16 +319,18 @@ class Swap extends Component {
                 </Grid>
                 <Grid item xs={12}>
                   <To
-                    mintAddress={mintAddresses[1]}
+                    accountData={askAccountData}
+                    poolData={askPoolData}
                     onSlippage={this.onSlippage} slippage={slippage}
                     onChange={this.onAskData} value={askValue}
+                    refPoolAddress={bidPoolAddress}
                   />
                 </Grid>
                 <Grid item xs={12} >
                   <Divider />
                 </Grid>
                 <Grid item xs={12}>
-                  <Details hopData={hopData} />
+                  <Details hopData={hopData} txIds={txIds} />
                 </Grid>
                 <Grid item xs={12}>
                   <Drain size={1} />
@@ -333,7 +338,6 @@ class Swap extends Component {
                 <Grid item xs={12}>
                   {this.renderAction()}
                 </Grid>
-                <Grid item xs={12} />
               </Grid>
             </Grid>
           </Grid>
@@ -356,8 +360,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setSuccess,
   updateWallet, openWallet,
-  getPools, getPool,
-  getPoolData,
+  getPools,
+  getPoolData, getAccountData, getMintData,
 }, dispatch);
 
 export default withRouter(connect(

@@ -1,3 +1,14 @@
+import ssjs from 'senswapjs';
+
+const NATIVE = {
+  address: ssjs.DEFAULT_EMPTY_ADDRESS,
+  decimals: 9,
+  name: 'Solana',
+  symbol: 'SOL',
+  ticket: 'solana',
+  icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
+}
+
 /**
  * Contructor
  */
@@ -14,6 +25,7 @@ configs.development = {
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   foundationAddress: '8UaZw2jDhJzv5V53569JbCd3bD4BnyCfBH3sjwgajGS9',
   cluster: 'devnet',
+  native: { ...NATIVE }
 }
 
 /**
@@ -27,6 +39,7 @@ configs.staging = {
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   foundationAddress: '8UaZw2jDhJzv5V53569JbCd3bD4BnyCfBH3sjwgajGS9',
   cluster: 'devnet',
+  native: { ...NATIVE }
 }
 
 /**
@@ -40,6 +53,7 @@ configs.production = {
   senAddress: 'SENBBKVCM7homnf5RX9zqpf1GFe935hnbU4uVzY1Y6M',
   foundationAddress: '9doo2HZQEmh2NgfT3Yx12M89aoBheycYqH1eaR5gKb3e',
   cluster: 'mainnet',
+  native: { ...NATIVE }
 }
 
 /**

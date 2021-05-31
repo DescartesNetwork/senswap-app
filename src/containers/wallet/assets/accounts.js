@@ -13,7 +13,7 @@ import Favorite from 'senswap-ui/favorite';
 import CircularProgress from 'senswap-ui/circularProgress';
 import Pagination from 'senswap-ui/pagination';
 
-import { MintAvatar } from 'containers/wallet';
+import { MintAvatar, BucketWatcher } from 'containers/wallet';
 import Price from './price';
 import PriceChange from './priceChange';
 
@@ -29,7 +29,7 @@ class Accounts extends Component {
     super();
 
     this.state = {
-      limit: 5,
+      limit: 4,
       page: 0,
       loading: false,
       data: [],
@@ -72,16 +72,14 @@ class Accounts extends Component {
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount] });
-    this.setState({ data: [], loading: true });
+    this.setState({ loading: true });
     let data = [];
     const sortedAccounts = this.sortFavourite(accounts);
     const inPageAccounts = sortedAccounts.slice(page * limit, (page + 1) * limit);
     for (const accountAddress of inPageAccounts) {
       try {
         const accountData = await getAccountData(accountAddress);
-        const { pool } = accountData;
-        const { address: poolAddress } = pool || {}
-        if (!ssjs.isAddress(poolAddress)) data.push(accountData);
+        data.push(accountData);
       } catch (er) { /* Skip error */ }
     }
     data.unshift(solAccount);
@@ -124,6 +122,10 @@ class Accounts extends Component {
     const { loading, data, fav, page, limit } = this.state;
 
     return <Grid container>
+      <BucketWatcher
+        addresses={data.map(({ address }) => address)}
+        onChange={this.fetchData}
+      />
       <Grid item xs={12}>
         <TableContainer>
           <Table>

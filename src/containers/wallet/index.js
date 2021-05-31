@@ -3,7 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
-import eachOfSeries from 'async/eachOfSeries';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -12,8 +11,8 @@ import Carousel from 'senswap-ui/carousel';
 
 import WalletPlugin, { BucketWatcher, WalletButton } from 'containers/wallet/plugins/walletPlugin';
 import { AccountSelection, AccountSend, AccountReceive, AccountAvatar } from 'containers/wallet/plugins/accountPlugin';
-import { MintSelection, MintAvatar } from 'containers/wallet/plugins/mintPlugin';
-import { PoolAvatar } from 'containers/wallet/plugins/poolPlugin';
+import { MintSelection, MintAvatar, WSOL } from 'containers/wallet/plugins/mintPlugin';
+import { PoolAvatar, PoolCard, PoolSelection } from 'containers/wallet/plugins/poolPlugin';
 
 // Main components
 import Header from './header';
@@ -34,41 +33,6 @@ export const configSenWallet = () => {
   global.BigInt.prototype.toJSON = function () {
     return this.toString();
   }
-  // Array convenient patch
-  // eslint-disable-next-line
-  Array.prototype.each = function (promise, options = {}) {
-    return new Promise((resolve, reject) => {
-      try {
-        // Parse options
-        const opts = { skipError: false, skipIndex: false, ...options }
-        const { skipError, skipIndex } = opts;
-        // Promise series
-        let data = [];
-        return eachOfSeries(this, (each, i, cb) => {
-          return promise(each, i).then(re => {
-            data.push(re);
-            return cb();
-          }).catch(er => {
-            if (!skipError) return cb(er);
-            if (!skipIndex) data.push(null);
-            return cb();
-          });
-        }, (er) => {
-          if (er) return reject(er);
-          return resolve(data);
-        });
-      } catch (er) {
-        return reject(er);
-      }
-    });
-  }
-  // eslint-disable-next-line
-  Array.prototype.zip = function (arr) {
-    if (typeof arr !== 'object') return [];
-    if (this.length !== arr.length) return [];
-    if (!this.length) return [];
-    return this.map((value, index) => ([value, arr[index]]));
-  }
   // Global access
   const { sol: { node, spltAddress, splataAddress, swapAddress } } = configs;
   window.senswap = {
@@ -84,8 +48,8 @@ export const configSenWallet = () => {
 export {
   WalletPlugin, WalletButton, BucketWatcher,
   AccountSelection, AccountSend, AccountReceive, AccountAvatar,
-  MintSelection, MintAvatar,
-  PoolAvatar
+  MintSelection, MintAvatar, WSOL,
+  PoolAvatar, PoolCard, PoolSelection,
 }
 
 

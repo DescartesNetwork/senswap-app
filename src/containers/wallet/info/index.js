@@ -57,7 +57,6 @@ class Info extends Component {
 
     // Transfer lamports
     if (!ssjs.isAddress(from)) {
-      amount = amount.toString();
       const txId = await this.lamports.transfer(amount, to, window.senswap.wallet);
       await setSuccess('Transfer successfully', utils.explorer(txId));
       return this.onCloseAccountSend();
