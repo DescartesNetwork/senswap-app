@@ -29,9 +29,9 @@ const useStyles = makeStyles(theme => ({
 
 function FeaturedCard(props) {
   const classes = useStyles();
-  const { subtitle, title, src } = props;
+  const { subtitle, title, src, onClick } = props;
 
-  return <Paper className={classes.paper}>
+  return <Paper className={classes.paper} onClick={onClick}>
     <Grid container className={classes.noWrap} alignItems="center">
       <Grid item>
         <Avatar src={src} size="medium" />
@@ -61,6 +61,7 @@ FeaturedCard.propTypes = {
   src: PropTypes.string,
   subtitle: PropTypes.string,
   title: PropTypes.string,
+  to: PropTypes.string,
   onClick: PropTypes.func,
 }
 

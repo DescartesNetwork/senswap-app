@@ -31,4 +31,22 @@ export default theme => ({
   cardAction: {
     padding: `${theme.spacing(2)}px ${theme.spacing(3)}px !important`,
   },
+  dialogAction: {
+    paddingBottom: theme.spacing(2),
+    paddingLeft: theme.spacing(3),
+    paddingRight: theme.spacing(3),
+  },
+  tableRow: {
+    cursor: 'pointer',
+    transition: theme.transitions.create(),
+    '&:hover': {
+      backgroundColor: theme.palette.background.secondary,
+    },
+  },
+  recommended: {
+    color: theme.palette.success.main
+  },
+  warning: {
+    color: theme.palette.warning.main
+  }
 });

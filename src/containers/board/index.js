@@ -10,13 +10,14 @@ import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 
 import Header from './header';
+import LPT from './lpt';
+import Balance from './balance';
 import TVL from './tvl';
 import Volume from './volume';
 import ROI from './roi';
 import Reserve from './reserve';
 import Price from './price';
 import Reference from './reference';
-import Action from './action';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
@@ -54,6 +55,7 @@ class Board extends Component {
   }
 
   render() {
+    const { wallet: { user: { address: walletAddress } } } = this.props;
     const { data } = this.state;
     const { address: poolAddress } = data;
 
@@ -66,6 +68,12 @@ class Board extends Component {
       <Grid item xs={12}>
         <Drain size={1} />
       </Grid>
+      {ssjs.isAddress(walletAddress) ? <Grid item xs={12} md={6}>
+        <LPT poolData={data} />
+      </Grid> : null}
+      {ssjs.isAddress(walletAddress) ? <Grid item xs={12} md={6}>
+        <Balance poolData={data} />
+      </Grid> : null}
       <Grid item xs={12} md={6}>
         <TVL poolAddress={poolAddress} />
       </Grid>
@@ -73,27 +81,16 @@ class Board extends Component {
         <Volume poolAddress={poolAddress} />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
-        <Grid container>
-          <Grid item xs={12}>
-            <ROI poolAddress={poolAddress} />
-          </Grid>
-          <Grid item xs={12}>
-            <Reserve poolData={data} />
-          </Grid>
-        </Grid>
+        <ROI poolAddress={poolAddress} />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
-        <Grid container>
-          <Grid item xs={12}>
-            <Price poolData={data} />
-          </Grid>
-          <Grid item xs={12}>
-            <Reference poolData={data} />
-          </Grid>
-        </Grid>
+        <Price poolData={data} />
       </Grid>
-      <Grid item xs={12} md={4}>
-        <Action poolAddress={poolAddress} />
+      <Grid item xs={12} sm={6} md={4}>
+        <Reserve poolData={data} />
+      </Grid>
+      <Grid item xs={12} sm={6} md={4}>
+        <Reference poolData={data} />
       </Grid>
     </Grid>
   }

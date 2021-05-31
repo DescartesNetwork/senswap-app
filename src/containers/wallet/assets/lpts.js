@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { withRouter } from 'react-router-dom';
+import { Link as RouterLink, withRouter } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 
@@ -10,8 +10,11 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import Favorite from 'senswap-ui/favorite';
-import Button from 'senswap-ui/button';
+import { IconButton } from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
+import Tooltip from 'senswap-ui/tooltip';
+
+import { LaunchRounded } from 'senswap-ui/icons';
 
 import { PoolAvatar, BucketWatcher } from 'containers/wallet';
 
@@ -54,6 +57,11 @@ class LPTs extends Component {
     return this.setState({ data, loading: false });
   }
 
+  toBoard = (poolAddress) => {
+    const { history } = this.props;
+    return history.push(`/board/${poolAddress}`);
+  }
+
   render() {
     const { classes } = this.props;
     const { loading, data } = this.state;
@@ -91,6 +99,7 @@ class LPTs extends Component {
                 const {
                   address, amount, mint: { decimals },
                   pool: {
+                    address: poolAddress,
                     mint_s: { icon: iconS, symbol: symbolS },
                     mint_a: { icon: iconA, symbol: symbolA },
                     mint_b: { icon: iconB, symbol: symbolB },
@@ -98,7 +107,7 @@ class LPTs extends Component {
                 } = lptData;
                 const icons = [iconA, iconB, iconS];
                 const name = `${symbolA || '.'} x ${symbolB || '.'} x ${symbolS || '.'}`;
-                return <TableRow key={address} className={classes.tableRow}>
+                return <TableRow key={address} className={classes.tableRow} onClick={() => this.toBoard(poolAddress)}>
                   <TableCell >
                     <Favorite />
                   </TableCell>
@@ -116,12 +125,15 @@ class LPTs extends Component {
                     <Typography>{utils.prettyNumber(ssjs.undecimalize(amount, decimals))}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                    >
-                      <Typography>Go to pool</Typography>
-                    </Button>
+                    <Tooltip title="Go to the pool">
+                      <IconButton
+                        color="primary"
+                        component={RouterLink}
+                        to={`/board/${poolAddress}`}
+                      >
+                        <LaunchRounded />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               })}
