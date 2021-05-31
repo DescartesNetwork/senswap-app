@@ -112,10 +112,8 @@ class Selection extends Component {
       .sort(({ reserve_s: a }, { reserve_s: b }) => Number(b - a));
     const poolData = recommendedPools.concat(otherPools);
     const { address: poolAddress } = poolData[0] || {}
-    return this.setState({
-      selectedPoolAddress: selectedPoolAddress || poolAddress,
-      data: poolData
-    });
+    const selectedAdress = data.some(({ address }) => address === selectedPoolAddress) ? selectedPoolAddress : poolAddress;
+    return this.setState({ selectedPoolAddress: selectedAdress, data: poolData });
   }
 
   openMintSelection = () => this.setState({ visibleMintSelection: true });
