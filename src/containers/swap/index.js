@@ -264,18 +264,26 @@ class Swap extends Component {
   }
 
   render() {
-    const { classes, ui: { type } } = this.props;
+    const { classes, ui: { type }, getAccountData } = this.props;
     const {
       bidPoolData, bidAccountData, bidValue,
       askPoolData, askAccountData, askValue,
       txIds, slippage, hopData,
     } = this.state;
+    const { address: bidAccountAddress } = bidAccountData || {}
     const { address: bidPoolAddress } = bidPoolData || {}
     const { address: askPoolAddress } = askPoolData || {}
 
     return <Grid container>
       <BucketWatcher
-        addresses={hopData.map(({ poolData: { address } }) => address)}
+        addresses={[bidAccountAddress]}
+        onChange={async () => {
+          const newBidAccountData = await getAccountData(bidAccountAddress);
+          return this.setState({ bidAccountData: newBidAccountData })
+        }}
+      />
+      <BucketWatcher
+        addresses={[bidPoolAddress, askPoolAddress]}
         onChange={() => this.estimateState()}
       />
       <Grid item xs={12}>
