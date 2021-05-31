@@ -30,5 +30,19 @@ export default theme => ({
     backgroundColor: theme.palette.background.secondary,
     fontSize: 10,
     height: theme.spacing(3)
+  },
+  circle: {
+    position: 'relative',
+    paddingLeft: theme.spacing(2),
+    '& .circle': {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      bottom: 0,
+      margin: 'auto',
+      width: 10,
+      height: 10,
+      borderRadius: theme.shape.borderRadius - 2,
+    }
   }
 });

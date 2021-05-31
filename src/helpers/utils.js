@@ -71,5 +71,22 @@ Utils.fetchValue = (balance, ticket) => {
     });
   });
 }
+Utils.formatCurrency = (str, decimal = 2, type = '$') => {
+  if (!str) return;
+  str = str.toString()
+  if (str.length > 10) {
+    let idx = str.length - 9;
+    return `$${str.substring(0, idx).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}.${str.substring(idx, idx + decimal)}b`;
+  }
+  if (str.length > 6) {
+    let idx = str.length - 6;
+    return `$${str.substring(0, idx).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}.${str.substring(idx, idx + decimal)}m`;
+  }
+  if (str.length > 3) {
+    let idx = str.length - 3;
+    return `$${str.substring(0, idx).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}.${str.substring(idx, idx + decimal)}k`;
+  }
+  return `$${str.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}`;
+}
 
 export default Utils;
