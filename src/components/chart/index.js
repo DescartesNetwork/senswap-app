@@ -18,12 +18,10 @@ function SenChart(props) {
     let gradient;
     if (chartRef.current) {
       ctx = chartRef.current.getContext('2d');
-      console.log(ctx, 'ctx');
-      gradient = ctx.createLinearGradient(0, 0, 0, chartRef.current ? chartRef.current.height : 500);
+      gradient = ctx.createLinearGradient(0, 0, 0, chartRef.current ? chartRef.current.height + 50 : 250);
       gradient.addColorStop(0, styles.backgroundColor ? styles.backgroundColor : '#883636');
       gradient.addColorStop(1, styles.backgroundColor ? `${styles.backgroundColor}00` : '#88363600');
     }
-    console.log(gradient)
     return gradient;
   }
 
@@ -72,11 +70,9 @@ function SenChart(props) {
   };
 
   useEffect(() => {
-    console.log(data, data.length, 'data');
     setChartData(data);
     setChartLabel(labels);
     setStyle(styles);
-    console.log(chartInstance)
     if (chartInstance) chartInstance.update();
     // eslint-disable-next-line
   }, [data, labels, chartInstance, styles]);
@@ -85,7 +81,6 @@ function SenChart(props) {
   const ctx = chartRef.current;
   if (ctx && !isRebuildChart && chartData.length > 0 && chartLabel.length > 0) {
     const chart = new Chartjs(ctx, configs);
-    console.log('craete chart', configs)
     setChartInstance(chart);
     setRebuildChart(true);
   }
