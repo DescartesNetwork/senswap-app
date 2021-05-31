@@ -86,7 +86,7 @@ class Reserve extends Component {
             <Grid item xs={12}>
               {data.map(({ label, value, color }, i) => {
                 return <Grid className={classes.circle} key={i}>
-                  <Typography variant="body2">{label}: {numeral(value).format('0.[0]a')}</Typography>
+                  <Typography variant="body2">{label}: ${numeral(value).format('0.[0]a')}</Typography>
                   <Grid style={{ background: color }} className="circle" />
                 </Grid>
               })}
