@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import PropType from 'prop-types';
+import PropTypes from 'prop-types';
 import Chartjs from 'chart.js/dist/chart';
 
 import Utils from 'helpers/utils';
@@ -94,11 +94,12 @@ SenChart.defaultProps = {
   data: [],
   styles: {}
 }
-SenChart.propsType = {
-  type: PropType.string,
-  disableAxe: PropType.bool,
-  data: PropType.array,
-  styles: PropType.object,
+
+SenChart.propTypes = {
+  type: PropTypes.string,
+  disableAxe: PropTypes.bool,
+  data: PropTypes.array,
+  styles: PropTypes.object,
 }
 
 export default SenChart;
