@@ -256,6 +256,7 @@ class Selection extends Component {
           variant="contained"
           color="primary"
           onClick={this.onOk}
+          disabled={!data.length}
           fullWidth
         >
           <Typography>OK</Typography>
