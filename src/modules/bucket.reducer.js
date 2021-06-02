@@ -42,7 +42,7 @@ export const getAccountData = (accountAddress, force = false) => {
       }).then(({ data: re }) => {
         accountData.mint = { ...accountData.mint, ...re }
         const { mint_authority, freeze_authority } = accountData.mint || {};
-        return window.senswap.swap._swap.derivePoolAddress(mint_authority, freeze_authority);
+        return window.senswap.swap.derivePoolAddress(mint_authority, freeze_authority);
       }).then(poolAddress => {
         // It is token account -> Break the promise chain
         if (!ssjs.isAddress(poolAddress)) return Promise.reject('No error');

@@ -21,6 +21,7 @@ import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import utils from 'helpers/utils';
+import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
@@ -50,18 +51,13 @@ class Selection extends Component {
       wallet: { user: { address }, lamports, accounts },
       solana, getAccountData
     } = this.props;
+    const { sol: { native } } = configs;
 
     const solAccount = {
       address,
       amount: global.BigInt(lamports),
       owner: address,
-      mint: {
-        decimals: 9,
-        name: 'Solana',
-        symbol: 'SOL',
-        ticket: 'solana',
-        icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
-      }
+      mint: { ...native }
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
