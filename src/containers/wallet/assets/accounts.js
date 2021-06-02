@@ -80,7 +80,7 @@ class Accounts extends Component {
       try {
         const accountData = await getAccountData(accountAddress);
         data.push(accountData);
-      } catch (er) { /* Skip error */ }
+      } catch (er) { console.log(er)/* Skip error */ }
     }
     data.unshift(solAccount);
     return this.setState({ data, loading: false });

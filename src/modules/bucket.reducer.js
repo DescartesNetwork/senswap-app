@@ -2,7 +2,6 @@ import ssjs from 'senswapjs';
 
 import configs from 'configs';
 import api from 'helpers/api';
-import sol from 'helpers/sol';
 
 /**
  * Documents
@@ -42,11 +41,8 @@ export const getAccountData = (accountAddress, force = false) => {
         return api.get(base + '/mint', { address: re.mint.address });
       }).then(({ data: re }) => {
         accountData.mint = { ...accountData.mint, ...re }
-        const {
-          mint_authority: mintAuthorityAddress,
-          freeze_authority: freezeAuthorityAddress,
-        } = accountData.mint || {};
-        return sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
+        const { mint_authority, freeze_authority } = accountData.mint || {};
+        return window.senswap.swap._swap.derivePoolAddress(mint_authority, freeze_authority);
       }).then(poolAddress => {
         // It is token account -> Break the promise chain
         if (!ssjs.isAddress(poolAddress)) return Promise.reject('No error');
