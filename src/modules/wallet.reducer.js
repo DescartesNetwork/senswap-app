@@ -3,7 +3,6 @@ import ssjs from 'senswapjs';
 import configs from 'configs';
 import session from 'helpers/session';
 import api from 'helpers/api';
-import sol from 'helpers/sol';
 
 
 /**
@@ -125,13 +124,13 @@ export const setWallet = (wallet) => {
       pools = pools.map(({ address: poolAddress }) => poolAddress);
       const rest = full.filter(accountAddress => !data.accounts.includes(accountAddress));
       let counter = 0;
-      for (let accountAddress of rest) {
+      for (const accountAddress of rest) {
         if (counter++ > MAX_ACCOUNTS) break;
         try {
           const accountData = await splt.getAccountData(accountAddress);
           const { mint } = accountData;
           const { mint_authority, freeze_authority } = mint || {};
-          const poolAddress = await sol.isMintLPTAddress(mint_authority, freeze_authority);
+          const poolAddress = await window.senswap.swap.derivePoolAddress(mint_authority, freeze_authority);
           if (!ssjs.isAddress(poolAddress) || !pools.includes(poolAddress)) continue;
           data.lpts.push(accountAddress);
         } catch (er) { /* Nothing */ }

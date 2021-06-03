@@ -1,21 +1,7 @@
 import ssjs from 'senswapjs';
 
-import configs from 'configs';
-
 
 const SOL = {}
-
-SOL.isMintLPTAddress = async (mintAuthorityAddress, freezeAuthorityAddress) => {
-  const { sol: { swapAddress } } = configs;
-  try {
-    const poolAddress = await ssjs.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress, swapAddress);
-    if (!ssjs.isAddress(poolAddress)) return false;
-    return poolAddress;
-  }
-  catch (er) {
-    return false;
-  }
-}
 
 SOL.scanAccount = async (mintAddress, walletAddress) => {
   if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid token address');

@@ -19,6 +19,7 @@ import PriceChange from './priceChange';
 
 import styles from './styles';
 import utils from 'helpers/utils';
+import configs from 'configs';
 import Personalization from 'helpers/personalization';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
@@ -58,17 +59,12 @@ class Accounts extends Component {
   fetchData = async () => {
     const { wallet: { user: { address }, lamports, accounts }, getAccountData } = this.props;
     const { limit, page } = this.state;
+    const { sol: { native } } = configs;
 
     const solAccount = {
       address,
       amount: global.BigInt(lamports),
-      mint: {
-        decimals: 9,
-        name: 'Solana',
-        symbol: 'SOL',
-        ticket: 'solana',
-        icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
-      }
+      mint: { ...native }
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount] });
@@ -80,7 +76,7 @@ class Accounts extends Component {
       try {
         const accountData = await getAccountData(accountAddress);
         data.push(accountData);
-      } catch (er) { /* Skip error */ }
+      } catch (er) { console.log(er)/* Skip error */ }
     }
     data.unshift(solAccount);
     return this.setState({ data, loading: false });
