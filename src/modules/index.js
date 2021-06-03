@@ -7,6 +7,7 @@ import faucet from './faucet.reducer';
 import pool from './pool.reducer';
 import bucket from './bucket.reducer';
 import mint from './mint.reducer';
+import board from './board.reducer';
 
 // eslint-disable-next-line
 export default (history) => combineReducers({
@@ -17,4 +18,5 @@ export default (history) => combineReducers({
   pool,
   bucket,
   mint,
+  board,
 });
