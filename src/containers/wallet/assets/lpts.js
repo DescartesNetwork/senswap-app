@@ -16,7 +16,8 @@ import Tooltip from 'senswap-ui/tooltip';
 
 import { LaunchRounded } from 'senswap-ui/icons';
 
-import { PoolAvatar, BucketWatcher } from 'containers/wallet';
+import { BucketWatcher } from 'containers/wallet';
+import { PoolAvatar } from 'containers/pool';
 
 import styles from './styles';
 import utils from 'helpers/utils';

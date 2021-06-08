@@ -16,7 +16,8 @@ import Link from 'senswap-ui/link';
 
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 
-import { MintAvatar, PoolSelection } from 'containers/wallet';
+import { MintAvatar } from 'containers/wallet';
+import { PoolSelection } from 'containers/pool';
 
 import styles from './styles';
 import utils from 'helpers/utils';

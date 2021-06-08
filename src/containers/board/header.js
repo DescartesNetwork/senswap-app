@@ -8,7 +8,8 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 
-import { WalletButton, PoolAvatar } from 'containers/wallet';
+import { WalletButton } from 'containers/wallet';
+import { PoolAvatar } from 'containers/pool';
 
 import styles from './styles';
 
