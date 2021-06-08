@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import numeral from 'numeral';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Paper from 'senswap-ui/paper';
 import Typography from 'senswap-ui/typography';
 
-import Utils from 'helpers/utils';
 import Chart from 'components/chart';
 import { setError } from 'modules/ui.reducer';
 import { getBoardDaily, getBoardStat } from 'modules/board.reducer';
@@ -69,7 +69,7 @@ class Volume extends Component {
       <Grid container>
         <Grid item xs={12}>
           <Typography variant="subtitle1" color="textSecondary">Volume</Typography>
-          <Typography variant="h5">{info && info.volume24h ? Utils.formatCurrency(info.volume24h) : '$0'}</Typography>
+          <Typography variant="h5">{info && info.volume24h ? numeral(info.volume24h).format('0.[0]a') : '$0'}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Chart data={data} labels={labels} type="bar" styles={styles} />
