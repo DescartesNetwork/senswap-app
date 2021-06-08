@@ -21,27 +21,26 @@ export const GET_BOARD_DAILY_OK = 'GET_BOARD_DAILY_OK';
 export const GET_BOARD_DAILY_FAIL = 'GET_BOARD_DAILY_FAIL';
 
 export const getBoardDaily = (address, force = false) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: GET_BOARD_DAILY });
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_BOARD_DAILY });
 
-      let { board: { daily: dailyData } } = getState();
-      if (!dailyData || force) {
-        const { api: { baseBoard } } = configs;
-        console.log('called')
-        return API_INSTANCE.get(baseBoard + '/daily/pools/' + address).then(({ data: dailyData }) => {
-          const data = { daily: dailyData };
-          dispatch({ type: GET_BOARD_DAILY_OK, data });
-          return resolve(dailyData);
-        }).catch(er => {
-          dispatch({ type: GET_BOARD_DAILY_FAIL, reason: er.toString() });
-          return reject(er.toString());
-        });
-      } else {
-        dispatch({ type: GET_BOARD_DAILY_OK, dailyData });
-        return resolve(dailyData);
-      }
-    });
+    let { board: { daily: dailyData } } = getState();
+    if (dailyData && !force) {
+      const data = { daily: dailyData }
+      dispatch({ type: GET_BOARD_DAILY_OK, data });
+      return dailyData;
+    }
+
+    const { api: { baseBoard } } = configs;
+    try {
+      const { data: dailyData } = await API_INSTANCE.get(baseBoard + '/daily/pools/' + address);
+      const data = { daily: dailyData };
+      dispatch({ type: GET_BOARD_DAILY_OK, data });
+      return dailyData;
+    } catch (er) {
+      dispatch({ type: GET_BOARD_DAILY_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 
@@ -53,26 +52,26 @@ export const GET_BOARD_STAT_OK = 'GET_BOARD_STAT_OK';
 export const GET_BOARD_STAT_FAIL = 'GET_BOARD_STAT_FAIL';
 
 export const getBoardStat = (address, force = false) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: GET_BOARD_DAILY });
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_BOARD_STAT });
 
-      let { board: { stat: statData } } = getState();
-      if (!statData || force) {
-        const { api: { baseBoard } } = configs;
-        return API_INSTANCE.get(baseBoard + '/stat/pools/' + address).then(({ data: statData }) => {
-          const data = { stat: statData };
-          dispatch({ type: GET_BOARD_DAILY_OK, data });
-          return resolve(statData);
-        }).catch(er => {
-          dispatch({ type: GET_BOARD_DAILY_FAIL, reason: er.toString() });
-          return reject(er.toString());
-        });
-      } else {
-        dispatch({ type: GET_BOARD_DAILY_OK, statData });
-        return resolve(statData);
-      }
-    });
+    let { board: { stat: statData } } = getState();
+    if (statData && !force) {
+      const data = { stat: statData }
+      dispatch({ type: GET_BOARD_STAT_OK, data });
+      return statData;
+    }
+
+    const { api: { baseBoard } } = configs;
+    try {
+      const { data: statData } = await API_INSTANCE.get(baseBoard + '/stat/pools/' + address);
+      const data = { stat: statData };
+      dispatch({ type: GET_BOARD_STAT_OK, data });
+      return statData;
+    } catch (er) {
+      dispatch({ type: GET_BOARD_STAT_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 

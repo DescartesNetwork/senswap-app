@@ -31,7 +31,7 @@ export const OPEN_WALLET_OK = 'OPEN_WALLET_OK';
 export const OPEN_WALLET_FAIL = 'OPEN_WALLET_FAIL';
 
 export const openWallet = () => {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch({ type: OPEN_WALLET });
 
     const { wallet: { visible } } = getState();
@@ -55,7 +55,7 @@ export const CLOSE_WALLET_OK = 'CLOSE_WALLET_OK';
 export const CLOSE_WALLET_FAIL = 'CLOSE_WALLET_FAIL';
 
 export const closeWallet = () => {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch({ type: CLOSE_WALLET });
 
     const { wallet: { visible } } = getState();
@@ -182,25 +182,23 @@ export const UNSET_WALLET_OK = 'UNSET_WALLET_OK';
 export const UNSET_WALLET_FAIL = 'UNSET_WALLET_FAIL';
 
 export const unsetWallet = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UNSET_WALLET });
+  return async (dispatch, getState) => {
+    dispatch({ type: UNSET_WALLET });
 
-      const { wallet: { user: { address } } } = getState();
-      if (!address) {
-        const er = 'Already disconnected';
-        dispatch({ type: UNSET_WALLET_FAIL, reason: er });
-        return reject(er);
-      }
+    const { wallet: { user: { address } } } = getState();
+    if (!address) {
+      const er = 'Already disconnected';
+      dispatch({ type: UNSET_WALLET_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      // Session storage
-      session.clear('WalletType');
-      session.clear('SecretKey');
+    // Session storage
+    session.clear('WalletType');
+    session.clear('SecretKey');
 
-      const data = { ...defaultState };
-      dispatch({ type: UNSET_WALLET_OK, data });
-      return resolve(data);
-    });
+    const data = { ...defaultState };
+    dispatch({ type: UNSET_WALLET_OK, data });
+    return data;
   }
 }
 

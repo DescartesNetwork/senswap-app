@@ -6,20 +6,15 @@ const api = {}
 /**
  * Build access token
  */
-api.auth = (auth = false) => {
-  return new Promise((resolve, reject) => {
-    if (!auth) return resolve(null);
-    const wallet = window.senswap.wallet;
-    if (!wallet) return reject('Wallet is not connected');
-    const datetime = Number(new Date()) + 60000; // Valid in 10s
-    const msg = datetime.toString() + ssjs.salt();
-    return wallet.certify(msg).then(({ address, sig }) => {
-      const authHeader = `${address} ${sig}`;
-      return resolve(authHeader);
-    }).catch(er => {
-      return reject(er);
-    });
-  });
+api.auth = async (auth = false) => {
+  if (!auth) return null;
+  const wallet = window.senswap.wallet;
+  if (!wallet) throw new Error('Wallet is not connected');
+  const datetime = Number(new Date()) + 60000; // Valid in 10s
+  const msg = datetime.toString() + ssjs.salt();
+  const { address, sig } = await wallet.certify(msg);
+  const authHeader = `${address} ${sig}`;
+  return authHeader;
 }
 
 /**
@@ -27,99 +22,79 @@ api.auth = (auth = false) => {
  */
 
 // Create
-api.post = (url, params = null, auth = false) => {
-  return new Promise((resolve, reject) => {
-    return api.auth(auth).then(authHeader => {
-      return axios({
-        method: 'post',
-        url: url,
-        data: params,
-        headers: { 'Authorization': authHeader }
-      });
-    }).then(re => {
-      let data = re.data;
-      if (data.status === 'ERROR') return reject(data.error);
-      return resolve(data);
-    }).catch(er => {
-      if (er.response) {
-        const { response: { data: { error } } } = er;
-        return reject(error);
-      }
-      return reject(er.message);
+api.post = async (url, params = null, auth = false) => {
+  const authHeader = await api.auth(auth);
+  try {
+    const { data } = await axios({
+      method: 'post',
+      url: url,
+      data: params,
+      headers: { 'Authorization': authHeader }
     });
-  });
+    if (data.status === 'ERROR') throw new Error(data.error);
+    return data;
+  } catch (er) {
+    if (!er.response) throw new Error(er.message);
+    const { response: { data: { error } } } = er;
+    throw new Error(error);
+  }
 }
 
 // Read
-api.get = (url, params = null, auth = false) => {
-  return new Promise((resolve, reject) => {
-    return api.auth(auth).then(authHeader => {
-      return axios({
-        method: 'get',
-        url: url,
-        params: params,
-        headers: { 'Authorization': authHeader }
-      });
-    }).then(re => {
-      let data = re.data;
-      if (data.status === 'ERROR') return reject(data.error);
-      return resolve(data);
-    }).catch(er => {
-      if (er.response) {
-        const { response: { data: { error } } } = er;
-        return reject(error);
-      }
-      return reject(er.message);
+api.get = async (url, params = null, auth = false) => {
+  const authHeader = await api.auth(auth);
+  try {
+    const { data } = await axios({
+      method: 'get',
+      url: url,
+      params: params,
+      headers: { 'Authorization': authHeader }
     });
-  });
+    if (data.status === 'ERROR') throw new Error(data.error);
+    return data;
+  } catch (er) {
+    if (!er.response) throw new Error(er.message);
+    const { response: { data: { error } } } = er;
+    throw new Error(error);
+  }
 }
 
 // Update
-api.put = (url, params = null, auth = false) => {
-  return new Promise((resolve, reject) => {
-    return api.auth(auth).then(authHeader => {
-      return axios({
-        method: 'put',
-        url: url,
-        data: params,
-        headers: { 'Authorization': authHeader }
-      });
-    }).then(re => {
-      let data = re.data;
-      if (data.status === 'ERROR') return reject(data.error);
-      return resolve(data);
-    }).catch(er => {
-      if (er.response) {
-        const { response: { data: { error } } } = er;
-        return reject(error);
-      }
-      return reject(er.message);
+api.put = async (url, params = null, auth = false) => {
+  const authHeader = await api.auth(auth);
+  try {
+    const { data } = await axios({
+      method: 'put',
+      url: url,
+      data: params,
+      headers: { 'Authorization': authHeader }
     });
-  });
+    if (data.status === 'ERROR') throw new Error(data.error);
+    return data;
+  } catch (er) {
+    if (!er.response) throw new Error(er.message);
+    const { response: { data: { error } } } = er;
+    throw new Error(error);
+  }
 }
 
 // Delete
-api.delete = (url, params = null, auth = false) => {
-  return new Promise((resolve, reject) => {
-    api.auth(auth).then(authHeader => {
-      return axios({
-        method: 'delete',
-        url: url,
-        data: params,
-        headers: { 'Authorization': authHeader }
-      });
-    }).then(re => {
-      let data = re.data;
-      if (data.status === 'ERROR') return reject(data.error);
-      return resolve(data);
-    }).catch(er => {
-      if (er.response) {
-        const { response: { data: { error } } } = er;
-        return reject(error);
-      }
-      return reject(er.message);
+api.delete = async (url, params = null, auth = false) => {
+  const authHeader = await api.auth(auth);
+  try {
+    const { data } = await axios({
+      method: 'delete',
+      url: url,
+      data: params,
+      headers: { 'Authorization': authHeader }
     });
-  })
+    if (data.status === 'ERROR') throw new Error(data.error);
+    return data;
+  } catch (er) {
+    if (!er.response) throw new Error(er.message);
+    const { response: { data: { error } } } = er;
+    throw new Error(error);
+  }
 }
 
 export default api;
