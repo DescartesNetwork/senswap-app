@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Chartjs from 'chart.js/dist/chart';
-
-import Utils from 'helpers/utils';
-
+import numeral from 'numeral';
 function SenChart(props) {
   const { data, labels, type, disableAxe, styles, ...others } = props;
   const chartRef = useRef(null);
@@ -54,7 +52,7 @@ function SenChart(props) {
           ticks: {
             // Include a dollar sign in the ticks
             callback: function (value, index, values) {
-              return Utils.formatCurrency(value);
+              return numeral(value).format('0.[0]a');
             }
           }
         },

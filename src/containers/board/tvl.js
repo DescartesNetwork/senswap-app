@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
+import numeral from 'numeral';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -10,7 +11,6 @@ import Typography from 'senswap-ui/typography';
 import Paper from 'senswap-ui/paper';
 
 import Chart from 'components/chart';
-import Utils from 'helpers/utils';
 import { setError } from 'modules/ui.reducer';
 import { getBoardDaily, getBoardStat } from 'modules/board.reducer';
 
@@ -71,7 +71,7 @@ class TVL extends Component {
       <Grid container>
         <Grid item xs={12}>
           <Typography variant="subtitle1" color="textSecondary">TVL</Typography>
-          <Typography variant="h5">{info && info.volume24h ? Utils.formatCurrency(info.tvl) : '$0'}</Typography>
+          <Typography variant="h5">{info && info.volume24h ? numeral(info.tvl).format('0.[0]a') : '$0'}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Chart data={data} labels={labels} type="line" styles={styles} fill={true} tension="0.4" pointRadius="0" />
