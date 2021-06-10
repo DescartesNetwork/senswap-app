@@ -16,7 +16,7 @@ configs.development = {
  */
 configs.staging = {
   base: 'https://api.senswap.xyz',
-  baseBoard: 'http://18.117.93.162:9090/stat/reports',
+  baseBoard: 'https://stat.senswap.xyz/stat/reports',
 }
 
 /**
@@ -24,7 +24,7 @@ configs.staging = {
  */
 configs.production = {
   base: 'https://api.senswap.com',
-  baseBoard: 'http://18.117.93.162:9090/stat/reports',
+  baseBoard: 'https://stat.senswap.com/stat/reports',
 }
 
 /**
