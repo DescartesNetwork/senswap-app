@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import numeral from 'numeral';
+import isEqual from 'react-fast-compare';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -24,21 +25,27 @@ class TVL extends Component {
       info: {}
     }
   }
-  endpoint(type, id) {
-    return `${type}/pools/${id}`;
-  }
 
   componentDidMount() {
     this.getDaily();
     this.getStat();
   }
+  componentDidUpdate(prevProps) {
+    const { poolAddress: prevAddress } = prevProps;
+    const { board: { stat: items } } = this.props;
+    if (items && !isEqual(prevAddress, items.pool)) {
+      this.getDaily(true);
+      this.getStat(true);
+      // console.log(this.state.data, ' state data')
+    }
+  }
 
-  getDaily = async () => {
+  getDaily = async (force = false) => {
     const { getBoardDaily, poolAddress: address } = this.props;
     try {
-      const data = await getBoardDaily(address);
+      const data = await getBoardDaily(address, force);
       if (data) {
-        const values = data.map(e => e.volume)
+        const values = data.map(e => e.tvl)
         const labels = data.map(e => e.time % 100);
         this.setState({ data: values });
         this.setState({ labels: labels });
@@ -48,10 +55,10 @@ class TVL extends Component {
     }
   }
 
-  getStat = async () => {
+  getStat = async (force = false) => {
     const { getBoardStat, poolAddress: address } = this.props;
     try {
-      const data = await getBoardStat(address);
+      const data = await getBoardStat(address, force);
       if (data) this.setState({ info: data });
     } catch (err) {
       return setError(err);
