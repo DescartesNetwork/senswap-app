@@ -36,6 +36,7 @@ class Board extends Component {
       labels: [],
       info: {},
       isLoading: false,
+      isUpdate: true,
     }
   }
 
@@ -47,6 +48,7 @@ class Board extends Component {
   }
 
   componentDidUpdate(prevProps) {
+    const { isUpdate } = this.state;
     const { wallet: { lpts: prevLPTs } } = prevProps;
     const { wallet: { lpts } } = this.props;
     const { match: { params: { poolAddress: prevAddress } } } = prevProps;
@@ -54,9 +56,10 @@ class Board extends Component {
 
     if (!isEqual(prevLPTs, lpts)) this.fetchData();
 
-    if (items && !isEqual(prevAddress, items.pool)) {
+    if (items && !isEqual(prevAddress, items.pool) && isUpdate) {
       this.getDaily(true);
       this.getStat(true);
+      this.setState({ isUpdate: false });
     }
   }
 
