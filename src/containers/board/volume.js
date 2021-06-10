@@ -4,76 +4,26 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import numeral from 'numeral';
-import isEqual from 'react-fast-compare';
 
+import { Skeleton } from '@material-ui/lab';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Paper from 'senswap-ui/paper';
 import Typography from 'senswap-ui/typography';
 
 import Chart from 'components/chart';
-import { setError } from 'modules/ui.reducer';
-import { getBoardDaily, getBoardStat } from 'modules/board.reducer';
 
 import styles from './styles';
 class Volume extends Component {
-  constructor() {
-    super();
-
-    this.state = {
-      data: [],
-      labels: [],
-      info: {}
-    }
-  }
-
-  componentDidMount() {
-    this.getDaily();
-    this.getStat();
-  }
-  componentDidUpdate(prevProps) {
-    const { poolAddress: prevAddress } = prevProps;
-    const { board: { stat: items } } = this.props;
-    if (items && !isEqual(prevAddress, items.pool)) {
-      this.getDaily(true);
-      this.getStat(true);
-      // console.log(this.state.data, ' state data')
-    }
-  }
-
-  getDaily = async (force = false) => {
-    const { getBoardDaily, poolAddress: address } = this.props;
-    try {
-      const data = await getBoardDaily(address, force);
-      if (data) {
-        const values = data.map(e => e.volume)
-        const labels = data.map(e => e.time % 100);
-        this.setState({ data: values });
-        this.setState({ labels: labels });
-      }
-    } catch (err) {
-      return setError(err);
-    }
-  }
-
-  getStat = async (force = false) => {
-    const { getBoardStat, poolAddress: address } = this.props;
-    try {
-      const data = await getBoardStat(address, force);
-      if (data) this.setState({ info: data });
-    } catch (err) {
-      return setError(err);
-    }
-  }
-
   render() {
-    const { classes } = this.props;
-    const { data, labels, info } = this.state;
+    const { classes, data, labels, info, loading: isLoading } = this.props;
     const styles = {
       backgroundColor: 'rgba(115, 136, 169, 0.353283)',
       borderColor: 'rgba(115, 136, 169, 0.353283)',
       borderRadius: 4,
     }
+
+    if (isLoading) return <Skeleton variant="rect" height={320} className={classes.chart} />;
 
     return <Paper className={classes.paper}>
       <Grid container>
@@ -91,11 +41,9 @@ class Volume extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  board: state.board,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getBoardDaily, getBoardStat
 }, dispatch);
 
 Volume.propTypes = {

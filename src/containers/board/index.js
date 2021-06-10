@@ -23,6 +23,7 @@ import { BucketWatcher } from 'containers/wallet';
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPoolData, getAccountData } from 'modules/bucket.reducer';
+import { getBoardDaily, getBoardStat } from 'modules/board.reducer';
 
 
 class Board extends Component {
@@ -30,18 +31,33 @@ class Board extends Component {
     super();
 
     this.state = {
-      data: {}
+      data: {},
+      chartData: [],
+      labels: [],
+      info: {},
+      isLoading: false,
     }
   }
 
   componentDidMount() {
+    this.setState({ isLoading: true });
     this.fetchData();
+    this.getDaily();
+    this.getStat();
   }
 
   componentDidUpdate(prevProps) {
     const { wallet: { lpts: prevLPTs } } = prevProps;
     const { wallet: { lpts } } = this.props;
+    const { match: { params: { poolAddress: prevAddress } } } = prevProps;
+    const { board: { stat: items } } = this.props;
+
     if (!isEqual(prevLPTs, lpts)) this.fetchData();
+
+    if (items && !isEqual(prevAddress, items.pool)) {
+      this.getDaily(true);
+      this.getStat(true);
+    }
   }
 
   fetchData = async () => {
@@ -54,9 +70,37 @@ class Board extends Component {
     }
   }
 
+
+  getDaily = async (force = false) => {
+    const { getBoardDaily, match: { params: { poolAddress } } } = this.props;
+    try {
+      const data = await getBoardDaily(poolAddress, force);
+      if (data) {
+        const labels = data.map(e => e.time % 100);
+        this.setState({ chartData: data });
+        this.setState({ labels: labels });
+        setTimeout(() => {
+          this.setState({ isLoading: false });
+        }, 800);
+      }
+    } catch (err) {
+      return setError(err);
+    }
+  }
+
+  getStat = async (force = false) => {
+    const { getBoardStat, match: { params: { poolAddress } } } = this.props;
+    try {
+      const data = await getBoardStat(poolAddress, force);
+      if (data) this.setState({ info: data });
+    } catch (err) {
+      return setError(err);
+    }
+  }
+
   render() {
     const { wallet: { user: { address: walletAddress } } } = this.props;
-    const { data } = this.state;
+    const { data, chartData, info, labels, isLoading } = this.state;
     const { address: poolAddress } = data;
 
     if (!ssjs.isAddress(poolAddress)) return null;
@@ -75,13 +119,13 @@ class Board extends Component {
         <Balance poolData={data} />
       </Grid> : null}
       <Grid item xs={12} md={6}>
-        <TVL poolAddress={poolAddress} />
+        <TVL poolAddress={poolAddress} data={chartData.map(e => e.tvl)} info={info} labels={labels} loading={isLoading} />
       </Grid>
       <Grid item xs={12} md={6}>
-        <Volume poolAddress={poolAddress} />
+        <Volume poolAddress={poolAddress} data={chartData.map(e => e.volume)} info={info} labels={labels} loading={isLoading} />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
-        <ROI poolAddress={poolAddress} />
+        <ROI poolAddress={poolAddress} info={info} />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
         <Price poolData={data} />
@@ -100,11 +144,13 @@ const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
   bucket: state.bucket,
+  board: state.board,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getPoolData, getAccountData
+  getPoolData, getAccountData,
+  getBoardDaily, getBoardStat,
 }, dispatch);
 
 export default withRouter(connect(

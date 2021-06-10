@@ -4,7 +4,7 @@ import Chartjs from 'chart.js/dist/chart';
 import numeral from 'numeral';
 import isEqual from 'react-fast-compare';
 function SenChart(props) {
-  const { data: datasets, labels, type, disableAxe, styles, ...others } = props;
+  const { classes, data: datasets, labels, type, disableAxe, styles, ...others } = props;
   const chartRef = useRef(null);
   const [chartLabel, setChartLabel] = useState([]);
   const [chartData, setChartData] = useState([]);
@@ -67,7 +67,6 @@ function SenChart(props) {
       }
     }
   };
-
   const addData = useCallback(() => {
     if (!chartInstance) return;
     const dataConfigs = chartInstance.data.datasets;
