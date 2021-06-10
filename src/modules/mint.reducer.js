@@ -16,27 +16,26 @@ export const GET_MINT_OK = 'GET_MINT_OK';
 export const GET_MINT_FAIL = 'GET_MINT_FAIL';
 
 export const getMint = (address, force = false) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: GET_MINT });
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_MINT });
 
-      let { mint: { [address]: mintData } } = getState();
-      if (!mintData || force) {
-        const { api: { base } } = configs;
-        return api.get(base + '/mint', { address }).then(({ data: mintData }) => {
-          const data = { [address]: mintData }
-          dispatch({ type: GET_MINT_OK, data });
-          return resolve(JSON.parse(JSON.stringify(mintData)));
-        }).catch(er => {
-          dispatch({ type: GET_MINT_FAIL, reason: er.toString() });
-          return reject(er.toString());
-        });
-      } else {
-        const data = { [address]: mintData }
-        dispatch({ type: GET_MINT_OK, data });
-        return resolve(mintData);
-      }
-    });
+    let { mint: { [address]: mintData } } = getState();
+    if (mintData && !force) {
+      const data = { [address]: mintData }
+      dispatch({ type: GET_MINT_OK, data });
+      return mintData;
+    }
+    
+    const { api: { base } } = configs;
+    try {
+      const { data: mintData } = await api.get(base + '/mint', { address });
+      const data = { [address]: mintData }
+      dispatch({ type: GET_MINT_OK, data });
+      return mintData;
+    } catch (er) {
+      dispatch({ type: GET_MINT_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 
@@ -48,19 +47,18 @@ export const GET_MINTS_OK = 'GET_MINTS_OK';
 export const GET_MINTS_FAIL = 'GET_MINTS_FAIL';
 
 export const getMints = (condition, limit, page) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: GET_MINTS });
+  return async dispatch => {
+    dispatch({ type: GET_MINTS });
 
-      const { api: { base } } = configs;
-      return api.get(base + '/mints', { condition, limit, page }).then(({ data }) => {
-        dispatch({ type: GET_MINTS_OK, data: {} });
-        return resolve(data);
-      }).catch(er => {
-        dispatch({ type: GET_MINTS_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
-    });
+    const { api: { base } } = configs;
+    try {
+      const { data } = await api.get(base + '/mints', { condition, limit, page });
+      dispatch({ type: GET_MINTS_OK, data: {} });
+      return data;
+    } catch (er) {
+      dispatch({ type: GET_MINTS_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 
@@ -72,26 +70,25 @@ export const ADD_MINT_OK = 'ADD_MINT_OK';
 export const ADD_MINT_FAIL = 'ADD_MINT_FAIL';
 
 export const addMint = (mint) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: ADD_MINT });
+  return async dispatch => {
+    dispatch({ type: ADD_MINT });
 
-      if (!mint) {
-        const er = 'Invalid mint data';
-        dispatch({ type: ADD_MINT_FAIL, reason: er });
-        return reject(er);
-      }
+    if (!mint) {
+      const er = 'Invalid mint data';
+      dispatch({ type: ADD_MINT_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const { api: { base } } = configs;
-      return api.post(base + '/mint', { mint }, true).then(({ data: mintData }) => {
-        const data = { [mintData.address]: mintData }
-        dispatch({ type: ADD_MINT_OK, data });
-        return resolve(mintData);
-      }).catch(er => {
-        dispatch({ type: ADD_MINT_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
-    });
+    const { api: { base } } = configs;
+    try {
+      const { data: mintData } = await api.post(base + '/mint', { mint }, true);
+      const data = { [mintData.address]: mintData }
+      dispatch({ type: ADD_MINT_OK, data });
+      return mintData;
+    } catch (er) {
+      dispatch({ type: ADD_MINT_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 
@@ -103,26 +100,25 @@ export const UPDATE_MINT_OK = 'UPDATE_MINT_OK';
 export const UPDATE_MINT_FAIL = 'UPDATE_MINT_FAIL';
 
 export const updateMint = (mint) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UPDATE_MINT });
+  return async dispatch => {
+    dispatch({ type: UPDATE_MINT });
 
-      if (!mint) {
-        const er = 'Invalid mint data';
-        dispatch({ type: ADD_MINT_FAIL, reason: er });
-        return reject(er);
-      }
+    if (!mint) {
+      const er = 'Invalid mint data';
+      dispatch({ type: ADD_MINT_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const { api: { base } } = configs;
-      return api.put(base + '/mint', { mint }, true).then(({ data: mintData }) => {
-        const data = { [mintData.address]: mintData }
-        dispatch({ type: UPDATE_MINT_OK, data });
-        return resolve(mintData);
-      }).catch(er => {
-        dispatch({ type: UPDATE_MINT_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
-    });
+    const { api: { base } } = configs;
+    try {
+      const { data: mintData } = await api.put(base + '/mint', { mint }, true);
+      const data = { [mintData.address]: mintData }
+      dispatch({ type: UPDATE_MINT_OK, data });
+      return mintData;
+    } catch (er) {
+      dispatch({ type: UPDATE_MINT_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 
@@ -134,26 +130,25 @@ export const DELETE_MINT_OK = 'DELETE_MINT_OK';
 export const DELETE_MINT_FAIL = 'DELETE_MINT_FAIL';
 
 export const deleteMint = (mint) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: DELETE_MINT });
+  return async dispatch => {
+    dispatch({ type: DELETE_MINT });
 
-      if (!mint) {
-        const er = 'Invalid mint data';
-        dispatch({ type: DELETE_MINT_FAIL, reason: er });
-        return reject(er);
-      }
+    if (!mint) {
+      const er = 'Invalid mint data';
+      dispatch({ type: DELETE_MINT_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const { api: { base } } = configs;
-      return api.delete(base + '/mint', { mint }, true).then(({ data: mintData }) => {
-        const data = { [mintData.address]: null }
-        dispatch({ type: DELETE_MINT_OK, data });
-        return resolve(mintData);
-      }).catch(er => {
-        dispatch({ type: DELETE_MINT_FAIL, reason: er.toString() });
-        return reject(er.toString());
-      });
-    });
+    const { api: { base } } = configs;
+    try {
+      const { data: mintData } = await api.delete(base + '/mint', { mint }, true);
+      const data = { [mintData.address]: null }
+      dispatch({ type: DELETE_MINT_OK, data });
+      return mintData;
+    } catch (er) {
+      dispatch({ type: DELETE_MINT_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
   }
 }
 

@@ -56,20 +56,12 @@ Utils.explorer = (addressOrTxId) => {
   return `https://explorer.solana.com/tx/${addressOrTxId}?cluster=${cluster}`;
 }
 
-Utils.fetchValue = (balance, ticket) => {
-  return new Promise((resolve, reject) => {
-    let usd = 0;
-    let btc = 0;
-    return ssjs.parseCGK(ticket).then(({ price }) => {
-      usd = balance * price;
-      return ssjs.parseCGK('bitcoin');
-    }).then(({ price }) => {
-      btc = usd / price;
-      return resolve({ usd, btc });
-    }).catch(er => {
-      return reject(er);
-    });
-  });
+Utils.fetchValue = async (balance, ticket) => {
+  const { price } = await ssjs.parseCGK(ticket);
+  const usd = balance * price;
+  const { price: btcPrice } = await ssjs.parseCGK('bitcoin');
+  const btc = usd / btcPrice;
+  return { usd, btc }
 }
 Utils.formatCurrency = (str, decimal = 2, type = '$') => {
   if (!str) return;

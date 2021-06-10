@@ -10,7 +10,7 @@ import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 import Drain from 'senswap-ui/drain';
 
-import { PoolCard } from 'containers/wallet';
+import { PoolCard } from 'containers/pool';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

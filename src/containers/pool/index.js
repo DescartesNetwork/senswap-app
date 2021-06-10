@@ -11,6 +11,7 @@ import Drain from 'senswap-ui/drain';
 import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 
+import { PoolAvatar, PoolCard, PoolSelection } from 'containers/pool/plugins';
 import PrivateRoute from 'containers/auth/privateRoute';
 import Header from './header';
 import FeaturedPool from './featuredPool';
@@ -18,6 +19,12 @@ import LatestPromotion from './latestPromotion';
 import MyPool from './myPool';
 
 import styles from './styles';
+
+
+/**
+ * Pool plugins
+ */
+export { PoolAvatar, PoolCard, PoolSelection }
 
 
 class Pool extends Component {

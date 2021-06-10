@@ -21,7 +21,8 @@ import {
   CloseRounded, ArrowDropDownRounded, CheckCircleOutlineRounded,
 } from 'senswap-ui/icons';
 
-import { MintAvatar, MintSelection, PoolAvatar } from 'containers/wallet';
+import { MintAvatar, MintSelection } from 'containers/wallet';
+import { PoolAvatar } from 'containers/pool';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
