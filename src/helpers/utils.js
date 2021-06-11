@@ -64,9 +64,9 @@ Utils.fetchValue = async (balance, ticket) => {
   return { usd, btc }
 }
 
-Utils.getAnnualPercentage = (roi, time = 1, decimal = 4) => {
+Utils.getAnnualPercentage = (roi, time = 1) => {
   if (!roi && typeof roi !== 'number') return;
-  return ((Math.pow(((roi / 100) + 1), time) - 1) * 100).toFixed(decimal) + '%';
+  return numeral((Math.pow(((roi / 100) + 1), time) - 1)).format('0[.]0[0]%')
 }
 
 Utils.formatTime = (time) => {

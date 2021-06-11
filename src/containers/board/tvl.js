@@ -29,7 +29,7 @@ class TVL extends Component {
       <Grid container>
         <Grid item xs={12}>
           <Typography variant="subtitle1" color="textSecondary">TVL</Typography>
-          <Typography variant="h5">{info && info.volume24h ? numeral(info.tvl).format('0.[0]a') : '$0'}</Typography>
+          <Typography variant="h5">{info && info.volume24h ? numeral(info.tvl).format('$0.[0]a') : '$0'}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Chart data={data} labels={labels} type="line" styles={styles} fill={true} tension="0.4" pointRadius="0" />

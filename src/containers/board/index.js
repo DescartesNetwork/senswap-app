@@ -36,7 +36,6 @@ class Board extends Component {
       labels: [],
       info: {},
       isLoading: false,
-      isUpdate: true,
     }
   }
 
@@ -48,19 +47,9 @@ class Board extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { isUpdate } = this.state;
     const { wallet: { lpts: prevLPTs } } = prevProps;
     const { wallet: { lpts } } = this.props;
-    const { match: { params: { poolAddress: prevAddress } } } = prevProps;
-    const { board: { stat: items } } = this.props;
-
     if (!isEqual(prevLPTs, lpts)) this.fetchData();
-
-    if (items && !isEqual(prevAddress, items.pool) && isUpdate) {
-      this.getDaily(true);
-      this.getStat(true);
-      this.setState({ isUpdate: false });
-    }
   }
 
   fetchData = async () => {
@@ -74,10 +63,10 @@ class Board extends Component {
   }
 
 
-  getDaily = async (force = false) => {
+  getDaily = async () => {
     const { getBoardDaily, match: { params: { poolAddress } } } = this.props;
     try {
-      const data = await getBoardDaily(poolAddress, force);
+      const data = await getBoardDaily(poolAddress);
       if (data) {
         const labels = data.map(e => e.time % 100);
         this.setState({ chartData: data });
@@ -91,10 +80,10 @@ class Board extends Component {
     }
   }
 
-  getStat = async (force = false) => {
+  getStat = async () => {
     const { getBoardStat, match: { params: { poolAddress } } } = this.props;
     try {
-      const data = await getBoardStat(poolAddress, force);
+      const data = await getBoardStat(poolAddress);
       if (data) this.setState({ info: data });
     } catch (err) {
       return setError(err);
