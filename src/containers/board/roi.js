@@ -15,7 +15,7 @@ import { getBoardStat } from 'modules/board.reducer';
 
 import styles from './styles';
 
-
+const ROI_DURATION = [1, 7, 30, 90, 365]
 class ROI extends Component {
   constructor() {
     super();
@@ -55,7 +55,7 @@ class ROI extends Component {
               </TableRow>
             </TableHead>
             <TableBody>
-              {[1, 30, 90, 365].map((e, idx) => {
+              {ROI_DURATION.map((e, idx) => {
                 return <TableRow key={idx}>
                   <TableCell>
                     <Typography>{(info && info.roi) ? Utils.getAnnualPercentage(Number(info.roi), e) : 0}</Typography>
