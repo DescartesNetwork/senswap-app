@@ -10,12 +10,35 @@ import Typography from 'senswap-ui/typography';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import Utils from 'helpers/utils';
 
+import { setError } from 'modules/ui.reducer';
+import { getBoardStat } from 'modules/board.reducer';
+
 import styles from './styles';
 
 
 class ROI extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      info: {},
+    }
+  }
+
+  componentDidMount() {
+    this.getStat();
+  }
+  getStat = async () => {
+    const { getBoardStat, poolAddress: address } = this.props;
+    try {
+      const data = await getBoardStat(address);
+      if (data) this.setState({ info: data });
+    } catch (err) {
+      return setError(err);
+    }
+  }
   render() {
-    const { info } = this.props;
+    const { info } = this.state;
 
     return <Grid container>
       <Grid item xs={12}>
@@ -55,6 +78,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getBoardStat,
 }, dispatch);
 
 ROI.propTypes = {

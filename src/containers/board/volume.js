@@ -12,11 +12,58 @@ import Paper from 'senswap-ui/paper';
 import Typography from 'senswap-ui/typography';
 
 import Chart from 'components/chart';
+import { setError } from 'modules/ui.reducer';
+import { getBoardDaily, getBoardStat } from 'modules/board.reducer';
 
 import styles from './styles';
 class Volume extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      chartData: [],
+      labels: [],
+      info: {},
+      isLoading: false,
+    }
+  }
+
+  componentDidMount() {
+    this.setState({ isLoading: true });
+    this.getDaily();
+    this.getStat();
+  }
+
+  getDaily = async () => {
+    const { getBoardDaily, poolAddress: address } = this.props;
+    try {
+      const data = await getBoardDaily(address);
+      if (data) {
+        const values = data.map(e => e.volume);
+        const labels = data.map(e => e.time % 100);
+        this.setState({ chartData: values });
+        this.setState({ labels: labels });
+        setTimeout(() => {
+          this.setState({ isLoading: false });
+        }, 800);
+      }
+    } catch (err) {
+      return setError(err);
+    }
+  }
+
+  getStat = async () => {
+    const { getBoardStat, poolAddress: address } = this.props;
+    try {
+      const data = await getBoardStat(address);
+      if (data) this.setState({ info: data });
+    } catch (err) {
+      return setError(err);
+    }
+  }
   render() {
-    const { classes, data, labels, info, loading: isLoading } = this.props;
+    const { classes } = this.props;
+    const { isLoading, chartData: data, info, labels } = this.state;
     const styles = {
       backgroundColor: 'rgba(115, 136, 169, 0.353283)',
       borderColor: 'rgba(115, 136, 169, 0.353283)',
@@ -44,6 +91,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getBoardDaily, getBoardStat,
 }, dispatch);
 
 Volume.propTypes = {

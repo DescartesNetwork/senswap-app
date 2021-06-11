@@ -23,7 +23,6 @@ import { BucketWatcher } from 'containers/wallet';
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPoolData, getAccountData } from 'modules/bucket.reducer';
-import { getBoardDaily, getBoardStat } from 'modules/board.reducer';
 
 
 class Board extends Component {
@@ -40,10 +39,7 @@ class Board extends Component {
   }
 
   componentDidMount() {
-    this.setState({ isLoading: true });
     this.fetchData();
-    this.getDaily();
-    this.getStat();
   }
 
   componentDidUpdate(prevProps) {
@@ -62,37 +58,9 @@ class Board extends Component {
     }
   }
 
-
-  getDaily = async () => {
-    const { getBoardDaily, match: { params: { poolAddress } } } = this.props;
-    try {
-      const data = await getBoardDaily(poolAddress);
-      if (data) {
-        const labels = data.map(e => e.time % 100);
-        this.setState({ chartData: data });
-        this.setState({ labels: labels });
-        setTimeout(() => {
-          this.setState({ isLoading: false });
-        }, 800);
-      }
-    } catch (err) {
-      return setError(err);
-    }
-  }
-
-  getStat = async () => {
-    const { getBoardStat, match: { params: { poolAddress } } } = this.props;
-    try {
-      const data = await getBoardStat(poolAddress);
-      if (data) this.setState({ info: data });
-    } catch (err) {
-      return setError(err);
-    }
-  }
-
   render() {
     const { wallet: { user: { address: walletAddress } } } = this.props;
-    const { data, chartData, info, labels, isLoading } = this.state;
+    const { data } = this.state;
     const { address: poolAddress } = data;
 
     if (!ssjs.isAddress(poolAddress)) return null;
@@ -111,13 +79,13 @@ class Board extends Component {
         <Balance poolData={data} />
       </Grid> : null}
       <Grid item xs={12} md={6}>
-        <TVL poolAddress={poolAddress} data={chartData.map(e => e.tvl)} info={info} labels={labels} loading={isLoading} />
+        <TVL poolAddress={poolAddress} />
       </Grid>
       <Grid item xs={12} md={6}>
-        <Volume poolAddress={poolAddress} data={chartData.map(e => e.volume)} info={info} labels={labels} loading={isLoading} />
+        <Volume poolAddress={poolAddress} />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
-        <ROI poolAddress={poolAddress} info={info} />
+        <ROI poolAddress={poolAddress} />
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
         <Price poolData={data} />
@@ -136,13 +104,11 @@ const mapStateToProps = state => ({
   ui: state.ui,
   wallet: state.wallet,
   bucket: state.bucket,
-  board: state.board,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getPoolData, getAccountData,
-  getBoardDaily, getBoardStat,
 }, dispatch);
 
 export default withRouter(connect(
