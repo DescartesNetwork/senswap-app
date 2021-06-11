@@ -20,16 +20,9 @@ export const GET_BOARD_DAILY = 'GET_BOARD_DAILY';
 export const GET_BOARD_DAILY_OK = 'GET_BOARD_DAILY_OK';
 export const GET_BOARD_DAILY_FAIL = 'GET_BOARD_DAILY_FAIL';
 
-export const getBoardDaily = (address, force = false) => {
+export const getBoardDaily = (address) => {
   return async (dispatch, getState) => {
     dispatch({ type: GET_BOARD_DAILY });
-
-    let { board: { daily: dailyData } } = getState();
-    if (dailyData && !force) {
-      const data = { daily: dailyData }
-      dispatch({ type: GET_BOARD_DAILY_OK, data });
-      return dailyData;
-    }
 
     const { api: { baseBoard } } = configs;
     try {
@@ -51,16 +44,9 @@ export const GET_BOARD_STAT = 'GET_BOARD_STAT';
 export const GET_BOARD_STAT_OK = 'GET_BOARD_STAT_OK';
 export const GET_BOARD_STAT_FAIL = 'GET_BOARD_STAT_FAIL';
 
-export const getBoardStat = (address, force = false) => {
+export const getBoardStat = (address) => {
   return async (dispatch, getState) => {
     dispatch({ type: GET_BOARD_STAT });
-
-    let { board: { stat: statData } } = getState();
-    if (statData && !force) {
-      const data = { stat: statData }
-      dispatch({ type: GET_BOARD_STAT_OK, data });
-      return statData;
-    }
 
     const { api: { baseBoard } } = configs;
     try {
