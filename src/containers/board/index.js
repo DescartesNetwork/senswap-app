@@ -30,7 +30,11 @@ class Board extends Component {
     super();
 
     this.state = {
-      data: {}
+      data: {},
+      chartData: [],
+      labels: [],
+      info: {},
+      isLoading: false,
     }
   }
 
@@ -104,7 +108,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
-  getPoolData, getAccountData
+  getPoolData, getAccountData,
 }, dispatch);
 
 export default withRouter(connect(

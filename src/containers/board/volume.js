@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import numeral from 'numeral';
 
+import { Skeleton } from '@material-ui/lab';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Paper from 'senswap-ui/paper';
@@ -20,13 +21,15 @@ class Volume extends Component {
     super();
 
     this.state = {
-      data: [],
+      chartData: [],
       labels: [],
-      info: {}
+      info: {},
+      isLoading: false,
     }
   }
 
   componentDidMount() {
+    this.setState({ isLoading: true });
     this.getDaily();
     this.getStat();
   }
@@ -36,10 +39,13 @@ class Volume extends Component {
     try {
       const data = await getBoardDaily(address);
       if (data) {
-        const values = data.map(e => e.volume)
+        const values = data.map(e => e.volume);
         const labels = data.map(e => e.time % 100);
-        this.setState({ data: values });
+        this.setState({ chartData: values });
         this.setState({ labels: labels });
+        setTimeout(() => {
+          this.setState({ isLoading: false });
+        }, 800);
       }
     } catch (err) {
       return setError(err);
@@ -55,21 +61,22 @@ class Volume extends Component {
       return setError(err);
     }
   }
-
   render() {
     const { classes } = this.props;
-    const { data, labels, info } = this.state;
+    const { isLoading, chartData: data, info, labels } = this.state;
     const styles = {
       backgroundColor: 'rgba(115, 136, 169, 0.353283)',
       borderColor: 'rgba(115, 136, 169, 0.353283)',
       borderRadius: 4,
     }
 
+    if (isLoading) return <Skeleton variant="rect" height={320} className={classes.chart} />;
+
     return <Paper className={classes.paper}>
       <Grid container>
         <Grid item xs={12}>
           <Typography variant="subtitle1" color="textSecondary">Volume</Typography>
-          <Typography variant="h5">{info && info.volume24h ? numeral(info.volume24h).format('0.[0]a') : '$0'}</Typography>
+          <Typography variant="h5">{info && info.volume24h ? numeral(info.volume24h).format('$0.[0]a') : '$0'}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Chart data={data} labels={labels} type="bar" styles={styles} />
@@ -81,11 +88,10 @@ class Volume extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
-  board: state.board,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-  getBoardDaily, getBoardStat
+  getBoardDaily, getBoardStat,
 }, dispatch);
 
 Volume.propTypes = {

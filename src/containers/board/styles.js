@@ -44,5 +44,8 @@ export default theme => ({
       height: 10,
       borderRadius: theme.shape.borderRadius - 2,
     }
-  }
+  },
+  chart: {
+    borderRadius: theme.shape.borderRadius * 2,
+  },
 });

@@ -127,8 +127,7 @@ export const setWallet = (wallet) => {
       for (const accountAddress of rest) {
         if (counter++ > MAX_ACCOUNTS) break;
         try {
-          const accountData = await splt.getAccountData(accountAddress);
-          const { mint } = accountData;
+          const { mint } = await splt.getAccountData(accountAddress);
           const { mint_authority, freeze_authority } = mint || {};
           const poolAddress = await window.senswap.swap.derivePoolAddress(mint_authority, freeze_authority);
           if (!ssjs.isAddress(poolAddress) || !pools.includes(poolAddress)) continue;
