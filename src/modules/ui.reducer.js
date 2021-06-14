@@ -40,20 +40,18 @@ const getCode = (value) => {
 }
 
 export const setScreen = (width) => {
-  return dispatch => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_SCREEN });
+  return async dispatch => {
+    dispatch({ type: SET_SCREEN });
 
-      if (typeof (width) !== 'number' || width < 0) {
-        const er = 'Input is null';
-        dispatch({ type: SET_SCREEN_FAIL, reason: er });
-        return reject(er);
-      }
+    if (typeof (width) !== 'number' || width < 0) {
+      const er = 'Input is null';
+      dispatch({ type: SET_SCREEN_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { width, type: getCode(width) };
-      dispatch({ type: SET_SCREEN_OK, data });
-      return resolve(data);
-    });
+    const data = { width, type: getCode(width) };
+    dispatch({ type: SET_SCREEN_OK, data });
+    return data;
   }
 }
 
@@ -65,21 +63,19 @@ export const SET_SCROLL_OK = 'SET_SCROLL_OK';
 export const SET_SCROLL_FAIL = 'SET_SCROLL_FAIL';
 
 export const setScroll = (scrollY) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_SCROLL });
+  return async (dispatch, getState) => {
+    dispatch({ type: SET_SCROLL });
 
-      if (typeof (scrollY) !== 'number' || scrollY < 0) {
-        const er = 'Empty input';
-        dispatch({ type: SET_SCROLL_FAIL, reason: er });
-        return reject(er);
-      }
+    if (typeof (scrollY) !== 'number' || scrollY < 0) {
+      const er = 'Empty input';
+      dispatch({ type: SET_SCROLL_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const { ui: { scrollY: prevScrollY } } = getState();
-      const data = { scrollY, direction: prevScrollY > scrollY ? 'up' : 'down' };
-      dispatch({ type: SET_SCROLL_OK, data });
-      return resolve(data);
-    });
+    const { ui: { scrollY: prevScrollY } } = getState();
+    const data = { scrollY, direction: prevScrollY > scrollY ? 'up' : 'down' };
+    dispatch({ type: SET_SCROLL_OK, data });
+    return data;
   }
 }
 
@@ -91,33 +87,31 @@ export const SET_ERROR_OK = 'SET_ERROR_OK';
 export const SET_ERROR_FAIL = 'SET_ERROR_FAIL';
 
 export const setError = (msg) => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_ERROR });
+  return async (dispatch, getState) => {
+    dispatch({ type: SET_ERROR });
 
-      if (!msg) {
-        const er = 'Empty input';
-        dispatch({ type: SET_ERROR_FAIL, reason: er });
-        return reject(er);
-      }
-      const { ui: { error: { visible: prevVisible, message: prevMessage } } } = getState();
-      if (prevVisible && msg === prevMessage) {
-        const er = 'There exists another error needed to handle first';
-        dispatch({ type: SET_ERROR_FAIL, reason: er });
-        return reject(er);
-      }
+    if (!msg) {
+      const er = 'Empty input';
+      dispatch({ type: SET_ERROR_FAIL, reason: er });
+      throw new Error(er);
+    }
+    const { ui: { error: { visible: prevVisible, message: prevMessage } } } = getState();
+    if (prevVisible && msg === prevMessage) {
+      const er = 'There exists another error needed to handle first';
+      dispatch({ type: SET_ERROR_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const parseError = (er) => {
-        if (er instanceof Error) return er.message;
-        if (typeof er === 'string') return er;
-        if (typeof er === 'object') return JSON.stringify(er);
-        return er.toString();
-      }
+    const parseError = (er) => {
+      if (er instanceof Error) return er.message;
+      if (typeof er === 'string') return er;
+      if (typeof er === 'object') return JSON.stringify(er);
+      return er.toString();
+    }
 
-      const data = { error: { message: parseError(msg), visible: true } }
-      dispatch({ type: SET_ERROR_OK, data });
-      return resolve(data);
-    });
+    const data = { error: { message: parseError(msg), visible: true } }
+    dispatch({ type: SET_ERROR_OK, data });
+    return data;
   }
 }
 
@@ -129,21 +123,19 @@ export const UNSET_ERROR_OK = 'UNSET_ERROR_OK';
 export const UNSET_ERROR_FAIL = 'UNSET_ERROR_FAIL';
 
 export const unsetError = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UNSET_ERROR });
+  return async (dispatch, getState) => {
+    dispatch({ type: UNSET_ERROR });
 
-      const { ui: { error: { visible: prevVisible } } } = getState();
-      if (!prevVisible) {
-        const er = 'There is no error';
-        dispatch({ type: UNSET_ERROR_FAIL, reason: er });
-        return reject(er);
-      }
+    const { ui: { error: { visible: prevVisible } } } = getState();
+    if (!prevVisible) {
+      const er = 'There is no error';
+      dispatch({ type: UNSET_ERROR_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { error: { message: '', visible: false } }
-      dispatch({ type: UNSET_ERROR_OK, data });
-      return resolve(data);
-    });
+    const data = { error: { message: '', visible: false } }
+    dispatch({ type: UNSET_ERROR_OK, data });
+    return data;
   }
 }
 
@@ -155,26 +147,24 @@ export const SET_SUCCESS_OK = 'SET_SUCCESS_OK';
 export const SET_SUCCESS_FAIL = 'SET_SUCCESS_FAIL';
 
 export const setSuccess = (msg, link = '#') => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_SUCCESS });
+  return async (dispatch, getState) => {
+    dispatch({ type: SET_SUCCESS });
 
-      if (!msg) {
-        const er = 'Empty input';
-        dispatch({ type: SET_SUCCESS_FAIL, reason: er });
-        return reject(er);
-      }
-      const { ui: { success: { visible: prevVisible, message: prevMessage } } } = getState();
-      if (prevVisible && msg === prevMessage) {
-        const er = 'There exists another success needed to handle first';
-        dispatch({ type: SET_SUCCESS_FAIL, reason: er });
-        return reject(er);
-      }
+    if (!msg) {
+      const er = 'Empty input';
+      dispatch({ type: SET_SUCCESS_FAIL, reason: er });
+      throw new Error(er);
+    }
+    const { ui: { success: { visible: prevVisible, message: prevMessage } } } = getState();
+    if (prevVisible && msg === prevMessage) {
+      const er = 'There exists another success needed to handle first';
+      dispatch({ type: SET_SUCCESS_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { success: { message: msg, visible: true, link } }
-      dispatch({ type: SET_SUCCESS_OK, data });
-      return resolve(data);
-    });
+    const data = { success: { message: msg, visible: true, link } }
+    dispatch({ type: SET_SUCCESS_OK, data });
+    return data;
   }
 }
 
@@ -186,21 +176,19 @@ export const UNSET_SUCCESS_OK = 'UNSET_SUCCESS_OK';
 export const UNSET_SUCCESS_FAIL = 'UNSET_SUCCESS_FAIL';
 
 export const unsetSuccess = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UNSET_SUCCESS });
+  return async (dispatch, getState) => {
+    dispatch({ type: UNSET_SUCCESS });
 
-      const { ui: { success: { visible: prevVisible } } } = getState();
-      if (!prevVisible) {
-        const er = 'There is no success';
-        dispatch({ type: UNSET_SUCCESS_FAIL, reason: er });
-        return reject(er);
-      }
+    const { ui: { success: { visible: prevVisible } } } = getState();
+    if (!prevVisible) {
+      const er = 'There is no success';
+      dispatch({ type: UNSET_SUCCESS_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { success: { message: '', visible: false, link: '#' } }
-      dispatch({ type: UNSET_SUCCESS_OK, data });
-      return resolve(data);
-    });
+    const data = { success: { message: '', visible: false, link: '#' } }
+    dispatch({ type: UNSET_SUCCESS_OK, data });
+    return data;
   }
 }
 
@@ -212,21 +200,19 @@ export const SET_LOADING_OK = 'SET_LOADING_OK';
 export const SET_LOADING_FAIL = 'SET_LOADING_FAIL';
 
 export const setLoading = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: SET_LOADING });
+  return async (dispatch, getState) => {
+    dispatch({ type: SET_LOADING });
 
-      const { ui: { loading: prevLoading } } = getState();
-      if (prevLoading) {
-        const er = 'Already loading';
-        dispatch({ type: SET_LOADING_FAIL, reason: er });
-        return reject(er);
-      }
+    const { ui: { loading: prevLoading } } = getState();
+    if (prevLoading) {
+      const er = 'Already loading';
+      dispatch({ type: SET_LOADING_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { loading: true }
-      dispatch({ type: SET_LOADING_OK, data });
-      return resolve(data);
-    });
+    const data = { loading: true }
+    dispatch({ type: SET_LOADING_OK, data });
+    return data;
   }
 }
 
@@ -238,21 +224,19 @@ export const UNSET_LOADING_OK = 'UNSET_LOADING_OK';
 export const UNSET_LOADING_FAIL = 'UNSET_LOADING_FAIL';
 
 export const unsetLoading = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: UNSET_LOADING });
+  return async (dispatch, getState) => {
+    dispatch({ type: UNSET_LOADING });
 
-      const { ui: { loading: prevLoading } } = getState();
-      if (!prevLoading) {
-        const er = 'Already unloading';
-        dispatch({ type: UNSET_LOADING_FAIL, reason: er });
-        return reject(er);
-      }
+    const { ui: { loading: prevLoading } } = getState();
+    if (!prevLoading) {
+      const er = 'Already unloading';
+      dispatch({ type: UNSET_LOADING_FAIL, reason: er });
+      throw new Error(er);
+    }
 
-      const data = { loading: false }
-      dispatch({ type: UNSET_LOADING_OK, data });
-      return resolve(data);
-    });
+    const data = { loading: false }
+    dispatch({ type: UNSET_LOADING_OK, data });
+    return data;
   }
 }
 
@@ -264,16 +248,14 @@ export const TOGGLE_LEFT_BAR_OK = 'TOGGLE_LEFT_BAR_OK';
 export const TOGGLE_LEFT_BAR_FAIL = 'TOGGLE_LEFT_BAR_FAIL';
 
 export const toggleLeftBar = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: TOGGLE_LEFT_BAR });
+  return async (dispatch, getState) => {
+    dispatch({ type: TOGGLE_LEFT_BAR });
 
-      const { ui: { leftbar: prevLeftbar } } = getState();
+    const { ui: { leftbar: prevLeftbar } } = getState();
 
-      const data = { leftbar: !prevLeftbar }
-      dispatch({ type: TOGGLE_LEFT_BAR_OK, data });
-      return resolve(data);
-    });
+    const data = { leftbar: !prevLeftbar }
+    dispatch({ type: TOGGLE_LEFT_BAR_OK, data });
+    return data;
   }
 }
 
@@ -285,16 +267,14 @@ export const TOGGLE_RIGHT_BAR_OK = 'TOGGLE_RIGHT_BAR_OK';
 export const TOGGLE_RIGHT_BAR_FAIL = 'TOGGLE_RIGHT_BAR_FAIL';
 
 export const toggleRightBar = () => {
-  return (dispatch, getState) => {
-    return new Promise((resolve, reject) => {
-      dispatch({ type: TOGGLE_RIGHT_BAR });
+  return async (dispatch, getState) => {
+    dispatch({ type: TOGGLE_RIGHT_BAR });
 
-      const { ui: { rightbar: prevRightbar } } = getState();
+    const { ui: { rightbar: prevRightbar } } = getState();
 
-      const data = { rightbar: !prevRightbar }
-      dispatch({ type: TOGGLE_RIGHT_BAR_OK, data });
-      return resolve(data);
-    });
+    const data = { rightbar: !prevRightbar }
+    dispatch({ type: TOGGLE_RIGHT_BAR_OK, data });
+    return data;
   }
 }
 

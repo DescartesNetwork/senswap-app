@@ -35,7 +35,6 @@ class PoolCard extends Component {
     super();
 
     this.state = {
-      loading: false,
       visibleDeposit: false,
       data: {},
     }

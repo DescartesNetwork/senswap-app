@@ -13,7 +13,7 @@ import CircularProgress from 'senswap-ui/circularProgress';
 
 import { UpdateRounded, LanguageRounded } from 'senswap-ui/icons';
 
-import { PoolAvatar } from 'containers/wallet';
+import { PoolAvatar } from 'containers/pool';
 import Interaction from './interaction';
 
 import styles from './styles';

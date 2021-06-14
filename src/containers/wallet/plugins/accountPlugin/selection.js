@@ -20,8 +20,8 @@ import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
 import { MintAvatar } from 'containers/wallet';
 
 import styles from './styles';
-import sol from 'helpers/sol';
 import utils from 'helpers/utils';
+import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 
@@ -35,6 +35,8 @@ class Selection extends Component {
       data: [],
       searchedData: [],
     }
+
+    this.swap = window.senswap.swap;
   }
 
   componentDidUpdate(prevProps) {
@@ -49,18 +51,13 @@ class Selection extends Component {
       wallet: { user: { address }, lamports, accounts },
       solana, getAccountData
     } = this.props;
+    const { sol: { native } } = configs;
 
     const solAccount = {
       address,
       amount: global.BigInt(lamports),
       owner: address,
-      mint: {
-        decimals: 9,
-        name: 'Solana',
-        symbol: 'SOL',
-        ticket: 'solana',
-        icon: 'https://assets.coingecko.com/coins/images/4128/large/coinmarketcap-solana-200.png'
-      }
+      mint: { ...native }
     }
 
     if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
@@ -70,11 +67,8 @@ class Selection extends Component {
       try {
         const data = await getAccountData(accountAddress);
         const { mint } = data;
-        const {
-          mint_authority: mintAuthorityAddress,
-          freeze_authority: freezeAuthorityAddress,
-        } = mint || {};
-        const poolAddress = await sol.isMintLPTAddress(mintAuthorityAddress, freezeAuthorityAddress);
+        const { mint_authority, freeze_authority } = mint || {};
+        const poolAddress = await this.swap.derivePoolAddress(mint_authority, freeze_authority);
         if (!ssjs.isAddress(poolAddress)) accountData.push(data);
       } catch (er) {
         // Nothing

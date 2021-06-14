@@ -3,57 +3,80 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import axios from 'axios';
+import numeral from 'numeral';
 
+import { Skeleton } from '@material-ui/lab';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Paper from 'senswap-ui/paper';
 import Typography from 'senswap-ui/typography';
 
 import Chart from 'components/chart';
+import { setError } from 'modules/ui.reducer';
+import { getBoardDaily, getBoardStat } from 'modules/board.reducer';
 
 import styles from './styles';
-
-const INSTANCE = axios.create({
-  baseURL: 'https://60aca8fc9e2d6b0017457a49.mockapi.io',
-  timeout: 60000,
-});
-const POOL_BY_TIME = 'poolDayData';
 class Volume extends Component {
   constructor() {
     super();
 
     this.state = {
-      data: [],
-      labels: []
+      chartData: [],
+      labels: [],
+      info: {},
+      isLoading: false,
     }
   }
 
   componentDidMount() {
-    INSTANCE.get(POOL_BY_TIME).then(({ data }) => {
-      if (data) {
-        const values = data.map(e => e.volume)
-        const labels = data.map(e => e.time);
-        this.setState({ data: values });
-        this.setState({ labels: labels });
-      }
-    })
+    this.setState({ isLoading: true });
+    this.getDaily();
+    this.getStat();
   }
 
+  getDaily = async () => {
+    const { getBoardDaily, poolAddress: address } = this.props;
+    try {
+      const data = await getBoardDaily(address);
+      if (data) {
+        const values = data.map(e => e.volume);
+        const labels = data.map(e => e.time % 100);
+        this.setState({ chartData: values });
+        this.setState({ labels: labels });
+        setTimeout(() => {
+          this.setState({ isLoading: false });
+        }, 800);
+      }
+    } catch (err) {
+      return setError(err);
+    }
+  }
+
+  getStat = async () => {
+    const { getBoardStat, poolAddress: address } = this.props;
+    try {
+      const data = await getBoardStat(address);
+      if (data) this.setState({ info: data });
+    } catch (err) {
+      return setError(err);
+    }
+  }
   render() {
     const { classes } = this.props;
-    const { data, labels } = this.state;
+    const { isLoading, chartData: data, info, labels } = this.state;
     const styles = {
       backgroundColor: 'rgba(115, 136, 169, 0.353283)',
       borderColor: 'rgba(115, 136, 169, 0.353283)',
       borderRadius: 4,
     }
 
+    if (isLoading) return <Skeleton variant="rect" height={320} className={classes.chart} />;
+
     return <Paper className={classes.paper}>
       <Grid container>
         <Grid item xs={12}>
           <Typography variant="subtitle1" color="textSecondary">Volume</Typography>
-          <Typography variant="h5">$1.32b</Typography>
+          <Typography variant="h5">{info && info.volume24h ? numeral(info.volume24h).format('$0.[0]a') : '$0'}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Chart data={data} labels={labels} type="bar" styles={styles} />
@@ -68,6 +91,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  getBoardDaily, getBoardStat,
 }, dispatch);
 
 Volume.propTypes = {

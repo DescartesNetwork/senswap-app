@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import Chartjs from 'chart.js/dist/chart';
-
-import Utils from 'helpers/utils';
-
+import numeral from 'numeral';
+import isEqual from 'react-fast-compare';
 function SenChart(props) {
-  const { data, labels, type, disableAxe, styles, ...others } = props;
+  const { classes, data: datasets, labels, type, disableAxe, styles, ...others } = props;
   const chartRef = useRef(null);
   const [chartLabel, setChartLabel] = useState([]);
   const [chartData, setChartData] = useState([]);
@@ -34,7 +33,7 @@ function SenChart(props) {
         backgroundColor: type === 'line' ? gradient(this) : style.backgroundColor,
         borderColor: style.borderColor,
         borderRadius: style.borderRadius,
-        data: chartData || [],
+        data: [],
         ...others,
       }],
     },
@@ -54,7 +53,7 @@ function SenChart(props) {
           ticks: {
             // Include a dollar sign in the ticks
             callback: function (value, index, values) {
-              return Utils.formatCurrency(value);
+              return numeral(value).format('0.[0]a');
             }
           }
         },
@@ -68,14 +67,32 @@ function SenChart(props) {
       }
     }
   };
+  const addData = useCallback(() => {
+    if (!chartInstance) return;
+    const dataConfigs = chartInstance.data.datasets;
+    if (dataConfigs && dataConfigs[0].data) {
+      chartData.forEach(item => {
+        chartInstance.data.datasets[0].data.push(item);
+      });
+      chartInstance.update();
+    }
+  }, [chartData, chartInstance]);
+
+  const removeData = useCallback(() => {
+    if (!chartInstance && chartInstance.data.datasets[0].data.length === 0) return;
+    const dataConfigs = chartInstance.data.datasets;
+
+    dataConfigs.forEach(datasets => {
+      datasets.data.splice(0, datasets.data.length);
+    });
+    chartInstance.update();
+  }, [chartInstance]);
 
   useEffect(() => {
-    setChartData(data);
+    setChartData(datasets);
     setChartLabel(labels);
     setStyle(styles);
-    if (chartInstance) chartInstance.update();
-    // eslint-disable-next-line
-  }, [data, labels, chartInstance, styles]);
+  }, [datasets, labels, styles]);
 
 
   const ctx = chartRef.current;
@@ -84,6 +101,10 @@ function SenChart(props) {
     setChartInstance(chart);
     setRebuildChart(true);
   }
+
+  useEffect(() => {
+    if (chartInstance && !isEqual(chartInstance.data.datasets[0].data, chartData)) return Promise.all([removeData(), addData()]);
+  }, [addData, chartData, chartInstance, chartLabel, removeData]);
 
   return <canvas ref={chartRef} />
 }

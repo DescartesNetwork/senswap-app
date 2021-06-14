@@ -15,7 +15,7 @@ import TextField from 'senswap-ui/textField';
 
 import { CloseRounded } from 'senswap-ui/icons';
 
-import { PoolAvatar } from 'containers/wallet';
+import { PoolAvatar } from 'containers/pool';
 
 import styles from './styles';
 import utils from 'helpers/utils';

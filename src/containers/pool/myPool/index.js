@@ -9,7 +9,7 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import CircularProgress from 'senswap-ui/circularProgress';
 
-import { PoolCard } from 'containers/wallet';
+import { PoolCard } from 'containers/pool';
 
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';

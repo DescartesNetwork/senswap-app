@@ -15,7 +15,7 @@ import { AccountAvatar } from 'containers/wallet';
 
 import styles from './styles';
 import { toggleRightBar } from 'modules/ui.reducer';
-import { openWallet, closeWallet } from 'modules/wallet.reducer';
+import { openWallet } from 'modules/wallet.reducer';
 
 
 class WalletButton extends Component {
@@ -72,7 +72,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   toggleRightBar,
-  openWallet, closeWallet,
+  openWallet,
 }, dispatch);
 
 export default withRouter(connect(

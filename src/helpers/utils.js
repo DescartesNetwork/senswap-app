@@ -56,37 +56,31 @@ Utils.explorer = (addressOrTxId) => {
   return `https://explorer.solana.com/tx/${addressOrTxId}?cluster=${cluster}`;
 }
 
-Utils.fetchValue = (balance, ticket) => {
-  return new Promise((resolve, reject) => {
-    let usd = 0;
-    let btc = 0;
-    return ssjs.parseCGK(ticket).then(({ price }) => {
-      usd = balance * price;
-      return ssjs.parseCGK('bitcoin');
-    }).then(({ price }) => {
-      btc = usd / price;
-      return resolve({ usd, btc });
-    }).catch(er => {
-      return reject(er);
-    });
-  });
+Utils.fetchValue = async (balance, ticket) => {
+  const { price } = await ssjs.parseCGK(ticket);
+  const usd = balance * price;
+  const { price: btcPrice } = await ssjs.parseCGK('bitcoin');
+  const btc = usd / btcPrice;
+  return { usd, btc }
 }
-Utils.formatCurrency = (str, decimal = 2, type = '$') => {
-  if (!str) return;
-  str = str.toString()
-  if (str.length > 10) {
-    let idx = str.length - 9;
-    return `$${str.substring(0, idx).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}.${str.substring(idx, idx + decimal)}b`;
+
+Utils.getAnnualPercentage = (roi, time = 1) => {
+  if (!roi && typeof roi !== 'number') return;
+  return numeral((Math.pow(((roi / 100) + 1), time) - 1)).format('0[.]0[0]%')
+}
+
+Utils.formatTime = (time) => {
+  if (!time) return;
+  switch (true) {
+    case time === 1:
+      return '24h';
+    case time < 365:
+      return time + 'd';
+    case time >= 365:
+      return '1y';
+    default:
+      break;
   }
-  if (str.length > 6) {
-    let idx = str.length - 6;
-    return `$${str.substring(0, idx).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}.${str.substring(idx, idx + decimal)}m`;
-  }
-  if (str.length > 3) {
-    let idx = str.length - 3;
-    return `$${str.substring(0, idx).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}.${str.substring(idx, idx + decimal)}k`;
-  }
-  return `$${str.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")}`;
 }
 
 export default Utils;
