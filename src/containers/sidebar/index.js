@@ -20,7 +20,8 @@ import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
   AccountBalanceWalletRounded, AccountBalanceRounded,
   GroupWorkRounded, ColorizeRounded, DescriptionRounded,
-  DonutLargeRounded, MenuOpenRounded, MenuRounded
+  DonutLargeRounded, MenuOpenRounded, MenuRounded,
+  MonetizationOn
 } from 'senswap-ui/icons';
 
 import styles from './styles';
@@ -127,6 +128,17 @@ class Sidebar extends Component {
                   <LayersRounded />
                 </ListItemIcon>
                 <ListItemText primary="Pool" />
+              </ListItem>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/farming"
+                className={route === 'farming' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <MonetizationOn />
+                </ListItemIcon>
+                <ListItemText primary="Farming" />
               </ListItem>
               <ListItem
                 button

@@ -216,7 +216,7 @@ class Swap extends Component {
     try {
       for (let data of hopData) {
         const { bidAmount, askAmount, poolData: { address: poolAddress }, dstMintAddress } = data;
-        const dstAddress = await this.onAutogenDestinationAddress(dstMintAddress);;
+        const dstAddress = await this.onAutogenDestinationAddress(dstMintAddress);
         const _srcAddress = srcAddress;
         srcAddress = dstAddress;
         const limit = this.estimateLimit(askAmount);
