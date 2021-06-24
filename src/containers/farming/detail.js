@@ -19,7 +19,7 @@ export default function Detail(props) {
             <TextField name="amountHavest" label="Earned" variant="outlined" value={props.amountHavest} />
           </Grid>
           <Grid item>
-            <Button variant="contained" color="primary" size="large" disabled={false} fullWidth>
+            <Button variant="contained" color="primary" size="large" disabled={false} fullWidth onClick={() => props.onHarvest(props.data)}>
               <Typography>Havest</Typography>
             </Button>
           </Grid>

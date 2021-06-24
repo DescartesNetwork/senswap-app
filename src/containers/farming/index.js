@@ -60,7 +60,10 @@ export default function Farming() {
     FarmingService.unstake(detail.amountStake, stakePool);
   }
 
-  function handleHavest(amount, stakePool) {}
+  function handleHarvest(stakePool) {
+    console.log("handleHarvest",handleHarvest)
+    FarmingService.harvest(stakePool);
+  }
 
   function handleChangeDetailAmount(e) {
     detail[e.target.name] = e.target.value;
@@ -69,7 +72,7 @@ export default function Farming() {
 
   return (
     <Grid container>
-      <Detail {...detail} onClose={handleCloseDetail} onChange={handleChangeDetailAmount} onStake={handleStake} onUnstake={handleUnstake} onHavest={handleHavest}></Detail>
+      <Detail {...detail} onClose={handleCloseDetail} onChange={handleChangeDetailAmount} onStake={handleStake} onUnstake={handleUnstake} onHarvest={handleHarvest}></Detail>
       <Grid item xs={12}>
         <Header />
         

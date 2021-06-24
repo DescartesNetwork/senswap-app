@@ -76,6 +76,20 @@ export default class FarmingService {
     console.log("unstake", stake);
   }
 
+  static async harvest( stakePool) {
+    const wallet = window.senswap.wallet;
+    const walletAddress = await wallet.getAccount();
+
+    const stakePoolAddress = stakePool.address;
+
+    let senWallet = await sol.scanAccount(MINT_SEN_ADDR, walletAddress);
+    const dstSenAddress = senWallet.address;
+
+    console.log("dstSenAddress",dstSenAddress)
+    const harvest = await liteFarming.harvest(stakePoolAddress, dstSenAddress, wallet);
+    console.log("harvest", harvest);
+  }
+
   static async fetchStakePools() {
     const stakePools = await api.get(apiBase + "/stake-pools").then((res) => res.data);
     const promise = [];
