@@ -20,7 +20,7 @@ import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
   AccountBalanceWalletRounded, AccountBalanceRounded,
   GroupWorkRounded, ColorizeRounded, DescriptionRounded,
-  DonutLargeRounded, MenuOpenRounded, MenuRounded
+  DonutLargeRounded, MenuOpenRounded, MenuRounded, AllInclusive
 } from 'senswap-ui/icons';
 
 import styles from './styles';
@@ -53,7 +53,7 @@ class Sidebar extends Component {
     const route = pathname.split('/')[1];
     return this.setState({ route })
   }
-  
+
   render() {
     const { classes, ui: { leftbar, width }, wallet: { user: { address, role } }, toggleLeftBar } = this.props;
     const { route } = this.state;
@@ -138,6 +138,17 @@ class Sidebar extends Component {
                   <AccountBalanceWalletRounded />
                 </ListItemIcon>
                 <ListItemText primary="Wallet" />
+              </ListItem>
+              <ListItem
+                button
+                component={RouterLink}
+                to="/farms"
+                className={route === 'farms' ? classes.listItemActive : classes.listItem}
+              >
+                <ListItemIcon className={classes.listItemIcon}>
+                  <AllInclusive />
+                </ListItemIcon>
+                <ListItemText primary="Farms" />
               </ListItem>
               {/* Faucet */}
               {cluster === 'devnet' ? <Fragment>
