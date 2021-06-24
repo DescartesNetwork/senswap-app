@@ -16,6 +16,7 @@ const defaultState = {
     address: null,
     role: 'user',
   },
+  stakeAccounts: [],
   accounts: [],
   lpts: [],
 }
@@ -89,7 +90,10 @@ export const setWallet = (wallet) => {
     }
 
     // Configs
-    const { api: { base } } = configs;
+    const {
+      api: { base },
+      sol: { farmingAddress },
+    } = configs;
     const lamports = window.senswap.lamports;
     const splt = window.senswap.splt;
     const connection = splt._splt.connection;
@@ -98,6 +102,7 @@ export const setWallet = (wallet) => {
       user: { address: '' },
       lamports: 0,
       accounts: [],
+      stakeAccounts: [],
       lpts: [],
       visible: false
     }
@@ -134,6 +139,23 @@ export const setWallet = (wallet) => {
           data.lpts.push(accountAddress);
         } catch (er) { /* Nothing */ }
       }
+
+      //Filter Stake Pool Accounts
+      const farmingProgramId = ssjs.fromAddress(farmingAddress);
+      const farmingAccounts = await connection.getProgramAccounts(farmingProgramId, {
+        commitment: "confirmed",
+        encoding: "jsonParsed",
+        filters: [
+          {
+            memcmp: {
+              bytes: ownerPublicKey.toBase58(),
+              offset: 32,
+            },
+          },
+        ],
+      });
+      data.stakeAccounts = farmingAccounts.map((acc) => acc.pubkey.toBase58());
+      
       // Add user to database
       let userData = await api.get(base + '/user', { address: data.user.address });
       if (!userData.data && data.lamports) {
