@@ -7,7 +7,7 @@ const configs = {}
  * Development configurations
  */
 configs.development = {
-  base: 'http://localhost:3000',
+  base: 'http://localhost:3001',
   baseBoard: 'https://stat.senswap.xyz/stat/reports',
 }
 

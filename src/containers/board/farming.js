@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
@@ -28,12 +28,21 @@ class Farming extends Component {
   constructor() {
     super();
 
-    this.state = {
-    }
+    this.harvestRef = createRef();
+    this.stakeRef = createRef();
   }
 
-  componentDidMount() {
+  onHandleHarvest = () => {
+    const value = this.harvestRef.current.value;
+    if (!value) return;
+    console.log(value, 'harvest');
   }
+  onHandleStake = () => {
+    const value = this.stakeRef.current.value;
+    if (!value) return;
+    console.log(value, 'stake');
+  }
+
   render() {
     const { classes } = this.props;
     // const { isLoading, chartData: data, info, labels } = this.state;
@@ -79,6 +88,7 @@ class Farming extends Component {
           <TextField
             variant="contained"
             defaultValue="0"
+            inputRef={this.harvestRef}
             InputProps={{
               endAdornment: <Typography color="error" style={{ cursor: 'pointer' }}>
                 <strong>MAX</strong>
@@ -89,6 +99,7 @@ class Farming extends Component {
           <Button
             variant="contained"
             color="primary"
+            onClick={this.onHandleHarvest}
           >
             Harvest
             </Button>
@@ -106,6 +117,7 @@ class Farming extends Component {
           <TextField
             variant="contained"
             defaultValue="0"
+            inputRef={this.stakeRef}
             InputProps={{
               endAdornment: <Typography color="error" style={{ cursor: 'pointer' }}>
                 <strong>MAX</strong>
@@ -113,10 +125,11 @@ class Farming extends Component {
             }} />
         </Grid>
         <Grid item xs={4} align="end">
-          <Button color="secondary">UnStake</Button>
+          <Button color="secondary" onClick={this.onHandleStake}>UnStake</Button>
           <Button
             variant="contained"
             color="primary"
+            onClick={this.onHandleStake}
           >
             Stake
             </Button>

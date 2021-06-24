@@ -68,6 +68,12 @@ class StakePool extends Component {
     this.setState({ visible: true });
     this.setState({ modalData: data });
   }
+  onHandleStake = (value) => {
+    console.log(value, 'stake')
+  }
+  onHandleHarvest = (value) => {
+    console.log(value, 'stake')
+  }
 
   render() {
     const { classes } = this.props;
@@ -105,7 +111,13 @@ class StakePool extends Component {
           </TableContainer>
         </Grid>
       </Grid>
-      <Modal visible={visible} onClose={this.onClose} modalData={modalData} />
+      <Modal
+        visible={visible}
+        onClose={this.onClose}
+        modalData={modalData}
+        onHandleStake={this.onHandleStake}
+        onHandleHarvest={this.onHandleHarvest}
+      />
     </Paper>
   }
 }
