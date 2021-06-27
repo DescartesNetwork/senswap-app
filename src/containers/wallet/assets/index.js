@@ -19,6 +19,7 @@ import LPTs from './lpts';
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
+import stakeAccounts from './stakeAccounts';
 
 
 class Assets extends Component {
@@ -89,6 +90,15 @@ class Assets extends Component {
                   <Typography>LP Tokens</Typography>
                 </Button>
               </Grid>
+              <Grid item>
+                <Button
+                  component={RouterLink}
+                  color={route === 'stake' ? 'primary' : 'default'}
+                  to='/wallet/stake'
+                >
+                  <Typography>Stake Accounts</Typography>
+                </Button>
+              </Grid>
             </Grid>
           </Grid>
           <Grid item>
@@ -113,6 +123,7 @@ class Assets extends Component {
           <Redirect exact from="/wallet" to="/wallet/accounts" />
           <Route exact path='/wallet/accounts' component={Accounts} />
           <Route exact path='/wallet/lpts' component={LPTs} />
+          <Route exact path='/wallet/stake' component={stakeAccounts} />
         </Switch>
       </Grid>
     </Grid>
