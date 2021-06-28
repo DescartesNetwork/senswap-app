@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
@@ -11,6 +11,7 @@ import Paper from 'senswap-ui/paper';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
+import CircularProgress from 'senswap-ui/circularProgress';
 
 import configs from 'configs';
 import sol from 'helpers/sol';
@@ -24,6 +25,7 @@ const LITE_FARMING = new ssjs.LiteFarming();
 
 const DECIMAL = 1;
 const LIMIT = 9999;
+const FARMING = new ssjs.Farming();
 class StakePool extends Component {
   constructor() {
     super();
@@ -43,6 +45,7 @@ class StakePool extends Component {
       modalData: [],
       stakeLoading: false,
       unStakeLoading: false,
+      loading: false,
     };
   }
   componentDidMount() {
@@ -50,20 +53,36 @@ class StakePool extends Component {
   }
   fetchData = async () => {
     const { getStakePools } = this.props;
+    this.setState({ loading: true });
     try {
       let res = await getStakePools(undefined, LIMIT);
       if (!res) return;
-      const mints = res.map(({ address }) => {
+      const promise = res.map(({ address }) => {
         return LITE_FARMING.getStakePoolData(address);
       });
-      await Promise.all(mints).then(mint => {
-        res = [...mint]
+      await Promise.all(promise).then(mints => {
+        res = [...mints]
       });
-      console.log(res, 'data');
-      this.setState({ data: res });
+      const newMints = await this.filterDebtData(res);
+      this.setState({ data: newMints, loading: false });
     } catch (er) {
       await setError(er);
     }
+  }
+  filterDebtData = async (data) => {
+    const { wallet } = this.props;
+    if (!data && !wallet && wallet.stakeAccounts) return;
+    const stakeAccounts = wallet.stakeAccounts;
+    const promiseDebt = stakeAccounts.map(address => {
+      return FARMING.getDebtData(address);
+    });
+    const debt = await Promise.all(promiseDebt);
+    debt.forEach((e, idx) => {
+      const { stake_pool: { address }, debt } = e;
+      const index = data.findIndex(({ address: mintAddress }) => mintAddress === address);
+      data[index].debt = debt;
+    });
+    return data;
   }
   onClose = () => {
     return this.setState({
@@ -91,12 +110,10 @@ class StakePool extends Component {
       reserveAmount, stakePoolAddress,
       LPAddress, senWallet
     }
-    console.log(senWallet, 'senWallet')
     if (type === 'unstake') return this.unstake(data)
     return this.stake(data)
 
   }
-
 
   stake = async (data) => {
     const wallet = window.senswap.wallet;
@@ -113,7 +130,7 @@ class StakePool extends Component {
       } catch (error) {
         accountData = await LITE_FARMING.initializeAccount(stakePoolAddress, wallet);
       }
-      if(!accountData) return;
+      if (!accountData) return;
       //Stake
       const stake = await LITE_FARMING.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
       console.log(stake, 'finish stake??');
@@ -135,7 +152,6 @@ class StakePool extends Component {
     console.log(data, 'stake11');
     try {
       const result = await LITE_FARMING.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
-      console.log(result, 'stake??');
       await setSuccess('The token has been unstaked!');
       this.setState({ unStakeLoading: false }, () => {
         this.fetchData();
@@ -145,13 +161,30 @@ class StakePool extends Component {
       await setError(err);
     }
   }
-  onHandleHarvest = (value) => {
-    console.log(value, 'stake')
+  onHandleHarvest = async () => {
+    this.setState({ loading: true });
+    const { modalData: { address: stakePoolAddress } } = this.state;
+    const { wallet: { user: { address: userAddress } } } = this.props;
+    const wallet = window.senswap.wallet;
+    const { sol: { senAddress } } = configs;
+    try {
+      const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
+      const harvest = await LITE_FARMING.harvest(stakePoolAddress, senWallet, wallet);
+      console.log(harvest, 'harvest');
+      await setSuccess('Harvest successfully');
+      this.setState({ loading: false }, () => {
+        this.fetchData();
+        this.onClose();
+      })
+    } catch (err) {
+      await setError(err);
+    }
+
   }
 
   render() {
     const { classes } = this.props;
-    const { fields, data, visible, modalData, stakeLoading, unStakeLoading } = this.state;
+    const { fields, data, visible, modalData, stakeLoading, unStakeLoading, loading } = this.state;
 
     return <Paper className={classes.paper}>
       <Grid container>
@@ -166,19 +199,32 @@ class StakePool extends Component {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data ? data.map((e, idx) => {
+                {!loading && data ? data.map((e, idx) => {
+                  const { mint_token: token,
+                    address: stakePoolAddress,
+                    debt, total_shares } = e;
                   return <TableRow key={idx}>
                     <TableCell>{idx + 1}</TableCell>
-                    <TableCell className={classes.address}>{e.address}</TableCell>
-                    <TableCell>{e.pendingReward}</TableCell>
+                    <TableCell className={classes.address}>{stakePoolAddress}</TableCell>
+                    <TableCell>{ssjs.undecimalize(debt, token.decimals)}</TableCell>
                     <TableCell>{e.apr}</TableCell>
                     <TableCell>{e.apy}</TableCell>
-                    <TableCell>{e.total_shares.toString()}</TableCell>
+                    <TableCell>{total_shares.toString()}</TableCell>
                     <TableCell>
                       <Button onClick={() => this.onOpen(e)}>Farming</Button>
                     </TableCell>
                   </TableRow>
-                }) : null}
+                }) : [1, 2, 3, 4, 5].map(e => {
+                  return <TableRow key={e}>
+                    <TableCell><CircularProgress size={17} /></TableCell>
+                    <TableCell><CircularProgress size={17} /></TableCell>
+                    <TableCell><CircularProgress size={17} /></TableCell>
+                    <TableCell><CircularProgress size={17} /></TableCell>
+                    <TableCell><CircularProgress size={17} /></TableCell>
+                    <TableCell><CircularProgress size={17} /></TableCell>
+                    <TableCell><CircularProgress size={17} /></TableCell>
+                  </TableRow>
+                })}
               </TableBody>
             </Table>
           </TableContainer>

@@ -155,7 +155,7 @@ export const setWallet = (wallet) => {
         ],
       });
       data.stakeAccounts = farmingAccounts.map((acc) => acc.pubkey.toBase58());
-      
+
       // Add user to database
       let userData = await api.get(base + '/user', { address: data.user.address });
       if (!userData.data && data.lamports) {

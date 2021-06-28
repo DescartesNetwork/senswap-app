@@ -49,9 +49,7 @@ class Modal extends Component {
   }
   handleHarvest = () => {
     const { onHandleHarvest } = this.props;
-    const value = this.harvestRef.current.value;
-    if (!value) return;
-    onHandleHarvest(value);
+    onHandleHarvest();
   }
   onOpenAccountSelection = (index) => this.setState({ visibleAccountSelection: true });
   onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
