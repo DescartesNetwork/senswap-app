@@ -20,7 +20,7 @@ import Modal from './modal';
 import styles from './styles';
 
 const LITE_FARMING = new ssjs.LiteFarming();
-const WALLET = window.senswap.wallet;
+
 
 const DECIMAL = 1;
 const LIMIT = 9999;
@@ -99,6 +99,7 @@ class StakePool extends Component {
 
 
   stake = async (data) => {
+    const wallet = window.senswap.wallet;
     this.setState({ stakeLoading: true });
     const {
       reserveAmount: amount, stakePoolAddress,
@@ -108,13 +109,13 @@ class StakePool extends Component {
       //Check Stake Pool Account
       let accountData = null;
       try {
-        accountData = await LITE_FARMING.getStakeAccountData(stakePoolAddress, WALLET);
+        accountData = await LITE_FARMING.getStakeAccountData(stakePoolAddress, wallet);
       } catch (error) {
-        accountData = await LITE_FARMING.initializeAccount(stakePoolAddress, WALLET);
+        accountData = await LITE_FARMING.initializeAccount(stakePoolAddress, wallet);
       }
       if(!accountData) return;
       //Stake
-      const stake = await LITE_FARMING.stake(amount, stakePoolAddress, LPAddress, senWallet, WALLET);
+      const stake = await LITE_FARMING.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
       console.log(stake, 'finish stake??');
       await setSuccess('The token has been staked!');
       this.setState({ stakeLoading: false }, () => {
