@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -7,7 +6,6 @@ import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
-import Typography from 'senswap-ui/typography';
 import Button from 'senswap-ui/button';
 import Paper from 'senswap-ui/paper';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
@@ -21,7 +19,9 @@ import Modal from './modal';
 
 import styles from './styles';
 
-const LITE_FARMING = new ssjs.LiteFarming(undefined, undefined, undefined, configs.sol.node);
+const LITE_FARMING = new ssjs.LiteFarming();
+const WALLET = window.senswap.wallet;
+
 const DECIMAL = 1;
 const LIMIT = 9999;
 class StakePool extends Component {
@@ -96,6 +96,8 @@ class StakePool extends Component {
     return this.stake(data)
 
   }
+
+
   stake = async (data) => {
     this.setState({ stakeLoading: true });
     const {
@@ -103,8 +105,16 @@ class StakePool extends Component {
       LPAddress, senWallet
     } = data;
     try {
-      console.log(amount, stakePoolAddress, senWallet, 'begin');
-      const stake = await LITE_FARMING.stake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
+      //Check Stake Pool Account
+      let accountData = null;
+      try {
+        accountData = await LITE_FARMING.getStakeAccountData(stakePoolAddress, WALLET);
+      } catch (error) {
+        accountData = await LITE_FARMING.initializeAccount(stakePoolAddress, WALLET);
+      }
+      if(!accountData) return;
+      //Stake
+      const stake = await LITE_FARMING.stake(amount, stakePoolAddress, LPAddress, senWallet, WALLET);
       console.log(stake, 'finish stake??');
       await setSuccess('The token has been staked!');
       this.setState({ stakeLoading: false }, () => {

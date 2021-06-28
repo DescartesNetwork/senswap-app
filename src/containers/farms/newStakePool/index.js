@@ -109,7 +109,7 @@ class NewStakePool extends Component {
     return this.setState({ period: period });
   }
 
-  newStakePool = async () => {
+  handleCreateStakePool = async () => {
     const liteFarming = new ssjs.LiteFarming(undefined, undefined, undefined, configs.sol.node);
     const wallet = window.senswap.wallet;
     const ownerAddress = await wallet.getAccount();
@@ -270,12 +270,12 @@ class NewStakePool extends Component {
                 variant="contained"
                 color="primary"
                 size="large"
-                onClick={this.newStakePool}
+                onClick={this.handleCreateStakePool}
                 endIcon={loading ? <CircularProgress size={17} /> : null}
                 disabled={loading}
                 fullWidth
               >
-                <Typography>New stake pool</Typography>
+                <Typography>Create Stake Pool</Typography>
               </Button>
             </Grid>
             <Grid item xs={12} />

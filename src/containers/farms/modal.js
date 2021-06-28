@@ -98,6 +98,9 @@ class Modal extends Component {
             <Grid item xs={12}>
               <Drain size={1} />
             </Grid>
+
+            {/* Havest */}
+
             <Grid item xs={12}>
               <Typography color="textSecondary">Pending reward</Typography>
             </Grid>
@@ -129,13 +132,15 @@ class Modal extends Component {
             <Grid item xs={12}>
               <Typography color="textSecondary">Farming</Typography>
             </Grid>
+
+            {/* Stake + unStake */}
             <Grid item xs={4}>
               {accountData.map((data, index) => {
                 const { mint } = data;
                 const { symbol, icon } = mint || {};
                 return <Fragment key={index}>
                   <Grid item xs={6}>
-                    <Typography color="textPrimary">Mint token: </Typography>
+                    <Typography color="textPrimary">LP token: </Typography>
                   </Grid>
                   <Grid item xs={6}>
                     <Button
