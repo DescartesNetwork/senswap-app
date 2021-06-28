@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -7,50 +6,72 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
+import Button from 'senswap-ui/button';
+import Brand from 'senswap-ui/brand';
+
+import { QueueRounded } from 'senswap-ui/icons';
 
 import { WalletButton } from 'containers/wallet';
-import { PoolAvatar } from 'containers/pool';
+import NewStakePool from './newStakePool';
 
 import styles from './styles';
+import { setError } from 'modules/ui.reducer';
+import { unsetWallet } from 'modules/wallet.reducer';
 
 
-class Header extends Component {
+class Wallet extends Component {
+  constructor() {
+    super();
 
-  parseIcon = () => {
-    const { poolData } = this.props;
-    const { mint_a, mint_b, mint_s } = poolData;
-    const { icon: iconA } = mint_a || {};
-    const { icon: iconB } = mint_b || {};
-    const { icon: iconS } = mint_s || {};
-    const icons = [iconA, iconB, iconS];
-    return icons;
+    this.state = {
+      visibleNewPool: false,
+      visibleDeposit: false,
+    }
   }
 
-  parseName = () => {
-    const { poolData } = this.props;
-    const { mint_a, mint_b, mint_s } = poolData;
-    const { symbol: symbolA } = mint_a || {};
-    const { symbol: symbolB } = mint_b || {};
-    const { symbol: symbolS } = mint_s || {};
-    return `${symbolA} x ${symbolB} x ${symbolS}`;
-  }
+  onOpenNewPool = () => this.setState({ visibleNewPool: true });
+  onCloseNewPool = () => this.setState({ visibleNewPool: false });
 
   render() {
-    const { classes } = this.props;
+    const { classes, wallet: { user: { address } }, ui: { leftbar } } = this.props;
+    const { visibleNewPool } = this.state;
 
-    return <Grid container>
+    return <Grid container spacing={0}>
       <Grid item xs={12}>
-        <Grid container className={classes.noWrap} alignItems="center">
+        <Grid container alignItems="center" className={classes.noWrap}>
           <Grid item className={classes.stretch}>
-            <PoolAvatar icons={this.parseIcon()} />
+            {!leftbar ? <Grid container>
+              <Grid item className={classes.opticalCorrectionBrand}>
+                <Brand />
+              </Grid>
+            </Grid> : <Typography>SenSwap</Typography>}
           </Grid>
-          <Grid item>
+          {address ? <Grid item>
             <WalletButton />
-          </Grid>
+          </Grid> : null}
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <Typography variant="h4">{this.parseName()}</Typography>
+        <Grid container alignItems="center" spacing={3}>
+          <Grid item>
+            <Typography variant="h4">Stake Pools</Typography>
+          </Grid>
+          {!address ? <Grid item>
+            <WalletButton />
+          </Grid> : <Fragment>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<QueueRounded />}
+                onClick={this.onOpenNewPool}
+              >
+                <Typography>New Stake Pool</Typography>
+              </Button>
+              <NewStakePool visible={visibleNewPool} onClose={this.onCloseNewPool} />
+            </Grid>
+          </Fragment>}
+        </Grid>
       </Grid>
     </Grid>
   }
@@ -58,20 +79,15 @@ class Header extends Component {
 
 const mapStateToProps = state => ({
   ui: state.ui,
+  wallet: state.wallet,
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
+  setError,
+  unsetWallet,
 }, dispatch);
-
-Header.defaultProps = {
-  poolData: {},
-}
-
-Header.propTypes = {
-  poolData: PropTypes.object,
-}
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(Header)));
+)(withStyles(styles)(Wallet)));

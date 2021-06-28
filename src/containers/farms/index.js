@@ -8,7 +8,6 @@ import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
 import Paper from 'senswap-ui/paper';
 import Typography from 'senswap-ui/typography';
-
 import Header from './header';
 import StakePools from './stakePool';
 
@@ -16,27 +15,8 @@ import styles from './styles';
 
 
 class Farms extends Component {
-  constructor() {
-    super();
-
-    this.state = {
-      data: [
-        {
-          name: ''
-        }
-      ]
-    }
-  }
-
-  componentDidMount() {
-  }
-  generationTable() {
-
-  }
-
   render() {
     const { classes } = this.props;
-    const { data } = this.state;
 
     return <Grid container>
       <Grid item xs={12}>
@@ -68,7 +48,7 @@ class Farms extends Component {
         <Drain size={1} />
       </Grid>
       <Grid item xs={12}>
-        <StakePools data={data} />
+        <StakePools />
       </Grid>
     </Grid>
   }

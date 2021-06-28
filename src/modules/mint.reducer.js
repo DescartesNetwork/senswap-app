@@ -25,7 +25,7 @@ export const getMint = (address, force = false) => {
       dispatch({ type: GET_MINT_OK, data });
       return mintData;
     }
-    
+
     const { api: { base } } = configs;
     try {
       const { data: mintData } = await api.get(base + '/mint', { address });

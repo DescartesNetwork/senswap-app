@@ -48,4 +48,10 @@ export default theme => ({
   chart: {
     borderRadius: theme.shape.borderRadius * 2,
   },
+  address: {
+    maxWidth: 150,
+    textOverflow: 'ellipsis',
+    whiteSpaceL: 'nowrap',
+    overflow: 'hidden',
+  }
 });
