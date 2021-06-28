@@ -13,22 +13,22 @@ export default function Detail(props) {
     <Dialog onClose={props.onClose} aria-labelledby="simple-dialog-title" open={props.isOpen}>
       <DialogTitle id="simple-dialog-title">Stake Pool Detail</DialogTitle>
       <DialogContent>
-        {/* Havest */}
-        <Grid container xs={12} alignItems="center" spacing={3} wrap="nowrap">
+        {/* Harvest */}
+        <Grid container alignItems="center" spacing={3} wrap="nowrap">
           <Grid item>
-            <TextField name="amountHavest" label="Earned" variant="outlined" value={props.amountHavest} />
+            <TextField name="amountHarvest" label="Earned" variant="outlined" value={props.amountHarvest} />
           </Grid>
           <Grid item>
             <Button variant="contained" color="primary" size="large" disabled={false} fullWidth onClick={() => props.onHarvest(props.data)}>
-              <Typography>Havest</Typography>
+              <Typography>Harvest</Typography>
             </Button>
           </Grid>
         </Grid>
 
         {/* Stake */}
-        <Grid container xs={12} alignItems="center" spacing={3} wrap="nowrap">
+        <Grid container alignItems="center" spacing={3} wrap="nowrap">
           <Grid item>
-            <TextField name="amountStake" label="LP Amount" variant="outlined" value={props.amountStake} />
+            <TextField name="amountStake" label="LP amount" variant="outlined" value={props.amountStake} />
           </Grid>
           <Grid item>
             <Button variant="contained" color="primary" size="large" disabled={false} fullWidth onClick={() => props.onStake(props.data)}>
@@ -38,13 +38,37 @@ export default function Detail(props) {
         </Grid>
 
         {/* Unstake */}
-        <Grid container xs={12} alignItems="center" spacing={3} wrap="nowrap">
+        <Grid container alignItems="center" spacing={3} wrap="nowrap">
           <Grid item>
-            <TextField name="amountUnstake" label="LP Amount" variant="outlined" value={props.amountUnstake} />
+            <TextField name="amountUnstake" label="LP amount" variant="outlined" value={props.amountUnstake} />
           </Grid>
           <Grid item>
             <Button variant="contained" color="primary" size="large" disabled={false} fullWidth onClick={() => props.onUnstake(props.data)}>
               Unstake
+            </Button>
+          </Grid>
+        </Grid>
+
+        {/* Seed */}
+        <Grid container alignItems="center" spacing={3} >
+          <Grid item>
+            <TextField name="amountSeed" label="Sen amount" variant="outlined" value={props.amountSeed} />
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="primary" size="large" disabled={false} fullWidth onClick={() => props.onSeed(props.data)}>
+              Seed
+            </Button>
+          </Grid>
+        </Grid>
+
+        {/* Unseed */}
+        <Grid container alignItems="center" spacing={3} wrap="nowrap">
+          <Grid item>
+            <TextField name="amountUnseed" label="Sen amount" variant="outlined" value={props.amountUnseed} />
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="primary" size="large" disabled={false} fullWidth onClick={() => props.onUnseed(props.data)}>
+              Unseed
             </Button>
           </Grid>
         </Grid>

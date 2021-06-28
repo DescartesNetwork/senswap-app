@@ -47,10 +47,11 @@ export default class FarmingService {
     const dstSenAddress = senWallet.address;
 
     //TEST
-    if (true) {
-      await liteFarming.initializeAccount(stakePoolAddress, wallet);
-    }
-    console.log("stakePool", stakePool);
+    // if (true) {
+    //   await liteFarming.initializeAccount(stakePoolAddress, wallet);
+    // }
+
+    // console.log("stakePool", stakePool);
     console.log("stakePoolAddress, srcAddress, dstSenAddress,", stakePoolAddress, srcAddress, dstSenAddress);
     const stake = await liteFarming.stake(10n, stakePoolAddress, srcAddress, dstSenAddress, wallet);
     console.log("2", stake);
@@ -69,14 +70,15 @@ export default class FarmingService {
     const dstSenAddress = senWallet.address;
 
     //Test admin
-    await liteFarming.seed(89999999900n, stakePoolAddress, senWallet.address, wallet);
+    // await liteFarming.seed(89999999900n, stakePoolAddress, senWallet.address, wallet);
 
+    // console.log("stakePool", stakePool);
     console.log("stakePoolAddress, srcAddress, dstSenAddress", stakePoolAddress, srcAddress, dstSenAddress);
     const stake = await liteFarming.unstake(1n, stakePoolAddress, srcAddress, dstSenAddress, wallet);
     console.log("unstake", stake);
   }
 
-  static async harvest( stakePool) {
+  static async harvest(stakePool) {
     const wallet = window.senswap.wallet;
     const walletAddress = await wallet.getAccount();
 
@@ -85,7 +87,7 @@ export default class FarmingService {
     let senWallet = await sol.scanAccount(MINT_SEN_ADDR, walletAddress);
     const dstSenAddress = senWallet.address;
 
-    console.log("dstSenAddress",dstSenAddress)
+    console.log("dstSenAddress", dstSenAddress)
     const harvest = await liteFarming.harvest(stakePoolAddress, dstSenAddress, wallet);
     console.log("harvest", harvest);
   }
@@ -103,5 +105,42 @@ export default class FarmingService {
       }
     });
     return stakePools;
+  }
+
+  static async seed(amount, stakePool) {
+    const wallet = window.senswap.wallet;
+    const walletAddress = await wallet.getAccount();
+    const stakePoolAddress = stakePool.address;
+
+    let senWallet = await sol.scanAccount(MINT_SEN_ADDR, walletAddress);
+    const srcSenAddress = senWallet.address;
+
+    console.log("stakePoolAddress, srcSenAddress", stakePoolAddress, srcSenAddress);
+    try {
+      const seed = await liteFarming.seed(10000000000n, stakePoolAddress, srcSenAddress, wallet);
+
+      console.log('Seeded: ', seed);
+      console.log("StakePool after seeding", stakePool);
+    } catch (err) {
+      console.error(err.all);
+    }
+  }
+
+  static async unseed(amount, stakePool) {
+    const wallet = window.senswap.wallet;
+    const walletAddress = await wallet.getAccount();
+    const stakePoolAddress = stakePool.address;
+
+    let senWallet = await sol.scanAccount(MINT_SEN_ADDR, walletAddress);
+    const dstSenAddress = senWallet.address;
+
+    console.log("stakePoolAddress, dstSenAddress", stakePoolAddress, dstSenAddress);
+    try {
+      const unseed = await liteFarming.unseed(1000000000n, stakePoolAddress, dstSenAddress, wallet);
+      console.log('Unseed: ', unseed);
+    }
+    catch (err) {
+      console.error(err.all);
+    }
   }
 }
