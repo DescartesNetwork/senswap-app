@@ -28,7 +28,10 @@ class Farming extends Component {
   }
 
   handleStake = (type) => {
-    const { onHandleStake, detail: {mint} } = this.props;
+    const {
+      onHandleStake,
+      detail: { mint },
+    } = this.props;
     const value = this.stakeRef.current.value;
     if (!value) return setError("Amount is required");
     onHandleStake(value, mint.address, type);
@@ -100,8 +103,8 @@ class Farming extends Component {
                 <Typography color="textSecondary">Pending reward</Typography>
               </Grid>
               <Grid item xs={8}>
-                <Typography >
-                  Reward: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(debt.debt, mint.decimals)}</b> SEN
+                <Typography>
+                  Reward: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(debt?.debt || 0, mint.decimals)}</b> SEN
                 </Typography>
               </Grid>
               <Grid item xs={4} align="end">
@@ -118,7 +121,7 @@ class Farming extends Component {
 
               {/* Stake + unStake */}
               <Grid item xs={12}>
-                <Typography >
+                <Typography>
                   LP token: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(account.amount, mint.decimals)}</b>
                 </Typography>
               </Grid>

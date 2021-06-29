@@ -14,7 +14,7 @@ import Typography from 'senswap-ui/typography';
 import Paper from 'senswap-ui/paper';
 import Drain from 'senswap-ui/drain';
 import Button from 'senswap-ui/button';
-import FarmingModal from 'containers/farms/farming';
+import StakePoolDetail from 'containers/farms/stakePoolDetail/stakePoolDetail';
 
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
@@ -158,7 +158,7 @@ class Farming extends Component {
             </Button>
         </Grid>
       </Grid>
-      <FarmingModal
+      <StakePoolDetail
         visible={visible}
         onClose={this.onClose}
         stakeLoading={stakeLoading}
