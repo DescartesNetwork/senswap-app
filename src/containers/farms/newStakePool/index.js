@@ -140,7 +140,7 @@ class NewStakePool extends Component {
     if (!ssjs.isAddress(srcSAddress)) return setError("Please select primary token");
     if (!ssjs.isAddress(srcAAddress)) return setError("Please select token 1");
     const reserveReward = ssjs.decimalize(reward, decimal);
-    const reservePeriod = ssjs.decimalize(period, decimal);
+    const reservePeriod = period
     if (!reserveReward || !reservePeriod) return setError("Invalid amount");
 
     try {
