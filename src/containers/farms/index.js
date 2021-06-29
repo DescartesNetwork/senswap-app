@@ -9,7 +9,7 @@ import Drain from 'senswap-ui/drain';
 import Paper from 'senswap-ui/paper';
 import Typography from 'senswap-ui/typography';
 import Header from './header';
-import StakePools from './stakePool';
+import StakePools from './stakePoolList/stakePoolList';
 
 import styles from './styles';
 
