@@ -18,6 +18,7 @@ import configs from "configs";
 import sol from "helpers/sol";
 
 import Farming from "../stakePoolDetail/stakePoolDetail";
+import Seed from '../seed';
 
 import styles from "../styles";
 
@@ -29,7 +30,8 @@ const COLS = [
   { label: "APR", key: "apr" },
   { label: "APY", key: "apy" },
   { label: "Liquidity", key: "total_value" },
-  { label: "", key: "action" },
+  { label: "", key: "detail" },
+  { label: "", key: "seed" },
 ];
 
 const DECIMAL = 9;
@@ -46,6 +48,7 @@ class StakePool extends Component {
       stakeLoading: false,
       unStakeLoading: false,
       loading: false,
+      visibleSeed: false,
     };
   }
   componentDidMount() {
@@ -115,7 +118,7 @@ class StakePool extends Component {
     let accountData = null;
     try {
       accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
-    } catch (error) {}
+    } catch (error) { }
     return accountData;
   };
 
@@ -229,9 +232,105 @@ class StakePool extends Component {
     }
   };
 
+  onHandleSeed = async (amount, type) => {
+    const {
+      wallet: {
+        user: { address: userAddress },
+      },
+    } = this.props;
+    const {
+      poolDetail: {
+        pool: { address: stakePoolAddress },
+      },
+    } = this.state;
+    const { sol: { senAddress } } = configs;
+    const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
+    const reserveAmount = ssjs.decimalize(amount, DECIMAL);
+    const data = {
+      reserveAmount, stakePoolAddress,
+      senWallet
+    }
+
+    if (type === 'unseed') return this.unseed(data);
+    return this.seed(data);
+  }
+  seed = async (data) => {
+    console.log(data, 'data seed')
+    const wallet = window.senswap.wallet;
+    const { setSuccess, setError } = this.props;
+    const {
+      reserveAmount: amount, stakePoolAddress,
+      senWallet
+    } = data;
+    try {
+      this.setState({ seedLoading: true });
+      const seed = await liteFarming.seed(amount, stakePoolAddress, senWallet, wallet);
+      if (!seed) throw new Error('Error!');
+      this.setState({ seedLoading: false }, () => {
+        this.onCloseSeed();
+        this.fetchStakePools();
+      });
+
+      await setSuccess('Successfully');
+
+    } catch (err) {
+      await setError(err);
+    }
+  }
+  unseed = async (data) => {
+    const wallet = window.senswap.wallet;
+    const { setSuccess, setError } = this.props;
+    const {
+      reserveAmount: amount, stakePoolAddress,
+      senWallet
+    } = data;
+    try {
+      this.setState({ unSeedLoading: true });
+      const seed = await liteFarming.unseed(amount, stakePoolAddress, senWallet, wallet);
+      if (!seed) throw new Error('Error!');
+      this.setState({ seedLoading: false }, () => {
+        this.onCloseSeed();
+        this.fetchStakePools();
+      });
+
+      await setSuccess('Successfully');
+
+    } catch (err) {
+      await setError(err);
+    }
+
+  }
+
+  onOpenSeed = async (stakePool) => {
+    if (!stakePool) return;
+    const {
+      mint_token: { address: mintAddress },
+    } = stakePool;
+    const wallet = window.senswap.wallet;
+
+    const account = await this.fetchAccountData(mintAddress, wallet);
+    console.log("stakePool.address", stakePool.address);
+    const debt = await this.fetchDebtData(stakePool.address);
+    const poolDetail = {
+      pool: stakePool,
+      account,
+      mint: account.mint,
+      debt,
+    };
+    console.log("poolDetail", poolDetail);
+    this.setState({ visibleSeed: true, poolDetail: poolDetail });
+  }
+  onCloseSeed = () => {
+    this.setState({
+      visibleSeed: false,
+      poolDetails: []
+    })
+  }
+
   render() {
     const { classes } = this.props;
-    const { stakePools, visible, poolDetail, stakeLoading, unStakeLoading, loading } = this.state;
+    const { stakePools, visible, poolDetail, stakeLoading, unStakeLoading, loading, visibleSeed,
+      seedLoading, unSeedLoading } = this.state;
 
     return (
       <Paper className={classes.paper}>
@@ -249,31 +348,34 @@ class StakePool extends Component {
                 <TableBody>
                   {!loading
                     ? stakePools.map((pool, idx) => {
-                        const { mint_token: token, address: stakePoolAddress, total_shares } = pool;
-                        return (
-                          <TableRow key={idx}>
-                            <TableCell>{idx + 1}</TableCell>
-                            <TableCell className={classes.address}>{stakePoolAddress}</TableCell>
-                            <TableCell>{pool.apr}%</TableCell>
-                            <TableCell>{pool.apy}%</TableCell>
-                            <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
-                            <TableCell>
-                              <Button onClick={() => this.onOpen(pool)}>Detail</Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })
+                      const { mint_token: token, address: stakePoolAddress, total_shares } = pool;
+                      return (
+                        <TableRow key={idx}>
+                          <TableCell>{idx + 1}</TableCell>
+                          <TableCell className={classes.address}>{stakePoolAddress}</TableCell>
+                          <TableCell>{pool.apr}%</TableCell>
+                          <TableCell>{pool.apy}%</TableCell>
+                          <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
+                          <TableCell>
+                            <Button onClick={() => this.onOpen(pool)}>Detail</Button>
+                          </TableCell>
+                          <TableCell>
+                            <Button onClick={() => this.onOpenSeed(pool)}>Seed</Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                     : [1, 2, 3, 4, 5].map((e) => {
-                        return (
-                          <TableRow key={e}>
-                            {COLS.map((col) => (
-                              <TableCell key={col.key}>
-                                <CircularProgress size={17} />
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        );
-                      })}
+                      return (
+                        <TableRow key={e}>
+                          {COLS.map((col) => (
+                            <TableCell key={col.key}>
+                              <CircularProgress size={17} />
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      );
+                    })}
                 </TableBody>
               </Table>
             </TableContainer>
@@ -287,6 +389,14 @@ class StakePool extends Component {
           detail={poolDetail}
           onHandleStake={this.handleStake}
           onHandleHarvest={this.onHandleHarvest}
+        />
+        <Seed
+          visible={visibleSeed}
+          onClose={this.onCloseSeed}
+          detail={poolDetail}
+          seedLoading={seedLoading}
+          unSeedLoading={unSeedLoading}
+          onHandleSeed={this.onHandleSeed}
         />
       </Paper>
     );

@@ -35,9 +35,9 @@ class Seed extends Component {
   }
 
   getMaxToken = () => {
-    const { modalData } = this.props;
-    if (!modalData && !modalData.length < 1) return;
-    const { total_shares, mint_token: { decimals } } = modalData;
+    const { detail } = this.props;
+    if (!detail && !detail.length < 1) return;
+    const { total_shares, mint_token: { decimals } } = detail;
     const share = ssjs.undecimalize(total_shares, decimals);
     return this.setState({ maxToken: share });
   }
@@ -50,8 +50,14 @@ class Seed extends Component {
 
   render() {
     const { maxToken } = this.state;
-    const { visible, onClose, modalData: data, seedLoading, unSeedLoading } = this.props;
-    if (data.length < 1) return null;
+    const { visible, onClose, detail: data, seedLoading, unSeedLoading } = this.props;
+    if (!data || !data.pool) return null;
+    const {
+      pool: {
+        treasury_sen: { amount }
+      },
+      mint: { decimals }
+    } = data;
 
     return <Fragment>
       <Dialog open={visible} onClose={onClose}>
@@ -65,7 +71,7 @@ class Seed extends Component {
               <Typography variant="body2">Address: {data.address}</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="body2">Total shares: {data && data.total_shares ? ssjs.undecimalize(data.total_shares, data.mint_token.decimals) : 0}</Typography>
+              <Typography variant="body2">Treasury SEN amount: {amount ? ssjs.undecimalize(amount, decimals) : 0}</Typography>
             </Grid>
             {/* Seed + unSeed */}
             <Grid item xs={12}>

@@ -79,9 +79,6 @@ class Board extends Component {
       {ssjs.isAddress(walletAddress) ? <Grid item xs={12} md={6}>
         <Balance poolData={data} />
       </Grid> : null}
-      <Grid item xs={12}>
-        <Farming />
-      </Grid>
       <Grid item xs={12} md={6}>
         <TVL poolAddress={poolAddress} />
       </Grid>

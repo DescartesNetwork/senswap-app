@@ -32,14 +32,15 @@ const FARMING = {
 }
 
 const LIMIT = 9999;
-const LITE_FARMING = new ssjs.LiteFarming();
+const liteFarming = new ssjs.LiteFarming();
 class Farming extends Component {
   constructor() {
     super();
     this.state = {
+      stakePools: [],
       visible: false,
       data: [],
-      modalData: [],
+      poolDetail: [],
       stakeLoading: false,
       unStakeLoading: false,
       loading: false,
@@ -49,26 +50,27 @@ class Farming extends Component {
   }
 
   componentDidMount() {
-    this.fecthData();
+    this.fetchStakePools();
   }
 
-  fecthData = async () => {
+
+  fetchStakePools = async () => {
     const { getStakePools } = this.props;
     this.setState({ loading: true });
     try {
-      let res = await getStakePools(undefined, LIMIT);
-      if (!res) return;
-      const promise = res.map(({ address }) => {
-        return LITE_FARMING.getStakePoolData(address);
+      let pools = await getStakePools(undefined, LIMIT);
+      //Fetch data from blockchain
+      const promise = pools.map(({ address }) => {
+        return liteFarming.getStakePoolData(address);
       });
-      await Promise.all(promise).then(mints => {
-        res = [...mints];
-      });
-      this.setState({ data: res, loading: false });
-    } catch (err) {
-      await setError(err);
+      let poolData = await Promise.all(promise);
+      //Calculate
+      poolData = this.calPoolStat(poolData);
+      this.setState({ stakePools: poolData, loading: false });
+    } catch (er) {
+      await setError(er);
     }
-  }
+  };
 
   onHandleHarvest = () => {
     const value = this.harvestRef.current.value;
@@ -83,18 +85,30 @@ class Farming extends Component {
 
   onClose = () => {
     return this.setState({
-      modalData: [],
+      poolDetail: [],
       stakeLoading: false,
       unStakeLoading: false,
       visible: false
     });
   }
-  onOpen = async (data) => {
-    if (!data) return;
-    const { mint_token: { address: mintAddress } } = data;
-    const mint = await this.onAccountData(mintAddress);
-    data.mint_details = mint;
-    this.setState({ visible: true, modalData: data });
+  onOpen = async (stakePool) => {
+    if (!stakePool) return;
+    const {
+      mint_token: { address: mintAddress },
+    } = stakePool;
+    const wallet = window.senswap.wallet;
+
+    const account = await this.fetchAccountData(mintAddress, wallet);
+    console.log("stakePool.address", stakePool.address);
+    const debt = await this.fetchDebtData(stakePool.address);
+    const poolDetail = {
+      pool: stakePool,
+      account,
+      mint: account.mint,
+      debt,
+    };
+    console.log("poolDetail", poolDetail);
+    this.setState({ visible: true, poolDetail: poolDetail });
   }
 
   onAccountData = async (mintAddress) => {
@@ -109,7 +123,7 @@ class Farming extends Component {
 
   render() {
     const { classes } = this.props;
-    const { visible, modalData, stakeLoading, unStakeLoading, data } = this.state;
+    const { visible, poolDetail, stakeLoading, unStakeLoading, data } = this.state;
 
     return <Paper className={classes.paper}>
       <Grid container alignItems="center">
@@ -163,7 +177,7 @@ class Farming extends Component {
         onClose={this.onClose}
         stakeLoading={stakeLoading}
         unStakeLoading={unStakeLoading}
-        modalData={modalData}
+        detail={poolDetail}
         onHandleStake={this.onHandleStake}
         onHandleHarvest={this.onHandleHarvest}
       />
