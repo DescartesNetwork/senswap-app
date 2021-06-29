@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { connect, useSelector } from 'react-redux';
+import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
@@ -18,6 +18,7 @@ import configs from 'configs';
 import sol from 'helpers/sol';
 
 import Farming from './farming';
+import Seed from './seed';
 
 import styles from './styles';
 
@@ -39,7 +40,8 @@ class StakePool extends Component {
         { label: 'APR', key: 'apr' },
         { label: 'APY', key: 'apy' },
         { label: 'Total Shares', key: 'total_value' },
-        { label: '', key: 'action' },
+        { label: '', key: 'stake' },
+        { label: '', key: 'seed' },
       ],
       data: [],
       visible: false,
@@ -47,6 +49,7 @@ class StakePool extends Component {
       stakeLoading: false,
       unStakeLoading: false,
       loading: false,
+      visibleSeed: false,
     };
   }
   componentDidMount() {
@@ -90,7 +93,9 @@ class StakePool extends Component {
       modalData: [],
       stakeLoading: false,
       unStakeLoading: false,
-      visible: false
+      seedLoading: false,
+      unSeedLoading: false,
+      visible: false,
     });
   }
   onOpen = async (data) => {
@@ -128,6 +133,7 @@ class StakePool extends Component {
   }
 
   stake = async (data) => {
+    const { setSuccess, setError } = this.props;
     const wallet = window.senswap.wallet;
     this.setState({ stakeLoading: true });
     const {
@@ -156,6 +162,7 @@ class StakePool extends Component {
     }
   }
   unstake = async (data) => {
+    const { setSuccess, setError } = this.props;
     this.setState({ unStakeLoading: true });
     const {
       reserveAmount: amount, stakePoolAddress,
@@ -191,9 +198,85 @@ class StakePool extends Component {
 
   }
 
+  onHandleSeed = async (amount, type) => {
+    const { wallet: { user: { address: userAddress } } } = this.props;
+    const { modalData: { address: stakePoolAddress } } = this.state;
+    const { sol: { senAddress } } = configs;
+    const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
+    const reserveAmount = ssjs.decimalize(amount, DECIMAL);
+    const data = {
+      reserveAmount, stakePoolAddress,
+      senWallet
+    }
+
+    if (type === 'unseed') return this.unseed(data);
+    return this.seed(data);
+  }
+  seed = async (data) => {
+    const wallet = window.senswap.wallet;
+    const { setSuccess, setError } = this.props;
+    const {
+      reserveAmount: amount, stakePoolAddress,
+      senWallet
+    } = data;
+    try {
+      this.setState({ seedLoading: true });
+      const seed = await LITE_FARMING.seed(amount, stakePoolAddress, senWallet, wallet);
+      if (!seed) throw new Error('Error!');
+      this.setState({ seedLoading: false }, () => {
+        this.onCloseSeed();
+      });
+
+      await setSuccess('Successfully');
+
+    } catch (err) {
+      await setError(err);
+    }
+  }
+  unseed = async (data) => {
+    const wallet = window.senswap.wallet;
+    const { setSuccess, setError } = this.props;
+    const {
+      reserveAmount: amount, stakePoolAddress,
+      senWallet
+    } = data;
+    try {
+      this.setState({ unSeedLoading: true });
+      const seed = await LITE_FARMING.unseed(amount, stakePoolAddress, senWallet, wallet);
+      if (!seed) throw new Error('Error!');
+      this.setState({ seedLoading: false }, () => {
+        this.onCloseSeed();
+      });
+
+      await setSuccess('Successfully');
+
+    } catch (err) {
+      await setError(err);
+    }
+
+  }
+
+  onOpenSeed = async (data) => {
+    if (!data) return;
+    const { mint_token: { address: mintAddress } } = data;
+    const mint = await this.onAccountData(mintAddress);
+    data.mint_details = mint;
+    this.setState({ visibleSeed: true, modalData: data });
+  }
+  onCloseSeed = () => {
+    this.setState({
+      visibleSeed: false,
+      modalData: []
+    })
+  }
+
   render() {
     const { classes } = this.props;
-    const { fields, data, visible, modalData, stakeLoading, unStakeLoading, loading } = this.state;
+    const {
+      fields, data, visible, modalData,
+      stakeLoading, unStakeLoading, loading, visibleSeed,
+      seedLoading, unSeedLoading
+    } = this.state;
 
     return <Paper className={classes.paper}>
       <Grid container>
@@ -222,6 +305,9 @@ class StakePool extends Component {
                     <TableCell>
                       <Button onClick={() => this.onOpen(e)}>Farming</Button>
                     </TableCell>
+                    <TableCell>
+                      <Button onClick={() => this.onOpenSeed(e)}>Seed</Button>
+                    </TableCell>
                   </TableRow>
                 }) : [1, 2, 3, 4, 5].map(e => {
                   return <TableRow key={e}>
@@ -247,6 +333,14 @@ class StakePool extends Component {
         modalData={modalData}
         onHandleStake={this.onHandleStake}
         onHandleHarvest={this.onHandleHarvest}
+      />
+      <Seed
+        visible={visibleSeed}
+        onClose={this.onCloseSeed}
+        modalData={modalData}
+        seedLoading={seedLoading}
+        unSeedLoading={unSeedLoading}
+        onHandleSeed={this.onHandleSeed}
       />
     </Paper>
   }
