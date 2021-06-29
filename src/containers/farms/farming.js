@@ -14,67 +14,59 @@ import Button from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
-import { getAccountData } from 'modules/bucket.reducer';
-
 import { MintAvatar } from 'containers/wallet';
-import AccountSelection from './newStakePool/selection';
-import { CloseRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
-
-import configs from 'configs';
-import sol from 'helpers/sol';
 
 import styles from './styles';
-class Modal extends Component {
+class Farming extends Component {
   constructor() {
     super();
 
     this.state = {
-      accountData: [{}],
-      index: 0,
-      visibleAccountSelection: false,
+      maxToken: 0,
     }
-
     this.stakeRef = createRef();
-    this.harvestRef = createRef();
   }
 
   handleStake = (type) => {
-    const { onHandleStake } = this.props;
+    const { onHandleStake, modalData: data } = this.props;
     const value = this.stakeRef.current.value;
-    const { accountData: [{ mint: { address: mintAddress } }] } = this.state;
+    const { mint_details: { address: mintAddress } } = data;
 
     if (!ssjs.isAddress(mintAddress)) return setError('Please select mint token');
-    if (!value) return setError('Amuont is required');;
+    if (!value) return setError('Amount is required');
     onHandleStake(value, mintAddress, type);
   }
   handleHarvest = () => {
     const { onHandleHarvest } = this.props;
     onHandleHarvest();
   }
-  onOpenAccountSelection = (index) => this.setState({ visibleAccountSelection: true });
-  onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
 
-  onAccountData = (data) => {
-    const { setError } = this.props;
-    const { accountData, index } = this.state;
-    if (accountData.some(({ address }) => data.address === address)) return setError('Already selected');
-    let newAccountData = [...accountData];
-    newAccountData[index] = data;
-    return this.setState({ accountData: newAccountData }, () => {
-      return this.onCloseAccountSelection();
-    });
+  getMaxToken = () => {
+    const { modalData } = this.props;
+    if (!modalData && !modalData.length < 1) return;
+    const { total_shares, mint_token: { decimals } } = modalData;
+    const share = ssjs.undecimalize(total_shares, decimals);
+    return this.setState({ maxToken: share });
+  }
+
+  onChange = () => {
+    const value = this.stakeRef.current.value;
+    console.log(value)
+    this.setState({ maxToken: value });
   }
 
   render() {
+    const { maxToken } = this.state;
     const { visible, onClose, modalData: data, stakeLoading, unStakeLoading } = this.props;
-    const { accountData, visibleAccountSelection } = this.state;
-    console.log(data, 'modal data');
+    if (data.length < 1) return null;
+    const { mint_details: mint } = data;
+    const { icon, name } = mint;
 
     return <Fragment>
       <Dialog open={visible} onClose={onClose}>
         <DialogTitle>Stat farming</DialogTitle>
         <DialogContent>
-          <Grid container>
+          <Grid container alignItems="center">
             <Grid item xs={12}>
               <Typography color="textSecondary">Stake pool</Typography>
             </Grid>
@@ -82,7 +74,7 @@ class Modal extends Component {
               <Typography variant="body2">Address: {data.address}</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="body2">Total shares: {data && data.total_shares ? data.total_shares.toString() : 0}</Typography>
+              <Typography variant="body2">Total shares: {data && data.total_shares ? ssjs.undecimalize(data.total_shares, data.mint_token.decimals) : 0}</Typography>
             </Grid>
             <Grid item xs={12}>
               <Typography color="textSecondary">Annual Percentage</Typography>
@@ -102,18 +94,8 @@ class Modal extends Component {
             <Grid item xs={12}>
               <Typography color="textSecondary">Pending reward</Typography>
             </Grid>
-            <Grid item xs={4}>
-              <Typography variant="body2">Reward: {data.pendingReward} SEN</Typography>
-            </Grid>
-            <Grid item xs={4}>
-              <TextField
-                variant="contained"
-                inputRef={this.harvestRef}
-                InputProps={{
-                  endAdornment: <Typography color="error" style={{ cursor: 'pointer' }}>
-                    <strong>MAX</strong>
-                  </Typography>
-                }} />
+            <Grid item xs={8}>
+              <Typography variant="body2">Reward: {data && data.debt ? ssjs.undecimalize(data.debt, data.mint_token.decimals) : 0} SEN</Typography>
             </Grid>
             <Grid item xs={4} align="end">
               <Button
@@ -132,34 +114,27 @@ class Modal extends Component {
             </Grid>
 
             {/* Stake + unStake */}
+            <Grid item xs={12}>
+              <Typography color="textPrimary">LP token: </Typography>
+            </Grid>
             <Grid item xs={4}>
-              {accountData.map((data, index) => {
-                const { mint } = data;
-                const { symbol, icon } = mint || {};
-                return <Fragment key={index}>
-                  <Grid item xs={6}>
-                    <Typography color="textPrimary">LP token: </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Button
-                      size="small"
-                      startIcon={<MintAvatar icon={icon} />}
-                      endIcon={<ArrowDropDownRounded />}
-                      onClick={() => this.onOpenAccountSelection(index)}
-                    >
-                      <Typography>{symbol || 'Select'} </Typography>
-                    </Button>
-                  </Grid>
-                </Fragment>
-              })}
+              <Grid container alignItems="center">
+                <Grid item xs={3}>
+                  <MintAvatar icon={icon} />
+                </Grid>
+                <Grid item xs={9}>
+                  <Typography color="textSecondary">{name || 'UNKNOWN'}</Typography>
+                </Grid>
+              </Grid>
             </Grid>
             <Grid item xs={4}>
               <TextField
                 variant="contained"
-                defaultValue="0"
+                value={maxToken}
                 inputRef={this.stakeRef}
+                onChange={this.onChange}
                 InputProps={{
-                  endAdornment: <Typography color="error" style={{ cursor: 'pointer' }}>
+                  endAdornment: <Typography color="error" style={{ cursor: 'pointer' }} onClick={this.getMaxToken}>
                     <strong>MAX</strong>
                   </Typography>
                 }} />
@@ -181,12 +156,6 @@ class Modal extends Component {
           </Grid>
         </DialogContent>
       </Dialog>
-      <AccountSelection
-        solana={false}
-        visible={visibleAccountSelection}
-        onClose={this.onCloseAccountSelection}
-        onChange={this.onAccountData}
-      />
     </Fragment>
   }
 }
@@ -200,10 +169,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setSuccess,
   getStakePools,
-  getAccountData,
 }, dispatch);
 
 export default withRouter(connect(
   mapStateToProps,
   mapDispatchToProps
-)(withStyles(styles)(Modal)));
+)(withStyles(styles)(Farming)));

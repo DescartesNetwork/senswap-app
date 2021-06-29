@@ -11,19 +11,20 @@ import Paper from 'senswap-ui/paper';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 import CircularProgress from 'senswap-ui/circularProgress';
 
 import configs from 'configs';
 import sol from 'helpers/sol';
 
-import Modal from './modal';
+import Farming from './farming';
 
 import styles from './styles';
 
 const LITE_FARMING = new ssjs.LiteFarming();
 
 
-const DECIMAL = 1;
+const DECIMAL = 9;
 const LIMIT = 9999;
 const FARMING = new ssjs.Farming();
 class StakePool extends Component {
@@ -92,11 +93,22 @@ class StakePool extends Component {
       visible: false
     });
   }
-  onOpen = (data) => {
+  onOpen = async (data) => {
     if (!data) return;
-    this.setState({ visible: true });
-    this.setState({ modalData: data });
-    console.log(LITE_FARMING, 'lite farming')
+    const { mint_token: { address: mintAddress } } = data;
+    const mint = await this.onAccountData(mintAddress);
+    data.mint_details = mint;
+    this.setState({ visible: true, modalData: data });
+  }
+
+  onAccountData = async (mintAddress) => {
+    const { wallet: { user: { address: userAddress } }, getAccountData } = this.props;
+    if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid mint address');
+    if (!ssjs.isAddress(userAddress)) throw new Error('Invalid wallet address');
+    const { address: accountAddress, state } = await sol.scanAccount(mintAddress, userAddress);
+    if (!state) throw new Error('Invalid state');
+    const { mint } = await getAccountData(accountAddress);
+    if (mint) return mint;
   }
 
   onHandleStake = async (amount, address, type) => {
@@ -105,14 +117,14 @@ class StakePool extends Component {
     const { sol: { senAddress } } = configs;
     const { address: LPAddress } = await sol.scanAccount(address, userAddress);
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
+    console.log(await sol.scanAccount(address, userAddress), await sol.scanAccount(senAddress, userAddress), 'decimal')
     const reserveAmount = ssjs.decimalize(amount, DECIMAL);
     const data = {
       reserveAmount, stakePoolAddress,
       LPAddress, senWallet
     }
     if (type === 'unstake') return this.unstake(data)
-    return this.stake(data)
-
+    return this.stake(data);
   }
 
   stake = async (data) => {
@@ -162,7 +174,6 @@ class StakePool extends Component {
     }
   }
   onHandleHarvest = async () => {
-    this.setState({ loading: true });
     const { modalData: { address: stakePoolAddress } } = this.state;
     const { wallet: { user: { address: userAddress } } } = this.props;
     const wallet = window.senswap.wallet;
@@ -172,10 +183,8 @@ class StakePool extends Component {
       const harvest = await LITE_FARMING.harvest(stakePoolAddress, senWallet, wallet);
       console.log(harvest, 'harvest');
       await setSuccess('Harvest successfully');
-      this.setState({ loading: false }, () => {
-        this.fetchData();
-        this.onClose();
-      })
+      this.fetchData();
+      this.onClose();
     } catch (err) {
       await setError(err);
     }
@@ -209,7 +218,7 @@ class StakePool extends Component {
                     <TableCell>{ssjs.undecimalize(debt, token.decimals)}</TableCell>
                     <TableCell>{e.apr}</TableCell>
                     <TableCell>{e.apy}</TableCell>
-                    <TableCell>{total_shares.toString()}</TableCell>
+                    <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
                     <TableCell>
                       <Button onClick={() => this.onOpen(e)}>Farming</Button>
                     </TableCell>
@@ -230,7 +239,7 @@ class StakePool extends Component {
           </TableContainer>
         </Grid>
       </Grid>
-      <Modal
+      <Farming
         visible={visible}
         onClose={this.onClose}
         stakeLoading={stakeLoading}
@@ -252,6 +261,7 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError, setSuccess,
   getStakePools,
+  getAccountData,
 }, dispatch);
 
 StakePool.propTypes = {
