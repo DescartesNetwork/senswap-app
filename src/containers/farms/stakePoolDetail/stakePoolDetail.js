@@ -102,6 +102,9 @@ class Farming extends Component {
               <Grid item xs={12}>
                 <Typography color="textSecondary">Pending reward</Typography>
               </Grid>
+              <Grid item xs={12}>
+                <Typography variant="body2">Period: {pool && pool.period ? ssjs.undecimalize(pool.period, 1) : 0} second</Typography>
+              </Grid>
               <Grid item xs={8}>
                 <Typography>
                   Reward: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(debt?.debt || 0, mint.decimals)}</b> SEN

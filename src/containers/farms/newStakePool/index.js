@@ -135,12 +135,12 @@ class NewStakePool extends Component {
       reward,
     } = this.state;
     const { setError, setSuccess, addStakePool, onClose } = this.props;
-    const decimal = 9;
+    const decimal = 1;
 
     if (!ssjs.isAddress(srcSAddress)) return setError("Please select primary token");
     if (!ssjs.isAddress(srcAAddress)) return setError("Please select token 1");
     const reserveReward = ssjs.decimalize(reward, decimal);
-    const reservePeriod = ssjs.decimalize(period, decimal);
+    const reservePeriod = ssjs.decimalize(period / 10, decimal);
     if (!reserveReward || !reservePeriod) return setError("Invalid amount");
 
     try {
@@ -326,7 +326,7 @@ const mapDispatchToProps = (dispatch) =>
 
 NewStakePool.defaultProps = {
   visible: false,
-  onClose: () => {},
+  onClose: () => { },
 };
 
 NewStakePool.propTypes = {
