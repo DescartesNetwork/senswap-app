@@ -23,7 +23,8 @@ import styles from './styles';
 import utils from 'helpers/utils';
 import configs from 'configs';
 import { setError } from 'modules/ui.reducer';
-import { getAccountData } from 'modules/bucket.reducer';
+import { getAccountData, getPoolData } from 'modules/bucket.reducer';
+import { getPools } from 'modules/pool.reducer';
 
 class Selection extends Component {
   constructor() {
@@ -49,32 +50,16 @@ class Selection extends Component {
   fetchData = async () => {
     const {
       wallet: { user: { address }, lamports, accounts },
-      solana, getAccountData
+      solana, getAccountData, getPools, getPoolData
     } = this.props;
     const { sol: { native } } = configs;
+    const pools = await getPools();
+    
+    const promises = pools.map(pool=> getPoolData(pool.address));
+    const poolData = await Promise.all(promises);
 
-    const solAccount = {
-      address,
-      amount: global.BigInt(lamports),
-      owner: address,
-      mint: { ...native }
-    }
-    if (!accounts || !accounts.length) return this.setState({ data: [solAccount], searchedData: [solAccount] });
-    let accountData = [];
-    this.setState({ loading: true });
-    for (let accountAddress of accounts) {
-      try {
-        const data = await getAccountData(accountAddress);
-        const { mint } = data;
-        const { mint_authority, freeze_authority } = mint || {};
-        const poolAddress = await this.swap.derivePoolAddress(mint_authority, freeze_authority);
-        if (!ssjs.isAddress(poolAddress)) accountData.push(data);
-      } catch (er) {
-        // Nothing
-      }
-    }
-    if (solana) accountData.unshift(solAccount);
-    return this.setState({ data: accountData, searchedData: accountData, loading: false });
+
+    return this.setState({ data: poolData, searchedData: poolData, loading: false });
   }
 
   onSearch = (e) => {
@@ -184,6 +169,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => bindActionCreators({
   setError,
   getAccountData,
+  getPools,
+  getPoolData
 }, dispatch);
 
 Selection.defaultProps = {

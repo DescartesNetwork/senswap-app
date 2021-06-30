@@ -11,5 +11,13 @@ export default theme => ({
     backgroundColor: theme.palette.background.default,
     border: '1px solid rgba(228, 228, 228, 0.1)',
     borderRadius: theme.shape.borderRadius
-  }
+  },
+  tableRow: {
+    background: "red",
+    cursor: 'pointer',
+    transition: theme.transitions.create(),
+    '&:hover': {
+      backgroundColor: theme.palette.background.secondary,
+    },
+  },
 });

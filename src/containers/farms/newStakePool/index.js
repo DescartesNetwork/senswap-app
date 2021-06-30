@@ -1,42 +1,46 @@
-import React, { Component, Fragment } from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
-import { bindActionCreators } from "redux";
-import { withRouter } from "react-router-dom";
-import isEqual from "react-fast-compare";
-import ssjs from "senswapjs";
+import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import { withRouter } from 'react-router-dom';
+import isEqual from 'react-fast-compare';
+import ssjs from 'senswapjs';
+import { PoolAvatar } from 'containers/pool';
+import { withStyles } from 'senswap-ui/styles';
+import Grid from 'senswap-ui/grid';
+import Typography from 'senswap-ui/typography';
+import TextField from 'senswap-ui/textField';
+import Button, { IconButton } from 'senswap-ui/button';
+import CircularProgress from 'senswap-ui/circularProgress';
+import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
+import Drain from 'senswap-ui/drain';
+import Paper from 'senswap-ui/paper';
 
-import { withStyles } from "senswap-ui/styles";
-import Grid from "senswap-ui/grid";
-import Typography from "senswap-ui/typography";
-import TextField from "senswap-ui/textField";
-import Button, { IconButton } from "senswap-ui/button";
-import CircularProgress from "senswap-ui/circularProgress";
-import Dialog, { DialogTitle, DialogContent } from "senswap-ui/dialog";
-import Drain from "senswap-ui/drain";
-import Paper from "senswap-ui/paper";
+import { CloseRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
 
-import { CloseRounded, ArrowDropDownRounded } from "senswap-ui/icons";
+import { MintAvatar } from 'containers/wallet';
+import AccountSelection from './selection';
 
-import { MintAvatar } from "containers/wallet";
-import AccountSelection from "./selection";
+import styles from './styles';
+import configs from 'configs';
+import sol from 'helpers/sol';
+import { setError, setSuccess } from 'modules/ui.reducer';
+import { getMint, getMints } from 'modules/mint.reducer';
+import { addStakePool } from 'modules/stakePool.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
+import ListLPT from './ListLPT';
 
-import styles from "./styles";
-import configs from "configs";
-import sol from "helpers/sol";
-import { setError, setSuccess } from "modules/ui.reducer";
-import { getMints } from "modules/mint.reducer";
-import { addStakePool } from "modules/stakePool.reducer";
-import { updateWallet } from "modules/wallet.reducer";
-import { getAccountData } from "modules/bucket.reducer";
-
+import NewStakePoolContent from './components/Content';
+import NewStakePoolHeader from './components/Header.js';
 class NewStakePool extends Component {
   constructor() {
     super();
 
     this.state = {
       loading: false,
-      accountData: [{}, {}],
+      senToken: {},
+      poolInfo: null,
       index: 0,
       visibleAccountSelection: false,
       reward: 0,
@@ -47,111 +51,79 @@ class NewStakePool extends Component {
   }
 
   componentDidMount() {
-    const { visible } = this.props;
-    if (visible) this.fetchData();
+    this.fetchSenTokenInfo();
   }
 
-  componentDidUpdate(prevProps) {
-    const {
-      wallet: { accounts: prevAccounts },
-      visible: prevVisible,
-    } = prevProps;
-    const {
-      wallet: { accounts },
-      visible,
-    } = this.props;
-    if (!isEqual(prevAccounts, accounts) && visible) this.fetchData();
-    if (!isEqual(prevVisible, visible) && visible) this.fetchData();
-  }
-
-  fetchData = async () => {
+  fetchSenTokenInfo = async () => {
     const {
       sol: { senAddress },
     } = configs;
-    const {
-      wallet: {
-        user: { address: walletAddress },
-      },
-      setError,
-      getAccountData,
-      getMints,
-    } = this.props;
-    const { accountData } = this.state;
-    let newAccountData = [...accountData];
+    const { getMint } = this.props;
     try {
       this.setState({ loading: true });
-      let data = await sol.scanAccount(senAddress, walletAddress);
-      const { state, address: accountAddress } = data || {};
-      if (!state) {
-        const mintData = await getMints(senAddress);
-        data = { address: "", amount: 0n, mint: mintData };
-      } else data = await getAccountData(accountAddress);
-      newAccountData[0] = data;
-      return this.setState({ loading: false, accountData: newAccountData });
+      //Fetch Sen Token Data
+      let senToken = await getMint(senAddress);
+      return this.setState({ loading: false, senToken });
     } catch (er) {
       await setError(er);
       return this.setState({ loading: false });
     }
   };
 
-  onOpenAccountSelection = (index) => this.setState({ index, visibleAccountSelection: true });
-  onCloseAccountSelection = () => this.setState({ visibleAccountSelection: false });
+  onCloseListLPT = () => this.setState({ visibleAccountSelection: false });
 
-  onAccountData = (data) => {
-    const { setError } = this.props;
-    const { accountData, index } = this.state;
-    if (accountData.some(({ address }) => data.address === address)) return setError("Already selected");
-    let newAccountData = [...accountData];
-    newAccountData[index] = data;
-    return this.setState({ accountData: newAccountData }, () => {
-      return this.onCloseAccountSelection();
+  onSelectLPT = (pool) => {
+    return this.setState({ poolInfo: pool }, () => {
+      return this.onCloseListLPT();
     });
   };
 
-  onChangeReward = (e) => {
-    const reward = e.target.value || "";
-    return this.setState({ reward: reward });
+  onChange = (e) => {
+    const { name, value } = e.target;
+    const valueNumber = value.replace(/[^\d/.]/g, '');
+    return this.setState({ [name]: valueNumber });
   };
 
   onChangePeriod = (e) => {
-    const period = e.target.value || "";
+    const period = e.target.value || '';
     return this.setState({ period: period });
   };
 
   handleCreateStakePool = async () => {
     const liteFarming = new ssjs.LiteFarming(undefined, undefined, undefined, configs.sol.node);
     const wallet = window.senswap.wallet;
-    const ownerAddress = await wallet.getAccount();
+    const { setError, setSuccess, addStakePool, onClose } = this.props;
     const {
-      accountData: [
-        {
-          mint: { address: srcSAddress },
-        },
-        {
-          mint: { address: srcAAddress },
-        },
-      ],
+      senToken,
+      poolInfo: { mint_lpt },
       period,
       reward,
     } = this.state;
-    const { setError, setSuccess, addStakePool, onClose } = this.props;
-    const decimal = 9;
+    const decimal = mint_lpt.decimal;
 
-    if (!ssjs.isAddress(srcSAddress)) return setError("Please select primary token");
-    if (!ssjs.isAddress(srcAAddress)) return setError("Please select token 1");
     const reserveReward = ssjs.decimalize(reward, decimal);
-    const reservePeriod = period
-    if (!reserveReward || !reservePeriod) return setError("Invalid amount");
+    const reservePeriod = period;
+    const ownerAddress = await wallet.getAccount();
+    const srcAAddress = mint_lpt.address;
+    const srcSAddress = senToken.address;
 
     try {
       this.setState({ loading: true });
-      const data = await liteFarming.initializeStakePool(reserveReward, reservePeriod, ownerAddress, srcAAddress, srcSAddress, wallet);
+      console.log(reserveReward, reservePeriod, ownerAddress, srcAAddress, srcSAddress);
+      const data = await liteFarming.initializeStakePool(
+        reserveReward,
+        reservePeriod,
+        ownerAddress,
+        srcAAddress,
+        srcSAddress,
+        wallet,
+      );
       const stakePool = {
         address: data.stakePoolAddress,
         mintShare: data.mintShareAddress,
       };
       await addStakePool(stakePool);
-      await setSuccess("Create a new pool successfully");
+      await setSuccess('Create a new pool successfully');
       return this.setState({ loading: false }, onClose);
     } catch (er) {
       await setError(er);
@@ -159,147 +131,119 @@ class NewStakePool extends Component {
     }
   };
 
-  renderSENRole = () => {
-    return (
-      <Grid item xs={12}>
-        <Typography>
-          SEN Token is required.{" "}
-          <span style={{ color: "#808191" }}>A pool in SenSwap is a trilogy in which SEN plays the role of middle man to reduce fee, leverage routing, and realize DAO.</span>
-        </Typography>
-      </Grid>
-    );
-  };
+  checkCreatePool() {
+    const { poolInfo, reward, period } = this.state;
+    return poolInfo && Number(reward) && Number(period);
+  }
 
   render() {
     const { classes, visible, onClose } = this.props;
-    const { loading, reward, period, accountData, visibleAccountSelection } = this.state;
+    const { poolInfo, loading, reward, period, senToken, visibleAccountSelection } = this.state;
 
-    const { address, mint } = accountData[0];
-    const { icon: senIcon, symbol: senSymbol } = mint || {};
-    const havingSen = ssjs.isAddress(address);
+    //LPT info
+    let poolIcon = [];
+    let lptName = '- Select one -';
+    if (poolInfo) {
+      const {
+        mint_s: { icon: iconS, symbol: symbolS },
+        mint_a: { icon: iconA, symbol: symbolA },
+        mint_b: { icon: iconB, symbol: symbolB },
+      } = poolInfo;
+      poolIcon = [iconA, iconB, iconS];
+      lptName = `${symbolA || '.'} x ${symbolB || '.'} x ${symbolS || '.'}`;
+    }
 
     return (
-      <Fragment>
-        <Dialog open={visible} onClose={onClose} fullWidth>
-          <DialogTitle>
-            <Grid container alignItems="center" className={classes.noWrap}>
-              <Grid item className={classes.stretch}>
-                <Typography variant="subtitle1">New stake pool</Typography>
+      <Dialog open={visible} onClose={onClose} fullWidth>
+        {/* Header */}
+        <NewStakePoolHeader></NewStakePoolHeader>
+        <DialogContent>
+          <Grid container spacing={3}>
+            {/* Description */}
+            <NewStakePoolContent></NewStakePoolContent>
+
+            {/* Reward Token */}
+            <Grid container item xs={12} alignItems="center">
+              <Grid item xs={3}>
+                <Typography color="textPrimary"> Reward Token: </Typography>
               </Grid>
-              <Grid item>
-                <IconButton onClick={onClose} edge="end">
-                  <CloseRounded />
-                </IconButton>
-              </Grid>
+              <Button
+                size="small"
+                startIcon={<MintAvatar icon={senToken.icon} />}
+                endIcon={<ArrowDropDownRounded />}
+                disabled={true}
+              >
+                <Typography>{senToken.symbol} </Typography>
+              </Button>
             </Grid>
-          </DialogTitle>
-          {!havingSen ? (
-            <DialogContent>
-              <Grid container spacing={2}>
-                {this.renderSENRole()}
-                <Grid item xs={12}>
-                  <Paper className={classes.paper}>
-                    <Grid container spacing={1}>
-                      <Grid item xs={12}>
-                        <Grid container className={classes.noWrap} alignItems="center">
-                          <Grid item className={classes.stretch}>
-                            <Typography variant="caption" color="textSecondary">
-                              HOW TO GET SEN?
-                            </Typography>
-                          </Grid>
-                          <Grid item>
-                            <Typography>{senSymbol}</Typography>
-                          </Grid>
-                          <Grid item>
-                            <MintAvatar icon={senIcon} />
-                          </Grid>
-                        </Grid>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Typography>You can swap your tokens to get SEN on our platform.</Typography>
-                      </Grid>
-                    </Grid>
-                  </Paper>
-                </Grid>
-                <Grid item xs={12} />
+
+            {/* LP Token */}
+            <Grid container item xs={12} alignItems="center">
+              <Grid item xs={3}>
+                <Typography color="textPrimary"> LP Token: </Typography>
               </Grid>
-            </DialogContent>
-          ) : (
-            <DialogContent>
-              <Grid container spacing={2}>
-                {this.renderSENRole()}
-                <Grid item xs={12}>
-                  <Typography>
-                    Liquidity provider incentive.{" "}
-                    <span style={{ color: "#808191" }}>
-                      Liquidity providers earn a 0.25% fee on all trades proportional to their share of the pool. Fees are added to the pool, accrue in real time and can be claimed
-                      by withdrawing your liquidity.
-                    </span>
-                  </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                  <Drain size={2} />
-                </Grid>
-                <Grid container className={classes.noWrap} alignItems="center">
-                  {accountData.map((data, index) => {
-                    const { amount, mint } = data;
-                    const { symbol, icon, decimals, ticket } = mint || {};
-                    return (
-                      <Fragment key={index}>
-                        <Grid item xs={6}>
-                          <Typography color="textPrimary"> {index === 0 ? "Reward Token" : "LP Token"}: </Typography>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <Button
-                            size="small"
-                            startIcon={<MintAvatar icon={icon} />}
-                            endIcon={<ArrowDropDownRounded />}
-                            onClick={() => this.onOpenAccountSelection(index)}
-                            disabled={!index}
-                          >
-                            <Typography>{symbol || "Select"} </Typography>
-                          </Button>
-                        </Grid>
-                      </Fragment>
-                    );
-                  })}
-                </Grid>
-                <Grid item xs={12}>
-                  <Drain size={1} />
-                </Grid>
-                <Grid container>
-                  <Grid item xs={6}>
-                    <Typography>Reward</Typography>
-                    <TextField variant="contained" value={reward} onChange={(e) => this.onChangeReward(e)} />
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>Period</Typography>
-                    <TextField value={period} variant="contained" onChange={(e) => this.onChangePeriod(e)} />
-                  </Grid>
-                </Grid>
-                <Grid item xs={12}>
-                  <Drain size={1} />
-                </Grid>
-                <Grid item xs={12}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                    onClick={this.handleCreateStakePool}
-                    endIcon={loading ? <CircularProgress size={17} /> : null}
-                    disabled={loading}
-                    fullWidth
-                  >
-                    <Typography>Create Stake Pool</Typography>
-                  </Button>
-                </Grid>
-                <Grid item xs={12} />
-              </Grid>
-            </DialogContent>
-          )}
-        </Dialog>
-        <AccountSelection solana={false} visible={visibleAccountSelection} onClose={this.onCloseAccountSelection} onChange={this.onAccountData} />
-      </Fragment>
+              <Button
+                size="small"
+                startIcon={poolInfo ? <PoolAvatar icons={poolIcon} /> : <MintAvatar />}
+                endIcon={<ArrowDropDownRounded />}
+                onClick={() => this.setState({ visibleAccountSelection: true })}
+              >
+                <Typography>{lptName} </Typography>
+              </Button>
+            </Grid>
+
+            {/* New Stake Pool Stat */}
+            <Grid item xs={6}>
+              <TextField
+                name="reward"
+                label="Reward"
+                variant="contained"
+                value={reward}
+                onChange={(e) => this.onChange(e)}
+                onFocus={(e) => {
+                  e.target.select();
+                }}
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                name="period"
+                label="Period"
+                value={period}
+                variant="contained"
+                onChange={(e) => this.onChange(e)}
+                onFocus={(e) => {
+                  e.target.select();
+                }}
+              />
+            </Grid>
+
+            {/* Action */}
+            <Grid item xs={12}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={this.handleCreateStakePool}
+                endIcon={loading ? <CircularProgress size={17} /> : null}
+                disabled={loading || !this.checkCreatePool()}
+                fullWidth
+              >
+                <Typography>Create Stake Pool</Typography>
+              </Button>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        {/* Modal Select LPT */}
+        <ListLPT
+          solana={false}
+          visible={visibleAccountSelection}
+          onClose={this.onCloseListLPT}
+          onSelect={this.onSelectLPT}
+        />
+      </Dialog>
     );
   }
 }
@@ -320,8 +264,9 @@ const mapDispatchToProps = (dispatch) =>
       addStakePool,
       updateWallet,
       getAccountData,
+      getMint,
     },
-    dispatch
+    dispatch,
   );
 
 NewStakePool.defaultProps = {
