@@ -156,7 +156,7 @@ class NewStakePool extends Component {
     return (
       <Dialog open={visible} onClose={onClose} fullWidth>
         {/* Header */}
-        <NewStakePoolHeader></NewStakePoolHeader>
+        <NewStakePoolHeader onClose={onClose}></NewStakePoolHeader>
         <DialogContent>
           <Grid container spacing={3}>
             {/* Description */}
