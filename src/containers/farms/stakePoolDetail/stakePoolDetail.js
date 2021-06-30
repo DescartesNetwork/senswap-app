@@ -56,6 +56,24 @@ class Farming extends Component {
     this.setState({ maxToken: value });
   };
 
+  toNumber(bigInt, decimal = 0) {
+    return Number(bigInt.toString()) / Math.pow(10, decimal);
+
+  }
+  calculateReward = (pool, debt) => {
+    if (debt === null || pool === null) return 0;
+    const p = this.toNumber(pool.reward, 9) / this.toNumber(pool.total_shares, 9);
+    const t = ((Date.now() / 1000) - Number(pool.genesis_timestamp.toString())) / this.toNumber(pool.period);
+    const r_i = this.toNumber(debt.account.amount, 9);
+    const d_i = this.toNumber(debt.debt, 9);
+    const D = this.toNumber(pool.compensation, 18);
+
+    const result = p * t * r_i - d_i + D * r_i;
+    console.log(result);
+    return (result);
+    // return Math.round((p * Math.floor(t) * r_i - d_i + D * r_i) * 1000.0) / 1000.0;
+  }
+
   render() {
     const { maxToken } = this.state;
     const {
@@ -104,7 +122,10 @@ class Farming extends Component {
               </Grid>
               <Grid item xs={8}>
                 <Typography>
-                  Reward: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(debt?.debt || 0, mint.decimals)}</b> SEN
+                  Reward: <b style={{ color: "#ff3122" }}>{
+                    // ssjs.undecimalize(debt?.debt || 0, mint.decimals)
+                    this.calculateReward(pool, debt)
+                  }</b> SEN
                 </Typography>
               </Grid>
               <Grid item xs={4} align="end">
