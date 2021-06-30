@@ -13,7 +13,6 @@ export default theme => ({
     borderRadius: theme.shape.borderRadius
   },
   tableRow: {
-    background: "red",
     cursor: 'pointer',
     transition: theme.transitions.create(),
     '&:hover': {

@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { Link as RouterLink, withRouter } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
@@ -19,7 +16,7 @@ import Tooltip from 'senswap-ui/tooltip';
 import { useDispatch } from 'react-redux';
 import { getPools } from 'modules/pool.reducer';
 import { getPoolData } from 'modules/bucket.reducer';
-import styles from './styles';
+import styles from '../styles';
 import { PoolAvatar } from 'containers/pool';
 
 function ListLPT(props) {

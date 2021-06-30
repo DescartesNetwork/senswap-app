@@ -1,38 +1,30 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
 import ssjs from 'senswapjs';
 import { PoolAvatar } from 'containers/pool';
-import { withStyles } from 'senswap-ui/styles';
+import { MintAvatar } from 'containers/wallet';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import TextField from 'senswap-ui/textField';
-import Button, { IconButton } from 'senswap-ui/button';
+import Button from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
-import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
-import Drain from 'senswap-ui/drain';
-import Paper from 'senswap-ui/paper';
-
-import { CloseRounded, ArrowDropDownRounded } from 'senswap-ui/icons';
-
-import { MintAvatar } from 'containers/wallet';
-import AccountSelection from './selection';
-
+import Dialog, { DialogContent } from 'senswap-ui/dialog';
+import { ArrowDropDownRounded } from 'senswap-ui/icons';
+import { withStyles } from 'senswap-ui/styles';
 import styles from './styles';
 import configs from 'configs';
-import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getMint, getMints } from 'modules/mint.reducer';
 import { addStakePool } from 'modules/stakePool.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
-import ListLPT from './ListLPT';
-
+import ListLPT from './components/ListLPT';
 import NewStakePoolContent from './components/Content';
 import NewStakePoolHeader from './components/Header.js';
+
 class NewStakePool extends Component {
   constructor() {
     super();
@@ -80,7 +72,7 @@ class NewStakePool extends Component {
 
   onChange = (e) => {
     const { name, value } = e.target;
-    const valueNumber = value.replace(/[^\d/.]/g, '');
+    const valueNumber = Number(value.replace(/[^\d/.]/g, ''));
     return this.setState({ [name]: valueNumber });
   };
 
@@ -99,7 +91,7 @@ class NewStakePool extends Component {
       period,
       reward,
     } = this.state;
-    const decimal = mint_lpt.decimal;
+    const decimal = mint_lpt.decimals;
 
     const reserveReward = ssjs.decimalize(reward, decimal);
     const reservePeriod = period;
@@ -109,7 +101,6 @@ class NewStakePool extends Component {
 
     try {
       this.setState({ loading: true });
-      console.log(reserveReward, reservePeriod, ownerAddress, srcAAddress, srcSAddress);
       const data = await liteFarming.initializeStakePool(
         reserveReward,
         reservePeriod,
@@ -137,7 +128,7 @@ class NewStakePool extends Component {
   }
 
   render() {
-    const { classes, visible, onClose } = this.props;
+    const { visible, onClose } = this.props;
     const { poolInfo, loading, reward, period, senToken, visibleAccountSelection } = this.state;
 
     //LPT info

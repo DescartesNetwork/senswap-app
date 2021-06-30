@@ -1,7 +1,5 @@
-import Drain from 'senswap-ui/drain';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
-
 import React from 'react';
 
 export default function NewStakePoolContent() {
