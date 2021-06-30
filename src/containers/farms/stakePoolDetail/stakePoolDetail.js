@@ -17,6 +17,7 @@ import { getStakePools } from "modules/stakePool.reducer";
 import { MintAvatar } from "containers/wallet";
 
 import styles from "../styles";
+import Farm from "../../../helpers/farm";
 class Farming extends Component {
   constructor() {
     super();
@@ -107,7 +108,7 @@ class Farming extends Component {
               </Grid>
               <Grid item xs={8}>
                 <Typography>
-                  Reward: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(debt?.debt || 0, mint.decimals)}</b> SEN
+                  Reward: <b style={{ color: "#ff3122" }}>{Farm.calculateReward(pool, debt)}</b> SEN
                 </Typography>
               </Grid>
               <Grid item xs={4} align="end">
