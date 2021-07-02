@@ -150,6 +150,53 @@ export const getPoolData = (poolAddress, force = false) => {
     }
   }
 }
+/**
+ * Get stake pool data
+ */
+export const GET_STAKE_POOL_DATA = 'GET_STAKE_POOL_DATA';
+export const GET_STAKE_POOL_DATA_OK = 'GET_STAKE_POOL_DATA_OK';
+export const GET_STAKE_POOL_DATA_FAIL = 'GET_STAKE_POOL_DATA_FAIL';
+
+export const getStakePoolData = (stakePoolAddress, force = false) => {
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_STAKE_POOL_DATA });
+
+    if (!ssjs.isAddress(stakePoolAddress)) {
+      const er = 'Invalid stake pool address';
+      dispatch({ type: GET_STAKE_POOL_DATA_FAIL, reason: er });
+      throw new Error(er);
+    }
+
+    let { bucket: { [stakePoolAddress]: stakePoolData } } = getState();
+    if (stakePoolData && !force) {
+      const data = { [stakePoolAddress]: stakePoolData };
+      dispatch({ type: GET_STAKE_POOL_DATA_OK, data });
+      return stakePoolData;
+    }
+
+    try {
+      const { api: { base } } = configs;
+      stakePoolData = await window.senswap.swap.getPoolData(stakePoolAddress);
+      const { data: re } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
+      const { mint_s, mint_a, mint_b, mint_lpt, ...others } = stakePoolData;
+      const { mintS, mintA, mintB, mintLPT, ...someothers } = re;
+      stakePoolData = {
+        ...others, ...someothers,
+        mint_s: { ...mint_s, ...mintS },
+        mint_a: { ...mint_a, ...mintA },
+        mint_b: { ...mint_b, ...mintB },
+        mint_lpt: { ...mint_lpt, ...mintLPT }
+      }
+      const data = { [stakePoolAddress]: stakePoolData }
+      dispatch({ type: GET_STAKE_POOL_DATA_OK, data });
+      return stakePoolData;
+    } catch (er) {
+      dispatch({ type: GET_STAKE_POOL_DATA_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
+  }
+}
+
 
 
 /**
@@ -193,6 +240,10 @@ export default (state = defaultState, action) => {
     case GET_POOL_DATA_OK:
       return { ...state, ...action.data };
     case GET_POOL_DATA_FAIL:
+      return { ...state, ...action.data };
+    case GET_STAKE_POOL_DATA_OK:
+      return { ...state, ...action.data };
+    case GET_STAKE_POOL_DATA_FAIL:
       return { ...state, ...action.data };
     case SET_ITEM_OK:
       return { ...state, ...action.data };

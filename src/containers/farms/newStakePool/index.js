@@ -84,7 +84,7 @@ class NewStakePool extends Component {
   handleCreateStakePool = async () => {
     const liteFarming = new ssjs.LiteFarming(undefined, undefined, undefined, configs.sol.node);
     const wallet = window.senswap.wallet;
-    const { setError, setSuccess, addStakePool, onClose } = this.props;
+    const { setError, setSuccess, addStakePool, onClose, bucket } = this.props;
     const {
       senToken,
       poolInfo: { mint_lpt },
@@ -98,6 +98,7 @@ class NewStakePool extends Component {
     const ownerAddress = await wallet.getAccount();
     const srcAAddress = mint_lpt.address;
     const srcSAddress = senToken.address;
+    console.log(reserveReward, reservePeriod, bucket, 'ssss asdas');
 
     try {
       this.setState({ loading: true });

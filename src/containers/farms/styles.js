@@ -53,5 +53,10 @@ export default theme => ({
     textOverflow: 'ellipsis',
     whiteSpaceL: 'nowrap',
     overflow: 'hidden',
+  },
+  assets: {
+    minWidth: 180,
+    display: 'flex',
+    alignItems: 'center'
   }
 });

@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { connect, useSelector } from "react-redux";
+import React, { Component, Fragment } from "react";
+import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { withRouter } from "react-router-dom";
 import ssjs from "senswapjs";
@@ -9,23 +9,28 @@ import Grid from "senswap-ui/grid";
 import Button from "senswap-ui/button";
 import Paper from "senswap-ui/paper";
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from "senswap-ui/table";
+import Avatar, { AvatarGroup } from "senswap-ui/avatar";
+import { HelpOutlineRounded } from 'senswap-ui/icons';
+import Typography from 'senswap-ui/typography';
+
 import { setError, setSuccess } from "modules/ui.reducer";
 import { getStakePools } from "modules/stakePool.reducer";
 import { getAccountData } from "modules/bucket.reducer";
 import CircularProgress from "senswap-ui/circularProgress";
+import { getPools, getPool } from 'modules/pool.reducer';
 
 import configs from "configs";
 import sol from "helpers/sol";
 
 import Farming from "../stakePoolDetail/stakePoolDetail";
 import Seed from '../seed';
-
 import styles from "../styles";
 
 const liteFarming = new ssjs.LiteFarming();
 const farming = new ssjs.Farming();
 const COLS = [
   { label: "#", key: "" },
+  { label: "Assets", key: "assets" },
   { label: "Address", key: "address" },
   { label: "APR", key: "apr" },
   { label: "APY", key: "apy" },
@@ -55,14 +60,19 @@ class StakePool extends Component {
     this.fetchStakePools();
   }
 
-  //Calculate stat: APY, APR, ...
-  calPoolStat(stakePools) {
-    const newStakePools = [];
-    for (const pool of stakePools) {
-      pool.apr = 0;
-      pool.apy = 0;
-      newStakePools.push(pool);
-    }
+  //Combine data to stake pool
+  combineStakePool(stakePools, lptIcons) {
+    const newStakePools = stakePools.map(stakePool => {
+      const { mint_token: { address: stakePoolAddress } } = stakePool;
+      const filter = lptIcons.find(({ lptAddress }) => lptAddress === stakePoolAddress);
+      if (filter) stakePool = { ...stakePool, ...filter };
+      return {
+        ...stakePool,
+        apr: 0,
+        apy: 0,
+      };
+    });
+
     return newStakePools;
   }
 
@@ -70,19 +80,45 @@ class StakePool extends Component {
     const { getStakePools } = this.props;
     this.setState({ loading: true });
     try {
-      let pools = await getStakePools(undefined, LIMIT);
+      let poolAddresses = await getStakePools({}, LIMIT);
       //Fetch data from blockchain
-      const promise = pools.map(({ address }) => {
+      const promise = poolAddresses.map(({ address }) => {
         return liteFarming.getStakePoolData(address);
       });
       let poolData = await Promise.all(promise);
+      //Fetch pool data to format to list icon
+      const lptIcons = await this.fetchPools();
       //Calculate
-      poolData = this.calPoolStat(poolData);
+      poolData = this.combineStakePool(poolData, lptIcons);
       this.setState({ stakePools: poolData, loading: false });
     } catch (er) {
       await setError(er);
     }
   };
+
+  fetchPools = async () => {
+    const { getPools, getPool, setError } = this.props;
+    try {
+      const pools = await getPools();
+      const poolData = await Promise.all(pools.map(({ address }) => getPool(address)));
+      const formatData = poolData.map(pool => {
+        const {
+          mintA: { icon: iconA, symbol: symbolA },
+          mintB: { icon: iconB, symbol: symbolB },
+          mintS: { icon: iconS, symbol: symbolS },
+          mintLPT: { address: mintLPTAddress }
+        } = pool;
+        return {
+          lptAddress: mintLPTAddress,
+          icons: [iconS, iconA, iconB],
+          symbols: [symbolS, symbolA, symbolB],
+        }
+      })
+      return formatData;
+    } catch (err) {
+      await setError('Invalid pools');
+    }
+  }
 
   onClose = () => {
     return this.setState({
@@ -329,8 +365,11 @@ class StakePool extends Component {
 
   render() {
     const { classes } = this.props;
-    const { stakePools, visible, poolDetail, stakeLoading, unStakeLoading, loading, visibleSeed,
-      seedLoading, unSeedLoading } = this.state;
+    const {
+      stakePools, visible, poolDetail,
+      stakeLoading, unStakeLoading, loading,
+      visibleSeed, seedLoading, unSeedLoading
+    } = this.state;
 
     return (
       <Paper className={classes.paper}>
@@ -348,10 +387,24 @@ class StakePool extends Component {
                 <TableBody>
                   {!loading
                     ? stakePools.map((pool, idx) => {
-                      const { mint_token: token, address: stakePoolAddress, total_shares } = pool;
+                      const { mint_token: token, address: stakePoolAddress, total_shares, icons, symbols } = pool;
                       return (
                         <TableRow key={idx}>
                           <TableCell>{idx + 1}</TableCell>
+                          <TableCell className={classes.assets}>
+                            <AvatarGroup>
+                              {icons ? icons.map((icon, idx) => {
+                                return <Avatar src={icon} className={classes.icon} key={idx}>
+                                  <HelpOutlineRounded />
+                                </Avatar>
+                              }) : <Avatar />}
+                            </AvatarGroup>
+                            <Grid item>
+                              <Typography>{symbols ? symbols.map((symbol, idx) => {
+                                return <Fragment key={idx}>{symbol}{symbol.length > Number(idx + 1) ? ' x ' : ''}</Fragment>
+                              }) : null}</Typography>
+                            </Grid>
+                          </TableCell>
                           <TableCell className={classes.address}>{stakePoolAddress}</TableCell>
                           <TableCell>{pool.apr}%</TableCell>
                           <TableCell>{pool.apy}%</TableCell>
@@ -416,6 +469,8 @@ const mapDispatchToProps = (dispatch) =>
       setSuccess,
       getStakePools,
       getAccountData,
+      getPools,
+      getPool,
     },
     dispatch
   );
