@@ -161,43 +161,34 @@ export const getStakePoolData = (stakePoolAddress, force = false) => {
   return async (dispatch, getState) => {
     dispatch({ type: GET_STAKE_POOL_DATA });
 
-    if (!ssjs.isAddress(stakePoolAddress)) {
-      const er = 'Invalid stake pool address';
-      dispatch({ type: GET_STAKE_POOL_DATA_FAIL, reason: er });
-      throw new Error(er);
-    }
+    let {
+      bucket: { [stakePoolAddress]: stakePoolData },
+    } = getState();
 
-    let { bucket: { [stakePoolAddress]: stakePoolData } } = getState();
+    //Cache
     if (stakePoolData && !force) {
       const data = { [stakePoolAddress]: stakePoolData };
       dispatch({ type: GET_STAKE_POOL_DATA_OK, data });
       return stakePoolData;
     }
-
+    //New
     try {
-      const { api: { base } } = configs;
-      stakePoolData = await window.senswap.swap.getPoolData(stakePoolAddress);
-      const { data: re } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
-      const { mint_s, mint_a, mint_b, mint_lpt, ...others } = stakePoolData;
-      const { mintS, mintA, mintB, mintLPT, ...someothers } = re;
-      stakePoolData = {
-        ...others, ...someothers,
-        mint_s: { ...mint_s, ...mintS },
-        mint_a: { ...mint_a, ...mintA },
-        mint_b: { ...mint_b, ...mintB },
-        mint_lpt: { ...mint_lpt, ...mintLPT }
-      }
-      const data = { [stakePoolAddress]: stakePoolData }
-      dispatch({ type: GET_STAKE_POOL_DATA_OK, data });
+      const {
+        api: { base },
+      } = configs;
+      const liteFarming = window.senswap.farming;
+      const stakePoolData = await liteFarming.getStakePoolData(stakePoolAddress);
+      const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
+
+      const dataStore = { [stakePoolAddress]: { ...poolData, ...stakePoolData } };
+      dispatch({ type: GET_STAKE_POOL_DATA_OK, data: dataStore });
       return stakePoolData;
     } catch (er) {
       dispatch({ type: GET_STAKE_POOL_DATA_FAIL, reason: er.toString() });
       throw new Error(er);
     }
-  }
-}
-
-
+  };
+};
 
 /**
  * Set item
