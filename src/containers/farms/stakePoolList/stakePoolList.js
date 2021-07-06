@@ -154,7 +154,7 @@ class StakePool extends Component {
   };
 
   stake = async (data) => {
-    const {setError, setSuccess} = this.props
+    const { setError, setSuccess } = this.props;
     const wallet = window.senswap.wallet;
     this.setState({ loading: true, loadingMessage: 'Waiting for stake' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
@@ -169,7 +169,7 @@ class StakePool extends Component {
       await liteFarming.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
       await setSuccess('The token has been staked!');
     } catch (err) {
-      console.log("Error")
+      console.log('Error');
       await setError(err);
     } finally {
       this.setState({ loading: false }, () => {
@@ -179,7 +179,7 @@ class StakePool extends Component {
   };
 
   unstake = async (data) => {
-    const {setError, setSuccess} = this.props
+    const { setError, setSuccess } = this.props;
     this.setState({ loading: true, loadingMessage: 'Waiting for unstake' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
@@ -201,7 +201,8 @@ class StakePool extends Component {
       },
     } = this.state;
     const {
-      setError, setSuccess,
+      setError,
+      setSuccess,
       wallet: {
         user: { address: userAddress },
       },
@@ -306,9 +307,10 @@ class StakePool extends Component {
   };
 
   render() {
-    const { classes } = this.props;
-    const { stakePools, visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading } =
-      this.state;
+    const { classes, stakePool } = this.props;
+    const stakePools = Object.values(stakePool) || [];
+
+    const { visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading } = this.state;
 
     return (
       <Grid container>

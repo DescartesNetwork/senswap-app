@@ -27,6 +27,7 @@ import { getAccountData } from 'modules/bucket.reducer';
 import ListLPT from './components/ListLPT';
 import NewStakePoolContent from './components/Content';
 import NewStakePoolHeader from './components/Header.js';
+import { Backdrop } from '@material-ui/core';
 
 class NewStakePool extends Component {
   constructor() {
@@ -91,7 +92,7 @@ class NewStakePool extends Component {
   };
 
   handleCreateStakePool = async () => {
-    const liteFarming = new ssjs.LiteFarming(undefined, undefined, undefined, configs.sol.node);
+    const liteFarming = window.senswap.farming;
     const wallet = window.senswap.wallet;
     const { setError, setSuccess, addStakePool, onClose } = this.props;
     const {
@@ -156,6 +157,16 @@ class NewStakePool extends Component {
     return (
       <Dialog open={visible} onClose={onClose} fullWidth>
         {/* Header */}
+        <Backdrop className={classes.backdrop} open={loading} transitionDuration={500}>
+          <Grid container spacing={2} justify="center">
+            <Grid item>
+              <CircularProgress color="primary" />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography align="center">Waiting for create Stake Pool!</Typography>
+            </Grid>
+          </Grid>
+        </Backdrop>
         <NewStakePoolHeader onClose={onClose}></NewStakePoolHeader>
         <DialogContent>
           <Grid container spacing={4}>

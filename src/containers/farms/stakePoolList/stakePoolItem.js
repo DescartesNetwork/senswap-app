@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -9,20 +9,27 @@ import { HelpOutlineRounded } from 'senswap-ui/icons';
 import Typography from 'senswap-ui/typography';
 import CircularProgress from 'senswap-ui/circularProgress';
 import styles from '../styles';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { getStakePoolData } from 'modules/bucket.reducer';
 
 function StakePoolItem(props) {
   const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
+  const dispatch = useDispatch();
   const poolData = useSelector((state) => {
-    console.log(state)
     return state.bucket[stakePool.address];
   });
+
+  useEffect(() => {
+    setTimeout(() => {
+      if(!poolData) dispatch(getStakePoolData(stakePool.address))
+    }, 500);
+  }, [])
 
   //Check loading
   function renderLoading() {
     return (
       <TableRow>
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((elm) => {
+        {[1, 2, 3, 4, 5, 6, 7].map((elm) => {
           return (
             <TableCell key={elm}>
               <CircularProgress size={17} />
@@ -37,7 +44,6 @@ function StakePoolItem(props) {
   //Render Stake Pool Element
   const {
     mint_token: token,
-    address: stakePoolAddress,
     total_shares,
     mintS: { icon: iconS, symbol: symbolS },
     mintA: { icon: iconA, symbol: symbolA },

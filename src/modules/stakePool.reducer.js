@@ -52,7 +52,13 @@ export const getStakePools = (condition, limit, page) => {
     const { api: { base } } = configs;
     try {
       const { data } = await api.get(base + '/stake-pools', { condition, limit, page });
-      dispatch({ type: GET_STAKE_POOLS_OK, data: {} });
+      const dataStore = {}
+      
+      for (const stakePool of data) {
+        const {address} = stakePool;
+        dataStore[address] = stakePool
+      }
+      dispatch({ type: GET_STAKE_POOLS_OK, data: dataStore });
       return data;
     } catch (er) {
       dispatch({ type: GET_STAKE_POOLS_FAIL, reason: er.toString() });
