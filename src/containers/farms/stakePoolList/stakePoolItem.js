@@ -12,7 +12,7 @@ import styles from '../styles';
 import { useSelector } from 'react-redux';
 
 function StakePoolItem(props) {
-  const { classes, stakePool, index, onOpenDetail } = props;
+  const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
   const poolData = useSelector((state) => {
     console.log(state)
     return state.bucket[stakePool.address];
@@ -67,15 +67,14 @@ function StakePoolItem(props) {
           <Typography>{name}</Typography>
         </Grid>
       </TableCell>
-      <TableCell className={classes.address}>{stakePoolAddress}</TableCell>
       <TableCell>0%</TableCell>
       <TableCell>0%</TableCell>
       <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
       <TableCell>
-        <Button onClick={() => onOpenDetail(poolData)}>Detail</Button>
+        <Button variant="outlined" onClick={() => onOpenSeed(stakePool)}>Seed</Button>
       </TableCell>
       <TableCell>
-        <Button onClick={() => props.onOpenSeed(props.pool)}>Seed</Button>
+        <Button color="primary" onClick={() => onOpenDetail(poolData)}>Detail</Button>
       </TableCell>
     </TableRow>
   );

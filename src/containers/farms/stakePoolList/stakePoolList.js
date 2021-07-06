@@ -32,7 +32,6 @@ const farming = new ssjs.Farming();
 const COLS = [
   { label: '#', key: '' },
   { label: 'Assets', key: 'assets' },
-  { label: 'Address', key: 'address' },
   { label: 'APR', key: 'apr' },
   { label: 'APY', key: 'apy' },
   { label: 'Liquidity', key: 'total_value' },

@@ -68,9 +68,17 @@ class Farming extends Component {
       stakeLoading,
       unStakeLoading,
     } = this.props;
-    if (!pool) return null;
 
-    const { icons, symbols } = pool;
+    console.log(pool)
+    // //Render Stake Pool Element
+    if (!pool) return null;
+    const {
+      mintS: { icon: iconS, symbol: symbolS },
+      mintA: { icon: iconA, symbol: symbolA },
+      mintB: { icon: iconB, symbol: symbolB },
+    } = pool;
+    const icons = [iconA, iconB, iconS];
+    const name = `${symbolA || '.'} x ${symbolB || '.'} x ${symbolS || '.'}`;
 
     return (
       <Fragment>
@@ -175,9 +183,7 @@ class Farming extends Component {
                             return <Avatar src={e} key={idx} />
                           }) : <Avatar />}
                         </AvatarGroup>
-                        <Typography color="textSecondary">{symbols ? symbols.map((symbol, idx) => {
-                          return <Fragment key={idx}>{symbol}{symbol.length > Number(idx + 1) ? ' x ' : ''}</Fragment>
-                        }) : 'UNKNOWN'}</Typography>
+                        <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
                       </Grid>
                       <Grid item xs={6}>
                         <TextField
