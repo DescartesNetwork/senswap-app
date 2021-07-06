@@ -67,7 +67,6 @@ class Farming extends Component {
       detail: { mint, account, pool, debt },
     } = this.props;
 
-    console.log(pool)
     // //Render Stake Pool Element
     if (!pool) return null;
     const {

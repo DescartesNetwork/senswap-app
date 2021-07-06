@@ -3,6 +3,7 @@ import ssjs from 'senswapjs';
 import configs from 'configs';
 import api from 'helpers/api';
 
+const farming = new ssjs.Farming();
 /**
  * Documents
  * @default defaultData
@@ -37,6 +38,7 @@ export const getAccountData = (accountAddress, force = false) => {
     try {
       const { api: { base } } = configs;
       accountData = await window.senswap.splt.getAccountData(accountAddress);
+      console.log("accountData",accountData)
       const { data: mintData } = await api.get(base + '/mint', { address: accountData.mint.address });
       accountData.mint = { ...accountData.mint, ...mintData }
       const { mint_authority, freeze_authority } = accountData.mint || {};
@@ -65,6 +67,47 @@ export const getAccountData = (accountAddress, force = false) => {
     }
   }
 }
+
+
+/**
+ * Get  stake account (Debt) data
+ */
+ export const GET_DEBT_DATA = 'GET_DEBT_DATA';
+ export const GET_DEBT_DATA_OK = 'GET_DEBT_DATA_OK';
+ export const GET_DEBT_DATA_FAIL = 'GET_DEBT_DATA_FAIL';
+ 
+ export const getStakeAccountData = (debtAddress, force = false) => {
+   return async (dispatch, getState) => {
+     dispatch({ type: GET_DEBT_DATA });
+     if (!ssjs.isAddress(debtAddress)) {
+       const er = 'Invalid account address';
+       dispatch({ type: GET_DEBT_DATA_FAIL, reason: er });
+       throw new Error(er);
+     }
+ 
+     let { bucket: { [debtAddress]: accountData } } = getState();
+     if (accountData && !force) {
+       const data = { [debtAddress]: accountData }
+       dispatch({ type: GET_DEBT_DATA_OK, data });
+       return accountData;
+     }
+ 
+     try {
+       const { api: { base } } = configs;
+       accountData = await farming.getDebtData(debtAddress)
+       const {stake_pool:{address : stakePoolAddress}, account:{address: stakeAccAddr} }= accountData
+       const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
+       accountData.pool = poolData;
+
+       const data = { [debtAddress]: accountData , [stakeAccAddr]: accountData.account}
+       dispatch({ type: GET_DEBT_DATA_OK, data });
+       return accountData;
+     } catch (er) {
+       dispatch({ type: GET_DEBT_DATA_FAIL, reason: er.toString() });
+       throw new Error(er);
+     }
+   }
+ }
 
 /**
  * Get mint data
@@ -224,6 +267,10 @@ export default (state = defaultState, action) => {
     case GET_ACCOUNT_DATA_OK:
       return { ...state, ...action.data };
     case GET_ACCOUNT_DATA_FAIL:
+      return { ...state, ...action.data };
+    case GET_DEBT_DATA_OK:
+      return { ...state, ...action.data };
+    case GET_DEBT_DATA_FAIL:
       return { ...state, ...action.data };
     case GET_MINT_DATA_OK:
       return { ...state, ...action.data };

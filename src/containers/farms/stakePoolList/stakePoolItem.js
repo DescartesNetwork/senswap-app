@@ -15,15 +15,14 @@ import { getStakePoolData } from 'modules/bucket.reducer';
 function StakePoolItem(props) {
   const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
   const dispatch = useDispatch();
-  const poolData = useSelector((state) => {
-    return state.bucket[stakePool.address];
-  });
+  const poolData = useSelector((state) => state.bucket[stakePool.address]);
+  const walletAddr = useSelector((state) => state.wallet.user.address);
 
   useEffect(() => {
     setTimeout(() => {
-      if(!poolData) dispatch(getStakePoolData(stakePool.address))
+      if (!poolData) dispatch(getStakePoolData(stakePool.address));
     }, 500);
-  }, [])
+  }, []);
 
   //Check loading
   function renderLoading() {
@@ -77,10 +76,14 @@ function StakePoolItem(props) {
       <TableCell>0%</TableCell>
       <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
       <TableCell>
-        <Button variant="outlined" onClick={() => onOpenSeed(stakePool)}>Seed</Button>
+        <Button variant="outlined" onClick={() => onOpenSeed(stakePool)} disabled={!walletAddr}>
+          Seed
+        </Button>
       </TableCell>
       <TableCell>
-        <Button color="primary" onClick={() => onOpenDetail(poolData)}>Detail</Button>
+        <Button color="primary" onClick={() => onOpenDetail(poolData)} disabled={!walletAddr}>
+          Detail
+        </Button>
       </TableCell>
     </TableRow>
   );

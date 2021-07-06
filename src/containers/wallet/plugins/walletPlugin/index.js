@@ -14,7 +14,7 @@ import styles from './styles';
 import session from 'helpers/session';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { setWallet, updateWallet } from 'modules/wallet.reducer';
-import { getAccountData, getPoolData, getStakePoolData } from 'modules/bucket.reducer';
+import { getAccountData, getPoolData, getStakeAccountData, getStakePoolData } from 'modules/bucket.reducer';
 
 export const BucketWatcher = Watcher;
 export const WalletButton = WalletButton_;
@@ -44,11 +44,17 @@ class WalletPlugin extends Component {
       window.senswap.splt.watch((er, re) => {
         if (er) return;
         const { type, address: changedAddress } = re;
+        const { bucket } = this.props;
         const {
-          wallet: { accounts, lpts },
+          wallet: { accounts, lpts, stakeAccounts },
         } = this.props;
-        if (type === 'account' && [...accounts, ...lpts].includes(changedAddress)) {
+
+        if (type === 'account' && ([...accounts, ...lpts].includes(changedAddress) || bucket[changedAddress])) {
           return getAccountData(changedAddress, true);
+        }
+        if (type === 'account' && ([...stakeAccounts].includes(changedAddress))) {
+          console.log("changedAddress",changedAddress)
+          return getStakeAccountData(changedAddress, true);
         }
       });
 
@@ -111,6 +117,7 @@ const mapDispatchToProps = (dispatch) =>
       getAccountData,
       getPoolData,
       getStakePoolData,
+      getStakeAccountData
     },
     dispatch,
   );
