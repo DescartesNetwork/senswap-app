@@ -16,7 +16,7 @@ import { setError, setSuccess } from "modules/ui.reducer";
 import { getStakePools } from "modules/stakePool.reducer";
 import { MintAvatar } from "containers/wallet";
 import Paper from 'senswap-ui/paper';
-
+import Backdrop from '@material-ui/core/Backdrop';
 import styles from "../styles";
 import Farm from "../../../helpers/farm";
 import Avatar, { AvatarGroup } from "senswap-ui/avatar";
@@ -65,8 +65,6 @@ class Farming extends Component {
       visible,
       onClose,
       detail: { mint, account, pool, debt },
-      stakeLoading,
-      unStakeLoading,
     } = this.props;
 
     console.log(pool)
@@ -204,24 +202,14 @@ class Farming extends Component {
                     </Grid>
                   </Grid>
                   <Grid item xs={6}>
-                    {stakeLoading ? (
-                      <Button variant="contained" color="primary" fullWidth>
-                        Stake <CircularProgress size={16} />
-                      </Button>
-                    ) : (
-                      <Button variant="contained" color="primary" onClick={() => this.handleStake("stake")} fullWidth>
+                  <Button variant="contained" color="primary" onClick={() => this.handleStake("stake")} fullWidth>
                         Stake
-                      </Button>
-                    )}
+                  </Button>
                   </Grid>
                   <Grid item xs={6}>
-                    {unStakeLoading ? (
-                      <Button variant="outlined" fullWidth>UnStake</Button>
-                    ) : (
-                      <Button variant="outlined" onClick={() => this.handleStake("unstake")} fullWidth>
+                  <Button variant="outlined" onClick={() => this.handleStake("unstake")} fullWidth>
                         UnStake
-                      </Button>
-                    )}
+                    </Button>
                   </Grid>
                 </Grid>
               </Paper>
