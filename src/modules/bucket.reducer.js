@@ -177,9 +177,10 @@ export const getStakePoolData = (stakePoolAddress, force = false) => {
         api: { base },
       } = configs;
       const liteFarming = window.senswap.farming;
-      const stakePoolData = await liteFarming.getStakePoolData(stakePoolAddress);
       const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
+      if(!poolData?.address) return;
 
+      const stakePoolData = await liteFarming.getStakePoolData(stakePoolAddress);
       const dataStore = { [stakePoolAddress]: { ...poolData, ...stakePoolData } };
       dispatch({ type: GET_STAKE_POOL_DATA_OK, data: dataStore });
       return stakePoolData;

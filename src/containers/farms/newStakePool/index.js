@@ -75,7 +75,13 @@ class NewStakePool extends Component {
 
   onChange = (e) => {
     const { name, value } = e.target;
-    const valueNumber = Number(value.replace(/[^\d/.]/g, ''));
+    if(/[^\d/.]/.test(value)) return;
+    return this.setState({ [name]: value });
+  };
+  onBlurNumber = (e) => {
+    const { name, value } = e.target;
+    let valueNumber = Number(value);
+    if(Number.isNaN(valueNumber) || !valueNumber) valueNumber = 0;
     return this.setState({ [name]: valueNumber });
   };
 
@@ -203,6 +209,7 @@ class NewStakePool extends Component {
                 onFocus={(e) => {
                   e.target.select();
                 }}
+                onBlur={(e)=>this.onBlurNumber(e)}
               />
             </Grid>
 
@@ -216,6 +223,7 @@ class NewStakePool extends Component {
                 onFocus={(e) => {
                   e.target.select();
                 }}
+                onBlur={(e)=>this.onBlurNumber(e)}
               />
             </Grid>
 
