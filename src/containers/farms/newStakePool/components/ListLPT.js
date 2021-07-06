@@ -48,7 +48,7 @@ function ListLPT(props) {
     const searchValue = e.target.value;
     setState({ ...state, searchValue });
   }
-  console.log('classes.tableRow', classes.tableRow);
+  
   return (
     <Dialog open={visible} onClose={onClose} fullWidth>
       {/* Title */}

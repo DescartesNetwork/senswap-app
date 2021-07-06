@@ -33,11 +33,12 @@ export const configSenWallet = () => {
     return this.toString();
   }
   // Global access
-  const { sol: { node, spltAddress, splataAddress, swapAddress } } = configs;
+  const { sol: { node, spltAddress, splataAddress, swapAddress, farmingAddress } } = configs;
   window.senswap = {
     splt: new ssjs.LiteSPLT(spltAddress, splataAddress, node),
     swap: new ssjs.LiteSwap(swapAddress, spltAddress, splataAddress, node),
     lamports: new ssjs.Lamports(node),
+    farming: new ssjs.LiteFarming(farmingAddress, spltAddress, splataAddress, node),
   }
 }
 

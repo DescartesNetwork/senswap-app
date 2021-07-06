@@ -55,7 +55,6 @@ class Farming extends Component {
 
   onChange = () => {
     const value = this.stakeRef.current.value;
-    console.log(value);
     this.setState({ maxToken: value });
   };
 

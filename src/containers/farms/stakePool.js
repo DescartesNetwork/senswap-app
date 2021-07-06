@@ -122,7 +122,6 @@ class StakePool extends Component {
     const { sol: { senAddress } } = configs;
     const { address: LPAddress } = await sol.scanAccount(address, userAddress);
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-    console.log(await sol.scanAccount(address, userAddress), await sol.scanAccount(senAddress, userAddress), 'decimal')
     const reserveAmount = ssjs.decimalize(amount, DECIMAL);
     const data = {
       reserveAmount, stakePoolAddress,
@@ -150,8 +149,7 @@ class StakePool extends Component {
       }
       if (!accountData) return;
       //Stake
-      const stake = await LITE_FARMING.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
-      console.log(stake, 'finish stake??');
+      await LITE_FARMING.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
       await setSuccess('The token has been staked!');
       this.setState({ stakeLoading: false }, () => {
         this.fetchData();
@@ -168,7 +166,6 @@ class StakePool extends Component {
       reserveAmount: amount, stakePoolAddress,
       LPAddress, senWallet
     } = data;
-    console.log(data, 'stake11');
     try {
       const result = await LITE_FARMING.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
       await setSuccess('The token has been unstaked!');
@@ -187,8 +184,7 @@ class StakePool extends Component {
     const { sol: { senAddress } } = configs;
     try {
       const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-      const harvest = await LITE_FARMING.harvest(stakePoolAddress, senWallet, wallet);
-      console.log(harvest, 'harvest');
+      await LITE_FARMING.harvest(stakePoolAddress, senWallet, wallet);
       await setSuccess('Harvest successfully');
       this.fetchData();
       this.onClose();

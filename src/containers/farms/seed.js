@@ -44,7 +44,6 @@ class Seed extends Component {
 
   onChange = () => {
     const value = this.seedRef.current.value;
-    console.log(value)
     this.setState({ maxToken: value });
   }
 

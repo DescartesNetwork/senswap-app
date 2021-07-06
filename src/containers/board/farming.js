@@ -75,12 +75,10 @@ class Farming extends Component {
   onHandleHarvest = () => {
     const value = this.harvestRef.current.value;
     if (!value) return;
-    console.log(value, 'harvest');
   }
   onHandleStake = () => {
     const value = this.stakeRef.current.value;
     if (!value) return;
-    console.log(value, 'stake');
   }
 
   onClose = () => {
@@ -99,7 +97,6 @@ class Farming extends Component {
     const wallet = window.senswap.wallet;
 
     const account = await this.fetchAccountData(mintAddress, wallet);
-    console.log("stakePool.address", stakePool.address);
     const debt = await this.fetchDebtData(stakePool.address);
     const poolDetail = {
       pool: stakePool,
@@ -107,7 +104,6 @@ class Farming extends Component {
       mint: account.mint,
       debt,
     };
-    console.log("poolDetail", poolDetail);
     this.setState({ visible: true, poolDetail: poolDetail });
   }
 
