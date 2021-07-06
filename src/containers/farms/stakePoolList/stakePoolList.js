@@ -108,7 +108,7 @@ class StakePool extends Component {
     let accountData = null;
     try {
       accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
-    } catch (error) {}
+    } catch (error) { }
     return accountData;
   };
 
@@ -324,35 +324,32 @@ class StakePool extends Component {
     } = this.state;
 
     return (
-      <Paper className={classes.paper}>
-        <Grid container>
-          <Grid item xs={12}>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow style={{ borderBottom: '1px solid #dadada' }}>
-                    {COLS.map((e, idx) => {
-                      return <TableCell key={idx}>{e.label}</TableCell>;
-                    })}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {stakePools.map((pool, idx) => {
-                    return (
-                      <StakePoolItem
-                        stakePool={pool}
-                        key={idx}
-                        index={idx}
-                        onOpenDetail={this.onOpenDetail}
-                        onOpenSeed={this.onOpenSeed}
-                      ></StakePoolItem>
-                    );
+      <Grid container>
+        <Grid item xs={12}>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow style={{ borderBottom: '1px solid #dadada' }}>
+                  {COLS.map((e, idx) => {
+                    return <TableCell key={idx}>{e.label}</TableCell>;
                   })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-                          <AvatarGroup>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stakePools.map((pool, idx) => {
+                  return (
+                    <StakePoolItem
+                      stakePool={pool}
+                      key={idx}
+                      index={idx}
+                      onOpenDetail={this.onOpenDetail}
+                      onOpenSeed={this.onOpenSeed}
+                    ></StakePoolItem>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Grid>
         {/* Modal farming */}
         <Farming
