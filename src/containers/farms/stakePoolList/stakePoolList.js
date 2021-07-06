@@ -372,68 +372,71 @@ class StakePool extends Component {
     } = this.state;
 
     return (
-      <Paper className={classes.paper}>
-        <Grid container>
-          <Grid item xs={12}>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow style={{ borderBottom: "1px solid #dadada" }}>
-                    {COLS.map((e, idx) => {
-                      return <TableCell key={idx}>{e.label}</TableCell>;
-                    })}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {!loading
-                    ? stakePools.map((pool, idx) => {
-                      const { mint_token: token, address: stakePoolAddress, total_shares, icons, symbols } = pool;
-                      return (
-                        <TableRow key={idx}>
-                          <TableCell>{idx + 1}</TableCell>
-                          <TableCell className={classes.assets}>
-                            <AvatarGroup>
-                              {icons ? icons.map((icon, idx) => {
-                                return <Avatar src={icon} className={classes.icon} key={idx}>
-                                  <HelpOutlineRounded />
-                                </Avatar>
-                              }) : <Avatar />}
-                            </AvatarGroup>
-                            <Grid item>
-                              <Typography>{symbols ? symbols.map((symbol, idx) => {
-                                return <Fragment key={idx}>{symbol}{symbol.length > Number(idx + 1) ? ' x ' : ''}</Fragment>
-                              }) : null}</Typography>
-                            </Grid>
+      // <Paper className={classes.paper}>
+      <Grid container>
+        <Grid item xs={12}>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow style={{ borderBottom: "1px solid #dadada" }}>
+                  {COLS.map((e, idx) => {
+                    return <TableCell key={idx}>
+                      <Typography variant="caption" color="textSecondary" style={{ textTransform: 'uppercase' }}>{e.label}</Typography>
+                    </TableCell>;
+                  })}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {!loading
+                  ? stakePools.map((pool, idx) => {
+                    const { mint_token: token, address: stakePoolAddress, total_shares, icons, symbols } = pool;
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell>{idx + 1}</TableCell>
+                        <TableCell className={classes.assets}>
+                          <AvatarGroup>
+                            {icons ? icons.map((icon, idx) => {
+                              return <Avatar src={icon} className={classes.icon} key={idx}>
+                                <HelpOutlineRounded />
+                              </Avatar>
+                            }) : <Avatar />}
+                          </AvatarGroup>
+                          <Grid item>
+                            <Typography>{symbols ? symbols.map((symbol, idx) => {
+                              return <Fragment key={idx}>{symbol}{symbol.length > Number(idx + 1) ? ' x ' : ''}</Fragment>
+                            }) : null}</Typography>
+                          </Grid>
+                        </TableCell>
+                        <TableCell className={classes.address}>{stakePoolAddress}</TableCell>
+                        <TableCell>{pool.apr}%</TableCell>
+                        <TableCell>{pool.apy}%</TableCell>
+                        <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
+                        {/* Action */}
+                        <TableCell className={classes.button}>
+                          <Button variant="outlined" onClick={() => this.onOpenSeed(pool)}>Seed</Button>
+                        </TableCell>
+                        <TableCell className={classes.button}>
+                          <Button color="primary" onClick={() => this.onOpen(pool)}>Detail</Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                  : [1, 2, 3, 4, 5].map((e) => {
+                    return (
+                      <TableRow key={e}>
+                        {COLS.map((col) => (
+                          <TableCell key={col.key}>
+                            <CircularProgress size={17} />
                           </TableCell>
-                          <TableCell className={classes.address}>{stakePoolAddress}</TableCell>
-                          <TableCell>{pool.apr}%</TableCell>
-                          <TableCell>{pool.apy}%</TableCell>
-                          <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
-                          <TableCell>
-                            <Button onClick={() => this.onOpen(pool)}>Detail</Button>
-                          </TableCell>
-                          <TableCell>
-                            <Button onClick={() => this.onOpenSeed(pool)}>Seed</Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                    : [1, 2, 3, 4, 5].map((e) => {
-                      return (
-                        <TableRow key={e}>
-                          {COLS.map((col) => (
-                            <TableCell key={col.key}>
-                              <CircularProgress size={17} />
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
+                        ))}
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Grid>
+        {/* Modal farming */}
         <Farming
           visible={visible}
           onClose={this.onClose}
@@ -443,6 +446,7 @@ class StakePool extends Component {
           onHandleStake={this.handleStake}
           onHandleHarvest={this.onHandleHarvest}
         />
+        {/* Modal seed - admin only */}
         <Seed
           visible={visibleSeed}
           onClose={this.onCloseSeed}
@@ -451,7 +455,8 @@ class StakePool extends Component {
           unSeedLoading={unSeedLoading}
           onHandleSeed={this.onHandleSeed}
         />
-      </Paper>
+      </Grid>
+      // </Paper>
     );
   }
 }

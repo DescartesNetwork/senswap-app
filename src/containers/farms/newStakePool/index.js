@@ -14,6 +14,9 @@ import CircularProgress from 'senswap-ui/circularProgress';
 import Dialog, { DialogContent } from 'senswap-ui/dialog';
 import { ArrowDropDownRounded } from 'senswap-ui/icons';
 import { withStyles } from 'senswap-ui/styles';
+import Paper from 'senswap-ui/paper';
+import Drain from 'senswap-ui/drain';
+
 import styles from './styles';
 import configs from 'configs';
 import { setError, setSuccess } from 'modules/ui.reducer';
@@ -129,7 +132,7 @@ class NewStakePool extends Component {
   }
 
   render() {
-    const { visible, onClose } = this.props;
+    const { visible, onClose, classes } = this.props;
     const { poolInfo, loading, reward, period, senToken, visibleAccountSelection } = this.state;
 
     //LPT info
@@ -150,38 +153,44 @@ class NewStakePool extends Component {
         {/* Header */}
         <NewStakePoolHeader onClose={onClose}></NewStakePoolHeader>
         <DialogContent>
-          <Grid container spacing={3}>
+          <Grid container spacing={4}>
             {/* Description */}
             <NewStakePoolContent></NewStakePoolContent>
 
             {/* Reward Token */}
-            <Grid container item xs={12} alignItems="center">
-              <Grid item xs={3}>
+            <Grid container item xs={12} alignItems="center" spacing={0}>
+              <Grid item xs={12}>
                 <Typography color="textPrimary"> Reward Token: </Typography>
               </Grid>
-              <Button
-                size="small"
-                startIcon={<MintAvatar icon={senToken.icon} />}
-                endIcon={<ArrowDropDownRounded />}
-                disabled={true}
-              >
-                <Typography>{senToken.symbol} </Typography>
-              </Button>
+              <Drain size={1} />
+              <Paper className={classes.formPaper}>
+                <Button
+                  size="small"
+                  startIcon={<MintAvatar icon={senToken.icon} />}
+                  endIcon={<ArrowDropDownRounded />}
+                  disabled={true}
+                >
+                  <Typography>{senToken.symbol} </Typography>
+                </Button>
+              </Paper>
             </Grid>
 
             {/* LP Token */}
-            <Grid container item xs={12} alignItems="center">
-              <Grid item xs={3}>
+            <Grid container item xs={12} alignItems="center" spacing={0}>
+              <Grid item xs={12}>
                 <Typography color="textPrimary"> LP Token: </Typography>
               </Grid>
-              <Button
-                size="small"
-                startIcon={poolInfo ? <PoolAvatar icons={poolIcon} /> : <MintAvatar />}
-                endIcon={<ArrowDropDownRounded />}
-                onClick={() => this.setState({ visibleAccountSelection: true })}
-              >
-                <Typography>{lptName} </Typography>
-              </Button>
+              <Drain size={1} />
+              <Paper className={classes.formPaper}>
+                <Button
+                  size="small"
+                  startIcon={poolInfo ? <PoolAvatar icons={poolIcon} /> : <MintAvatar />}
+                  endIcon={<ArrowDropDownRounded />}
+                  onClick={() => this.setState({ visibleAccountSelection: true })}
+                >
+                  <Typography>{lptName} </Typography>
+                </Button>
+              </Paper>
             </Grid>
 
             {/* New Stake Pool Stat */}
@@ -222,9 +231,10 @@ class NewStakePool extends Component {
                 disabled={loading || !this.checkCreatePool()}
                 fullWidth
               >
-                <Typography>Create Stake Pool</Typography>
+                <Typography>Create</Typography>
               </Button>
             </Grid>
+            <Drain size={2} />
           </Grid>
         </DialogContent>
 

@@ -58,5 +58,16 @@ export default theme => ({
     minWidth: 180,
     display: 'flex',
     alignItems: 'center'
-  }
+  },
+  button: {
+    '& button': {
+      textTransform: 'capitalize',
+    }
+  },
+  formPaper: {
+    padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
+    borderRadius: theme.shape.borderRadius / 3,
+    backgroundColor: theme.palette.background.secondary,
+    width: '100%',
+  },
 });

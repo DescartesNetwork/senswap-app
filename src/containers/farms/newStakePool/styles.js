@@ -19,4 +19,10 @@ export default theme => ({
       backgroundColor: theme.palette.background.secondary,
     },
   },
+  formPaper: {
+    padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
+    borderRadius: theme.shape.borderRadius / 3,
+    backgroundColor: theme.palette.background.secondary,
+    width: '100%',
+  }
 });
