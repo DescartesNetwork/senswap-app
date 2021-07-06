@@ -63,7 +63,9 @@ export default theme => ({
     '& button': {
       padding: theme.spacing(1),
       textTransform: 'capitalize',
-    }
+    },
+    maxWidth: 150,
+    textAlign: "right",
   },
   formPaper: {
     padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,

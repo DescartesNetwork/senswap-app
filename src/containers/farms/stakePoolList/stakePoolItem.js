@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -14,27 +14,34 @@ import { getStakePoolData } from 'modules/bucket.reducer';
 
 function StakePoolItem(props) {
   const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
-  const [isAccess, setAccess] = useState(false);
   const dispatch = useDispatch();
   const poolData = useSelector((state) => {
     return state.bucket[stakePool.address];
   });
+
+  let isConnected = false;
+  let isAdmin = false;
+
   const wallet = useSelector((state) => {
     return state.wallet;
   });
+  const {
+    user: { address: userAddress, role },
+  } = wallet;
+
+  //Check user permission
+  if (userAddress) isConnected = true;
+  if (isConnected) {
+    isAdmin = role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator';
+  }
 
   useEffect(() => {
-    //Check user permission
-    if (wallet && wallet.user) {
-      const { user: { role } } = wallet;
-      if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator') return setAccess(true);
-    }
     // get pool data
     setTimeout(() => {
       if (!poolData) dispatch(getStakePoolData(stakePool.address));
     }, 500);
     // eslint-disable-next-line
-  }, [])
+  }, []);
 
   //Check loading
   function renderLoading() {
@@ -86,12 +93,16 @@ function StakePoolItem(props) {
       <TableCell>0%</TableCell>
       <TableCell>0%</TableCell>
       <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
-      {isAccess ?
-        <TableCell className={classes.button}>
-          <Button variant="outlined" onClick={() => onOpenSeed(poolData)}>Seed</Button>
-        </TableCell> : null}
+
       <TableCell className={classes.button}>
-        <Button color="primary" onClick={() => onOpenDetail(poolData)}>Detail</Button>
+        {isAdmin && (
+          <Button variant="outlined" onClick={() => onOpenSeed(poolData)}>
+            Seed
+          </Button>
+        )}
+        <Button color="primary" onClick={() => onOpenDetail(poolData)} disabled={!isConnected}>
+          Detail
+        </Button>
       </TableCell>
     </TableRow>
   );

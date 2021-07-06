@@ -23,6 +23,7 @@ import Seed from '../seed';
 import styles from '../styles';
 import StakePoolItem from './stakePoolItem';
 import { Backdrop } from '@material-ui/core';
+import { updateWallet } from 'modules/wallet.reducer';
 
 const liteFarming = new ssjs.LiteFarming();
 const COLS = [
@@ -167,13 +168,19 @@ class StakePool extends Component {
       try {
         await liteFarming.getStakeAccountData(stakePoolAddress, wallet);
       } catch (error) {
-        await liteFarming.initializeAccount(stakePoolAddress, wallet);
+        const newAccount = await liteFarming.initializeAccount(stakePoolAddress, wallet);
+         
+        const {
+          updateWallet,
+          wallet: { stakeAccounts },
+        } = this.props;
+        stakeAccounts.push(newAccount.debtAddress);
+        updateWallet({ stakeAccounts });
       }
       //Stake
       await liteFarming.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
       await setSuccess('The token has been staked!');
     } catch (err) {
-      console.log('Error');
       await setError(err);
     } finally {
       this.setState({ loading: false }, () => {
@@ -287,7 +294,6 @@ class StakePool extends Component {
   };
 
   onOpenSeed = async (stakePool) => {
-    console.log(stakePool, 'stake pool');
     if (!stakePool) return;
     const {
       mint_token: { address: mintAddress },
@@ -396,6 +402,7 @@ const mapDispatchToProps = (dispatch) =>
       getPools,
       getPool,
       getStakePoolData,
+      updateWallet
     },
     dispatch,
   );

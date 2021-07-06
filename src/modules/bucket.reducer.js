@@ -38,7 +38,6 @@ export const getAccountData = (accountAddress, force = false) => {
     try {
       const { api: { base } } = configs;
       accountData = await window.senswap.splt.getAccountData(accountAddress);
-      console.log("accountData",accountData)
       const { data: mintData } = await api.get(base + '/mint', { address: accountData.mint.address });
       accountData.mint = { ...accountData.mint, ...mintData }
       const { mint_authority, freeze_authority } = accountData.mint || {};

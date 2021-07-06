@@ -46,15 +46,11 @@ class WalletPlugin extends Component {
         const { type, address: changedAddress } = re;
         const { bucket } = this.props;
         const {
-          wallet: { accounts, lpts, stakeAccounts },
+          wallet: { accounts, lpts },
         } = this.props;
 
         if (type === 'account' && ([...accounts, ...lpts].includes(changedAddress) || bucket[changedAddress])) {
           return getAccountData(changedAddress, true);
-        }
-        if (type === 'account' && ([...stakeAccounts].includes(changedAddress))) {
-          console.log("changedAddress",changedAddress)
-          return getStakeAccountData(changedAddress, true);
         }
       });
 

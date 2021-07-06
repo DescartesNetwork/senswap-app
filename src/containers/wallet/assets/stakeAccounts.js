@@ -6,15 +6,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import ssjs from 'senswapjs';
 //
 import styles from './styles';
-import Avatar from 'senswap-ui/avatar';
-import { HelpOutlineRounded } from 'senswap-ui/icons';
 import { getStakeAccountData } from 'modules/bucket.reducer';
 import CircularProgress from 'senswap-ui/circularProgress';
-import Farm from 'helpers/farm';
 import { PoolAvatar } from 'containers/pool';
 import { withStyles } from 'senswap-ui/styles';
 
-const COLS = ['LP TOKEN', 'STAKE ACCOUNT', 'LIQUIDITY', ' EARNED', 'REWARD TOKEN'];
+//const COLS = ['LP TOKEN', 'STAKE ACCOUNT', 'LIQUIDITY', ' EARNED', 'REWARD TOKEN'];
+const COLS = ['LP TOKEN', 'STAKE ACCOUNT', 'LIQUIDITY'];
 
 function RenderLoading() {
   return (
@@ -30,15 +28,15 @@ function RenderLoading() {
   );
 }
 
-function Liquidity(props){
+function Liquidity(props) {
   const { stakeAccAddr, token } = props;
   const stakeAccountData = useSelector((state) => state.bucket[stakeAccAddr]);
-  return <TableCell> {Number(ssjs.undecimalize(stakeAccountData.amount, token.decimals)).toFixed(2)}</TableCell>
+  return <TableCell> {Number(ssjs.undecimalize(stakeAccountData.amount, token.decimals)).toFixed(2)}</TableCell>;
 }
 
 function DebtAccountItems(props) {
-  const { address, classes } = props;
-  const debtData = useSelector((state) => state.bucket[address]);
+  const { debAddr, classes } = props;
+  const debtData = useSelector((state) => state.bucket[debAddr]);
   //Check Loading
   if (!debtData) return <RenderLoading></RenderLoading>;
 
@@ -53,7 +51,7 @@ function DebtAccountItems(props) {
   } = debtData.pool;
   const icons = [iconA, iconB, iconS];
   const name = `${symbolA || '.'} x ${symbolB || '.'} x ${symbolS || '.'}`;
- 
+
   return (
     <TableRow className={classes.tableRow}>
       <TableCell>
@@ -67,13 +65,20 @@ function DebtAccountItems(props) {
         </Grid>
       </TableCell>
       <TableCell> {account.address}</TableCell>
-      <Liquidity stakeAccAddr = {account.address} token={token}></Liquidity>
-      <TableCell>{Number(Farm.calculateReward(stake_pool, debtData)).toFixed(2)}</TableCell>
+      <Liquidity stakeAccAddr={account.address} token={token}></Liquidity>
+      {/* <TableCell>{Number(Farm.calculateReward(stake_pool, debtData)).toFixed(2)}</TableCell>
       <TableCell>
-        <Avatar src={iconS} className={classes.icon}>
-          <HelpOutlineRounded />
-        </Avatar>
-      </TableCell>
+        <Grid container className={classes.noWrap} alignItems="center">
+          <Grid item>
+            <Avatar src={iconS} className={classes.icon}>
+              <HelpOutlineRounded />
+            </Avatar>
+          </Grid>
+          <Grid item>
+            <Typography>SEN</Typography>
+          </Grid>
+        </Grid>
+      </TableCell> */}
     </TableRow>
   );
 }
@@ -90,6 +95,7 @@ function StakeAccounts(props) {
       }
     }
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -108,10 +114,10 @@ function StakeAccounts(props) {
                 ))}
               </TableRow>
             </TableHead>
-            
+
             <TableBody>
               {stakeAccounts.map((address) => {
-                return <DebtAccountItems address={address} classes={classes}></DebtAccountItems>;
+                return <DebtAccountItems debAddr={address} classes={classes} key={address}></DebtAccountItems>;
               })}
             </TableBody>
           </Table>
