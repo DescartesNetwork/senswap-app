@@ -6,8 +6,6 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
-import Paper from 'senswap-ui/paper';
-import Typography from 'senswap-ui/typography';
 import Header from './header';
 import StakePools from './stakePoolList/stakePoolList';
 
@@ -16,7 +14,7 @@ import styles from './styles';
 
 class Farms extends Component {
   render() {
-    const { classes } = this.props;
+    // const { classes } = this.props;
 
     return <Grid container>
       <Grid item xs={12}>

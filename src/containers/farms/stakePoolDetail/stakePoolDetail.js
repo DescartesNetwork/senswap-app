@@ -11,12 +11,9 @@ import Dialog, { DialogTitle, DialogContent } from "senswap-ui/dialog";
 import Drain from "senswap-ui/drain";
 import TextField from "senswap-ui/textField";
 import Button from "senswap-ui/button";
-import CircularProgress from "senswap-ui/circularProgress";
 import { setError, setSuccess } from "modules/ui.reducer";
 import { getStakePools } from "modules/stakePool.reducer";
-import { MintAvatar } from "containers/wallet";
 import Paper from 'senswap-ui/paper';
-import Backdrop from '@material-ui/core/Backdrop';
 import styles from "../styles";
 import Farm from "../../../helpers/farm";
 import Avatar, { AvatarGroup } from "senswap-ui/avatar";
@@ -67,9 +64,8 @@ class Farming extends Component {
       detail: { mint, account, pool, debt },
     } = this.props;
 
-    console.log(pool)
     // //Render Stake Pool Element
-    if (!pool) return null;
+    if (!pool || !pool.mintS) return null;
     const {
       mintS: { icon: iconS, symbol: symbolS },
       mintA: { icon: iconA, symbol: symbolA },
@@ -87,44 +83,48 @@ class Farming extends Component {
               <Grid item xs={12}>
                 <Typography color="textSecondary">Stake pool</Typography>
               </Grid>
-              <Paper className={classes.formPaper}>
-                <Grid container >
-                  <Grid item xs={2}>
-                    <Typography variant="body2">Address:</Typography>
+              <Grid item xs={12}>
+                <Paper className={classes.formPaper}>
+                  <Grid container >
+                    <Grid item xs={2}>
+                      <Typography variant="body2">Address:</Typography>
+                    </Grid>
+                    <Grid item xs={10}>
+                      <Typography>{pool.address}</Typography>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Typography variant="body2">Total shares:</Typography>
+                    </Grid>
+                    <Grid item xs={10}>
+                      <Typography>{pool && pool.total_shares ? ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals) : 0}</Typography>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={10}>
-                    <Typography>{pool.address}</Typography>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <Typography variant="body2">Total shares:</Typography>
-                  </Grid>
-                  <Grid item xs={10}>
-                    <Typography>{pool && pool.total_shares ? ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals) : 0}</Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
+                </Paper>
+              </Grid>
 
               {/* Annual percentage */}
               <Drain size={2} />
               <Grid item xs={12}>
                 <Typography color="textSecondary">Annual Percentage</Typography>
               </Grid>
-              <Paper className={classes.formPaper}>
-                <Grid container>
-                  <Grid item xs={2}>
-                    <Typography variant="body2">APR:</Typography>
+              <Grid item xs={12}>
+                <Paper className={classes.formPaper}>
+                  <Grid container>
+                    <Grid item xs={2}>
+                      <Typography variant="body2">APR:</Typography>
+                    </Grid>
+                    <Grid item xs={10}>
+                      <Typography>{pool.apr}%</Typography>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Typography variant="body2">APY: {pool.apy}%</Typography>
+                    </Grid>
+                    <Grid item xs={10}>
+                      <Typography>{pool.apy}%</Typography>
+                    </Grid>
                   </Grid>
-                  <Grid item xs={10}>
-                    <Typography>{pool.apr}%</Typography>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <Typography variant="body2">APY: {pool.apy}%</Typography>
-                  </Grid>
-                  <Grid item xs={10}>
-                    <Typography>{pool.apy}%</Typography>
-                  </Grid>
-                </Grid>
-              </Paper>
+                </Paper>
+              </Grid>
               <Grid item xs={12}>
                 <Drain size={1} />
               </Grid>
@@ -134,29 +134,31 @@ class Farming extends Component {
               <Grid item xs={12}>
                 <Typography color="textSecondary">Pending reward</Typography>
               </Grid>
-              <Paper className={classes.formPaper}>
-                <Grid container alignItems="flex-end">
-                  <Grid item xs={2}>
-                    <Typography variant="body2">Period:</Typography>
-                  </Grid>
-                  <Grid item xs={10}>
-                    <Typography variant="body2">{pool && pool.period ? ssjs.undecimalize(pool.period, 1) : 0} second</Typography>
-                  </Grid>
-                  <Grid item xs={2}>
-                    <Typography>Reward:</Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography>
-                      <b style={{ color: "#ff3122" }}>{Farm.calculateReward(pool, debt)}</b> SEN
+              <Grid item xs={12}>
+                <Paper className={classes.formPaper}>
+                  <Grid container alignItems="flex-end">
+                    <Grid item xs={2}>
+                      <Typography variant="body2">Period:</Typography>
+                    </Grid>
+                    <Grid item xs={10}>
+                      <Typography variant="body2">{pool && pool.period ? ssjs.undecimalize(pool.period, 1) : 0} second</Typography>
+                    </Grid>
+                    <Grid item xs={2}>
+                      <Typography>Reward:</Typography>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Typography>
+                        <b style={{ color: "#ff3122" }}>{Farm.calculateReward(pool, debt)}</b> SEN
                 </Typography>
-                  </Grid>
-                  <Grid item xs={4} align="end">
-                    <Button variant="contained" color="primary" onClick={this.handleHarvest}>
-                      Harvest
+                    </Grid>
+                    <Grid item xs={4} align="end">
+                      <Button variant="contained" color="primary" onClick={this.handleHarvest}>
+                        Harvest
                 </Button>
+                    </Grid>
                   </Grid>
-                </Grid>
-              </Paper>
+                </Paper>
+              </Grid>
               <Grid item xs={12}>
                 <Drain size={1} />
               </Grid>
@@ -166,53 +168,61 @@ class Farming extends Component {
               </Grid>
 
               {/* Stake + unStake */}
-              <Paper className={classes.formPaper}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    <Typography>
-                      LP token: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(account.amount, mint.decimals)}</b>
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Grid container alignItems="center" className={classes.outlineInput}>
-                      <Grid item xs={6}>
-                        <AvatarGroup>
-                          {icons ? icons.map((e, idx) => {
-                            return <Avatar src={e} key={idx} />
-                          }) : <Avatar />}
-                        </AvatarGroup>
-                        <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <TextField
-                          variant="standard"
-                          value={maxToken}
-                          inputRef={this.stakeRef}
-                          onChange={this.onChange}
-                          InputProps={{
-                            endAdornment: (
-                              <Typography color="error" style={{ cursor: "pointer" }} onClick={this.getMaxToken}>
-                                <strong>MAX</strong>
-                              </Typography>
-                            ),
-                          }}
-                          multiline={false}
-                        />
+              <Grid item xs={12}>
+                <Paper className={classes.formPaper}>
+                  <Grid container>
+                    <Grid item xs={12}>
+                      <Typography>
+                        LP token: <b style={{ color: "#ff3122" }}>{ssjs.undecimalize(account.amount, mint.decimals)}</b>
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Grid container alignItems="center" className={classes.outlineInput} spacing={0}>
+                        <Grid item xs={7}>
+                          <Grid container alignItems="center">
+                            <Grid item>
+                              <AvatarGroup>
+                                {icons ? icons.map((e, idx) => {
+                                  return <Avatar src={e} key={idx} />
+                                }) : <Avatar />}
+                              </AvatarGroup>
+                            </Grid>
+                            <Grid item>
+                              <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
+                            </Grid>
+                          </Grid>
+                        </Grid>
+                        <Grid item xs={5}>
+                          <TextField
+                            variant="standard"
+                            value={maxToken}
+                            inputRef={this.stakeRef}
+                            onChange={this.onChange}
+                            InputProps={{
+                              disableUnderline: true,
+                              endAdornment: (
+                                <Typography color="error" style={{ cursor: "pointer" }} onClick={this.getMaxToken}>
+                                  <strong>MAX</strong>
+                                </Typography>
+                              ),
+                            }}
+                          />
+                        </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
-                  <Grid item xs={6}>
-                  <Button variant="contained" color="primary" onClick={() => this.handleStake("stake")} fullWidth>
+                    <Grid item xs={6} className={classes.button}>
+                      <Button variant="contained" color="primary" onClick={() => this.handleStake("stake")} fullWidth>
                         Stake
                   </Button>
-                  </Grid>
-                  <Grid item xs={6}>
-                  <Button variant="outlined" onClick={() => this.handleStake("unstake")} fullWidth>
+                    </Grid>
+                    <Grid item xs={6} className={classes.button}>
+                      <Button variant="outlined" onClick={() => this.handleStake("unstake")} fullWidth>
                         UnStake
                     </Button>
+                    </Grid>
                   </Grid>
-                </Grid>
-              </Paper>
+                </Paper>
+              </Grid>
               <Drain size={5} />
             </Grid>
           </DialogContent>

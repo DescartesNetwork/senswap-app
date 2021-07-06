@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import ssjs from 'senswapjs';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -14,15 +14,26 @@ import { getStakePoolData } from 'modules/bucket.reducer';
 
 function StakePoolItem(props) {
   const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
+  const [isAccess, setAccess] = useState(false);
   const dispatch = useDispatch();
   const poolData = useSelector((state) => {
     return state.bucket[stakePool.address];
   });
+  const wallet = useSelector((state) => {
+    return state.wallet;
+  });
 
   useEffect(() => {
+    //Check user permission
+    if (wallet && wallet.user) {
+      const { user: { role } } = wallet;
+      if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator') return setAccess(true);
+    }
+    // get pool data
     setTimeout(() => {
-      if(!poolData) dispatch(getStakePoolData(stakePool.address))
+      if (!poolData) dispatch(getStakePoolData(stakePool.address));
     }, 500);
+    // eslint-disable-next-line
   }, [])
 
   //Check loading
@@ -40,7 +51,6 @@ function StakePoolItem(props) {
     );
   }
   if (!poolData) return renderLoading();
-
   //Render Stake Pool Element
   const {
     mint_token: token,
@@ -76,10 +86,11 @@ function StakePoolItem(props) {
       <TableCell>0%</TableCell>
       <TableCell>0%</TableCell>
       <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
-      <TableCell>
-        <Button variant="outlined" onClick={() => onOpenSeed(stakePool)}>Seed</Button>
-      </TableCell>
-      <TableCell>
+      {isAccess ?
+        <TableCell className={classes.button}>
+          <Button variant="outlined" onClick={() => onOpenSeed(poolData)}>Seed</Button>
+        </TableCell> : null}
+      <TableCell className={classes.button}>
         <Button color="primary" onClick={() => onOpenDetail(poolData)}>Detail</Button>
       </TableCell>
     </TableRow>

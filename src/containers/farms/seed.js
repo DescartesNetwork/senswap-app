@@ -14,7 +14,7 @@ import Button from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
-import { MintAvatar } from 'containers/wallet';
+import Paper from 'senswap-ui/paper';
 
 import styles from './styles';
 class Seed extends Component {
@@ -49,7 +49,7 @@ class Seed extends Component {
 
   render() {
     const { maxToken } = this.state;
-    const { visible, onClose, detail: data, seedLoading, unSeedLoading } = this.props;
+    const { classes, visible, onClose, detail: data, seedLoading, unSeedLoading } = this.props;
     if (!data || !data.pool) return null;
     const {
       pool: {
@@ -67,16 +67,22 @@ class Seed extends Component {
               <Typography color="textSecondary">Stake pool</Typography>
             </Grid>
             <Grid item xs={12}>
-              <Typography variant="body2">Address: {data.address}</Typography>
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="body2">Treasury SEN amount: {amount ? ssjs.undecimalize(amount, decimals) : 0}</Typography>
+              <Paper className={classes.formPaper}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    <Typography variant="body2">Address: {data.address}</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2">Treasury SEN amount: {amount ? ssjs.undecimalize(amount, decimals) : 0}</Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
             </Grid>
             {/* Seed + unSeed */}
             <Grid item xs={12}>
               <Typography color="textPrimary">Start seeding: </Typography>
             </Grid>
-            <Grid item xs={8}>
+            <Grid item xs={12}>
               <TextField
                 variant="contained"
                 value={maxToken}
@@ -88,20 +94,29 @@ class Seed extends Component {
                   </Typography>
                 }} />
             </Grid>
-            <Grid item xs={4} align="end">
-              {unSeedLoading ? <Button variant="outlined" color="secondary" disabled>Unseed</Button> :
-                <Button variant="outlined" onClick={() => this.handleSeed('unseed')}>Unseed</Button>}
-              {seedLoading ? <Button
-                variant="contained"
-                color="secondary" disabled>Seed <CircularProgress size={16} /></Button> :
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => this.handleSeed()}
-                >
-                  Seed
+            <Drain size={2} />
+            <Grid item xs={12} align="end">
+              <Grid container>
+                <Grid item xs={6} className={classes.button}>
+                  {unSeedLoading ? <Button variant="outlined" color="secondary" fullWidth disabled>Unseed</Button> :
+                    <Button variant="outlined" onClick={() => this.handleSeed('unseed')} fullWidth>Unseed</Button>}
+                </Grid>
+                <Grid item xs={6} className={classes.button}>
+                  {seedLoading ? <Button
+                    variant="contained"
+                    color="secondary" fullWidth disabled>Seed <CircularProgress size={16} /></Button> :
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => this.handleSeed()}
+                      fullWidth
+                    >
+                      Seed
             </Button>}
+                </Grid>
+              </Grid>
             </Grid>
+            <Drain size={2} />
           </Grid>
         </DialogContent>
       </Dialog>

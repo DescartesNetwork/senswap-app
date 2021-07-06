@@ -42,13 +42,14 @@ function ListLPT(props) {
       });
     }
     fetchStakePools();
+    // eslint-disable-next-line
   }, []);
 
   function handleSearch(e) {
     const searchValue = e.target.value;
     setState({ ...state, searchValue });
   }
-  
+
   return (
     <Dialog open={visible} onClose={onClose} fullWidth>
       {/* Title */}

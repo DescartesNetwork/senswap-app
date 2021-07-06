@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -6,11 +6,7 @@ import ssjs from 'senswapjs';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
-import Button from 'senswap-ui/button';
-import Paper from 'senswap-ui/paper';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
-import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
-import { HelpOutlineRounded } from 'senswap-ui/icons';
 import Typography from 'senswap-ui/typography';
 
 import { setError, setSuccess } from 'modules/ui.reducer';
@@ -29,15 +25,14 @@ import StakePoolItem from './stakePoolItem';
 import { Backdrop } from '@material-ui/core';
 
 const liteFarming = new ssjs.LiteFarming();
-const farming = new ssjs.Farming();
 const COLS = [
   { label: '#', key: '' },
   { label: 'Assets', key: 'assets' },
   { label: 'APR', key: 'apr' },
   { label: 'APY', key: 'apy' },
   { label: 'Liquidity', key: 'total_value' },
-  { label: '', key: 'detail' },
   { label: '', key: 'seed' },
+  { label: '', key: 'detail' },
 ];
 
 const DECIMAL = 9;
@@ -54,10 +49,19 @@ class StakePool extends Component {
       loadingMessage: '',
       loading: false,
       visibleSeed: false,
+      isAccess: false,
     };
   }
   componentDidMount() {
     this.fetchStakePools();
+  }
+
+  // check user permission
+  checkPermission = () => {
+    const { wallet: {
+      user: { role }
+    } } = this.props;
+    if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator') return this.setState({ isAccess: true });
   }
 
   fetchStakePools = async () => {
@@ -107,7 +111,7 @@ class StakePool extends Component {
     let accountData = null;
     try {
       accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
-    } catch (error) {}
+    } catch (error) { }
     return accountData;
   };
 
@@ -283,6 +287,7 @@ class StakePool extends Component {
   };
 
   onOpenSeed = async (stakePool) => {
+    console.log(stakePool, 'stake pool');
     if (!stakePool) return;
     const {
       mint_token: { address: mintAddress },
@@ -310,7 +315,7 @@ class StakePool extends Component {
     const { classes, stakePool } = this.props;
     const stakePools = Object.values(stakePool) || [];
 
-    const { visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading } = this.state;
+    const { isAccess, visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading } = this.state;
 
     return (
       <Grid container>
@@ -330,7 +335,8 @@ class StakePool extends Component {
               <TableHead>
                 <TableRow style={{ borderBottom: '1px solid #dadada' }}>
                   {COLS.map((e, idx) => {
-                    return <TableCell key={idx}>{e.label}</TableCell>;
+                    const tableCell = (!isAccess && e.key !== 'seed') ? <TableCell key={idx}>{e.label}</TableCell> : null;
+                    return tableCell;
                   })}
                 </TableRow>
               </TableHead>
