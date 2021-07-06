@@ -8,7 +8,7 @@ export default theme => ({
   },
   paper: {
     padding: theme.spacing(4),
-    borderRadius: theme.shape.borderRadius * 2
+    borderRadius: theme.shape.borderRadius * 2,
   },
   icon: {
     width: theme.spacing(3),
@@ -61,6 +61,7 @@ export default theme => ({
   },
   button: {
     '& button': {
+      padding: theme.spacing(1),
       textTransform: 'capitalize',
     }
   },
@@ -68,12 +69,22 @@ export default theme => ({
     padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
     borderRadius: theme.shape.borderRadius / 3,
     backgroundColor: theme.palette.background.secondary,
-    width: '100%',
+    // width: '100%',
   },
   backdrop: {
     background: 'linear-gradient(163.28deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%)',
     backdropFilter: `blur(${theme.spacing(2)}px)`,
     WebkitBackdropFilter: `blur(${theme.spacing(2)}px)`,
     zIndex: theme.zIndex.tooltip + 1,
-  }
+  },
+  outlineInput: {
+    border: '1px solid',
+    borderColor: theme.palette.border.default,
+    borderRadius: theme.shape.borderRadius / 3,
+    padding: `${theme.spacing(1)}px ${theme.spacing(1) + 2}px`,
+    '& input': {
+      textAlign: 'right',
+      padding: `${theme.spacing(0)} ${theme.spacing(2)}px`
+    }
+  },
 });

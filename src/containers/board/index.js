@@ -18,7 +18,6 @@ import ROI from './roi';
 import Reserve from './reserve';
 import Price from './price';
 import Reference from './reference';
-import Farming from './farming';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
