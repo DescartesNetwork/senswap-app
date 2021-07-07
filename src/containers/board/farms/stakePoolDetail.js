@@ -14,7 +14,7 @@ import Button from "senswap-ui/button";
 import { setError, setSuccess } from "modules/ui.reducer";
 import { getStakePools } from "modules/stakePool.reducer";
 import Paper from 'senswap-ui/paper';
-import styles from "../styles";
+import styles from "./styles";
 import Farm from "../../../helpers/farm";
 import Avatar, { AvatarGroup } from "senswap-ui/avatar";
 class Farming extends Component {
@@ -177,7 +177,7 @@ class Farming extends Component {
                       </Typography>
                     </Grid>
                     <Grid item xs={12}>
-                      <Grid container className={classes.outlineInput} spacing={0}>
+                      <Grid container alignItems="center" className={classes.outlineInput} spacing={0}>
                         <Grid item xs={7}>
                           <Grid container alignItems="center">
                             <Grid item>

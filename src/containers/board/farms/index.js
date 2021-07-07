@@ -18,9 +18,9 @@ import { getPools, getPool } from 'modules/pool.reducer';
 import configs from 'configs';
 import sol from 'helpers/sol';
 
-import Farming from '../stakePoolDetail/stakePoolDetail';
-import Seed from '../seed';
-import styles from '../styles';
+import Farming from './stakePoolDetail';
+import Seed from './seed';
+import styles from './styles';
 import StakePoolItem from './stakePoolItem';
 import { Backdrop } from '@material-ui/core';
 
@@ -311,7 +311,7 @@ class StakePool extends Component {
     const { classes, stakePool } = this.props;
     const stakePools = Object.values(stakePool) || [];
 
-    const { visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading } = this.state;
+    const { isAccess, visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading } = this.state;
 
     return (
       <Grid container>

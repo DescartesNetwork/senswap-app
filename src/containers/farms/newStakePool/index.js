@@ -25,7 +25,6 @@ import { addStakePool } from 'modules/stakePool.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 import ListLPT from './components/ListLPT';
-import NewStakePoolContent from './components/Content';
 import NewStakePoolHeader from './components/Header.js';
 import { Backdrop } from '@material-ui/core';
 
@@ -76,13 +75,13 @@ class NewStakePool extends Component {
 
   onChange = (e) => {
     const { name, value } = e.target;
-    if(/[^\d/.]/.test(value)) return;
+    if (/[^\d/.]/.test(value)) return;
     return this.setState({ [name]: value });
   };
   onBlurNumber = (e) => {
     const { name, value } = e.target;
     let valueNumber = Number(value);
-    if(Number.isNaN(valueNumber) || !valueNumber) valueNumber = 0;
+    if (Number.isNaN(valueNumber) || !valueNumber) valueNumber = 0;
     return this.setState({ [name]: valueNumber });
   };
 
@@ -170,9 +169,6 @@ class NewStakePool extends Component {
         <NewStakePoolHeader onClose={onClose}></NewStakePoolHeader>
         <DialogContent>
           <Grid container spacing={4}>
-            {/* Description */}
-            <NewStakePoolContent></NewStakePoolContent>
-
             {/* Reward Token */}
             <Grid container item xs={12} alignItems="center" spacing={0}>
               <Grid item xs={12}>
@@ -220,7 +216,7 @@ class NewStakePool extends Component {
                 onFocus={(e) => {
                   e.target.select();
                 }}
-                onBlur={(e)=>this.onBlurNumber(e)}
+                onBlur={(e) => this.onBlurNumber(e)}
               />
             </Grid>
 
@@ -234,7 +230,10 @@ class NewStakePool extends Component {
                 onFocus={(e) => {
                   e.target.select();
                 }}
-                onBlur={(e)=>this.onBlurNumber(e)}
+                onBlur={(e) => this.onBlurNumber(e)}
+                InputProps={{
+                  endAdornment: <Typography color="textSecondary">Second</Typography>
+                }}
               />
             </Grid>
 

@@ -45,7 +45,7 @@ class StakePool extends Component {
       ],
       data: [],
       visible: false,
-      seedData: [],
+      modalData: [],
       stakeLoading: false,
       unStakeLoading: false,
       loading: false,
@@ -90,7 +90,7 @@ class StakePool extends Component {
   }
   onClose = () => {
     return this.setState({
-      seedData: [],
+      modalData: [],
       stakeLoading: false,
       unStakeLoading: false,
       seedLoading: false,
@@ -103,7 +103,7 @@ class StakePool extends Component {
     const { mint_token: { address: mintAddress } } = data;
     const mint = await this.onAccountData(mintAddress);
     data.mint_details = mint;
-    this.setState({ visible: true, seedData: data });
+    this.setState({ visible: true, modalData: data });
   }
 
   onAccountData = async (mintAddress) => {
@@ -118,7 +118,7 @@ class StakePool extends Component {
 
   onHandleStake = async (amount, address, type) => {
     const { wallet: { user: { address: userAddress } } } = this.props;
-    const { seedData: { address: stakePoolAddress } } = this.state;
+    const { modalData: { address: stakePoolAddress } } = this.state;
     const { sol: { senAddress } } = configs;
     const { address: LPAddress } = await sol.scanAccount(address, userAddress);
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
@@ -178,7 +178,7 @@ class StakePool extends Component {
     }
   }
   onHandleHarvest = async () => {
-    const { seedData: { address: stakePoolAddress } } = this.state;
+    const { modalData: { address: stakePoolAddress } } = this.state;
     const { wallet: { user: { address: userAddress } } } = this.props;
     const wallet = window.senswap.wallet;
     const { sol: { senAddress } } = configs;
@@ -196,7 +196,7 @@ class StakePool extends Component {
 
   onHandleSeed = async (amount, type) => {
     const { wallet: { user: { address: userAddress } } } = this.props;
-    const { seedData: { address: stakePoolAddress } } = this.state;
+    const { modalData: { address: stakePoolAddress } } = this.state;
     const { sol: { senAddress } } = configs;
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
     const reserveAmount = ssjs.decimalize(amount, DECIMAL);
@@ -257,19 +257,19 @@ class StakePool extends Component {
     const { mint_token: { address: mintAddress } } = data;
     const mint = await this.onAccountData(mintAddress);
     data.mint_details = mint;
-    this.setState({ visibleSeed: true, seedData: data });
+    this.setState({ visibleSeed: true, modalData: data });
   }
   onCloseSeed = () => {
     this.setState({
       visibleSeed: false,
-      seedData: []
+      modalData: []
     })
   }
 
   render() {
     const { classes } = this.props;
     const {
-      fields, data, visible, seedData,
+      fields, data, visible, modalData,
       stakeLoading, unStakeLoading, loading, visibleSeed,
       seedLoading, unSeedLoading
     } = this.state;
@@ -326,14 +326,14 @@ class StakePool extends Component {
         onClose={this.onClose}
         stakeLoading={stakeLoading}
         unStakeLoading={unStakeLoading}
-        seedData={seedData}
+        modalData={modalData}
         onHandleStake={this.onHandleStake}
         onHandleHarvest={this.onHandleHarvest}
       />
       <Seed
         visible={visibleSeed}
         onClose={this.onCloseSeed}
-        seedData={seedData}
+        modalData={modalData}
         seedLoading={seedLoading}
         unSeedLoading={unSeedLoading}
         onHandleSeed={this.onHandleSeed}

@@ -18,6 +18,7 @@ import ROI from './roi';
 import Reserve from './reserve';
 import Price from './price';
 import Reference from './reference';
+import Farms from './farms/index';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
@@ -95,6 +96,14 @@ class Board extends Component {
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
         <Reference poolData={data} />
+      </Grid>
+      <Grid item xs={12}>
+        <Drain size={1} />
+      </Grid>
+      {/* Farms */}
+
+      <Grid item xs={12}>
+        <Farms poolData={data} />
       </Grid>
     </Grid>
   }
