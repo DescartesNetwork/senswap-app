@@ -91,7 +91,7 @@ function StakeAccounts(props) {
   useEffect(() => {
     async function fetchData() {
       for (const address of stakeAccounts) {
-        await dispatch(getStakeAccountData(address));
+        dispatch(getStakeAccountData(address));
       }
     }
     fetchData();
