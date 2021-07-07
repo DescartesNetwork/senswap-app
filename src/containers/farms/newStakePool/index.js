@@ -25,7 +25,6 @@ import { addStakePool } from 'modules/stakePool.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
 import ListLPT from './components/ListLPT';
-import NewStakePoolContent from './components/Content';
 import NewStakePoolHeader from './components/Header.js';
 import { Backdrop } from '@material-ui/core';
 
@@ -76,14 +75,15 @@ class NewStakePool extends Component {
 
   onChange = (e) => {
     const { name, value } = e.target;
-    if(/[^\d/.]/.test(value)) return;
+    if (/[^\d\\.]/.test(value)) return;
     return this.setState({ [name]: value });
   };
   onBlurNumber = (e) => {
     const { name, value } = e.target;
-    let valueNumber = Number(value);
-    if(Number.isNaN(valueNumber) || !valueNumber) valueNumber = 0;
-    return this.setState({ [name]: valueNumber });
+    const decimals = 9;
+    if (!/^[\d]+(\.\d+)?$/.test(value) || Number(value) < Math.pow(10, -decimals))
+      return this.setState({ [name]: '0' });
+    return this.setState({ [name]: value });
   };
 
   onChangePeriod = (e) => {
@@ -170,9 +170,6 @@ class NewStakePool extends Component {
         <NewStakePoolHeader onClose={onClose}></NewStakePoolHeader>
         <DialogContent>
           <Grid container spacing={4}>
-            {/* Description */}
-            <NewStakePoolContent></NewStakePoolContent>
-
             {/* Reward Token */}
             <Grid container item xs={12} alignItems="center" spacing={0}>
               <Grid item xs={12}>
@@ -213,28 +210,28 @@ class NewStakePool extends Component {
             <Grid item xs={6}>
               <TextField
                 name="reward"
-                label="Reward"
+                label="Reward (Sen/Period)"
                 variant="contained"
                 value={reward}
                 onChange={(e) => this.onChange(e)}
                 onFocus={(e) => {
                   e.target.select();
                 }}
-                onBlur={(e)=>this.onBlurNumber(e)}
+                onBlur={(e) => this.onBlurNumber(e)}
               />
             </Grid>
 
             <Grid item xs={6}>
               <TextField
                 name="period"
-                label="Period"
+                label="Period (Seconds)"
                 value={period}
                 variant="contained"
                 onChange={(e) => this.onChange(e)}
                 onFocus={(e) => {
                   e.target.select();
                 }}
-                onBlur={(e)=>this.onBlurNumber(e)}
+                onBlur={(e) => this.onBlurNumber(e)}
               />
             </Grid>
 
@@ -291,7 +288,7 @@ const mapDispatchToProps = (dispatch) =>
 
 NewStakePool.defaultProps = {
   visible: false,
-  onClose: () => { },
+  onClose: () => {},
 };
 
 NewStakePool.propTypes = {
