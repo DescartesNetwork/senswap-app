@@ -85,6 +85,7 @@ export default theme => ({
     borderColor: theme.palette.border.default,
     borderRadius: theme.shape.borderRadius / 3,
     padding: `${theme.spacing(1)}px ${theme.spacing(1) + 2}px`,
+    alignItems: 'center',
     '& input': {
       textAlign: 'right',
       padding: `${theme.spacing(0)} ${theme.spacing(2)}px`
