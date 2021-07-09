@@ -79,14 +79,14 @@ class Farming extends Component {
     //
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const total = Number(ssjs.undecimalize(total_shares, decimals));
-    console.log("lpt",lpt)
-    console.log("total",total)
+    console.log("lpt", lpt)
+    console.log("total", total)
     const portion = total ? lpt / total * 100 : 0;
 
     return (
       <Fragment>
         <Dialog open={visible} onClose={onClose}>
-          <DialogTitle>Stat farming</DialogTitle>
+          <DialogTitle>Start farming</DialogTitle>
           <DialogContent>
             <Grid container alignItems="center">
               {/* Annual percentage */}
@@ -116,7 +116,7 @@ class Farming extends Component {
                 <Drain size={1} />
               </Grid>
 
-              {/* Havest */}
+              {/* Harvest */}
 
               <Grid item xs={12}>
                 <Typography color="textSecondary">Pending reward</Typography>

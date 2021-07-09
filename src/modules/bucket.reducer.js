@@ -71,42 +71,42 @@ export const getAccountData = (accountAddress, force = false) => {
 /**
  * Get  stake account (Debt) data
  */
- export const GET_DEBT_DATA = 'GET_DEBT_DATA';
- export const GET_DEBT_DATA_OK = 'GET_DEBT_DATA_OK';
- export const GET_DEBT_DATA_FAIL = 'GET_DEBT_DATA_FAIL';
- 
- export const getStakeAccountData = (debtAddress, force = false) => {
-   return async (dispatch, getState) => {
-     dispatch({ type: GET_DEBT_DATA });
-     if (!ssjs.isAddress(debtAddress)) {
-       const er = 'Invalid account address';
-       dispatch({ type: GET_DEBT_DATA_FAIL, reason: er });
-       throw new Error(er);
-     }
- 
-     let { bucket: { [debtAddress]: accountData } } = getState();
-     if (accountData && !force) {
-       const data = { [debtAddress]: accountData }
-       dispatch({ type: GET_DEBT_DATA_OK, data });
-       return accountData;
-     }
- 
-     try {
-       const { api: { base } } = configs;
-       accountData = await farming.getDebtData(debtAddress)
-       const {stake_pool:{address : stakePoolAddress}, account:{address: stakeAccAddr} }= accountData
-       const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
-       accountData.pool = poolData;
+export const GET_DEBT_DATA = 'GET_DEBT_DATA';
+export const GET_DEBT_DATA_OK = 'GET_DEBT_DATA_OK';
+export const GET_DEBT_DATA_FAIL = 'GET_DEBT_DATA_FAIL';
 
-       const data = { [debtAddress]: accountData , [stakeAccAddr]: accountData.account}
-       dispatch({ type: GET_DEBT_DATA_OK, data });
-       return accountData;
-     } catch (er) {
-       dispatch({ type: GET_DEBT_DATA_FAIL, reason: er.toString() });
-       throw new Error(er);
-     }
-   }
- }
+export const getStakeAccountData = (debtAddress, force = false) => {
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_DEBT_DATA });
+    if (!ssjs.isAddress(debtAddress)) {
+      const er = 'Invalid account address';
+      dispatch({ type: GET_DEBT_DATA_FAIL, reason: er });
+      throw new Error(er);
+    }
+
+    let { bucket: { [debtAddress]: accountData } } = getState();
+    if (accountData && !force) {
+      const data = { [debtAddress]: accountData }
+      dispatch({ type: GET_DEBT_DATA_OK, data });
+      return accountData;
+    }
+
+    try {
+      const { api: { base } } = configs;
+      accountData = await farming.getDebtData(debtAddress)
+      const { stake_pool: { address: stakePoolAddress }, account: { address: stakeAccAddr } } = accountData
+      const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
+      accountData.pool = poolData;
+
+      const data = { [debtAddress]: accountData, [stakeAccAddr]: accountData.account }
+      dispatch({ type: GET_DEBT_DATA_OK, data });
+      return accountData;
+    } catch (er) {
+      dispatch({ type: GET_DEBT_DATA_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
+  }
+}
 
 /**
  * Get mint data
@@ -220,7 +220,7 @@ export const getStakePoolData = (stakePoolAddress, force = false) => {
       } = configs;
       const liteFarming = window.senswap.farming;
       const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
-      if(!poolData?.address) return;
+      if (!poolData?.address) return;
 
       const stakePoolData = await liteFarming.getStakePoolData(stakePoolAddress);
       const dataStore = { [stakePoolAddress]: { ...poolData, ...stakePoolData } };

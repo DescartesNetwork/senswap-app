@@ -151,7 +151,7 @@ class StakePool extends Component {
   stake = async (data) => {
     const { setError, setSuccess } = this.props;
     const wallet = window.senswap.wallet;
-    this.setState({ loading: true, loadingMessage: 'Waiting for stake' });
+    this.setState({ loading: true, loadingMessage: 'Wait for staking' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       //Check Stake Pool Account
@@ -175,7 +175,7 @@ class StakePool extends Component {
 
   unstake = async (data) => {
     const { setError, setSuccess } = this.props;
-    this.setState({ loading: true, loadingMessage: 'Waiting for unstake' });
+    this.setState({ loading: true, loadingMessage: 'Wait for unstaking' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       await liteFarming.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);

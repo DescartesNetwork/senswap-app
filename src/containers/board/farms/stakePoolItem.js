@@ -101,7 +101,7 @@ function StakePoolItem(props) {
           </Button>
         )}
         <Button color="primary" onClick={() => onOpenDetail(poolData)} disabled={!isConnected}>
-          Detail
+          Details
         </Button>
       </TableCell>
     </TableRow>

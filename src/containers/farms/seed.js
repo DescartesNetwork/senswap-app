@@ -42,7 +42,7 @@ class Seed extends Component {
     if (!pool && !pool.mintS) return;
     const { total_shares, mint_token: { decimals } } = pool;
     const share = ssjs.undecimalize(total_shares, decimals);
-    console.log(share, ' sahre');
+    console.log(share, ' share');
     return this.setState({ maxToken: share });
   }
 
@@ -94,7 +94,7 @@ class Seed extends Component {
                     <Typography variant="body2">Address: {address}</Typography>
                   </Grid>
                   <Grid item xs={12}>
-                    <Typography variant="body2">Treasury: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong></Typography>
+                    <Typography variant="body2">Treasury: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong> SEN</Typography>
                   </Grid>
                 </Grid>
               </Paper>
@@ -165,7 +165,7 @@ class Seed extends Component {
                           fullWidth
                         >
                           Seed
-            </Button>}
+                        </Button>}
                     </Grid>
                   </Grid>
                 </Grid>
