@@ -33,8 +33,13 @@ class Wallet extends Component {
   onCloseNewPool = () => this.setState({ visibleNewPool: false });
 
   render() {
-    const { classes, wallet: { user: { address } }, ui: { leftbar } } = this.props;
+    const { classes, wallet: { user: { address, role } }, ui: { leftbar } } = this.props;
     const { visibleNewPool } = this.state;
+
+    let isAdmin = false;
+    if (address) {
+      isAdmin = role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator';
+    }
 
     return <Grid container spacing={0}>
       <Grid item xs={12}>
@@ -56,9 +61,8 @@ class Wallet extends Component {
           <Grid item>
             <Typography variant="h4">Stake Pools</Typography>
           </Grid>
-          {!address ? <Grid item>
-            <WalletButton />
-          </Grid> : <Fragment>
+          {!address ? <Grid item><WalletButton /></Grid> : null}
+          {isAdmin ? <Fragment>
             <Grid item>
               <Button
                 variant="contained"
@@ -70,7 +74,7 @@ class Wallet extends Component {
               </Button>
               <NewStakePool visible={visibleNewPool} onClose={this.onCloseNewPool} />
             </Grid>
-          </Fragment>}
+          </Fragment> : null}
         </Grid>
       </Grid>
     </Grid>
