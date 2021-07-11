@@ -38,12 +38,11 @@ class Seed extends Component {
   }
 
   getMaxToken = () => {
-    const { detail: { pool } } = this.props;
-    if (!pool && !pool.mintS) return;
-    const { total_shares, mint_token: { decimals } } = pool;
-    const share = ssjs.undecimalize(total_shares, decimals);
-    console.log(share, ' sahre');
-    return this.setState({ maxToken: share });
+    const { detail: { pool, amount: accAmount } } = this.props;
+    if (!pool) return;
+    const { mint_token: { decimals } } = pool;
+    const total = ssjs.undecimalize(accAmount, decimals);
+    return this.setState({ maxToken: total });
   }
 
   onChange = () => {
@@ -51,14 +50,19 @@ class Seed extends Component {
     this.setState({ maxToken: value });
   }
 
+  onHandleClose = () => {
+    const { onClose } = this.props;
+    this.setState({ maxToken: 0 });
+    return onClose();
+  }
+
   render() {
     const { maxToken } = this.state;
-    const { classes, visible, onClose, detail: data, seedLoading, unSeedLoading } = this.props;
+    const { classes, visible, detail: data, seedLoading, unSeedLoading } = this.props;
     if (!data || !data.pool) return null;
     const {
       pool: {
         treasury_sen: { amount },
-        address,
         mintS: { icon: iconS, symbol: symbolS },
         mintA: { icon: iconA, symbol: symbolA },
         mintB: { icon: iconB, symbol: symbolB },
@@ -69,7 +73,7 @@ class Seed extends Component {
     const icons = [iconA, iconB, iconS];
     const name = `${symbolA} x ${symbolB} x ${symbolS}`;
     return <Fragment>
-      <Dialog open={visible} onClose={onClose}>
+      <Dialog open={visible} onClose={this.onHandleClose}>
         <DialogTitle>Seed / Unseed</DialogTitle>
         <DialogContent>
           <Grid container alignItems="center">
@@ -81,7 +85,7 @@ class Seed extends Component {
                 <Grid container>
                   <Grid item xs={12}>
                     <Grid container alignItems="center" spacing={0}>
-                      <Typography variant="body2">From:</Typography>
+                      <Typography color="textSecondary" variant="body2">From:</Typography>
                       <Grid item>
                         <Avatar src={iconS} />
                       </Grid>
@@ -91,28 +95,25 @@ class Seed extends Component {
                     </Grid>
                   </Grid>
                   <Grid item xs={12}>
-                    <Typography variant="body2">Address: {address}</Typography>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="body2">Treasury: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong></Typography>
+                    <Typography color="textSecondary" variant="body2">Available: <strong style={{ color: '#f31241' }}>{accAmount ? ssjs.undecimalize(accAmount, decimals) : 0}</strong> SEN</Typography>
                   </Grid>
                 </Grid>
               </Paper>
             </Grid>
             {/* Seed + unSeed */}
             <Grid item xs={12}>
-              <Typography color="textPrimary">Start seeding: </Typography>
+              <Typography color="textSecondary">Start seeding: </Typography>
             </Grid>
             <Grid item xs={12}>
               <Paper className={classes.formPaper}>
                 <Grid container>
                   <Grid item xs={12}>
-                    <Typography>Available: <strong style={{ color: '#f31241' }}>{accAmount ? ssjs.undecimalize(accAmount, decimals) : 0}</strong> SEN</Typography>
+                    <Typography color="textSecondary" variant="body2">Total SEN: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong></Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Grid container className={classes.outlineInput} spacing={0}>
                       <Grid item xs={1}>
-                        <Typography variant="body2">To: </Typography>
+                        <Typography color="textSecondary" variant="body2">To: </Typography>
                       </Grid>
                       <Grid item xs={6}>
                         <Grid container alignItems="center">
@@ -165,7 +166,7 @@ class Seed extends Component {
                           fullWidth
                         >
                           Seed
-            </Button>}
+                        </Button>}
                     </Grid>
                   </Grid>
                 </Grid>
@@ -173,6 +174,7 @@ class Seed extends Component {
               </Paper>
             </Grid>
           </Grid>
+          <Drain size={2} />
         </DialogContent>
       </Dialog>
     </Fragment>

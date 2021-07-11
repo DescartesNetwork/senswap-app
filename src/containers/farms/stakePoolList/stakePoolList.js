@@ -160,7 +160,13 @@ class StakePool extends Component {
       try {
         await liteFarming.getStakeAccountData(stakePoolAddress, wallet);
       } catch (error) {
-        newAccount = await liteFarming.initializeAccount(stakePoolAddress, wallet);
+        const newAccount = await liteFarming.initializeAccount(stakePoolAddress, wallet);
+        const {
+          updateWallet,
+          wallet: { stakeAccount }
+        } = this.props;
+        stakeAccount.push(newAccount.debtAddress);
+        updateWallet({ stakeAccount });
       }
       //Stake
       await liteFarming.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
@@ -299,7 +305,6 @@ class StakePool extends Component {
     const { address: senWallet, amount } = await sol.scanAccount(senAddress, userAddress);
 
     const account = await this.fetchAccountData(mintAddress, wallet);
-    console.log(account);
     const debt = await this.fetchDebtData(stakePool.address);
     const poolDetail = {
       pool: stakePool,

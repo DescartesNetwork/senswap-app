@@ -100,10 +100,6 @@ function StakePoolItem(props) {
             Seed
           </Button>
         )}
-        {/* {isAdmin ? <Button variant="outlined" onClick={() => onOpenSeed(poolData)}>
-          Seed
-        </Button> : null
-        } */}
         <Button color="primary" onClick={() => onOpenDetail(poolData)} disabled={!isConnected}>
           Details
         </Button>
