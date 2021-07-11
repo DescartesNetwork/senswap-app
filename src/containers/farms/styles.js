@@ -60,6 +60,7 @@ export default theme => ({
     alignItems: 'center'
   },
   button: {
+    textAlign: 'right',
     '& button': {
       padding: theme.spacing(1),
       textTransform: 'capitalize',

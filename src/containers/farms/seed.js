@@ -81,7 +81,7 @@ class Seed extends Component {
                 <Grid container>
                   <Grid item xs={12}>
                     <Grid container alignItems="center" spacing={0}>
-                      <Typography variant="body2">From:</Typography>
+                      <Typography color="textSecondary" variant="body2">From:</Typography>
                       <Grid item>
                         <Avatar src={iconS} />
                       </Grid>
@@ -91,28 +91,28 @@ class Seed extends Component {
                     </Grid>
                   </Grid>
                   <Grid item xs={12}>
-                    <Typography variant="body2">Address: {address}</Typography>
+                    <Typography color="textSecondary" variant="body2">Address: <span style={{ color: '#fff' }}>{address}</span></Typography>
                   </Grid>
                   <Grid item xs={12}>
-                    <Typography variant="body2">Treasury: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong></Typography>
+                    <Typography color="textSecondary" variant="body2">Available: <strong style={{ color: '#f31241' }}>{accAmount ? ssjs.undecimalize(accAmount, decimals) : 0}</strong> SEN</Typography>
                   </Grid>
                 </Grid>
               </Paper>
             </Grid>
             {/* Seed + unSeed */}
             <Grid item xs={12}>
-              <Typography color="textPrimary">Start seeding: </Typography>
+              <Typography color="textSecondary">Start seeding: </Typography>
             </Grid>
             <Grid item xs={12}>
               <Paper className={classes.formPaper}>
                 <Grid container>
                   <Grid item xs={12}>
-                    <Typography>Available: <strong style={{ color: '#f31241' }}>{accAmount ? ssjs.undecimalize(accAmount, decimals) : 0}</strong> SEN</Typography>
+                    <Typography color="textSecondary" variant="body2">Treasury: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong></Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Grid container className={classes.outlineInput} spacing={0}>
                       <Grid item xs={1}>
-                        <Typography variant="body2">To: </Typography>
+                        <Typography color="textSecondary" variant="body2">To: </Typography>
                       </Grid>
                       <Grid item xs={6}>
                         <Grid container alignItems="center">
@@ -165,7 +165,7 @@ class Seed extends Component {
                           fullWidth
                         >
                           Seed
-            </Button>}
+                        </Button>}
                     </Grid>
                   </Grid>
                 </Grid>
@@ -173,6 +173,7 @@ class Seed extends Component {
               </Paper>
             </Grid>
           </Grid>
+          <Drain size={2} />
         </DialogContent>
       </Dialog>
     </Fragment>
