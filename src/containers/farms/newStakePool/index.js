@@ -163,7 +163,7 @@ class NewStakePool extends Component {
               <CircularProgress color="primary" />
             </Grid>
             <Grid item xs={12}>
-              <Typography align="center">Waiting for create Stake Pool!</Typography>
+              <Typography align="center">Wait for creating Stake Pool!</Typography>
             </Grid>
           </Grid>
         </Backdrop>
@@ -288,7 +288,7 @@ const mapDispatchToProps = (dispatch) =>
 
 NewStakePool.defaultProps = {
   visible: false,
-  onClose: () => {},
+  onClose: () => { },
 };
 
 NewStakePool.propTypes = {

@@ -22,7 +22,7 @@ api.auth = async (auth = false) => {
  */
 
 // Create
-api.post = async (url, params = null, auth = false) => {
+api.post = async (url, params = null, auth = true) => {
   const authHeader = await api.auth(auth);
   try {
     const { data } = await axios({
@@ -60,7 +60,7 @@ api.get = async (url, params = null, auth = false) => {
 }
 
 // Update
-api.put = async (url, params = null, auth = false) => {
+api.put = async (url, params = null, auth = true) => {
   const authHeader = await api.auth(auth);
   try {
     const { data } = await axios({
@@ -79,7 +79,7 @@ api.put = async (url, params = null, auth = false) => {
 }
 
 // Delete
-api.delete = async (url, params = null, auth = false) => {
+api.delete = async (url, params = null, auth = true) => {
   const authHeader = await api.auth(auth);
   try {
     const { data } = await axios({

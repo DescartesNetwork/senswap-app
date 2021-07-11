@@ -42,7 +42,7 @@ class Seed extends Component {
     if (!pool && !pool.mintS) return;
     const { total_shares, mint_token: { decimals } } = pool;
     const share = ssjs.undecimalize(total_shares, decimals);
-    console.log(share, ' sahre');
+    console.log(share, ' share');
     return this.setState({ maxToken: share });
   }
 
