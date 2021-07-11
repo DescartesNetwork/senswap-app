@@ -52,6 +52,25 @@ class UiUx extends Component {
     return setTimeout(() => ele.scrollIntoView(), 300);
   }
 
+  onUnsetError = () =>{
+    const {
+      ui: {
+        error: { visible: errorVisible },
+      },
+      unsetError
+    } = this.props;
+    if(errorVisible) unsetError();
+  }
+
+  onUnsetSuccess = () =>{
+    const {
+      ui: {
+        success: {visible: successVisible},
+      }, unsetSuccess
+    } = this.props;
+    if(successVisible) unsetSuccess();
+  }
+
   render() {
     const { classes } = this.props;
     const {
@@ -77,13 +96,13 @@ class UiUx extends Component {
           </Grid>
         </Backdrop>
         {/* Error dialog */}
-        <Snackbar open={errorVisible} onClose={unsetError} autoHideDuration={10000}>
+        <Snackbar open={errorVisible} onClose={this.onUnsetError} autoHideDuration={10000}>
           <Alert severity="error" onClose={unsetError} >
             <Typography>{errorMsg}</Typography>
           </Alert>
         </Snackbar>
         {/* Success dialog */}
-        <Snackbar open={successVisible} onClose={unsetSuccess} autoHideDuration={10000}>
+        <Snackbar open={successVisible} onClose={this.onUnsetSuccess} autoHideDuration={10000}>
           <Alert severity="success" onClose={unsetSuccess} >
             {successLink ? <Link href={successLink} style={{ color: '#edf7ed' }}>{successMsg} - check it out!</Link> :
               <Typography>{successMsg}</Typography>}

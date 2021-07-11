@@ -47,7 +47,7 @@ function StakePoolItem(props) {
   function renderLoading() {
     return (
       <TableRow>
-        {[1, 2, 3, 4, 5, 6, 7].map((elm) => {
+        {[1, 2, 3, 4, 5, 6].map((elm) => {
           return (
             <TableCell key={elm}>
               <CircularProgress size={17} />
