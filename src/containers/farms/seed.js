@@ -105,7 +105,7 @@ class Seed extends Component {
             </Grid> */}
               {/* Seed + unSeed */}
               <Grid item xs={12}>
-                <Typography variant="body2">Start seeding: </Typography>
+                <Typography variant="body2" color="textSecondary">Start seeding: </Typography>
               </Grid>
               <Grid item xs={12}>
                 <Paper className={classes.formPaper}>
