@@ -12,11 +12,13 @@ import Typography from 'senswap-ui/typography';
 import Drain from 'senswap-ui/drain';
 import TextField from 'senswap-ui/textField';
 import Button from 'senswap-ui/button';
-import { setError, setSuccess } from 'modules/ui.reducer';
-import { getStakePools } from 'modules/stakePool.reducer';
+import CircularProgress from 'senswap-ui/circularProgress';
 import Paper from 'senswap-ui/paper';
 import Farm from 'helpers/farm';
 import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
+
+import { setError, setSuccess } from 'modules/ui.reducer';
+import { getStakePools } from 'modules/stakePool.reducer';
 import Utils from 'helpers/utils';
 import { getStakePoolData, getAccountData, getPoolData } from 'modules/bucket.reducer';
 
@@ -35,7 +37,8 @@ class Farming extends Component {
       debt: {},
       account: {},
       stakeLoading: false,
-      unstakeLoading: false,
+      unStakeLoading: false,
+      harvestLoading: false,
     };
     this.stakeRef = createRef();
   }
@@ -157,7 +160,7 @@ class Farming extends Component {
 
   unstake = async (data) => {
     const { setError, setSuccess } = this.props;
-    this.setState({ loading: true, loadingMessage: 'Wait for unstaking' });
+    this.setState({ unStakeLoading: true, loadingMessage: 'Wait for unstaking' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       await liteFarming.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
@@ -165,7 +168,7 @@ class Farming extends Component {
     } catch (err) {
       await setError(err);
     } finally {
-      this.setState({ loading: false });
+      this.setState({ unStakeLoading: false });
     }
   };
 
@@ -182,6 +185,7 @@ class Farming extends Component {
     const {
       sol: { senAddress },
     } = configs;
+    this.setState({ harvestLoading: true });
     try {
       const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
       await liteFarming.harvest(stakePoolAddress, senWallet, wallet);
@@ -189,6 +193,8 @@ class Farming extends Component {
       this.onClose();
     } catch (err) {
       await setError(err);
+    } finally {
+      this.setState({ harvestLoading: false });
     }
   };
 
@@ -205,7 +211,10 @@ class Farming extends Component {
   };
 
   render() {
-    const { maxToken, stakePoolAddress, debt, account, stakeLoading } = this.state;
+    const {
+      maxToken, stakePoolAddress, debt,
+      stakeLoading, unStakeLoading, harvestLoading
+    } = this.state;
     const { classes, bucket, poolData } = this.props;
     const pool = bucket[stakePoolAddress];
     const { mint_lpt: mint } = poolData;
@@ -250,9 +259,16 @@ class Farming extends Component {
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
-                  <Button variant="contained" color="primary" onClick={this.onHandleHarvest} fullWidth>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={this.onHandleHarvest}
+                    fullWidth
+                    disabled={harvestLoading}
+                    startIcon={harvestLoading ? <CircularProgress size={17} /> : null}
+                  >
                     Harvest
-              </Button>
+                  </Button>
                 </Grid>
               </Grid>
             </Paper>
@@ -328,7 +344,8 @@ class Farming extends Component {
                     color="primary"
                     size="large"
                     onClick={() => this.handleStake('stake')} fullWidth
-                    disable={stakeLoading}
+                    disabled={stakeLoading}
+                    startIcon={stakeLoading ? <CircularProgress size={17} /> : null}
                   >
                     Stake
                   </Button>
@@ -337,6 +354,8 @@ class Farming extends Component {
                   <Button
                     variant="outlined"
                     onClick={() => this.handleStake('unstake')} fullWidth
+                    disabled={unStakeLoading}
+                    startIcon={unStakeLoading ? <CircularProgress size={17} /> : null}
                   >
                     Unstake
                   </Button>

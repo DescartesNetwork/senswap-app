@@ -50,6 +50,9 @@ class StakePool extends Component {
       loading: false,
       visibleSeed: false,
       isAccess: false,
+      stakeLoading: false,
+      unStakeLoading: false,
+      harvestLoading: false,
     };
   }
   componentDidMount() {
@@ -152,7 +155,7 @@ class StakePool extends Component {
   stake = async (data) => {
     const { setError, setSuccess } = this.props;
     const wallet = window.senswap.wallet;
-    this.setState({ loading: true, loadingMessage: 'Wait for staking' });
+    this.setState({ stakeLoading: true, loadingMessage: 'Wait for staking' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       //Check Stake Pool Account
@@ -184,7 +187,7 @@ class StakePool extends Component {
       console.log('Error');
       await setError(err);
     } finally {
-      this.setState({ loading: false }, () => {
+      this.setState({ stakeLoading: false }, () => {
         this.onClose();
       });
     }
@@ -192,7 +195,7 @@ class StakePool extends Component {
 
   unstake = async (data) => {
     const { setError, setSuccess } = this.props;
-    this.setState({ loading: true, loadingMessage: 'Wait for unstaking' });
+    this.setState({ unStakeLoading: true, loadingMessage: 'Wait for unstaking' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       await liteFarming.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
@@ -200,7 +203,7 @@ class StakePool extends Component {
     } catch (err) {
       await setError(err);
     } finally {
-      this.setState({ loading: false }, () => {
+      this.setState({ unStakeLoading: false }, () => {
         this.onClose();
       });
     }
@@ -223,13 +226,17 @@ class StakePool extends Component {
     const {
       sol: { senAddress },
     } = configs;
+    this.setState({ harvestLoading: true });
     try {
       const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
       await liteFarming.harvest(stakePoolAddress, senWallet, wallet);
       await setSuccess('Harvest successfully');
-      this.onClose();
     } catch (err) {
       await setError(err);
+    } finally {
+      this.setState({ harvestLoading: false }, () => {
+        this.onClose();
+      });
     }
   };
 
@@ -327,7 +334,10 @@ class StakePool extends Component {
     const { classes, stakePool } = this.props;
     const stakePools = Object.values(stakePool) || [];
 
-    const { visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading } = this.state;
+    const {
+      visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading,
+      harvestLoading, stakeLoading, unStakeLoading
+    } = this.state;
 
     return (
       <Grid container>
@@ -374,6 +384,9 @@ class StakePool extends Component {
           detail={poolDetail}
           onHandleStake={this.handleStake}
           onHandleHarvest={this.onHandleHarvest}
+          stakeLoading={stakeLoading}
+          unStakeLoading={unStakeLoading}
+          harvestLoading={harvestLoading}
         />
         {/* Modal seed - admin only */}
         <Seed

@@ -149,21 +149,25 @@ class Seed extends Component {
                 <Grid item xs={12} align="end">
                   <Grid container>
                     <Grid item xs={6} className={classes.button}>
-                      {unSeedLoading ? <Button variant="outlined" color="secondary" fullWidth disabled>Unseed</Button> :
-                        <Button variant="outlined" onClick={() => this.handleSeed('unseed')} fullWidth>Unseed</Button>}
+                      <Button
+                        variant="outlined"
+                        onClick={() => this.handleSeed('unseed')}
+                        fullWidth
+                        disabled={unSeedLoading}
+                        startIcon={unSeedLoading ? <CircularProgress size={17} /> : null}
+                      >Unseed</Button>
                     </Grid>
                     <Grid item xs={6} className={classes.button}>
-                      {seedLoading ? <Button
+                      <Button
                         variant="contained"
-                        color="secondary" fullWidth disabled>Seed <CircularProgress size={16} /></Button> :
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => this.handleSeed()}
-                          fullWidth
-                        >
-                          Seed
-                        </Button>}
+                        color="primary"
+                        onClick={() => this.handleSeed()}
+                        fullWidth
+                        disabled={seedLoading}
+                        startIcon={seedLoading ? <CircularProgress size={17} /> : null}
+                      >
+                        Seed
+                        </Button>
                     </Grid>
                   </Grid>
                 </Grid>

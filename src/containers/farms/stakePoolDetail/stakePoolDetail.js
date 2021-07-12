@@ -11,13 +11,17 @@ import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Drain from 'senswap-ui/drain';
 import TextField from 'senswap-ui/textField';
 import Button from 'senswap-ui/button';
+import Paper from 'senswap-ui/paper';
+import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
+import CircularProgress from 'senswap-ui/circularProgress';
+
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
-import Paper from 'senswap-ui/paper';
-import styles from '../styles';
-import Farm from '../../../helpers/farm';
-import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
+import Farm from 'helpers/farm';
 import Utils from 'helpers/utils';
+
+import styles from '../styles';
+
 class Farming extends Component {
   constructor() {
     super();
@@ -59,10 +63,9 @@ class Farming extends Component {
   render() {
     const { maxToken } = this.state;
     const {
-      classes,
-      visible,
-      onClose,
+      classes, visible, onClose,
       detail: { mint, account, pool, debt },
+      stakeLoading, unStakeLoading, harvestLoading,
     } = this.props;
     // //Render Stake Pool Element
     if (!pool || !pool.mintS) return null;
@@ -153,7 +156,13 @@ class Farming extends Component {
                       </Typography>
                     </Grid>
                     <Grid item xs={12} align="end">
-                      <Button variant="contained" color="primary" onClick={this.handleHarvest} fullWidth>
+                      <Button
+                        variant="contained"
+                        color="primary" onClick={this.handleHarvest}
+                        fullWidth
+                        disabled={harvestLoading}
+                        startIcon={harvestLoading ? <CircularProgress size={17} /> : null}
+                      >
                         Harvest
                       </Button>
                     </Grid>
@@ -219,12 +228,24 @@ class Farming extends Component {
                       </Grid>
                     </Grid>
                     <Grid item xs={6} className={classes.button}>
-                      <Button variant="contained" color="primary" onClick={() => this.handleStake('stake')} fullWidth>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => this.handleStake('stake')} fullWidth
+                        disabled={stakeLoading}
+                        startIcon={stakeLoading ? <CircularProgress size={17} /> : null}
+                      >
                         Stake
                       </Button>
                     </Grid>
                     <Grid item xs={6} className={classes.button}>
-                      <Button variant="outlined" onClick={() => this.handleStake('unstake')} fullWidth>
+                      <Button
+                        variant="outlined"
+                        onClick={() => this.handleStake('unstake')}
+                        fullWidth
+                        disabled={unStakeLoading}
+                        startIcon={unStakeLoading ? <CircularProgress size={17} /> : null}
+                      >
                         Unstake
                       </Button>
                     </Grid>
