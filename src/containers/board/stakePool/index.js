@@ -247,7 +247,7 @@ class Farming extends Component {
 
           {/* Harvest */}
           <Grid item xs={12}>
-            <Typography color="textSecondary">Pending reward</Typography>
+            <Typography variant="body2" color="textSecondary">Pending reward</Typography>
           </Grid>
           <Grid item xs={12}>
             <Paper className={classes.formPaper}>
@@ -255,10 +255,10 @@ class Farming extends Component {
                 <Grid item xs={12} md={6}>
                   <Grid container>
                     <Grid item>
-                      <Typography color="textSecondary" variant="body2">Reward:</Typography>
+                      <Typography color="textSecondary">Reward:</Typography>
                     </Grid>
                     <Grid item>
-                      <Typography variant="body2">
+                      <Typography>
                         <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[0]a')}</b> SEN
                           </Typography>
                     </Grid>
@@ -267,10 +267,10 @@ class Farming extends Component {
                 <Grid item xs={12} md={6}>
                   <Grid container justify="flex-end">
                     <Grid item>
-                      <Typography color="textSecondary" variant="body2">Period:</Typography>
+                      <Typography color="textSecondary">Period:</Typography>
                     </Grid>
                     <Grid item>
-                      <Typography variant="body2">{numeral(pool.period).format('0,0')} second</Typography>
+                      <Typography>{numeral(pool.period).format('0,0')} second</Typography>
                     </Grid>
                   </Grid>
                 </Grid>
@@ -293,7 +293,7 @@ class Farming extends Component {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography color="textSecondary">Stake / Unstake</Typography>
+            <Typography variant="body2" color="textSecondary">Stake / Unstake</Typography>
           </Grid>
 
           {/* Stake + unStake */}
@@ -311,10 +311,10 @@ class Farming extends Component {
                 <Grid item xs={12} md={6}>
                   <Grid container alignItems="flex-end">
                     <Grid item>
-                      <Typography color="textSecondary" variant="body2">Total shares:</Typography>
+                      <Typography color="textSecondary">Total shares:</Typography>
                     </Grid>
                     <Grid item>
-                      <Typography variant="body2">
+                      <Typography>
                         {pool && pool.total_shares ? ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals) : 0}
                       </Typography>
                     </Grid>
@@ -323,10 +323,10 @@ class Farming extends Component {
                 <Grid item xs={12} md={6}>
                   <Grid container justify="flex-end" alignItems="flex-end">
                     <Grid item>
-                      <Typography color="textSecondary" variant="body2">Your LPT:</Typography>
+                      <Typography color="textSecondary">Your LPT:</Typography>
                     </Grid>
                     <Grid item>
-                      <Typography variant="body2">{numeral(lpt).format('0.[0]')} ({numeral(portion).format('0.[0][0]')}%)</Typography>
+                      <Typography>{numeral(lpt).format('0.[0]')} ({numeral(portion).format('0.[0][0]')}%)</Typography>
                     </Grid>
                   </Grid>
                 </Grid>

@@ -98,4 +98,7 @@ export default (theme) => ({
     color: '#ff3122',
     fontWeight: 'bold',
   },
+  label: {
+    display: 'flex',
+  }
 });
