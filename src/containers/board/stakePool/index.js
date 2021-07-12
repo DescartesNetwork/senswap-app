@@ -20,11 +20,9 @@ import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
-import Utils from 'helpers/utils';
 import { getStakePoolData, getAccountData, getPoolData } from 'modules/bucket.reducer';
 
 import styles from './styles';
-import accounts from 'containers/wallet/assets/accounts';
 
 const liteFarming = new ssjs.LiteFarming();
 
@@ -235,6 +233,7 @@ class Farming extends Component {
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const total = Number(ssjs.undecimalize(total_shares, decimals));
     const portion = total ? lpt / total * 100 : 0;
+    console.log(Farm.calculateReward(pool, debt), typeof Farm.calculateReward(pool, debt), 'type of reward');
     return (
       <Paper className={classes.paper}>
         <Grid container alignItems="center">
@@ -259,7 +258,7 @@ class Farming extends Component {
                     </Grid>
                     <Grid item>
                       <Typography>
-                        <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.00')}</b> SEN
+                        <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
                           </Typography>
                     </Grid>
                   </Grid>
@@ -277,7 +276,7 @@ class Farming extends Component {
                 <Grid item xs={12} align="end">
                   <Button
                     variant="contained"
-                    color="primary" onClick={this.handleHarvest}
+                    color="primary" onClick={this.onHandleHarvest}
                     fullWidth
                     disabled={harvestLoading}
                     startIcon={harvestLoading ? <CircularProgress size={17} /> : null}
@@ -326,7 +325,7 @@ class Farming extends Component {
                       <Typography color="textSecondary">Your LPT:</Typography>
                     </Grid>
                     <Grid item>
-                      <Typography>{numeral(lpt).format('0.[0]')} ({numeral(portion).format('0.[0][0]')}%)</Typography>
+                      <Typography>{numeral(lpt).format('0.[0]')} ({numeral(portion).format('0.[00]')}%)</Typography>
                     </Grid>
                   </Grid>
                 </Grid>

@@ -113,7 +113,7 @@ class Seed extends Component {
                     <Grid item className={classes.label}>
                       <Typography color="textSecondary">Total SEN:</Typography>
                       <Typography className={classes.amount}>
-                        {amount ? numeral(ssjs.undecimalize(amount, decimals)).format('0,0.00') : 0}
+                        {amount ? numeral(ssjs.undecimalize(amount, decimals)).format('0,0.[00]') : 0}
                       </Typography>
                       <Typography>SEN</Typography>
                     </Grid>
@@ -121,7 +121,7 @@ class Seed extends Component {
                     <Grid item className={classes.label}>
                       <Typography color="textSecondary">Available SEN: </Typography>
                       <Typography className={classes.amount}>
-                        {accAmount ? numeral(ssjs.undecimalize(accAmount, decimals)).format('0,0.00') : 0}
+                        {accAmount ? numeral(ssjs.undecimalize(accAmount, decimals)).format('0,0.[00]') : 0}
                       </Typography>
                       <Typography>SEN</Typography>
                     </Grid>
