@@ -93,7 +93,7 @@ function StakePoolItem(props) {
       </TableCell>
       <TableCell>0%</TableCell>
       <TableCell>0%</TableCell>
-      <TableCell>{numeral(ssjs.undecimalize(total_shares, token.decimals)).format('0,0.00')}</TableCell>
+      <TableCell>{numeral(ssjs.undecimalize(total_shares, token.decimals)).format('0,0.[00]')}</TableCell>
 
       <TableCell className={classes.button}>
         {isAdmin && (
