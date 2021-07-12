@@ -213,7 +213,7 @@ class Farming extends Component {
                           <Typography color="textSecondary">Your LPT:</Typography>
                         </Grid>
                         <Grid item>
-                          <Typography>numeral(lpt).format('0,0.[00]') ({numeral(portion).format('0.[0]')}%)</Typography>
+                          <Typography>{numeral(lpt).format('0,0.[00]')} ({numeral(portion).format('0.[0]')}%)</Typography>
                         </Grid>
                       </Grid>
                     </Grid>
