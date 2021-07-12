@@ -71,7 +71,7 @@ function StakePoolItem(props) {
 
   return (
     <TableRow>
-      <TableCell>{index + 1}</TableCell>
+      <TableCell className={classes.columnIndex}>{index + 1}</TableCell>
       <TableCell className={classes.assets}>
         <AvatarGroup>
           {icons ? (

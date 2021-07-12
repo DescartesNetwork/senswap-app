@@ -28,10 +28,10 @@ import { updateWallet } from 'modules/wallet.reducer';
 const liteFarming = new ssjs.LiteFarming();
 const COLS = [
   { label: '#', key: '' },
-  { label: 'Assets', key: 'assets' },
+  { label: 'ASSETS', key: 'assets' },
   { label: 'APR', key: 'apr' },
   { label: 'APY', key: 'apy' },
-  { label: 'Liquidity', key: 'total_value' },
+  { label: 'LIQUIDITY', key: 'total_value' },
   { label: '', key: 'detail' },
 ];
 
@@ -360,7 +360,7 @@ class StakePool extends Component {
               <TableHead>
                 <TableRow style={{ borderBottom: '1px solid #dadada' }}>
                   {COLS.map((e, idx) => {
-                    return <TableCell key={idx}>{e.label}</TableCell>;
+                    return <TableCell key={idx}>   <Typography color="textSecondary" variant="caption">{e.label}</Typography></TableCell>;
                   })}
                 </TableRow>
               </TableHead>
