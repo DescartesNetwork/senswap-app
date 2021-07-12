@@ -258,7 +258,7 @@ class Farming extends Component {
                     </Grid>
                     <Grid item>
                       <Typography>
-                        <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[0]a')}</b> SEN
+                        <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.00')}</b> SEN
                           </Typography>
                     </Grid>
                   </Grid>

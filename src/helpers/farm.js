@@ -13,7 +13,9 @@ class Farm {
     const d_i = this.bigIntToNumber(debt.debt, 9);
     const D = this.bigIntToNumber(pool.compensation, 18);
 
-    return (p * Math.floor(t) * r_i - d_i + D * r_i);
+    const reward  = p * Math.floor(t) * r_i - d_i + D * r_i;
+
+    return Number(Number(reward).toFixed(8));
   }
 
   // static calculateAPR() {
