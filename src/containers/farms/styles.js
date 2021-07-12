@@ -100,5 +100,8 @@ export default (theme) => ({
   },
   columnIndex: {
     width: 0
+  },
+  label: {
+    display: 'flex',
   }
 });

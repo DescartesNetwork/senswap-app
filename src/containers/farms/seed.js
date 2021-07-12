@@ -110,16 +110,16 @@ class Seed extends Component {
               <Grid item xs={12}>
                 <Paper className={classes.formPaper}>
                   <Grid container justify="space-between">
-                    <Grid item justify="space-between" style={{ display: 'flex' }}>
-                      <Typography color="textSecondary">Total:</Typography>
+                    <Grid item className={classes.label}>
+                      <Typography color="textSecondary">Total SEN:</Typography>
                       <Typography className={classes.amount}>
                         {amount ? numeral(ssjs.undecimalize(amount, decimals)).format('0,0.00') : 0}
                       </Typography>
                       <Typography>SEN</Typography>
                     </Grid>
 
-                    <Grid item justify="space-between" style={{ display: 'flex' }}>
-                      <Typography color="textSecondary">Available: </Typography>
+                    <Grid item className={classes.label}>
+                      <Typography color="textSecondary">Available SEN: </Typography>
                       <Typography className={classes.amount}>
                         {accAmount ? numeral(ssjs.undecimalize(accAmount, decimals)).format('0,0.00') : 0}
                       </Typography>
