@@ -80,7 +80,7 @@ export const addStakePool = (stakePool) => {
 
     const { api: { base } } = configs;
     try {
-      const { data: stakePoolData } = await api.post(base + '/stake-pool', { stakePool });
+      const { data: stakePoolData } = await api.post(base + '/stake-pool', { stakePool }, true);
       const data = { [stakePoolData.address]: stakePoolData }
       dispatch({ type: ADD_STAKE_POOL_OK, data });
       return stakePoolData;
