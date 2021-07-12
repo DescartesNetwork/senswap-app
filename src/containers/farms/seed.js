@@ -107,7 +107,7 @@ class Seed extends Component {
                   <Grid item xs={6}>
                     <Typography color="textSecondary" variant="body2">Available: <strong style={{ color: '#f31241' }}>{accAmount ? ssjs.undecimalize(accAmount, decimals) : 0}</strong> SEN</Typography>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={6} align="end">
                     <Typography color="textSecondary" variant="body2">Total SEN: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong></Typography>
                   </Grid>
                   <Grid item xs={12}>
