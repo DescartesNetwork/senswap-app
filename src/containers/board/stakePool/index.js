@@ -30,45 +30,50 @@ class Farming extends Component {
 
     this.state = {
       maxToken: 0,
-      poolDetails: {},
+      stakePoolAddress: '',
       stakePools: [],
+      debt: {},
+      account: {}
     };
     this.stakeRef = createRef();
   }
   componentDidMount() {
     this.fecthStakePools();
   }
+
   fecthStakePools = async () => {
     const {
       getStakePoolData, getStakePools,
-      poolData
+      poolData: { mint_lpt: { address: mintAddress } },
     } = this.props;
-    console.log(poolData, 'data')
     try {
       let poolAddresses = await getStakePools({}, 9999);
       const promise = poolAddresses.map(({ address }) => {
         return getStakePoolData(address);
       });
       const stakePools = await Promise.all(promise);
-      console.log(stakePools, 'stake pools')
-      this.setState({ stakePools: stakePools }, () => {
-        this.getStakePoolDetails();
+      this.setState({ stakePools: stakePools }, async () => {
+        const stakePoolAddress = await this.getStakePoolAddress();
+        const debt = await this.fetchDebtData(stakePoolAddress);
+        this.setState({ debt: debt });
       });
+      const account = await this.fetchAccountData(mintAddress);
+      this.setState({ account: account });
     } catch (err) {
       console.log(err, 'err');
     }
   }
 
-  getStakePoolDetails = async () => {
+  getStakePoolAddress = async () => {
     const { poolData: {
       mint_lpt: { address: mintAddress }
-    }
+    },
     } = this.props;
-    console.log(mintAddress, 'mintAddress')
     const { stakePools } = this.state;
     try {
-      const poolDetails = stakePools.find(({ mintLPT }) => mintLPT === mintAddress);
-      console.log(stakePools, mintAddress, 'poll details')
+      const { address: stakePoolAddress } = stakePools.find(stakePool => stakePool.mintLPT === mintAddress || stakePool.mint_token.address === mintAddress);
+      this.setState({ stakePoolAddress: stakePoolAddress });
+      return stakePoolAddress;
     } catch (err) {
       console.log(err)
     }
@@ -103,14 +108,10 @@ class Farming extends Component {
       wallet: {
         user: { address: userAddress },
       },
+      bucket,
     } = this.props;
-    const { poolDetails: {
-      pool: {
-        address: stakePoolAddress,
-        mintLPT: mintAddress,
-      },
-    },
-    } = this.state;
+    const { stakePoolAddress } = this.state;
+    const { mintLPT: mintAddress } = bucket[stakePoolAddress];
     const value = this.stakeRef.current.value;
     if (!value) return setError('Amount is required');
     const {
@@ -167,11 +168,7 @@ class Farming extends Component {
   };
 
   onHandleHarvest = async () => {
-    const {
-      poolDetails: {
-        pool: { address: stakePoolAddress },
-      },
-    } = this.state;
+    const { stakePoolAddress } = this.state;
     const {
       setError,
       setSuccess,
@@ -194,9 +191,7 @@ class Farming extends Component {
   };
 
   getMaxToken = () => {
-    const {
-      poolDetails: { account, mint },
-    } = this.state;
+    const { account, mint } = this.state;
 
     const share = ssjs.undecimalize(account.amount, mint.decimals);
     return this.setState({ maxToken: share });
@@ -208,13 +203,12 @@ class Farming extends Component {
   };
 
   render() {
-    const { maxToken, poolDetails } = this.state;
-    const { classes, bucket } = this.props;
-    // console.log(bucket, 'bucket');
+    const { maxToken, stakePoolAddress, debt, account } = this.state;
+    const { classes, bucket, poolData } = this.props;
+    const pool = bucket[stakePoolAddress];
+    const { mint_lpt: mint } = poolData;
     // //Render Stake Pool Element
-    if (!poolDetails || Object.keys(poolDetails).length === 0) return null;
-    const { mint, account, pool, debt } = poolDetails;
-
+    if (!pool) return null;
     const {
       mint_token: { decimals },
       total_shares,
@@ -246,7 +240,7 @@ class Farming extends Component {
             <Paper className={classes.formPaper}>
               <Grid container alignItems="flex-end">
                 <Grid item xs={2}>
-                  <Typography variant="body2">Total shares:</Typography>
+                  <Typography color="textSecondary" variant="body2">Total shares:</Typography>
                 </Grid>
                 <Grid item xs={10}>
                   <Typography>
@@ -255,24 +249,24 @@ class Farming extends Component {
                 </Grid>
 
                 <Grid item xs={2}>
-                  <Typography variant="body2">Your LPT:</Typography>
+                  <Typography color="textSecondary" variant="body2">Your LPT:</Typography>
                 </Grid>
                 <Grid item xs={10}>
                   <Typography>{Utils.prettyNumber(lpt)} ({portion}%)</Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography variant="body2">Period:</Typography>
+                  <Typography color="textSecondary" variant="body2">Period:</Typography>
                 </Grid>
                 <Grid item xs={10}>
                   <Typography>{Utils.prettyNumber(pool.period)} second</Typography>
                 </Grid>
                 <Grid item xs={2}>
-                  <Typography>Reward:</Typography>
+                  <Typography color="textSecondary" variant="body2">Reward:</Typography>
                 </Grid>
                 <Grid item xs={10}>
                   <Typography>
-                    <b style={{ color: '#ff3122' }}>{Utils.prettyNumber(Farm.calculateReward(pool, debt))}</b> SEN
-              </Typography>
+                    {/* <b style={{ color: '#ff3122' }}>{Utils.prettyNumber(Farm.calculateReward(pool, debt))}</b> SEN */}
+                  </Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Button variant="contained" color="primary" onClick={this.onHandleHarvest} fullWidth>

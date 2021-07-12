@@ -171,7 +171,7 @@ class StakePool extends Component {
       //Stake
       await liteFarming.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
       //Update new stake account to wallet
-      if(newAccount){
+      if (newAccount) {
         const {
           updateWallet,
           wallet: { stakeAccounts },

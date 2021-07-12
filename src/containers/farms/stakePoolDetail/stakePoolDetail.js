@@ -97,13 +97,13 @@ class Farming extends Component {
                 <Paper className={classes.formPaper}>
                   <Grid container>
                     <Grid item xs={2}>
-                      <Typography variant="body2">APR:</Typography>
+                      <Typography color="textSecondary" variant="body2">APR:</Typography>
                     </Grid>
                     <Grid item xs={10}>
                       <Typography>{pool.apr || 0}%</Typography>
                     </Grid>
                     <Grid item xs={2}>
-                      <Typography variant="body2">APY:</Typography>
+                      <Typography color="textSecondary" variant="body2">APY:</Typography>
                     </Grid>
                     <Grid item xs={10}>
                       <Typography>{pool.apy || 0}%</Typography>
@@ -124,7 +124,7 @@ class Farming extends Component {
                 <Paper className={classes.formPaper}>
                   <Grid container alignItems="flex-end">
                     <Grid item xs={2}>
-                      <Typography variant="body2">Total shares:</Typography>
+                      <Typography color="textSecondary" variant="body2">Total shares:</Typography>
                     </Grid>
                     <Grid item xs={10}>
                       <Typography>
@@ -133,26 +133,19 @@ class Farming extends Component {
                     </Grid>
 
                     <Grid item xs={2}>
-                      <Typography variant="body2">Your LPT:</Typography>
+                      <Typography color="textSecondary" variant="body2">Your LPT:</Typography>
                     </Grid>
                     <Grid item xs={10}>
-                      <Typography>{Utils.prettyNumber(lpt)}</Typography>
-                    </Grid>
-
-                    <Grid item xs={2}>
-                      <Typography variant="body2">Your Portion:</Typography>
-                    </Grid>
-                    <Grid item xs={10}>
-                      <Typography>{portion}% </Typography>
+                      <Typography>{Utils.prettyNumber(lpt)} ({portion}%)</Typography>
                     </Grid>
                     <Grid item xs={2}>
-                      <Typography variant="body2">Period:</Typography>
+                      <Typography color="textSecondary" variant="body2">Period:</Typography>
                     </Grid>
                     <Grid item xs={10}>
                       <Typography>{Utils.prettyNumber(pool.period)} second</Typography>
                     </Grid>
                     <Grid item xs={2}>
-                      <Typography>Reward:</Typography>
+                      <Typography color="textSecondary" variant="body2">Reward:</Typography>
                     </Grid>
                     <Grid item xs={6}>
                       <Typography>
@@ -180,7 +173,7 @@ class Farming extends Component {
                 <Paper className={classes.formPaper}>
                   <Grid container>
                     <Grid item xs={12}>
-                      <Typography>
+                      <Typography color="textSecondary" variant="body2">
                         LP token:{' '}
                         <b style={{ color: '#ff3122' }}>
                           {Utils.prettyNumber(ssjs.undecimalize(account.amount, mint.decimals))}
