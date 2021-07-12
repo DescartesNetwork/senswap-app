@@ -78,7 +78,7 @@ class Farming extends Component {
     const { maxToken, disableStake, disableUnstake } = this.state;
     const {
       classes, visible, onClose,
-      detail: { pool, debt },
+      detail: { account, mint, pool, debt },
       stakeLoading, unStakeLoading, harvestLoading,
     } = this.props;
     // //Render Stake Pool Element
@@ -186,14 +186,15 @@ class Farming extends Component {
               <Grid item xs={12}>
                 <Paper className={classes.formPaper}>
                   <Grid container>
-                    {/* <Grid item xs={12}>
-                      <Typography color="textSecondary" variant="body2">
-                        LP token:{' '}
-                        <b style={{ color: '#ff3122' }}>
-                          {Utils.prettyNumber(ssjs.undecimalize(account.amount, mint.decimals))}
-                        </b>
+                    <Grid item xs={12} className={classes.label}>
+                      <Typography color="textSecondary">LP token:</Typography>
+                      <Typography color="textSecondary" className={classes.amount}>
+                        {numeral(ssjs.undecimalize(account.amount, mint.decimals)).format('0,0.[00]')}
                       </Typography>
-                    </Grid> */}
+                      <Typography color="textPrimary">
+                        SEN
+                      </Typography>
+                    </Grid>
                     <Grid item xs={12} md={6}>
                       <Grid container alignItems="flex-end">
                         <Grid item>
