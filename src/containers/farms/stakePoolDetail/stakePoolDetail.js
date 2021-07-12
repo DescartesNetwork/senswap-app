@@ -90,7 +90,7 @@ class Farming extends Component {
             <Grid container alignItems="center">
               {/* Annual percentage */}
               <Drain size={2} />
-              <Grid item xs={12}>
+              {/* <Grid item xs={12}>
                 <Typography color="textSecondary">Annual Percentage</Typography>
               </Grid>
               <Grid item xs={12}>
@@ -113,7 +113,7 @@ class Farming extends Component {
               </Grid>
               <Grid item xs={12}>
                 <Drain size={1} />
-              </Grid>
+              </Grid> */}
 
               {/* Harvest */}
 
@@ -147,13 +147,13 @@ class Farming extends Component {
                     <Grid item xs={2}>
                       <Typography color="textSecondary" variant="body2">Reward:</Typography>
                     </Grid>
-                    <Grid item xs={6}>
+                    <Grid item xs={10}>
                       <Typography>
                         <b style={{ color: '#ff3122' }}>{Utils.prettyNumber(Farm.calculateReward(pool, debt))}</b> SEN
                       </Typography>
                     </Grid>
-                    <Grid item xs={4} align="end">
-                      <Button variant="contained" color="primary" onClick={this.handleHarvest}>
+                    <Grid item xs={12} align="end">
+                      <Button variant="contained" color="primary" onClick={this.handleHarvest} fullWidth>
                         Harvest
                       </Button>
                     </Grid>
@@ -231,7 +231,7 @@ class Farming extends Component {
                   </Grid>
                 </Paper>
               </Grid>
-              <Drain size={5} />
+              <Drain size={2} />
             </Grid>
           </DialogContent>
         </Dialog>
