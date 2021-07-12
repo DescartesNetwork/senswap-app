@@ -48,6 +48,8 @@ class StakePool extends Component {
       seedData: [],
       stakeLoading: false,
       unStakeLoading: false,
+      seedLoading: false,
+      unSeedLoading: false,
       loading: false,
       visibleSeed: false,
     };
@@ -215,18 +217,17 @@ class StakePool extends Component {
       reserveAmount: amount, stakePoolAddress,
       senWallet
     } = data;
+    this.setState({ seedLoading: true });
     try {
-      this.setState({ seedLoading: true });
       const seed = await LITE_FARMING.seed(amount, stakePoolAddress, senWallet, wallet);
       if (!seed) throw new Error('Error!');
+      await setSuccess('Successfully');
+    } catch (err) {
+      await setError(err);
+    } finally {
       this.setState({ seedLoading: false }, () => {
         this.onCloseSeed();
       });
-
-      await setSuccess('Successfully');
-
-    } catch (err) {
-      await setError(err);
     }
   }
   unseed = async (data) => {
@@ -236,18 +237,18 @@ class StakePool extends Component {
       reserveAmount: amount, stakePoolAddress,
       senWallet
     } = data;
+    this.setState({ unSeedLoading: true });
     try {
-      this.setState({ unSeedLoading: true });
-      const seed = await LITE_FARMING.unseed(amount, stakePoolAddress, senWallet, wallet);
-      if (!seed) throw new Error('Error!');
-      this.setState({ seedLoading: false }, () => {
-        this.onCloseSeed();
-      });
-
+      const unSeed = await LITE_FARMING.unseed(amount, stakePoolAddress, senWallet, wallet);
+      if (!unSeed) throw new Error('Error!');
       await setSuccess('Successfully');
 
     } catch (err) {
       await setError(err);
+    } finally {
+      this.setState({ unSeedLoading: false }, () => {
+        this.onCloseSeed();
+      });
     }
 
   }

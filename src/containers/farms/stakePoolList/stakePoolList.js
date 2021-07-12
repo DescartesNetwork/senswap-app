@@ -53,6 +53,8 @@ class StakePool extends Component {
       stakeLoading: false,
       unStakeLoading: false,
       harvestLoading: false,
+      seedLoading: false,
+      unSeedLoading: false,
     };
   }
   componentDidMount() {
@@ -262,34 +264,35 @@ class StakePool extends Component {
     const wallet = window.senswap.wallet;
     const { setSuccess, setError } = this.props;
     const { reserveAmount: amount, stakePoolAddress, senWallet } = data;
+    this.setState({ seedLoading: true });
     try {
-      this.setState({ seedLoading: true });
       const seed = await liteFarming.seed(amount, stakePoolAddress, senWallet, wallet);
       if (!seed) throw new Error('Error!');
-      this.setState({ seedLoading: false }, () => {
-        this.onCloseSeed();
-      });
-
       await setSuccess('Successfully');
     } catch (err) {
       await setError(err);
+    } finally {
+      this.setState({ seedLoading: false }, () => {
+        this.onCloseSeed();
+      });
     }
   };
   unseed = async (data) => {
     const wallet = window.senswap.wallet;
     const { setSuccess, setError } = this.props;
     const { reserveAmount: amount, stakePoolAddress, senWallet } = data;
+    this.setState({ unSeedLoading: true });
     try {
-      this.setState({ unSeedLoading: true });
       const seed = await liteFarming.unseed(amount, stakePoolAddress, senWallet, wallet);
       if (!seed) throw new Error('Error!');
-      this.setState({ seedLoading: false }, () => {
-        this.onCloseSeed();
-      });
 
       await setSuccess('Successfully');
     } catch (err) {
       await setError(err);
+    } finally {
+      this.setState({ unSeedLoading: false }, () => {
+        this.onCloseSeed();
+      });
     }
   };
 
