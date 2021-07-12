@@ -23,7 +23,7 @@ export default theme => ({
     padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
     borderRadius: theme.shape.borderRadius / 3,
     backgroundColor: theme.palette.background.secondary,
-    width: '100%',
+    // width: '100%',
   },
   backdrop: {
     background: 'linear-gradient(163.28deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%)',

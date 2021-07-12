@@ -169,13 +169,12 @@ class NewStakePool extends Component {
         </Backdrop>
         <NewStakePoolHeader onClose={onClose}></NewStakePoolHeader>
         <DialogContent>
-          <Grid container spacing={4}>
+          <Grid container alignItems="center" spacing={2}>
             {/* Reward Token */}
-            <Grid container item xs={12} alignItems="center" spacing={0}>
-              <Grid item xs={12}>
-                <Typography color="textPrimary"> Reward Token: </Typography>
-              </Grid>
-              <Drain size={1} />
+            <Grid item xs={12}>
+              <Typography color="textPrimary"> Reward Token: </Typography>
+            </Grid>
+            <Grid item xs={12}>
               <Paper className={classes.formPaper}>
                 <Button
                   size="small"
@@ -187,13 +186,12 @@ class NewStakePool extends Component {
                 </Button>
               </Paper>
             </Grid>
-
+            <Drain size={1} />
             {/* LP Token */}
-            <Grid container item xs={12} alignItems="center" spacing={0}>
-              <Grid item xs={12}>
-                <Typography color="textPrimary"> LP Token: </Typography>
-              </Grid>
-              <Drain size={1} />
+            <Grid item xs={12}>
+              <Typography color="textPrimary"> LP Token: </Typography>
+            </Grid>
+            <Grid item xs={12}>
               <Paper className={classes.formPaper}>
                 <Button
                   size="small"
@@ -205,7 +203,7 @@ class NewStakePool extends Component {
                 </Button>
               </Paper>
             </Grid>
-
+            <Drain size={2} />
             {/* New Stake Pool Stat */}
             <Grid item xs={6}>
               <TextField
@@ -234,6 +232,7 @@ class NewStakePool extends Component {
                 onBlur={(e) => this.onBlurNumber(e)}
               />
             </Grid>
+            <Drain size={2} />
 
             {/* Action */}
             <Grid item xs={12}>

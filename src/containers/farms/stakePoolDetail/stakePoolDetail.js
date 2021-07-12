@@ -63,7 +63,6 @@ class Farming extends Component {
   };
 
   onChange = () => {
-
     const {
       detail: { account, mint: { decimals }, debt },
     } = this.props;
@@ -71,7 +70,6 @@ class Farming extends Component {
     const share = Number(ssjs.undecimalize(account.amount, decimals));
     const value = Number(this.stakeRef.current.value);
     this.setState({ maxToken: value, disableStake: false, disableUnstake: false });
-    console.log(lpt, share, value, 'check');
     if (value > lpt) this.setState({ disableUnstake: true });
     if (value > share) this.setState({ disableStake: true });
   };
