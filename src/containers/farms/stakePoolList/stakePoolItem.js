@@ -11,6 +11,7 @@ import CircularProgress from 'senswap-ui/circularProgress';
 import styles from '../styles';
 import { useDispatch, useSelector } from 'react-redux';
 import { getStakePoolData } from 'modules/bucket.reducer';
+import numeral from 'numeral';
 
 function StakePoolItem(props) {
   const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
@@ -92,7 +93,7 @@ function StakePoolItem(props) {
       </TableCell>
       <TableCell>0%</TableCell>
       <TableCell>0%</TableCell>
-      <TableCell>{ssjs.undecimalize(total_shares, token.decimals)}</TableCell>
+      <TableCell>{numeral(ssjs.undecimalize(total_shares, token.decimals)).format('0,0.00')}</TableCell>
 
       <TableCell className={classes.button}>
         {isAdmin && (
