@@ -145,7 +145,7 @@ class Farming extends Component {
                         </Grid>
                         <Grid item>
                           <Typography>
-                            <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.00')}</b> SEN
+                            <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
                           </Typography>
                         </Grid>
                       </Grid>
@@ -212,7 +212,7 @@ class Farming extends Component {
                           <Typography color="textSecondary">Your LPT:</Typography>
                         </Grid>
                         <Grid item>
-                          <Typography>{numeral(lpt).format('0.[0]a')} ({numeral(portion).format('0.[0]')}%)</Typography>
+                          <Typography>{numeral(lpt).format('0.[00]')} ({numeral(portion).format('0.[00]')}%)</Typography>
                         </Grid>
                       </Grid>
                     </Grid>
