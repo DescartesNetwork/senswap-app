@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-export default theme => ({
+export default (theme) => ({
   noWrap: {
     flexWrap: 'nowrap',
   },
@@ -24,12 +24,12 @@ export default theme => ({
   },
   unit: {
     fontSize: 12,
-    color: '#808191'
+    color: '#808191',
   },
   chip: {
     backgroundColor: theme.palette.background.secondary,
     fontSize: 10,
-    height: theme.spacing(3)
+    height: theme.spacing(3),
   },
   circle: {
     position: 'relative',
@@ -43,7 +43,7 @@ export default theme => ({
       width: 10,
       height: 10,
       borderRadius: theme.shape.borderRadius - 2,
-    }
+    },
   },
   chart: {
     borderRadius: theme.shape.borderRadius * 2,
@@ -57,7 +57,7 @@ export default theme => ({
   assets: {
     minWidth: 180,
     display: 'flex',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   button: {
     textAlign: 'right',
@@ -66,7 +66,7 @@ export default theme => ({
       textTransform: 'capitalize',
       '&:nth-of-type(2)': {
         marginLeft: 14,
-      }
+      },
     },
   },
   formPaper: {
@@ -89,7 +89,13 @@ export default theme => ({
     alignItems: 'center',
     '& input': {
       textAlign: 'right',
-      padding: `${theme.spacing(0)} ${theme.spacing(2)}px`
-    }
+      padding: `${theme.spacing(0)} ${theme.spacing(2)}px`,
+    },
+  },
+  amount: {
+    marginLeft: theme.spacing(2),
+    marginRight: 4,
+    color: '#ff3122',
+    fontWeight: 'bold',
   },
 });
