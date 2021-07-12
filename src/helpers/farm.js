@@ -5,7 +5,7 @@ class Farm {
   }
 
   static calculateReward = (pool, debt) => {
-    if (debt === null || pool === null) return 0;
+    if (debt === null || Object.keys(debt).length === 0 || pool === null) return 0;
 
     const p = this.bigIntToNumber(pool.reward, 9) / this.bigIntToNumber(pool.total_shares, 9);
     const t = ((Date.now() / 1000) - Number(pool.genesis_timestamp.toString())) / this.bigIntToNumber(pool.period);

@@ -33,7 +33,9 @@ class Farming extends Component {
       stakePoolAddress: '',
       stakePools: [],
       debt: {},
-      account: {}
+      account: {},
+      stakeLoading: false,
+      unstakeLoading: false,
     };
     this.stakeRef = createRef();
   }
@@ -133,7 +135,7 @@ class Farming extends Component {
   stake = async (data) => {
     const { setError, setSuccess } = this.props;
     const wallet = window.senswap.wallet;
-    this.setState({ loading: true, loadingMessage: 'Wait for staking' });
+    this.setState({ stakeLoading: true, loadingMessage: 'Wait for staking' });
     const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       //Check Stake Pool Account
@@ -149,7 +151,7 @@ class Farming extends Component {
       console.log('Error');
       await setError(err);
     } finally {
-      this.setState({ loading: false });
+      this.setState({ stakeLoading: false });
     }
   };
 
@@ -203,7 +205,7 @@ class Farming extends Component {
   };
 
   render() {
-    const { maxToken, stakePoolAddress, debt, account } = this.state;
+    const { maxToken, stakePoolAddress, debt, account, stakeLoading } = this.state;
     const { classes, bucket, poolData } = this.props;
     const pool = bucket[stakePoolAddress];
     const { mint_lpt: mint } = poolData;
@@ -239,12 +241,12 @@ class Farming extends Component {
           <Grid item xs={12}>
             <Paper className={classes.formPaper}>
               <Grid container alignItems="flex-end">
-                <Grid item xs={2}>
+                <Grid item>
                   <Typography color="textSecondary" variant="body2">Reward:</Typography>
                 </Grid>
-                <Grid item xs={10}>
+                <Grid item>
                   <Typography>
-                    {/* <b style={{ color: '#ff3122' }}>{Utils.prettyNumber(Farm.calculateReward(pool, debt))}</b> SEN */}
+                    <b style={{ color: '#ff3122' }}>{Utils.prettyNumber(Farm.calculateReward(pool, debt))}</b> SEN
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
@@ -321,14 +323,23 @@ class Farming extends Component {
                   </Grid>
                 </Grid>
                 <Grid item xs={6} className={classes.button}>
-                  <Button variant="contained" color="primary" onClick={() => this.handleStake('stake')} fullWidth>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="large"
+                    onClick={() => this.handleStake('stake')} fullWidth
+                    disable={stakeLoading}
+                  >
                     Stake
-              </Button>
+                  </Button>
                 </Grid>
                 <Grid item xs={6} className={classes.button}>
-                  <Button variant="outlined" onClick={() => this.handleStake('unstake')} fullWidth>
+                  <Button
+                    variant="outlined"
+                    onClick={() => this.handleStake('unstake')} fullWidth
+                  >
                     Unstake
-              </Button>
+                  </Button>
                 </Grid>
               </Grid>
             </Paper>
