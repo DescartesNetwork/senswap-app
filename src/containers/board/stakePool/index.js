@@ -240,27 +240,6 @@ class Farming extends Component {
             <Paper className={classes.formPaper}>
               <Grid container alignItems="flex-end">
                 <Grid item xs={2}>
-                  <Typography color="textSecondary" variant="body2">Total shares:</Typography>
-                </Grid>
-                <Grid item xs={10}>
-                  <Typography>
-                    {pool && pool.total_shares ? ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals) : 0}
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={2}>
-                  <Typography color="textSecondary" variant="body2">Your LPT:</Typography>
-                </Grid>
-                <Grid item xs={10}>
-                  <Typography>{Utils.prettyNumber(lpt)} ({portion}%)</Typography>
-                </Grid>
-                <Grid item xs={2}>
-                  <Typography color="textSecondary" variant="body2">Period:</Typography>
-                </Grid>
-                <Grid item xs={10}>
-                  <Typography>{Utils.prettyNumber(pool.period)} second</Typography>
-                </Grid>
-                <Grid item xs={2}>
                   <Typography color="textSecondary" variant="body2">Reward:</Typography>
                 </Grid>
                 <Grid item xs={10}>
@@ -288,13 +267,20 @@ class Farming extends Component {
           <Grid item xs={12}>
             <Paper className={classes.formPaper}>
               <Grid container>
-                <Grid item xs={12}>
+                <Grid item xs={2}>
+                  <Typography color="textSecondary" variant="body2">Total shares:</Typography>
+                </Grid>
+                <Grid item xs={4}>
                   <Typography>
-                    LP token:{' '}
-                    <b style={{ color: '#ff3122' }}>
-                      {Utils.prettyNumber(ssjs.undecimalize(account.amount, mint.decimals))}
-                    </b>
+                    {pool && pool.total_shares ? ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals) : 0}
                   </Typography>
+                </Grid>
+
+                <Grid item xs={2}>
+                  <Typography color="textSecondary" variant="body2">Your LPT:</Typography>
+                </Grid>
+                <Grid item xs={4}>
+                  <Typography>{Utils.prettyNumber(lpt)} ({portion}%)</Typography>
                 </Grid>
                 <Grid item xs={12}>
                   <Grid container className={classes.outlineInput} spacing={0}>
@@ -347,7 +333,7 @@ class Farming extends Component {
               </Grid>
             </Paper>
           </Grid>
-          <Drain size={5} />
+          <Drain size={2} />
         </Grid>
       </Paper>
     );
