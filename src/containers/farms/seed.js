@@ -77,7 +77,7 @@ class Seed extends Component {
         <DialogTitle>Seed / Unseed</DialogTitle>
         <DialogContent>
           <Grid container alignItems="center">
-            <Grid item xs={12}>
+            {/* <Grid item xs={12}>
               <Typography color="textSecondary">Stake pool</Typography>
             </Grid>
             <Grid item xs={12}>
@@ -94,12 +94,9 @@ class Seed extends Component {
                       </Grid>
                     </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <Typography color="textSecondary" variant="body2">Available: <strong style={{ color: '#f31241' }}>{accAmount ? ssjs.undecimalize(accAmount, decimals) : 0}</strong> SEN</Typography>
-                  </Grid>
                 </Grid>
               </Paper>
-            </Grid>
+            </Grid> */}
             {/* Seed + unSeed */}
             <Grid item xs={12}>
               <Typography color="textSecondary">Start seeding: </Typography>
@@ -107,14 +104,14 @@ class Seed extends Component {
             <Grid item xs={12}>
               <Paper className={classes.formPaper}>
                 <Grid container>
-                  <Grid item xs={12}>
+                  <Grid item xs={6}>
+                    <Typography color="textSecondary" variant="body2">Available: <strong style={{ color: '#f31241' }}>{accAmount ? ssjs.undecimalize(accAmount, decimals) : 0}</strong> SEN</Typography>
+                  </Grid>
+                  <Grid item xs={6}>
                     <Typography color="textSecondary" variant="body2">Total SEN: <strong style={{ color: '#f31241' }}>{amount ? ssjs.undecimalize(amount, decimals) : 0}</strong></Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Grid container className={classes.outlineInput} spacing={0}>
-                      <Grid item xs={1}>
-                        <Typography color="textSecondary" variant="body2">To: </Typography>
-                      </Grid>
                       <Grid item xs={6}>
                         <Grid container alignItems="center">
                           <Grid item>
@@ -129,7 +126,7 @@ class Seed extends Component {
                           </Grid>
                         </Grid>
                       </Grid>
-                      <Grid item xs={5}>
+                      <Grid item xs={6}>
                         <TextField
                           variant="standard"
                           value={maxToken}
