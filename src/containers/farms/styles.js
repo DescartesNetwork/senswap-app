@@ -70,7 +70,7 @@ export default theme => ({
     },
   },
   formPaper: {
-    padding: `${theme.spacing(1)}px ${theme.spacing(2)}px`,
+    padding: theme.spacing(2),
     borderRadius: theme.shape.borderRadius / 3,
     backgroundColor: theme.palette.background.secondary,
     // width: '100%',
