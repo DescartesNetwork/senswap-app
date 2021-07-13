@@ -69,9 +69,7 @@ class Farming extends Component {
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const share = Number(ssjs.undecimalize(account.amount, decimals));
     const value = Number(this.stakeRef.current.value);
-    this.setState({ maxToken: this.stakeRef.current.value, disableStake: value > lpt, disableUnstake: value > share });
-    // if (value > lpt) this.setState({ disableUnstake: true });
-    // if (value > share) this.setState({ disableStake: true });
+    this.setState({ maxToken: value, disableStake: value > share, disableUnstake: value > lpt });
   };
 
   render() {
