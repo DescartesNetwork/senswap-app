@@ -33,8 +33,7 @@ export default theme => ({
     padding: `${theme.spacing(1)}px ${theme.spacing(1) + 2}px`,
     alignItems: 'center',
     '& input': {
-      textAlign: 'right',
-      padding: `${theme.spacing(0)} ${theme.spacing(2)}px`
+      padding: `${theme.spacing(0)} ${theme.spacing(2)}px ${theme.spacing(0)} ${theme.spacing(0)}`
     }
   },
 });

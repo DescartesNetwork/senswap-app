@@ -63,7 +63,6 @@ export default (theme) => ({
     textAlign: 'right',
     '& button': {
       padding: theme.spacing(1),
-      textTransform: 'capitalize',
       '&:nth-of-type(2)': {
         marginLeft: 14,
       },
@@ -88,8 +87,8 @@ export default (theme) => ({
     padding: `${theme.spacing(1)}px ${theme.spacing(1) + 2}px`,
     alignItems: 'center',
     '& input': {
-      paddingRight: theme.spacing(2),
-    },
+      padding: `${theme.spacing(0)} ${theme.spacing(2)}px ${theme.spacing(0)} ${theme.spacing(0)}`
+    }
   },
   amount: {
     color: '#ff3122',

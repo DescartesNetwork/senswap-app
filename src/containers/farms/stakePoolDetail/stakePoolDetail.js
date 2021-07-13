@@ -166,7 +166,7 @@ class Farming extends Component {
                         </Grid>
                       </Grid>
                     </Grid>
-                    <Grid item xs={12} md={4} align="end">
+                    <Grid item xs={12} md={4} align="end" className={classes.button}>
                       <Button
                         variant="contained"
                         color="primary" onClick={this.handleHarvest}
@@ -174,7 +174,7 @@ class Farming extends Component {
                         disabled={harvestLoading}
                         startIcon={harvestLoading ? <CircularProgress size={17} /> : null}
                       >
-                        Harvest
+                        <Typography>Harvest</Typography>
                       </Button>
                     </Grid>
                   </Grid>
@@ -251,7 +251,7 @@ class Farming extends Component {
                         disabled={stakeLoading || disableStake}
                         startIcon={stakeLoading ? <CircularProgress size={17} /> : null}
                       >
-                        Stake
+                        <Typography>Stake</Typography>
                       </Button>
                     </Grid>
                   </Grid>
@@ -320,14 +320,14 @@ class Farming extends Component {
                         </Grid>
                       </Grid>
                     </Grid>
-                    <Grid item xs={4} className={classes.button}>
+                    <Grid item xs={4} className={classes.button} >
                       <Button
                         variant="outlined"
                         onClick={() => this.handleStake('unstake')} fullWidth
                         disabled={unStakeLoading || disableUnstake}
                         startIcon={unStakeLoading ? <CircularProgress size={17} /> : null}
                       >
-                        Unstake
+                        <Typography>Unstake</Typography>
                       </Button>
                     </Grid>
                   </Grid>

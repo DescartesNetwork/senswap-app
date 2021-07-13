@@ -98,11 +98,11 @@ function StakePoolItem(props) {
       <TableCell className={classes.button}>
         {isAdmin && (
           <Button variant="outlined" onClick={() => onOpenSeed(poolData)}>
-            Seed
+            <Typography variant="body2">Seed</Typography>
           </Button>
         )}
         <Button color="primary" onClick={() => onOpenDetail(poolData)} disabled={!isConnected}>
-          Details
+          <Typography variant="body2">Details</Typography>
         </Button>
       </TableCell>
     </TableRow>

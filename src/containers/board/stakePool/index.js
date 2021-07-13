@@ -333,7 +333,7 @@ class Farming extends Component {
                     </Grid>
                   </Grid>
                 </Grid>
-                <Grid item xs={12} md={4} align="end">
+                <Grid item xs={12} md={4} align="end" className={classes.button}>
                   <Button
                     variant="contained"
                     color="primary" onClick={this.handleHarvest}
@@ -418,8 +418,8 @@ class Farming extends Component {
                     disabled={stakeLoading || disableStake}
                     startIcon={stakeLoading ? <CircularProgress size={17} /> : null}
                   >
-                    Stake
-                      </Button>
+                    <Typography>Stake</Typography>
+                  </Button>
                 </Grid>
               </Grid>
             </Paper>
@@ -494,8 +494,8 @@ class Farming extends Component {
                     disabled={unStakeLoading || disableUnstake}
                     startIcon={unStakeLoading ? <CircularProgress size={17} /> : null}
                   >
-                    Unstake
-                      </Button>
+                    <Typography>Unstake</Typography>
+                  </Button>
                 </Grid>
               </Grid>
             </Paper>
