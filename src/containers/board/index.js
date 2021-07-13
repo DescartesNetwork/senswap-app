@@ -98,7 +98,7 @@ class Board extends Component {
         <Reference poolData={data} />
       </Grid>
       {/* Farming */}
-      {ssjs.isAddress(walletAddress) ? <Grid item xs={12} sm={8} md={6}>
+      {ssjs.isAddress(walletAddress) ? <Grid item xs={12} sm={8} md={8}>
         <StakePool poolData={data} />
       </Grid> : null}
       <Grid item xs={12}>

@@ -148,13 +148,14 @@ class Seed extends Component {
                           </Grid>
                         </Grid>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid item xs={6} align="right">
                         <TextField
                           variant="standard"
                           value={maxToken}
                           inputRef={this.seedRef}
                           onChange={this.onChange}
                           fullWidth
+                          className={classes.textRight}
                           InputProps={{
                             disableUnderline: true,
                             endAdornment: (

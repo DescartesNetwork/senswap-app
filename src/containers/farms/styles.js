@@ -88,20 +88,38 @@ export default (theme) => ({
     padding: `${theme.spacing(1)}px ${theme.spacing(1) + 2}px`,
     alignItems: 'center',
     '& input': {
-      textAlign: 'right',
-      padding: `${theme.spacing(0)} ${theme.spacing(2)}px`,
+      paddingRight: theme.spacing(2),
     },
   },
   amount: {
-    marginLeft: theme.spacing(2),
-    marginRight: 4,
     color: '#ff3122',
     fontWeight: 'bold',
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(0.5),
   },
   columnIndex: {
     width: 0
   },
   label: {
     display: 'flex',
+  },
+  leftLine: {
+    position: 'relative',
+    paddingLeft: `${theme.spacing(2)}px !important`,
+    marginLeft: theme.spacing(1),
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      width: 1,
+      height: '100%',
+      left: 0,
+      top: 0,
+      background: theme.palette.background.secondaryBrown,
+    }
+  },
+  textRight: {
+    '& *': {
+      textAlign: 'right',
+    }
   }
 });
