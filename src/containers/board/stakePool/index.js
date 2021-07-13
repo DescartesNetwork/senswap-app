@@ -6,6 +6,7 @@ import ssjs from 'senswapjs';
 import sol from 'helpers/sol';
 import configs from 'configs';
 import numeral from 'numeral';
+import isEqual from 'react-fast-compare';
 
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
@@ -17,6 +18,7 @@ import CircularProgress from 'senswap-ui/circularProgress';
 import Paper from 'senswap-ui/paper';
 import Farm from 'helpers/farm';
 import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
+import { Skeleton } from '@material-ui/lab';
 
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
@@ -36,6 +38,7 @@ class Farming extends Component {
       stakePools: [],
       debt: {},
       account: {},
+      loading: false,
       stakeLoading: false,
       unStakeLoading: false,
       harvestLoading: false,
@@ -45,12 +48,21 @@ class Farming extends Component {
   componentDidMount() {
     this.fecthStakePools();
   }
+  componentDidUpdate(prevProps) {
+    const { stakePoolAddress: address } = this.state;
+    const { bucket: currBucket } = this.props;
+    const { bucket: prevBucket } = prevProps;
+
+    // Compare stake pool details
+    if (!isEqual(currBucket[address], prevBucket[address])) return this.fecthStakePools();
+  }
 
   fecthStakePools = async () => {
     const {
       getStakePoolData, getStakePools,
       poolData: { mint_lpt: { address: mintAddress } },
     } = this.props;
+    this.setState({ loading: true });
     try {
       let poolAddresses = await getStakePools({}, 9999);
       const promise = poolAddresses.map(({ address }) => {
@@ -66,6 +78,8 @@ class Farming extends Component {
       this.setState({ account: account });
     } catch (err) {
       console.log(err, 'err');
+    } finally {
+      this.setState({ loading: false });
     }
   }
 
@@ -213,13 +227,15 @@ class Farming extends Component {
   render() {
     const {
       maxToken, stakePoolAddress, debt,
-      stakeLoading, unStakeLoading, harvestLoading
+      stakeLoading, unStakeLoading, harvestLoading,
+      loading
     } = this.state;
     const { classes, bucket, poolData } = this.props;
+
     const pool = bucket[stakePoolAddress];
     const { mint_lpt: mint } = poolData;
     // //Render Stake Pool Element
-    if (!pool) return null;
+    if (!pool || loading) return <Skeleton variant="rect" height={600} className={classes.paper} />;
     const {
       mint_token: { decimals },
       total_shares,
@@ -233,7 +249,6 @@ class Farming extends Component {
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const total = Number(ssjs.undecimalize(total_shares, decimals));
     const portion = total ? lpt / total * 100 : 0;
-    console.log(Farm.calculateReward(pool, debt), typeof Farm.calculateReward(pool, debt), 'type of reward');
     return (
       <Paper className={classes.paper}>
         <Grid container alignItems="center">
