@@ -16,6 +16,7 @@ import Button from 'senswap-ui/button';
 import Paper from 'senswap-ui/paper';
 import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import CircularProgress from 'senswap-ui/circularProgress';
+import Divider from 'senswap-ui/divider';
 
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
@@ -140,7 +141,32 @@ class Farming extends Component {
               <Grid item>
                 <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
               </Grid>
-              <Drain size={2} />
+
+              {/* Shares */}
+              <Grid item xs={12}>
+                <Grid container spacing={1}>
+                  <Grid item>
+                    <Typography color="textSecondary">Total shares:</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography>
+                      {pool && pool.total_shares ? numeral(ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals)).format('0,0.[00]') : 0}
+                    </Typography>
+                  </Grid>
+                  <Grid item className={classes.leftLine}>
+                    <Typography color="textSecondary">Your share:</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography>{numeral(lpt).format('0,0.[00]')} ({numeral(portion).format('0.[0]')}%)</Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Drain size={1} />
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              <Drain size={1} />
+
               {/* Harvest */}
               <Grid item xs={12}>
                 <Typography variant="body2" color="textSecondary">Pending reward</Typography>
@@ -189,24 +215,6 @@ class Farming extends Component {
               <Grid item xs={12}>
                 <Paper className={classes.formPaper}>
                   <Grid container alignItems="flex-end">
-                    <Grid item xs={12}>
-                      <Grid container spacing={1}>
-                        <Grid item>
-                          <Typography color="textSecondary">Total shares:</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography>
-                            {pool && pool.total_shares ? numeral(ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals)).format('0,0.[00]') : 0}
-                          </Typography>
-                        </Grid>
-                        <Grid item className={classes.leftLine}>
-                          <Typography color="textSecondary">Your share:</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography>{numeral(lpt).format('0,0.[00]')} ({numeral(portion).format('0.[0]')}%)</Typography>
-                        </Grid>
-                      </Grid>
-                    </Grid>
                     <Grid item xs={8}>
                       <Grid container justify="space-between" spacing={0}>
                         <Grid item>
@@ -266,24 +274,6 @@ class Farming extends Component {
               <Grid item xs={12}>
                 <Paper className={classes.formPaper}>
                   <Grid container alignItems="flex-end">
-                    <Grid item xs={12}>
-                      <Grid container spacing={1}>
-                        <Grid item>
-                          <Typography color="textSecondary">Total shares:</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography>
-                            {pool && pool.total_shares ? numeral(ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals)).format('0,0.[00]') : 0}
-                          </Typography>
-                        </Grid>
-                        <Grid item className={classes.leftLine}>
-                          <Typography color="textSecondary">Your share:</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography>{numeral(lpt).format('0,0.[00]')} ({numeral(portion).format('0.[0]')}%)</Typography>
-                        </Grid>
-                      </Grid>
-                    </Grid>
                     <Grid item xs={8}>
                       <Grid container justify="space-between" spacing={0}>
                         <Grid item>
@@ -291,7 +281,7 @@ class Farming extends Component {
                         </Grid>
                         <Grid item>
                           <Typography variant="caption" color="textSecondary">
-                            Available: {account && mint ? numeral(ssjs.undecimalize(account.amount, mint.decimals)).format('0,0.[00]') : 0} LPT</Typography>
+                            Available: {numeral(lpt).format('0,0.[00]')} LPT</Typography>
                         </Grid>
                       </Grid>
                       <Grid container className={classes.outlineInput} spacing={0}>

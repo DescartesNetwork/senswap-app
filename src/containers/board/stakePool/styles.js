@@ -36,4 +36,18 @@ export default theme => ({
       padding: `${theme.spacing(0)} ${theme.spacing(2)}px ${theme.spacing(0)} ${theme.spacing(0)}`
     }
   },
+  leftLine: {
+    position: 'relative',
+    paddingLeft: `${theme.spacing(2)}px !important`,
+    marginLeft: theme.spacing(1),
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      width: 1,
+      height: '100%',
+      left: 0,
+      top: 0,
+      background: theme.palette.background.secondaryBrown,
+    }
+  },
 });
