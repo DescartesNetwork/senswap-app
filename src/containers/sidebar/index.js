@@ -18,14 +18,12 @@ import Fab from '@material-ui/core/Fab';
 
 import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
-  AccountBalanceWalletRounded, AccountBalanceRounded,
-  GroupWorkRounded, ColorizeRounded, DescriptionRounded,
-  DonutLargeRounded, MenuOpenRounded, MenuRounded
+  AccountBalanceWalletRounded, AccountBalanceRounded, GroupWorkRounded,
+  ColorizeRounded, MenuOpenRounded, MenuRounded
 } from 'senswap-ui/icons';
 
 import styles from './styles';
 import configs from 'configs';
-import YELLOWPAPER from 'static/docs/senswap_yellowpaper.pdf';
 import { toggleLeftBar } from 'modules/ui.reducer';
 
 
@@ -53,7 +51,7 @@ class Sidebar extends Component {
     const route = pathname.split('/')[1];
     return this.setState({ route })
   }
-  
+
   render() {
     const { classes, ui: { leftbar, width }, wallet: { user: { address, role } }, toggleLeftBar } = this.props;
     const { route } = this.state;
@@ -184,37 +182,6 @@ class Sidebar extends Component {
                   <ListItemText primary="DAO" />
                 </ListItem>
               </Fragment> : null}
-              {/* Papers */}
-              <Drain size={2} />
-              <Divider />
-              <Drain size={2} />
-              <ListItem
-                button
-                component={RouterLink}
-                to="/tokenomic"
-                target="_blank"
-                rel="noopener"
-                className={classes.listItem}
-                disabled
-              >
-                <ListItemIcon className={classes.listItemIcon}>
-                  <DonutLargeRounded />
-                </ListItemIcon>
-                <ListItemText primary="Whitepaper & Tokenomic" />
-              </ListItem>
-              <ListItem
-                button
-                component={RouterLink}
-                to={YELLOWPAPER}
-                target="_blank"
-                rel="noopener"
-                className={classes.listItem}
-              >
-                <ListItemIcon className={classes.listItemIcon}>
-                  <DescriptionRounded />
-                </ListItemIcon>
-                <ListItemText primary="Yellow Paper" />
-              </ListItem>
             </List>
           </Grid>
         </Grid>
