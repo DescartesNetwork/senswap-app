@@ -97,7 +97,7 @@ export const setWallet = (wallet) => {
     const lamports = window.senswap.lamports;
     const splt = window.senswap.splt;
     const connection = splt._splt.connection;
-    const spltPromgramId = splt._splt.spltProgramId;
+    const spltProgramId = splt._splt.spltProgramId;
     const data = {
       user: { address: '' },
       lamports: 0,
@@ -114,7 +114,7 @@ export const setWallet = (wallet) => {
       data.lamports = await lamports.get(data.user.address);
       // Fetch mint accounts and lpt accounts
       const ownerPublicKey = ssjs.fromAddress(data.user.address);
-      const { value } = await connection.getTokenAccountsByOwner(ownerPublicKey, { programId: spltPromgramId });
+      const { value } = await connection.getTokenAccountsByOwner(ownerPublicKey, { programId: spltProgramId });
       const full = value.map(({ pubkey }) => pubkey.toBase58());
       // Filter mint accounts
       const { data: mints } = await api.get(base + '/mints', { condition: {}, limit: -1, page: 0 });

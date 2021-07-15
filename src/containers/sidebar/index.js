@@ -25,7 +25,6 @@ import {
 
 import styles from './styles';
 import configs from 'configs';
-import YELLOWPAPER from 'static/docs/senswap_yellowpaper.pdf';
 import { toggleLeftBar } from 'modules/ui.reducer';
 
 
@@ -195,37 +194,6 @@ class Sidebar extends Component {
                   <ListItemText primary="DAO" />
                 </ListItem>
               </Fragment> : null}
-              {/* Papers */}
-              <Drain size={2} />
-              <Divider />
-              <Drain size={2} />
-              <ListItem
-                button
-                component={RouterLink}
-                to="/tokenomic"
-                target="_blank"
-                rel="noopener"
-                className={classes.listItem}
-                disabled
-              >
-                <ListItemIcon className={classes.listItemIcon}>
-                  <DonutLargeRounded />
-                </ListItemIcon>
-                <ListItemText primary="Whitepaper & Tokenomic" />
-              </ListItem>
-              <ListItem
-                button
-                component={RouterLink}
-                to={YELLOWPAPER}
-                target="_blank"
-                rel="noopener"
-                className={classes.listItem}
-              >
-                <ListItemIcon className={classes.listItemIcon}>
-                  <DescriptionRounded />
-                </ListItemIcon>
-                <ListItemText primary="Yellow Paper" />
-              </ListItem>
             </List>
           </Grid>
         </Grid>
