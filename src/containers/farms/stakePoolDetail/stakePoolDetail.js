@@ -154,7 +154,7 @@ class Farming extends Component {
                     </Typography>
                   </Grid>
                   <Grid item className={classes.leftLine}>
-                    <Typography color="textSecondary">Your share:</Typography>
+                    <Typography color="textSecondary">Your shares:</Typography>
                   </Grid>
                   <Grid item>
                     <Typography>{numeral(lpt).format('0,0.[00]')} ({numeral(portion).format('0.[0]')}%)</Typography>
