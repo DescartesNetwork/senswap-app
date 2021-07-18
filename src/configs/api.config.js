@@ -15,8 +15,7 @@ configs.development = {
  * Staging configurations
  */
 configs.staging = {
-  base: 'http://localhost:3001',
-  // base: 'https://api.senswap.xyz',
+  base: 'https://api.senswap.xyz',
   baseBoard: 'https://stat.senswap.xyz/stat/reports',
 }
 
