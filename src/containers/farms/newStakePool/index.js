@@ -4,8 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
-import { PoolAvatar } from 'containers/pool';
-import { MintAvatar } from 'containers/wallet';
+
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import TextField from 'senswap-ui/textField';
@@ -16,17 +15,21 @@ import { ArrowDropDownRounded } from 'senswap-ui/icons';
 import { withStyles } from 'senswap-ui/styles';
 import Paper from 'senswap-ui/paper';
 import Drain from 'senswap-ui/drain';
+import { Backdrop } from '@material-ui/core';
 
-import styles from './styles';
+import { PoolAvatar } from 'containers/pool';
+import { MintAvatar } from 'containers/wallet';
+import ListLPT from './components/ListLPT';
+import NewStakePoolHeader from './components/Header.js';
+
 import configs from 'configs';
+import styles from './styles';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getMint, getMints } from 'modules/mint.reducer';
 import { addStakePool } from 'modules/stakePool.reducer';
 import { updateWallet } from 'modules/wallet.reducer';
 import { getAccountData } from 'modules/bucket.reducer';
-import ListLPT from './components/ListLPT';
-import NewStakePoolHeader from './components/Header.js';
-import { Backdrop } from '@material-ui/core';
+
 
 class NewStakePool extends Component {
   constructor() {
@@ -50,9 +53,7 @@ class NewStakePool extends Component {
   }
 
   fetchSenTokenInfo = async () => {
-    const {
-      sol: { senAddress },
-    } = configs;
+    const { sol: { senAddress } } = configs;
     const { getMint } = this.props;
     try {
       this.setState({ loading: true });
@@ -78,6 +79,7 @@ class NewStakePool extends Component {
     if (/[^\d\\.]/.test(value)) return;
     return this.setState({ [name]: value });
   };
+  
   onBlurNumber = (e) => {
     const { name, value } = e.target;
     const decimals = 9;
@@ -130,7 +132,7 @@ class NewStakePool extends Component {
       await setError(er);
       return this.setState({ loading: false });
     }
-  };
+  }
 
   checkCreatePool() {
     const { poolInfo, reward, period } = this.state;
@@ -141,7 +143,7 @@ class NewStakePool extends Component {
     const { visible, onClose, classes } = this.props;
     const { poolInfo, loading, reward, period, senToken, visibleAccountSelection } = this.state;
 
-    //LPT info
+    // LPT info
     let poolIcon = [];
     let lptName = '- Select one -';
     if (poolInfo) {
@@ -295,4 +297,7 @@ NewStakePool.propTypes = {
   onClose: PropTypes.func,
 };
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(NewStakePool)));
+export default withRouter(connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withStyles(styles)(NewStakePool)));
