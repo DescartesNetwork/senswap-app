@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
@@ -8,20 +10,18 @@ import TextField from 'senswap-ui/textField';
 import Dialog, { DialogTitle, DialogContent } from 'senswap-ui/dialog';
 import Table, { TableBody, TableCell, TableContainer, TableRow } from 'senswap-ui/table';
 import CircularProgress from 'senswap-ui/circularProgress';
-
-import { CloseRounded, SearchRounded } from 'senswap-ui/icons';
-import { LaunchRounded } from 'senswap-ui/icons';
-
 import Tooltip from 'senswap-ui/tooltip';
-import { useDispatch } from 'react-redux';
-import { getPools } from 'modules/pool.reducer';
-import { getPoolData } from 'modules/bucket.reducer';
-import styles from '../styles';
+
+import { CloseRounded, SearchRounded, LaunchRounded } from 'senswap-ui/icons';
+
 import { PoolAvatar } from 'containers/pool';
 
-function ListLPT(props) {
-  const { classes } = props;
-  const { visible, onClose, onSelect } = props;
+import styles from '../styles';
+import { getPools } from 'modules/pool.reducer';
+import { getPoolData } from 'modules/bucket.reducer';
+
+
+function ListLPT({ classes, visible, onClose, onSelect }) {
   const [state, setState] = useState({
     isLoading: true,
     searchValue: '',
@@ -32,22 +32,19 @@ function ListLPT(props) {
   useEffect(() => {
     async function fetchStakePools() {
       const pools = await dispatch(getPools());
-      const promises = pools.map((pool) => dispatch(getPoolData(pool.address)));
-      const poolData = await Promise.all(promises);
-
-      setState({
+      const poolData = await Promise.all(pools.map((pool) => dispatch(getPoolData(pool.address))));
+      return setState({
         isLoading: true,
         searchValue: '',
         pools: poolData,
       });
     }
     fetchStakePools();
-    // eslint-disable-next-line
-  }, []);
+  }, [dispatch]);
 
-  function handleSearch(e) {
+  const handleSearch = (e) => {
     const searchValue = e.target.value;
-    setState({ ...state, searchValue });
+    return setState({ ...state, searchValue });
   }
 
   return (
@@ -77,11 +74,9 @@ function ListLPT(props) {
               value={state.searchValue}
               onChange={(e) => handleSearch(e)}
               InputProps={{
-                startAdornment: (
-                  <IconButton size="small">
-                    <SearchRounded />
-                  </IconButton>
-                ),
+                startAdornment: (<IconButton size="small">
+                  <SearchRounded />
+                </IconButton>),
               }}
               fullWidth
             />
@@ -90,20 +85,14 @@ function ListLPT(props) {
             <TableContainer>
               <Table>
                 <TableBody>
-                  {!state.pools.length ? (
-                    <TableRow>
-                      <TableCell />
-                      <TableCell>
-                        {state.isLoading ? (
-                          <CircularProgress size={17} />
-                        ) : (
-                          <Typography variant="caption">No token</Typography>
-                        )}
-                      </TableCell>
-                      <TableCell />
-                      <TableCell />
-                    </TableRow>
-                  ) : null}
+                  {!state.pools.length ? <TableRow>
+                    <TableCell />
+                    <TableCell>
+                      {state.isLoading ? <CircularProgress size={17} /> : <Typography variant="caption">No token</Typography>)}
+                    </TableCell>
+                    <TableCell />
+                    <TableCell />
+                  </TableRow> : null}
                   {state.pools.map((pool) => {
                     const {
                       address: poolAddress,
@@ -113,27 +102,25 @@ function ListLPT(props) {
                     } = pool;
                     const icons = [iconA, iconB, iconS];
                     const name = `${symbolA || '.'} x ${symbolB || '.'} x ${symbolS || '.'}`;
-                    return (
-                      <TableRow key={poolAddress} className={classes.tableRow} onClick={() => onSelect(pool)}>
-                        <TableCell>
-                          <Grid container className={classes.noWrap} alignItems="center">
-                            <Grid item>
-                              <PoolAvatar icons={icons} />
-                            </Grid>
-                            <Grid item>
-                              <Typography>{name || 'UNKNOWN'}</Typography>
-                            </Grid>
+                    return <TableRow key={poolAddress} className={classes.tableRow} onClick={() => onSelect(pool)}>
+                      <TableCell>
+                        <Grid container className={classes.noWrap} alignItems="center">
+                          <Grid item>
+                            <PoolAvatar icons={icons} />
                           </Grid>
-                        </TableCell>
-                        <TableCell>
-                          <Tooltip title="Go to the pool">
-                            <IconButton color="primary" component={RouterLink} to={`/board/${poolAddress}`}>
-                              <LaunchRounded />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    );
+                          <Grid item>
+                            <Typography>{name || 'UNKNOWN'}</Typography>
+                          </Grid>
+                        </Grid>
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title="Go to the pool">
+                          <IconButton color="primary" component={RouterLink} to={`/board/${poolAddress}`}>
+                            <LaunchRounded />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
                   })}
                 </TableBody>
               </Table>
@@ -145,4 +132,5 @@ function ListLPT(props) {
     </Dialog>
   );
 }
+
 export default withStyles(styles)(ListLPT);
