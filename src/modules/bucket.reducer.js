@@ -3,6 +3,7 @@ import ssjs from 'senswapjs';
 import configs from 'configs';
 import api from 'helpers/api';
 
+const farming = new ssjs.Farming();
 /**
  * Documents
  * @default defaultData
@@ -61,6 +62,47 @@ export const getAccountData = (accountAddress, force = false) => {
       return accountData;
     } catch (er) {
       dispatch({ type: GET_ACCOUNT_DATA_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
+  }
+}
+
+
+/**
+ * Get  stake account (Debt) data
+ */
+export const GET_DEBT_DATA = 'GET_DEBT_DATA';
+export const GET_DEBT_DATA_OK = 'GET_DEBT_DATA_OK';
+export const GET_DEBT_DATA_FAIL = 'GET_DEBT_DATA_FAIL';
+
+export const getStakeAccountData = (debtAddress, force = false) => {
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_DEBT_DATA });
+    if (!ssjs.isAddress(debtAddress)) {
+      const er = 'Invalid account address';
+      dispatch({ type: GET_DEBT_DATA_FAIL, reason: er });
+      throw new Error(er);
+    }
+
+    let { bucket: { [debtAddress]: accountData } } = getState();
+    if (accountData && !force) {
+      const data = { [debtAddress]: accountData }
+      dispatch({ type: GET_DEBT_DATA_OK, data });
+      return accountData;
+    }
+
+    try {
+      const { api: { base } } = configs;
+      accountData = await farming.getDebtData(debtAddress)
+      const { stake_pool: { address: stakePoolAddress }, account: { address: stakeAccAddr } } = accountData
+      const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
+      accountData.pool = poolData;
+
+      const data = { [debtAddress]: accountData, [stakeAccAddr]: accountData.account }
+      dispatch({ type: GET_DEBT_DATA_OK, data });
+      return accountData;
+    } catch (er) {
+      dispatch({ type: GET_DEBT_DATA_FAIL, reason: er.toString() });
       throw new Error(er);
     }
   }
@@ -150,7 +192,46 @@ export const getPoolData = (poolAddress, force = false) => {
     }
   }
 }
+/**
+ * Get stake pool data
+ */
+export const GET_STAKE_POOL_DATA = 'GET_STAKE_POOL_DATA';
+export const GET_STAKE_POOL_DATA_OK = 'GET_STAKE_POOL_DATA_OK';
+export const GET_STAKE_POOL_DATA_FAIL = 'GET_STAKE_POOL_DATA_FAIL';
 
+export const getStakePoolData = (stakePoolAddress, force = false) => {
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_STAKE_POOL_DATA });
+
+    let {
+      bucket: { [stakePoolAddress]: stakePoolData },
+    } = getState();
+
+    //Cache
+    if (stakePoolData && !force) {
+      const data = { [stakePoolAddress]: stakePoolData };
+      dispatch({ type: GET_STAKE_POOL_DATA_OK, data });
+      return stakePoolData;
+    }
+    //New
+    try {
+      const {
+        api: { base },
+      } = configs;
+      const liteFarming = window.senswap.farming;
+      const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
+      if (!poolData?.address) return;
+
+      const stakePoolData = await liteFarming.getStakePoolData(stakePoolAddress);
+      const dataStore = { [stakePoolAddress]: { ...poolData, ...stakePoolData } };
+      dispatch({ type: GET_STAKE_POOL_DATA_OK, data: dataStore });
+      return stakePoolData;
+    } catch (er) {
+      dispatch({ type: GET_STAKE_POOL_DATA_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
+  };
+};
 
 /**
  * Set item
@@ -186,6 +267,10 @@ export default (state = defaultState, action) => {
       return { ...state, ...action.data };
     case GET_ACCOUNT_DATA_FAIL:
       return { ...state, ...action.data };
+    case GET_DEBT_DATA_OK:
+      return { ...state, ...action.data };
+    case GET_DEBT_DATA_FAIL:
+      return { ...state, ...action.data };
     case GET_MINT_DATA_OK:
       return { ...state, ...action.data };
     case GET_MINT_DATA_FAIL:
@@ -193,6 +278,10 @@ export default (state = defaultState, action) => {
     case GET_POOL_DATA_OK:
       return { ...state, ...action.data };
     case GET_POOL_DATA_FAIL:
+      return { ...state, ...action.data };
+    case GET_STAKE_POOL_DATA_OK:
+      return { ...state, ...action.data };
+    case GET_STAKE_POOL_DATA_FAIL:
       return { ...state, ...action.data };
     case SET_ITEM_OK:
       return { ...state, ...action.data };

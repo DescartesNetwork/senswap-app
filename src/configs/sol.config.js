@@ -24,6 +24,7 @@ configs.development = {
   swapAddress: 'D8UuF1jPr5gtxHvnVz3HpxP2UkgtxLs9vwz7ecaTkrGy',
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   foundationAddress: '8UaZw2jDhJzv5V53569JbCd3bD4BnyCfBH3sjwgajGS9',
+  farmingAddress: 'DX4CXjREqTUDPXFKBNbRFHTf4C42ezGWXCnyusvMWhu1',
   cluster: 'devnet',
   native: { ...NATIVE }
 }
@@ -38,6 +39,7 @@ configs.staging = {
   swapAddress: 'D8UuF1jPr5gtxHvnVz3HpxP2UkgtxLs9vwz7ecaTkrGy',
   senAddress: '5YwUkPdXLoujGkZuo9B4LsLKj3hdkDcfP4derpspifSJ',
   foundationAddress: '8UaZw2jDhJzv5V53569JbCd3bD4BnyCfBH3sjwgajGS9',
+  farmingAddress: 'DX4CXjREqTUDPXFKBNbRFHTf4C42ezGWXCnyusvMWhu1',
   cluster: 'devnet',
   native: { ...NATIVE }
 }
@@ -52,6 +54,7 @@ configs.production = {
   swapAddress: 'SSW7ooZ1EbEognq5GosbygA3uWW1Hq1NsFq6TsftCFV',
   senAddress: 'SENBBKVCM7homnf5RX9zqpf1GFe935hnbU4uVzY1Y6M',
   foundationAddress: '9doo2HZQEmh2NgfT3Yx12M89aoBheycYqH1eaR5gKb3e',
+  farmingAddress: '',
   cluster: 'mainnet',
   native: { ...NATIVE }
 }

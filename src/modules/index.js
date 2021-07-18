@@ -8,6 +8,7 @@ import pool from './pool.reducer';
 import bucket from './bucket.reducer';
 import mint from './mint.reducer';
 import board from './board.reducer';
+import stakePool from './stakePool.reducer';
 
 // eslint-disable-next-line
 export default (history) => combineReducers({
@@ -19,4 +20,5 @@ export default (history) => combineReducers({
   bucket,
   mint,
   board,
+  stakePool,
 });

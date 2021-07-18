@@ -18,6 +18,7 @@ import ROI from './roi';
 import Reserve from './reserve';
 import Price from './price';
 import Reference from './reference';
+import StakePool from './stakePool';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
@@ -95,6 +96,13 @@ class Board extends Component {
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
         <Reference poolData={data} />
+      </Grid>
+      {/* Farming */}
+      {ssjs.isAddress(walletAddress) ? <Grid item xs={12} sm={8} md={8}>
+        <StakePool poolData={data} />
+      </Grid> : null}
+      <Grid item xs={12}>
+        <Drain size={1} />
       </Grid>
     </Grid>
   }

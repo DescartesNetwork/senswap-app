@@ -14,19 +14,22 @@ import styles from './styles';
 import session from 'helpers/session';
 import { setError, setLoading, unsetLoading } from 'modules/ui.reducer';
 import { setWallet, updateWallet } from 'modules/wallet.reducer';
-import { getAccountData, getPoolData } from 'modules/bucket.reducer';
-
+import { getAccountData, getPoolData, getStakeAccountData, getStakePoolData } from 'modules/bucket.reducer';
 
 export const BucketWatcher = Watcher;
 export const WalletButton = WalletButton_;
 
 class WalletPlugin extends Component {
-
   async componentDidMount() {
     const {
-      setError, setLoading, unsetLoading,
-      setWallet, updateWallet,
-      getAccountData, getPoolData,
+      setError,
+      setLoading,
+      unsetLoading,
+      setWallet,
+      updateWallet,
+      getAccountData,
+      getPoolData,
+      getStakePoolData,
     } = this.props;
 
     const wallet = this.reconnect();
@@ -34,15 +37,23 @@ class WalletPlugin extends Component {
 
     await setLoading();
     try {
-      const { user: { address } } = await setWallet(wallet);
+      const {
+        user: { address },
+      } = await setWallet(wallet);
+
       window.senswap.splt.watch((er, re) => {
         if (er) return;
         const { type, address: changedAddress } = re;
-        const { wallet: { accounts, lpts } } = this.props;
-        if (type === 'account' && [...accounts, ...lpts].includes(changedAddress)) {
+        const { bucket } = this.props;
+        const {
+          wallet: { accounts, lpts },
+        } = this.props;
+
+        if (type === 'account' && ([...accounts, ...lpts].includes(changedAddress) || bucket[changedAddress])) {
           return getAccountData(changedAddress, true);
         }
       });
+
       window.senswap.swap.watch((er, re) => {
         if (er) return;
         const { type, address: changedAddress } = re;
@@ -51,9 +62,18 @@ class WalletPlugin extends Component {
           return getPoolData(changedAddress, true);
         }
       });
+
       window.senswap.lamports.watch(address, (er, re) => {
         if (er) return;
         return updateWallet({ lamports: re });
+      });
+
+      window.senswap.farming.watch((er, re) => {
+        if (er) return;
+        const { type, address: changedAddress } = re;
+        if (type === 'stake_pool') {
+          getStakePoolData(changedAddress, true);
+        }
       });
     } catch (er) {
       await setError(er);
@@ -69,26 +89,33 @@ class WalletPlugin extends Component {
     if (walletType === 'Keystore') return new SecretKeyWallet(session.get('SecretKey'));
     if (walletType === 'Coin98') return new Coin98Wallet();
     return null;
-  }
+  };
 
   render() {
-    return <LoginDialog />
+    return <LoginDialog />;
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   ui: state.ui,
   wallet: state.wallet,
   bucket: state.bucket,
 });
 
-const mapDispatchToProps = dispatch => bindActionCreators({
-  setError, setLoading, unsetLoading,
-  setWallet, updateWallet,
-  getAccountData, getPoolData,
-}, dispatch);
+const mapDispatchToProps = (dispatch) =>
+  bindActionCreators(
+    {
+      setError,
+      setLoading,
+      unsetLoading,
+      setWallet,
+      updateWallet,
+      getAccountData,
+      getPoolData,
+      getStakePoolData,
+      getStakeAccountData
+    },
+    dispatch,
+  );
 
-export default withRouter(connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withStyles(styles)(WalletPlugin)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(WalletPlugin)));
