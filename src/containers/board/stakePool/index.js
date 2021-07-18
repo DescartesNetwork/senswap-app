@@ -3,8 +3,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
 import ssjs from 'senswapjs';
-import sol from 'helpers/sol';
-import configs from 'configs';
 import numeral from 'numeral';
 import isEqual from 'react-fast-compare';
 
@@ -21,6 +19,8 @@ import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import { Skeleton } from '@material-ui/lab';
 import Divider from 'senswap-ui/divider';
 
+import sol from 'helpers/sol';
+import configs from 'configs';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
 import { getStakePoolData, getAccountData, getPoolData } from 'modules/bucket.reducer';
@@ -28,6 +28,7 @@ import { getStakePoolData, getAccountData, getPoolData } from 'modules/bucket.re
 import styles from './styles';
 
 const liteFarming = new ssjs.LiteFarming();
+
 
 class Farming extends Component {
   constructor() {
@@ -50,9 +51,11 @@ class Farming extends Component {
     this.stakeRef = createRef();
     this.unstakeRef = createRef();
   }
+  
   componentDidMount() {
     this.fecthStakePools();
   }
+  
   componentDidUpdate(prevProps) {
     const { stakePoolAddress: address } = this.state;
     const { bucket: currBucket } = this.props;
