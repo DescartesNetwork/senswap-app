@@ -8,7 +8,7 @@ const configs = {}
  */
 configs.development = {
   base: 'http://localhost:3001',
-  baseBoard: 'https://stat.senswap.xyz/stat/reports',
+  baseBoard: 'http://18.117.93.162:9090/stat/reports',
 }
 
 /**
