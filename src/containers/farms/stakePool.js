@@ -9,18 +9,17 @@ import Grid from 'senswap-ui/grid';
 import Button from 'senswap-ui/button';
 import Paper from 'senswap-ui/paper';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
-import { setError, setSuccess } from 'modules/ui.reducer';
-import { getStakePools } from 'modules/stakePool.reducer';
-import { getAccountData } from 'modules/bucket.reducer';
 import CircularProgress from 'senswap-ui/circularProgress';
-
-import configs from 'configs';
-import sol from 'helpers/sol';
 
 import Farming from './farming';
 import Seed from './seed';
 
+import configs from 'configs';
+import sol from 'helpers/sol';
 import styles from './styles';
+import { setError, setSuccess } from 'modules/ui.reducer';
+import { getStakePools } from 'modules/stakePool.reducer';
+import { getAccountData } from 'modules/bucket.reducer';
 
 const LITE_FARMING = new ssjs.LiteFarming();
 
@@ -52,11 +51,13 @@ class StakePool extends Component {
       unSeedLoading: false,
       loading: false,
       visibleSeed: false,
-    };
+    }
   }
+
   componentDidMount() {
     this.fetchData();
   }
+
   fetchData = async () => {
     const { getStakePools } = this.props;
     this.setState({ loading: true });
@@ -75,6 +76,7 @@ class StakePool extends Component {
       await setError(er);
     }
   }
+
   filterDebtData = async (data) => {
     const { wallet } = this.props;
     if (!data && !wallet && wallet.stakeAccounts) return;
@@ -90,6 +92,7 @@ class StakePool extends Component {
     });
     return data;
   }
+
   onClose = () => {
     return this.setState({
       seedData: [],
@@ -100,6 +103,7 @@ class StakePool extends Component {
       visible: false,
     });
   }
+
   onOpen = async (data) => {
     if (!data) return;
     const { mint_token: { address: mintAddress } } = data;
@@ -161,6 +165,7 @@ class StakePool extends Component {
       await setError(err);
     }
   }
+
   unstake = async (data) => {
     const { setSuccess, setError } = this.props;
     this.setState({ unStakeLoading: true });
@@ -179,6 +184,7 @@ class StakePool extends Component {
       await setError(err);
     }
   }
+
   onHandleHarvest = async () => {
     const { seedData: { address: stakePoolAddress } } = this.state;
     const { wallet: { user: { address: userAddress } } } = this.props;
@@ -210,6 +216,7 @@ class StakePool extends Component {
     if (type === 'unseed') return this.unseed(data);
     return this.seed(data);
   }
+
   seed = async (data) => {
     const wallet = window.senswap.wallet;
     const { setSuccess, setError } = this.props;
@@ -230,6 +237,7 @@ class StakePool extends Component {
       });
     }
   }
+
   unseed = async (data) => {
     const wallet = window.senswap.wallet;
     const { setSuccess, setError } = this.props;
@@ -260,6 +268,7 @@ class StakePool extends Component {
     data.mint_details = mint;
     this.setState({ visibleSeed: true, seedData: data });
   }
+
   onCloseSeed = () => {
     this.setState({
       visibleSeed: false,
@@ -354,9 +363,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   getStakePools,
   getAccountData,
 }, dispatch);
-
-StakePool.propTypes = {
-}
 
 export default withRouter(connect(
   mapStateToProps,
