@@ -19,6 +19,8 @@ import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 
 import styles from './styles';
 import numeral from 'numeral';
+
+
 class Seed extends Component {
   constructor() {
     super();
@@ -77,137 +79,100 @@ class Seed extends Component {
     } = data;
     const icons = [iconA, iconB, iconS];
     const name = `${symbolA} x ${symbolB} x ${symbolS}`;
-    return (
-      <Fragment>
-        <Dialog open={visible} onClose={this.onHandleClose}>
-          <DialogTitle>Seed / Unseed</DialogTitle>
-          <DialogContent>
-            <Grid container alignItems="center">
-              {/* <Grid item xs={12}>
-              <Typography color="textSecondary">Stake pool</Typography>
+    return <Dialog open={visible} onClose={this.onHandleClose}>
+        <DialogTitle>Seed / Unseed</DialogTitle>
+        <DialogContent>
+          <Grid container alignItems="center">
+            <Grid item xs={12}>
+              <Typography variant="body2" color="textSecondary">Start seeding: </Typography>
             </Grid>
             <Grid item xs={12}>
               <Paper className={classes.formPaper}>
-                <Grid container>
-                  <Grid item xs={12}>
-                    <Grid container alignItems="center" spacing={0}>
-                      <Typography color="textSecondary" variant="body2">From:</Typography>
-                      <Grid item>
-                        <Avatar src={iconS} />
-                      </Grid>
-                      <Grid item>
-                        <Typography color="textSecondary">{symbolS}</Typography>
-                      </Grid>
-                    </Grid>
+                <Grid container justify="space-between">
+                  <Grid item className={classes.label}>
+                    <Typography color="textSecondary">Total SEN:</Typography>
+                    <Typography className={classes.amount}>
+                      {amount ? numeral(ssjs.undecimalize(amount, decimals)).format('0,0.[00]') : 0}
+                    </Typography>
+                    <Typography>SEN</Typography>
+                  </Grid>
+
+                  <Grid item className={classes.label}>
+                    <Typography color="textSecondary">Available SEN: </Typography>
+                    <Typography className={classes.amount}>
+                      {accAmount ? numeral(ssjs.undecimalize(accAmount, decimals)).format('0,0.[00]') : 0}
+                    </Typography>
+                    <Typography>SEN</Typography>
                   </Grid>
                 </Grid>
-              </Paper>
-            </Grid> */}
-              {/* Seed + unSeed */}
-              <Grid item xs={12}>
-                <Typography variant="body2" color="textSecondary">Start seeding: </Typography>
-              </Grid>
-              <Grid item xs={12}>
-                <Paper className={classes.formPaper}>
-                  <Grid container justify="space-between">
-                    <Grid item className={classes.label}>
-                      <Typography color="textSecondary">Total SEN:</Typography>
-                      <Typography className={classes.amount}>
-                        {amount ? numeral(ssjs.undecimalize(amount, decimals)).format('0,0.[00]') : 0}
-                      </Typography>
-                      <Typography>SEN</Typography>
-                    </Grid>
+                <Drain size={3} />
 
-                    <Grid item className={classes.label}>
-                      <Typography color="textSecondary">Available SEN: </Typography>
-                      <Typography className={classes.amount}>
-                        {accAmount ? numeral(ssjs.undecimalize(accAmount, decimals)).format('0,0.[00]') : 0}
-                      </Typography>
-                      <Typography>SEN</Typography>
-                    </Grid>
-                  </Grid>
-                  <Drain size={3} />
-
-                  <Grid item xs={12}>
-                    <Grid container className={classes.outlineInput} spacing={0}>
-                      <Grid item xs={6}>
-                        <Grid container alignItems="center">
-                          <Grid item>
-                            <AvatarGroup>
-                              {icons ? (
-                                icons.map((e, idx) => {
-                                  return <Avatar src={e} key={idx} />;
-                                })
-                              ) : (
-                                <Avatar />
-                              )}
-                            </AvatarGroup>
-                          </Grid>
-                          <Grid item>
-                            <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
-                          </Grid>
+                <Grid item xs={12}>
+                  <Grid container className={classes.outlineInput} spacing={0}>
+                    <Grid item xs={6}>
+                      <Grid container alignItems="center">
+                        <Grid item>
+                          <AvatarGroup>
+                            {icons ? icons.map((e, idx) => <Avatar src={e} key={idx} />) : <Avatar />}
+                          </AvatarGroup>
+                        </Grid>
+                        <Grid item>
+                          <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
                         </Grid>
                       </Grid>
-                      <Grid item xs={6} align="right">
-                        <TextField
-                          variant="standard"
-                          value={maxToken}
-                          inputRef={this.seedRef}
-                          onChange={this.onChange}
-                          fullWidth
-                          className={classes.textRight}
-                          InputProps={{
-                            disableUnderline: true,
-                            endAdornment: (
-                              <Typography color="error" style={{ cursor: 'pointer' }} onClick={this.getMaxToken}>
-                                <strong>MAX</strong>
-                              </Typography>
-                            ),
-                          }}
-                        />
-                      </Grid>
                     </Grid>
+                  <Grid item xs={6} align="right">
+                    <TextField
+                      variant="standard"
+                      value={maxToken}
+                      inputRef={this.seedRef}
+                      onChange={this.onChange}
+                      fullWidth
+                      className={classes.textRight}
+                      InputProps={{
+                        disableUnderline: true,
+                        endAdornment: <Typography color="error" style={{ cursor: 'pointer' }} onClick={this.getMaxToken}>
+                          <strong>MAX</strong>
+                        </Typography>,
+                      }}
+                    />
                   </Grid>
-
-                  <Drain size={3} />
-
-                  {/* Button */}
-                  <Grid item xs={12} align="end">
-                    <Grid container>
-                      <Grid item xs={6} className={classes.button}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => this.handleSeed()}
-                          fullWidth
-                          disabled={seedLoading}
-                          startIcon={seedLoading ? <CircularProgress size={17} /> : null}
-                        >
-                          Seed
-                        </Button>
-                      </Grid>
-                      <Grid item xs={6} className={classes.button}>
-                        <Button
-                          variant="outlined"
-                          onClick={() => this.handleSeed('unseed')}
-                          fullWidth
-                          disabled={unSeedLoading}
-                          startIcon={unSeedLoading ? <CircularProgress size={17} /> : null}
-                        >
-                          Unseed
-                        </Button>
-                      </Grid>
-                    </Grid>
-                    <Drain size={1} />
-                  </Grid>
-                </Paper>
+                </Grid>
               </Grid>
-              <Drain size={2} />
-            </Grid>
-          </DialogContent>
-        </Dialog>
-      </Fragment>
-    );
+
+              <Drain size={3} />
+
+              {/* Button */}
+              <Grid item xs={12} align="end">
+                <Grid container>
+                  <Grid item xs={6} className={classes.button}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => this.handleSeed()}
+                      fullWidth
+                      disabled={seedLoading}
+                      startIcon={seedLoading ? <CircularProgress size={17} /> : null}
+                    >Seed</Button>
+                  </Grid>
+                  <Grid item xs={6} className={classes.button}>
+                    <Button
+                      variant="outlined"
+                      onClick={() => this.handleSeed('unseed')}
+                      fullWidth
+                      disabled={unSeedLoading}
+                      startIcon={unSeedLoading ? <CircularProgress size={17} /> : null}
+                    >Unseed</Button>
+                  </Grid>
+                </Grid>
+                <Drain size={1} />
+              </Grid>
+            </Paper>
+          </Grid>
+          <Drain size={2} />
+        </Grid>
+      </DialogContent>
+    </Dialog>
   }
 }
 
@@ -217,14 +182,13 @@ const mapStateToProps = (state) => ({
   wallet: state.wallet,
 });
 
-const mapDispatchToProps = (dispatch) =>
-  bindActionCreators(
-    {
-      setError,
-      setSuccess,
-      getStakePools,
-    },
-    dispatch,
-  );
+const mapDispatchToProps = (dispatch) => bindActionCreators({
+  setError,
+  setSuccess,
+  getStakePools,
+}, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(Seed)));
+export default withRouter(connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(withStyles(styles)(Seed)));
