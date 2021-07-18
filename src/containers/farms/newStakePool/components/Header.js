@@ -1,12 +1,15 @@
 import React from "react";
+
 import { withStyles } from "senswap-ui/styles";
-import styles from "../styles";
-//
 import Grid from "senswap-ui/grid";
 import { IconButton } from "senswap-ui/button";
 import { DialogTitle } from "senswap-ui/dialog";
 import Typography from "senswap-ui/typography";
+
 import { CloseRounded } from "senswap-ui/icons";
+
+import styles from "../styles";
+
 
 function NewStakePoolHeader(props) {
   const { classes, onClose } = props;
