@@ -21,10 +21,7 @@ class Farms extends Component {
         <Header />
       </Grid>
       <Grid item xs={12}>
-        <Drain size={1} />
-      </Grid>
-      <Grid item xs={12}>
-        <Drain size={1} />
+        <Drain />
       </Grid>
       <Grid item xs={12}>
         <StakePools />
