@@ -88,7 +88,7 @@ function ListLPT({ classes, visible, onClose, onSelect }) {
                   {!state.pools.length ? <TableRow>
                     <TableCell />
                     <TableCell>
-                      {state.isLoading ? <CircularProgress size={17} /> : <Typography variant="caption">No token</Typography>)}
+                      {state.isLoading ? <CircularProgress size={17} /> : <Typography variant="caption">No token</Typography>}
                     </TableCell>
                     <TableCell />
                     <TableCell />

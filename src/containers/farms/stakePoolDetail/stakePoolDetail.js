@@ -50,9 +50,11 @@ class Farming extends Component {
       onHandleStake,
       detail: { mint },
     } = this.props;
-    const value = this.stakeRef.current.value;
-    if (!value) return setError('Amount is required');
-    onHandleStake(value, mint.address, type);
+    const amountStake = this.stakeRef.current.value;
+    const amountUnstake = this.unstakeRef.current.value;
+    if (!amountStake || !amountUnstake) return setError('Amount is required');
+    const amount = { amountStake, amountUnstake };
+    onHandleStake(amount, mint.address, type);
   }
 
   handleHarvest = () => {

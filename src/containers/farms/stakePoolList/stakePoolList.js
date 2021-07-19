@@ -141,11 +141,14 @@ class StakePool extends Component {
     const {
       sol: { senAddress },
     } = configs;
+    const { amountStake, amountUnstake } = amount;
     const { address: LPAddress } = await sol.scanAccount(address, userAddress);
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-    const reserveAmount = ssjs.decimalize(amount, DECIMAL);
+    const reserveAmountStake = ssjs.decimalize(amountStake, DECIMAL);
+    const reserveAmountUnstake = ssjs.decimalize(amountUnstake, DECIMAL);
     const data = {
-      reserveAmount,
+      reserveAmountStake,
+      reserveAmountUnstake,
       stakePoolAddress,
       LPAddress,
       senWallet,
@@ -158,7 +161,7 @@ class StakePool extends Component {
     const { setError, setSuccess } = this.props;
     const wallet = window.senswap.wallet;
     this.setState({ stakeLoading: true, loadingMessage: 'Wait for staking' });
-    const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
+    const { reserveAmountStake: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       //Check Stake Pool Account
       let newAccount = null;
@@ -198,7 +201,7 @@ class StakePool extends Component {
   unstake = async (data) => {
     const { setError, setSuccess } = this.props;
     this.setState({ unStakeLoading: true, loadingMessage: 'Wait for unstaking' });
-    const { reserveAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
+    const { reserveAmountUnstake: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       await liteFarming.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
       await setSuccess('The token has been unstaked!');
