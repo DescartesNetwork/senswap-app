@@ -2,6 +2,7 @@ import { getAccountData } from 'modules/bucket.reducer';
 import ssjs from 'senswapjs';
 import store from '../store'
 
+
 const SOL = {}
 
 SOL.scanAccount = async (mintAddress, walletAddress) => {
