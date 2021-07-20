@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import ssjs from 'senswapjs';
 
 import utils from 'helpers/utils';
 
@@ -9,7 +8,7 @@ function Price(props) {
   const { ticket } = props;
   useEffect(() => {
     if (!ticket) return setPrice(0);
-    return ssjs.parseCGK(ticket).then(({ price }) => {
+    return utils.fetchCGK(ticket).then(({ price }) => {
       return setPrice(price);
     }).catch(er => {
       // Do nothing

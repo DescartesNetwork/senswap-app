@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import ssjs from 'senswapjs';
 
 import Typography from 'senswap-ui/typography';
 
@@ -13,7 +12,7 @@ function Price(props) {
   useEffect(() => {
     return (async () => {
       try {
-        const { price } = await ssjs.parseCGK(ticket);
+        const { price } = await utils.fetchCGK(ticket);
         setPrice(price);
         setUSD(price * amount);
       } catch (er) { /* Do nothing */ }

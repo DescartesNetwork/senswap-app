@@ -7,7 +7,7 @@ import api from 'helpers/api';
  * @default defaultData
  */
 const defaultState = {}
-
+const cacheMint = {};
 /**
  * Get mint
  */
@@ -50,9 +50,18 @@ export const getMints = (condition, limit, page) => {
   return async dispatch => {
     dispatch({ type: GET_MINTS });
 
+    const filterOption = { condition, limit, page };
     const { api: { base } } = configs;
     try {
-      const { data } = await api.get(base + '/mints', { condition, limit, page });
+      const key = JSON.stringify(filterOption)
+      if(cacheMint[key]){
+        dispatch({ type: GET_MINTS_OK, data: {} });
+        return cacheMint[key];
+      }
+
+      const { data } = await api.get(base + '/mints', filterOption);
+      cacheMint[key] = data;
+      
       dispatch({ type: GET_MINTS_OK, data: {} });
       return data;
     } catch (er) {

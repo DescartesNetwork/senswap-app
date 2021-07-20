@@ -8,10 +8,10 @@ import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 import Table, { TableBody, TableCell, TableContainer, TableHead, TableRow } from 'senswap-ui/table';
-import Utils from 'helpers/utils';
 
 import { setError } from 'modules/ui.reducer';
 import { getBoardStat } from 'modules/board.reducer';
+import Utils from 'helpers/utils';
 
 import styles from './styles';
 

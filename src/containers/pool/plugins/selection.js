@@ -28,6 +28,7 @@ import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { getPools, getPool } from 'modules/pool.reducer';
 import { getMintData, getPoolData } from 'modules/bucket.reducer';
+import Utils from 'helpers/utils';
 
 
 class Selection extends Component {
@@ -99,7 +100,7 @@ class Selection extends Component {
     const reserveS = ssjs.undecimalize(reserve_s, decimalsS);
     const tickets = [ticketA, ticketB, ticketS];
     const reserves = [reserveA, reserveB, reserveS];
-    const prices = await Promise.all(tickets.map(ticket => ssjs.parseCGK(ticket)));
+    const prices = await Promise.all(tickets.map(ticket => Utils.fetchCGK(ticket)));
     stat.tvl = prices.reduce((sum, { price }, index) => sum + price * reserves[index], 0);
     return stat;
   }
