@@ -7,6 +7,7 @@ import Grid from 'senswap-ui/grid';
 import Typography from 'senswap-ui/typography';
 
 import { ArrowDropDownRounded, ArrowDropUpRounded } from 'senswap-ui/icons';
+import Utils from 'helpers/utils';
 
 
 const useStyles = makeStyles(theme => ({
@@ -26,7 +27,7 @@ function PriceChange(props) {
   const [priceChange, setPriceChange] = useState(0);
   const { ticket } = props;
   useEffect(() => {
-    return ssjs.parseCGK(ticket).then(({ priceChange }) => {
+    return Utils.fetchCGK(ticket).then(({ priceChange }) => {
       setPriceChange(priceChange);
     }).catch(er => {
       // Do nothing

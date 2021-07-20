@@ -4,6 +4,9 @@ import ssjs from 'senswapjs';
 
 import configs from 'configs';
 
+const cache = {
+  coinGecko:{}
+};
 
 const Utils = {}
 
@@ -57,11 +60,20 @@ Utils.explorer = (addressOrTxId) => {
 }
 
 Utils.fetchValue = async (balance, ticket) => {
-  const { price } = await ssjs.parseCGK(ticket);
+  const { price } = await Utils.fetchCGK(ticket);
   const usd = balance * price;
-  const { price: btcPrice } = await ssjs.parseCGK('bitcoin');
+  const { price: btcPrice } = await Utils.fetchCGK('bitcoin');
   const btc = usd / btcPrice;
   return { usd, btc }
+}
+
+Utils.fetchCGK = async (ticket, force) => {
+  const cacheValue = cache.coinGecko[ticket];
+  if(cacheValue && !force) return cacheValue;
+
+  const dataCGK =  await ssjs.parseCGK(ticket);
+  cache.coinGecko[ticket] = dataCGK
+  return dataCGK;
 }
 
 Utils.getAnnualPercentage = (roi, time = 1) => {

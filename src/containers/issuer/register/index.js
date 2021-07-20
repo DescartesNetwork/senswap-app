@@ -19,6 +19,7 @@ import { FlightTakeoffRounded, HelpOutlineRounded } from 'senswap-ui/icons';
 import styles from './styles';
 import { setError } from 'modules/ui.reducer';
 import { addMint } from 'modules/mint.reducer';
+import Utils from 'helpers/utils';
 
 const EMPTY = {
   loading: false,
@@ -65,7 +66,7 @@ class RegisterMint extends Component {
       if (!name) return;
       this.timeoutId = setTimeout(() => {
         return this.setState({ loading: true }, () => {
-          return ssjs.parseCGK(ticket).then(data => {
+          return Utils.fetchCGK(ticket).then(data => {
             return this.setState({ ...EMPTY, data: { ...data, ticket } });
           }).catch(er => {
             return this.setState({ ...EMPTY }, () => {

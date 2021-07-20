@@ -3,13 +3,14 @@ import PropTypes from 'prop-types';
 import ssjs from 'senswapjs';
 
 import utils from 'helpers/utils';
+import Utils from 'helpers/utils';
 
 function Price(props) {
   const [price, setPrice] = useState(0);
   const { ticket } = props;
   useEffect(() => {
     if (!ticket) return setPrice(0);
-    return ssjs.parseCGK(ticket).then(({ price }) => {
+    return Utils.fetchCGK(ticket).then(({ price }) => {
       return setPrice(price);
     }).catch(er => {
       // Do nothing
