@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import ssjs from 'senswapjs';
 
 import { makeStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
