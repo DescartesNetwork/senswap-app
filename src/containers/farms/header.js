@@ -35,11 +35,8 @@ class Wallet extends Component {
   render() {
     const { classes, wallet: { user: { address, role } }, ui: { leftbar } } = this.props;
     const { visibleNewPool } = this.state;
-
     let isAdmin = false;
-    if (address) {
-      isAdmin = role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator';
-    }
+    if (address && role) isAdmin = role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator';
 
     return <Grid container spacing={0}>
       <Grid item xs={12}>

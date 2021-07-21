@@ -1,4 +1,4 @@
-import React, { Component, createRef, Fragment } from 'react';
+import React, { Component, createRef } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -50,9 +50,11 @@ class Farming extends Component {
       onHandleStake,
       detail: { mint },
     } = this.props;
-    const value = this.stakeRef.current.value;
-    if (!value) return setError('Amount is required');
-    onHandleStake(value, mint.address, type);
+    const amountStake = this.stakeRef.current.value;
+    const amountUnstake = this.unstakeRef.current.value;
+    if (!amountStake || !amountUnstake) return setError('Amount is required');
+    const amount = { amountStake, amountUnstake };
+    onHandleStake(amount, mint.address, type);
   }
 
   handleHarvest = () => {
@@ -127,13 +129,9 @@ class Farming extends Component {
         <Grid container alignItems="center" spacing={1}>
           <Grid item>
             <AvatarGroup>
-              {icons ? (
-                icons.map((e, idx) => {
-                  return <Avatar size="small" src={e} key={idx} />;
-                })
-              ) : (
-                <Avatar />
-              )}
+              {icons ? icons.map((e, idx) => {
+                return <Avatar size="small" src={e} key={idx} />;
+              }) : <Avatar />}
             </AvatarGroup>
           </Grid>
           <Grid item>

@@ -6,6 +6,7 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
+
 import Header from './header';
 import StakePools from './stakePoolList/stakePoolList';
 

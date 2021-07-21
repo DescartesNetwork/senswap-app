@@ -19,8 +19,8 @@ import { Backdrop } from '@material-ui/core';
 
 import { PoolAvatar } from 'containers/pool';
 import { MintAvatar } from 'containers/wallet';
-import ListLPT from './components/ListLPT';
-import NewStakePoolHeader from './components/Header.js';
+import ListLPT from './components/listLPT';
+import NewStakePoolHeader from './components/header.js';
 
 import configs from 'configs';
 import styles from './styles';
@@ -79,7 +79,7 @@ class NewStakePool extends Component {
     if (/[^\d\\.]/.test(value)) return;
     return this.setState({ [name]: value });
   };
-  
+
   onBlurNumber = (e) => {
     const { name, value } = e.target;
     const decimals = 9;
@@ -94,8 +94,7 @@ class NewStakePool extends Component {
   };
 
   handleCreateStakePool = async () => {
-    const liteFarming = window.senswap.farming;
-    const wallet = window.senswap.wallet;
+    const { wallet, farming: liteFarming } = window.senswap;
     const { setError, setSuccess, addStakePool, onClose } = this.props;
     const {
       senToken,

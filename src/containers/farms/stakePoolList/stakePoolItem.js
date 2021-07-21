@@ -1,17 +1,21 @@
 import React, { useEffect } from 'react';
 import ssjs from 'senswapjs';
+import numeral from 'numeral';
+
 import { withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Button from 'senswap-ui/button';
 import { TableCell, TableRow } from 'senswap-ui/table';
 import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
-import { HelpOutlineRounded } from 'senswap-ui/icons';
 import Typography from 'senswap-ui/typography';
 import CircularProgress from 'senswap-ui/circularProgress';
-import styles from '../styles';
 import { useDispatch, useSelector } from 'react-redux';
+
+import { HelpOutlineRounded } from 'senswap-ui/icons';
+
+import styles from '../styles';
 import { getStakePoolData } from 'modules/bucket.reducer';
-import numeral from 'numeral';
+
 
 function StakePoolItem(props) {
   const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
@@ -32,7 +36,7 @@ function StakePoolItem(props) {
 
   //Check user permission
   if (userAddress) isConnected = true;
-  if (isConnected) {
+  if (isConnected && role) {
     isAdmin = role.toLowerCase() === 'admin' || role.toLowerCase() === 'operator';
   }
 
@@ -41,19 +45,16 @@ function StakePoolItem(props) {
     setTimeout(() => {
       if (!poolData) dispatch(getStakePoolData(stakePool.address));
     }, 500);
-    // eslint-disable-next-line
-  }, []);
+  }, [dispatch]);
 
   //Check loading
   function renderLoading() {
     return (
       <TableRow>
         {[1, 2, 3, 4, 5, 6].map((elm) => {
-          return (
-            <TableCell key={elm}>
-              <CircularProgress size={17} />
-            </TableCell>
-          );
+          return <TableCell key={elm}>
+            <CircularProgress size={17} />
+          </TableCell>
         })}
       </TableRow>
     );
@@ -75,17 +76,11 @@ function StakePoolItem(props) {
       <TableCell className={classes.columnIndex}>{index + 1}</TableCell>
       <TableCell className={classes.assets}>
         <AvatarGroup>
-          {icons ? (
-            icons.map((icon, idx) => {
-              return (
-                <Avatar src={icon} className={classes.icon} key={idx}>
-                  <HelpOutlineRounded />
-                </Avatar>
-              );
-            })
-          ) : (
-            <Avatar />
-          )}
+          {icons ? icons.map((icon, idx) => {
+            return <Avatar src={icon} className={classes.icon} key={idx}>
+              <HelpOutlineRounded />
+            </Avatar>
+          }) : <Avatar />}
         </AvatarGroup>
         <Grid item>
           <Typography>{name}</Typography>
