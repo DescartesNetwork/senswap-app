@@ -124,8 +124,7 @@ class StakePool extends Component {
     if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid mint address');
     if (!ssjs.isAddress(userAddress)) throw new Error('Invalid wallet address');
     const { address: accountAddress, state } = await sol.scanAccount(mintAddress, userAddress);
-    // if (!state) throw new Error('Invalid state');
-    console.log(accountAddress, state, '????')
+    if (!state) throw new Error('Invalid state');
     const account = await getAccountData(accountAddress);
     return account;
   };
@@ -166,18 +165,17 @@ class StakePool extends Component {
       if (status) await setSuccess('Success');
       if (!status) await setError('Fail');
       console.log(msg);
-      // return this.setState({ unStakeLoading: false }, () => {
-      //   this.onClose();
-      // });
-      return;
+      return this.setState({ unStakeLoading: false }, () => {
+        this.onClose();
+      });
     }
     this.setState({ stakeLoading: true, loadingMessage: 'Wait for staking' });
     const { status, msg } = await farm.stake(data);
     if (status) setSuccess(msg);
     if (!status) setError(msg);
-    // return this.setState({ unStakeLoading: false }, () => {
-    //   this.onClose();
-    // });
+    return this.setState({ unStakeLoading: false }, () => {
+      this.onClose();
+    });
   };
 
   onHandleHarvest = async () => {
