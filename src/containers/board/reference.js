@@ -17,6 +17,7 @@ import Chip from 'senswap-ui/chip';
 import { HelpOutlineRounded, ArrowDropDownRounded, ArrowDropUpRounded } from 'senswap-ui/icons';
 
 import styles from './styles';
+import Utils from 'helpers/utils';
 
 const useStyles = makeStyles(theme => ({
   noWrap: {
@@ -35,7 +36,7 @@ function Price(props) {
   useEffect(() => {
     return (async () => {
       try {
-        const { price, priceChange } = await ssjs.parseCGK(ticket);
+        const { price, priceChange } = await Utils.fetchCGK(ticket);
         setPrice(price);
         setPriceChange(priceChange);
       } catch (er) { /* Do nothing */ }

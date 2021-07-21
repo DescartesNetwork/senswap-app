@@ -15,6 +15,7 @@ import Paper from 'senswap-ui/paper';
 import Chart from 'components/chart';
 
 import styles from './styles';
+import Utils from 'helpers/utils';
 
 
 class Reserve extends Component {
@@ -52,7 +53,7 @@ class Reserve extends Component {
       [ticketS, reserveS, symbolS]
     ];
     data = await Promise.all(data.map(async ([ticket, reserve, symbol]) => {
-      const { price } = await ssjs.parseCGK(ticket);
+      const { price } = await Utils.fetchCGK(ticket);
       const value = price * reserve;
       return { label: symbol, value }
     }));

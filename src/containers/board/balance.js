@@ -23,6 +23,7 @@ import { BucketWatcher } from 'containers/wallet';
 import styles from './styles';
 import sol from 'helpers/sol';
 import { getAccountData } from 'modules/bucket.reducer';
+import Utils from 'helpers/utils';
 
 
 function Valuation(props) {
@@ -31,7 +32,7 @@ function Valuation(props) {
   useEffect(() => {
     return (async () => {
       try {
-        const { price } = await ssjs.parseCGK(ticket);
+        const { price } = await Utils.fetchCGK(ticket);
         setValue(price * balance);
       } catch (er) { /* Do nothing */ }
     })();

@@ -1,4 +1,6 @@
+import { getAccountData } from 'modules/bucket.reducer';
 import ssjs from 'senswapjs';
+import store from '../store'
 
 
 const SOL = {}
@@ -13,7 +15,7 @@ SOL.scanAccount = async (mintAddress, walletAddress) => {
   let data = { address: '', state: 0 }
   data.address = await ssjs.deriveAssociatedAddress(walletAddress, mintAddress, spltAddress, splataAddress);
   try {
-    const accountData = await splt.getAccountData(data.address);
+    const accountData = await store.dispatch(getAccountData(data.address));
     data = { ...data, ...accountData }
   } catch (er) {/* Nothing */ }
   return data;
@@ -30,7 +32,7 @@ SOL.newAccount = async (mintAddress, ownerAddress = null) => {
   const accountAddress = await ssjs.deriveAssociatedAddress(walletAddress, mintAddress, spltAddress, splataAddress);
 
   try {
-    const accountData = await splt.getAccountData(accountAddress);
+    const accountData = await store.dispatch(getAccountData(accountAddress));
     const { address } = accountData;
     if (!ssjs.isAddress(address)) throw new Error('Account has not been initialized');
     return { address }
