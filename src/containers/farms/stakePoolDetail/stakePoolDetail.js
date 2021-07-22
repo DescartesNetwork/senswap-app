@@ -108,27 +108,19 @@ class Farming extends Component {
 
   handleHarvest = async () => {
     const {
-      detail, setError, setSuccess,
-      wallet: {
+      detail, wallet: {
         user: { address: userAddress },
       } } = this.props;
     const { pool: { address: stakePoolAddress } } = detail;
-    const { wallet, farming: liteFarming } = window.senswap;
-    const {
-      sol: { senAddress },
-    } = configs;
+    const { sol: { senAddress } } = configs;
     this.setState({ harvestLoading: true });
-    try {
-      const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-      await liteFarming.harvest(stakePoolAddress, senWallet, wallet);
-      await setSuccess('Harvest successfully');
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ harvestLoading: false }, () => {
-        this.handleClose();
-      });
+    const params = {
+      senAddress, userAddress, stakePoolAddress
     }
+    const { status, msg } = await farm.harvest(params);
+    this.setState({ harvestLoading: false }, () => {
+      this.handleClose(status, msg);
+    });
   }
 
   getMaxToken = (type) => {

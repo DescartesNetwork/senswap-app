@@ -112,7 +112,7 @@ class Farming extends Component {
       accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
     } catch (error) { }
     return accountData;
-  };
+  }
 
   fetchAccountData = async (mintAddress) => {
     const {
@@ -127,7 +127,7 @@ class Farming extends Component {
     if (!state) throw new Error('Invalid state');
     const account = await getAccountData(accountAddress);
     return account;
-  };
+  }
 
   handleStake = async (type) => {
     const {
@@ -158,7 +158,7 @@ class Farming extends Component {
     };
     if (type === 'unstake') return this.unstake(params);
     return this.stake(params);
-  };
+  }
 
   stake = async (params) => {
     const { setError, setSuccess } = this.props;
@@ -180,7 +180,7 @@ class Farming extends Component {
     });
   }
 
-  onHandleHarvest = async () => {
+  handleHarvest = async () => {
     const { stakePoolAddress } = this.state;
     const {
       setError,
@@ -199,7 +199,7 @@ class Farming extends Component {
       if (status) setSuccess(msg);
       return setError(msg)
     });
-  };
+  }
 
   getMaxToken = (type) => {
     const {
@@ -218,7 +218,7 @@ class Farming extends Component {
     return this.setState({ maxStake: share }, () => {
       this.onStakeChange();
     });
-  };
+  }
 
   onStakeChange = () => {
     const {
@@ -230,7 +230,7 @@ class Farming extends Component {
     const share = Number(ssjs.undecimalize(amount, decimals));
     const value = Number(this.stakeRef.current.value);
     this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || value / value !== 1 });
-  };
+  }
 
   onUnstakeChange = () => {
     const {
@@ -242,7 +242,7 @@ class Farming extends Component {
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const value = Number(this.unstakeRef.current.value);
     this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || value / value !== 1 });
-  };
+  }
 
   render() {
     const {
