@@ -64,21 +64,21 @@ class NewStakePool extends Component {
       await setError(er);
       return this.setState({ loading: false });
     }
-  };
+  }
 
-  onCloseListLPT = () => this.setState({ visibleAccountSelection: false });
+  onCloseListLPT = () => this.setState({ visibleAccountSelection: false })
 
   onSelectLPT = (pool) => {
     return this.setState({ poolInfo: pool }, () => {
       return this.onCloseListLPT();
     });
-  };
+  }
 
   onChange = (e) => {
     const { name, value } = e.target;
     if (/[^\d\\.]/.test(value)) return;
     return this.setState({ [name]: value });
-  };
+  }
 
   onBlurNumber = (e) => {
     const { name, value } = e.target;
@@ -86,12 +86,12 @@ class NewStakePool extends Component {
     if (!/^[\d]+(\.\d+)?$/.test(value) || Number(value) < Math.pow(10, -decimals))
       return this.setState({ [name]: '0' });
     return this.setState({ [name]: value });
-  };
+  }
 
   onChangePeriod = (e) => {
     const period = e.target.value || '';
     return this.setState({ period: period });
-  };
+  }
 
   handleCreateStakePool = async () => {
     const { wallet, farming: liteFarming } = window.senswap;

@@ -29,8 +29,8 @@ class Wallet extends Component {
     }
   }
 
-  onOpenNewPool = () => this.setState({ visibleNewPool: true });
-  onCloseNewPool = () => this.setState({ visibleNewPool: false });
+  onOpenNewPool = () => this.setState({ visibleNewPool: true })
+  onCloseNewPool = () => this.setState({ visibleNewPool: false })
 
   render() {
     const { classes, wallet: { user: { address, role } }, ui: { leftbar } } = this.props;

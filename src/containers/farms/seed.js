@@ -47,7 +47,7 @@ class Seed extends Component {
     };
     if (type === 'unseed') return this.unseed(params);
     return this.seed(params);
-  };
+  }
 
   seed = async (data) => {
     const { wallet, farming: liteFarming } = window.senswap;
@@ -65,7 +65,8 @@ class Seed extends Component {
         this.onHandleClose();
       });
     }
-  };
+  }
+
   unseed = async (data) => {
     const { wallet, farming: liteFarming } = window.senswap;
     const { setSuccess, setError } = this.props;
@@ -83,7 +84,7 @@ class Seed extends Component {
         this.onHandleClose();
       });
     }
-  };
+  }
 
   getMaxToken = () => {
     const {
@@ -95,18 +96,18 @@ class Seed extends Component {
     } = pool;
     const total = ssjs.undecimalize(accAmount, decimals);
     return this.setState({ maxToken: total });
-  };
+  }
 
   onChange = () => {
     const value = this.seedRef.current.value;
     this.setState({ maxToken: value });
-  };
+  }
 
   onHandleClose = () => {
     const { onClose } = this.props;
     this.setState({ maxToken: 0 });
     return onClose();
-  };
+  }
 
   render() {
     const { maxToken, seedLoading, unSeedLoading } = this.state;
