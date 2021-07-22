@@ -27,17 +27,62 @@ class Seed extends Component {
 
     this.state = {
       maxToken: 0,
+      seedLoading: false,
+      unSeedLoading: false,
     };
     this.seedRef = createRef();
   }
 
   handleSeed = (type) => {
-    const { onHandleSeed, detail } = this.props;
-    const { senWallet } = detail;
+    const { detail } = this.props;
+    const { senWallet, pool: { address: stakePoolAddress } } = detail;
+    console.log(detail)
     const amount = this.seedRef.current.value;
+    const reserveAmount = ssjs.decimalize(amount, 9);
     if (!amount) return setError('Amount is required');
-    const data = { amount, senWallet };
-    onHandleSeed(data, type);
+    const params = {
+      reserveAmount,
+      stakePoolAddress,
+      senWallet,
+    };
+    if (type === 'unseed') return this.unseed(params);
+    return this.seed(params);
+  };
+
+  seed = async (data) => {
+    const { wallet, farming: liteFarming } = window.senswap;
+    const { setSuccess, setError } = this.props;
+    const { reserveAmount: amount, stakePoolAddress, senWallet } = data;
+    this.setState({ seedLoading: true });
+    try {
+      const seed = await liteFarming.seed(amount, stakePoolAddress, senWallet, wallet);
+      if (!seed) throw new Error('Error!');
+      await setSuccess('Successfully');
+    } catch (err) {
+      await setError(err);
+    } finally {
+      this.setState({ seedLoading: false }, () => {
+        this.onHandleClose();
+      });
+    }
+  };
+  unseed = async (data) => {
+    const { wallet, farming: liteFarming } = window.senswap;
+    const { setSuccess, setError } = this.props;
+    const { reserveAmount: amount, stakePoolAddress, senWallet } = data;
+    this.setState({ unSeedLoading: true });
+    try {
+      const seed = await liteFarming.unseed(amount, stakePoolAddress, senWallet, wallet);
+      if (!seed) throw new Error('Error!');
+
+      await setSuccess('Successfully');
+    } catch (err) {
+      await setError(err);
+    } finally {
+      this.setState({ unSeedLoading: false }, () => {
+        this.onHandleClose();
+      });
+    }
   };
 
   getMaxToken = () => {
@@ -64,8 +109,8 @@ class Seed extends Component {
   };
 
   render() {
-    const { maxToken } = this.state;
-    const { classes, visible, detail: data, seedLoading, unSeedLoading } = this.props;
+    const { maxToken, seedLoading, unSeedLoading } = this.state;
+    const { classes, visible, detail: data } = this.props;
     if (!data || !data.pool) return null;
     const {
       pool: {

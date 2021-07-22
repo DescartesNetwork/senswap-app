@@ -78,12 +78,12 @@ export const GET_DEBT_DATA_FAIL = 'GET_DEBT_DATA_FAIL';
 export const getStakeAccountData = (debtAddress, force = false) => {
   return async (dispatch, getState) => {
     dispatch({ type: GET_DEBT_DATA });
+    console.log(ssjs.isAddress(debtAddress), 'ss')
     if (!ssjs.isAddress(debtAddress)) {
       const er = 'Invalid account address';
       dispatch({ type: GET_DEBT_DATA_FAIL, reason: er });
       throw new Error(er);
     }
-
     let { bucket: { [debtAddress]: accountData } } = getState();
     if (accountData && !force) {
       const data = { [debtAddress]: accountData }

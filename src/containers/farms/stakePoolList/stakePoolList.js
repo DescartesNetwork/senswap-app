@@ -17,7 +17,6 @@ import Seed from '../seed';
 import styles from '../styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
-import farm from 'helpers/farm';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
 import { getAccountData, getStakePoolData } from 'modules/bucket.reducer';
@@ -34,7 +33,6 @@ const COLS = [
   { label: '', key: 'detail' },
 ];
 
-const DECIMAL = 9;
 const LIMIT = 9999;
 
 
@@ -50,11 +48,7 @@ class StakePool extends Component {
       loading: false,
       visibleSeed: false,
       isAccess: false,
-      stakeLoading: false,
-      unStakeLoading: false,
       harvestLoading: false,
-      seedLoading: false,
-      unSeedLoading: false,
     };
   }
   componentDidMount() {
@@ -75,7 +69,7 @@ class StakePool extends Component {
     } catch (er) {
       await setError(er);
     }
-  };
+  }
 
   onClose = () => {
     return this.setState({
@@ -83,8 +77,14 @@ class StakePool extends Component {
       stakeLoading: false,
       unStakeLoading: false,
       visible: false,
+      loading: false,
     });
-  };
+  }
+
+  onHandleStake = (msg) => {
+    // Set backlock on handle stake
+    this.setState({ loading: true, loadingMessage: msg });
+  }
 
   onOpenDetail = async (stakePool) => {
     if (!stakePool) return;
@@ -101,18 +101,19 @@ class StakePool extends Component {
       debt,
     };
     this.setState({ visible: true, poolDetail: poolDetail });
-  };
+  }
 
   fetchDebtData = async (poolAddress) => {
+    const { setError } = this.props;
     const { wallet, farming: liteFarming } = window.senswap;
     let accountData = null;
     try {
       accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
     } catch (error) {
-      console.log(error);
+      return setError(error);
     }
     return accountData;
-  };
+  }
 
   fetchAccountData = async (mintAddress) => {
     const {
@@ -127,141 +128,7 @@ class StakePool extends Component {
     if (!state) throw new Error('Invalid state');
     const account = await getAccountData(accountAddress);
     return account;
-  };
-
-  handleStake = async (amount, address, type) => {
-    const {
-      updateWallet,
-      wallet: {
-        user: { address: userAddress },
-        stakeAccounts, stakeAccount
-      },
-    } = this.props;
-    const {
-      poolDetail: {
-        pool: { address: stakePoolAddress },
-      },
-    } = this.state;
-    const {
-      sol: { senAddress },
-    } = configs;
-    const { amountStake, amountUnstake } = amount;
-    const { address: LPAddress } = await sol.scanAccount(address, userAddress);
-    const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-    const reserveStakeAmount = ssjs.decimalize(amountStake, DECIMAL);
-    const reserveUnstakeAmount = ssjs.decimalize(amountUnstake, DECIMAL);
-    const data = {
-      reserveStakeAmount,
-      reserveUnstakeAmount,
-      stakePoolAddress,
-      LPAddress,
-      senWallet,
-      stakeAccounts, stakeAccount,
-      updateWallet,
-    };
-    if (type === 'unstake') {
-      this.setState({ unStakeLoading: true, loadingMessage: 'Wait for unstaking' });
-      const { status, msg } = await farm.unstake(data);
-      if (status) await setSuccess('Success');
-      if (!status) await setError('Fail');
-      console.log(msg);
-      return this.setState({ unStakeLoading: false }, () => {
-        this.onClose();
-      });
-    }
-    this.setState({ stakeLoading: true, loadingMessage: 'Wait for staking' });
-    const { status, msg } = await farm.stake(data);
-    if (status) setSuccess(msg);
-    if (!status) setError(msg);
-    return this.setState({ unStakeLoading: false }, () => {
-      this.onClose();
-    });
-  };
-
-  onHandleHarvest = async () => {
-    const {
-      poolDetail: {
-        pool: { address: stakePoolAddress },
-      },
-    } = this.state;
-    const {
-      setError,
-      setSuccess,
-      wallet: {
-        user: { address: userAddress },
-      },
-    } = this.props;
-    const { wallet, farming: liteFarming } = window.senswap;
-    const {
-      sol: { senAddress },
-    } = configs;
-    this.setState({ harvestLoading: true });
-    try {
-      const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-      await liteFarming.harvest(stakePoolAddress, senWallet, wallet);
-      await setSuccess('Harvest successfully');
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ harvestLoading: false }, () => {
-        this.onClose();
-      });
-    }
-  };
-
-  onHandleSeed = async (data, type) => {
-    const {
-      poolDetail: {
-        pool: { address: stakePoolAddress },
-      },
-    } = this.state;
-    const { amount, senWallet } = data;
-    const reserveAmount = ssjs.decimalize(amount, DECIMAL);
-    const params = {
-      reserveAmount,
-      stakePoolAddress,
-      senWallet,
-    };
-
-    if (type === 'unseed') return this.unseed(params);
-    return this.seed(params);
-  };
-
-  seed = async (data) => {
-    const { wallet, farming: liteFarming } = window.senswap;
-    const { setSuccess, setError } = this.props;
-    const { reserveAmount: amount, stakePoolAddress, senWallet } = data;
-    this.setState({ seedLoading: true });
-    try {
-      const seed = await liteFarming.seed(amount, stakePoolAddress, senWallet, wallet);
-      if (!seed) throw new Error('Error!');
-      await setSuccess('Successfully');
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ seedLoading: false }, () => {
-        this.onCloseSeed();
-      });
-    }
-  };
-  unseed = async (data) => {
-    const { wallet, farming: liteFarming } = window.senswap;
-    const { setSuccess, setError } = this.props;
-    const { reserveAmount: amount, stakePoolAddress, senWallet } = data;
-    this.setState({ unSeedLoading: true });
-    try {
-      const seed = await liteFarming.unseed(amount, stakePoolAddress, senWallet, wallet);
-      if (!seed) throw new Error('Error!');
-
-      await setSuccess('Successfully');
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ unSeedLoading: false }, () => {
-        this.onCloseSeed();
-      });
-    }
-  };
+  }
 
   onOpenSeed = async (stakePool) => {
     if (!stakePool) return;
@@ -292,21 +159,22 @@ class StakePool extends Component {
       senWallet,
     };
     this.setState({ visibleSeed: true, poolDetail: poolDetail });
-  };
+  }
+
   onCloseSeed = () => {
     this.setState({
       visibleSeed: false,
       poolDetails: [],
     });
-  };
+  }
 
   render() {
     const { classes, stakePool } = this.props;
     const stakePools = Object.values(stakePool) || [];
 
     const {
-      visible, poolDetail, loadingMessage, loading, visibleSeed, seedLoading, unSeedLoading,
-      harvestLoading, stakeLoading, unStakeLoading
+      visible, poolDetail, loadingMessage,
+      loading, visibleSeed,
     } = this.state;
 
     return <Grid container>
@@ -351,20 +219,13 @@ class StakePool extends Component {
         visible={visible}
         onClose={this.onClose}
         detail={poolDetail}
-        onHandleStake={this.handleStake}
-        onHandleHarvest={this.onHandleHarvest}
-        stakeLoading={stakeLoading}
-        unStakeLoading={unStakeLoading}
-        harvestLoading={harvestLoading}
+        onHandleStake={this.onHandleStake}
       />
       {/* Modal seed - admin only */}
       <Seed
         visible={visibleSeed}
         onClose={this.onCloseSeed}
         detail={poolDetail}
-        seedLoading={seedLoading}
-        unSeedLoading={unSeedLoading}
-        onHandleSeed={this.onHandleSeed}
       />
     </Grid>
   }

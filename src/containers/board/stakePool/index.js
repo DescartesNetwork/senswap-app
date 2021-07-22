@@ -19,8 +19,9 @@ import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import { Skeleton } from '@material-ui/lab';
 import Divider from 'senswap-ui/divider';
 
-import sol from 'helpers/sol';
 import configs from 'configs';
+import sol from 'helpers/sol';
+import farm from 'helpers/farm';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
 import { getStakePoolData, getAccountData, getPoolData } from 'modules/bucket.reducer';
@@ -148,54 +149,36 @@ class Farming extends Component {
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
     const reserveStake = ssjs.decimalize(stake, 9);
     const reserveUnstake = ssjs.decimalize(unstake, 9);
-    const data = {
+    const params = {
       reserveStake,
       reserveUnstake,
       stakePoolAddress,
       LPAddress,
       senWallet,
     };
-    if (type === 'unstake') return this.unstake(data);
-    return this.stake(data);
+    if (type === 'unstake') return this.unstake(params);
+    return this.stake(params);
   };
 
-  stake = async (data) => {
+  stake = async (params) => {
     const { setError, setSuccess } = this.props;
-    const { wallet, farming: liteFarming } = window.senswap;
-    this.setState({ stakeLoading: true, loadingMessage: 'Wait for staking' });
-    const { reserveStake: amount, stakePoolAddress, LPAddress, senWallet } = data;
-    try {
-      //Check Stake Pool Account
-      try {
-        await liteFarming.getStakeAccountData(stakePoolAddress, wallet);
-      } catch (error) {
-        await liteFarming.initializeAccount(stakePoolAddress, wallet);
-      }
-      //Stake
-      await liteFarming.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
-      await setSuccess('The token has been staked!');
-    } catch (err) {
-      console.log('Error');
-      await setError(err);
-    } finally {
-      this.setState({ stakeLoading: false, maxStake: 0 });
-    }
-  };
+    this.setState({ stakeLoading: true });
+    const { status, msg } = await farm.stake(params);
+    this.setState({ stakeLoading: false, maxStake: 0 }, () => {
+      if (status) return setSuccess(msg);
+      return setError(msg);
+    });
+  }
 
-  unstake = async (data) => {
+  unstake = async (params) => {
     const { setError, setSuccess } = this.props;
-    const liteFarming = window.senswap.farming;
-    this.setState({ unStakeLoading: true, loadingMessage: 'Wait for unstaking' });
-    const { reserveUnstake: amount, stakePoolAddress, LPAddress, senWallet } = data;
-    try {
-      await liteFarming.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
-      await setSuccess('The token has been unstaked!');
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ unStakeLoading: false, maxUnstake: 0 });
-    }
-  };
+    this.setState({ unStakeLoading: true });
+    const { status, msg } = await farm.unstake(params);
+    this.setState({ unStakeLoading: false, maxUnstake: 0 }, () => {
+      if (status) return setSuccess(msg);
+      return setError(msg)
+    });
+  }
 
   onHandleHarvest = async () => {
     const { stakePoolAddress } = this.state;
@@ -206,21 +189,16 @@ class Farming extends Component {
         user: { address: userAddress },
       },
     } = this.props;
-    const { wallet, farming: liteFarming } = window.senswap;
-    const {
-      sol: { senAddress },
-    } = configs;
+    const { sol: { senAddress } } = configs;
     this.setState({ harvestLoading: true });
-    try {
-      const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-      await liteFarming.harvest(stakePoolAddress, senWallet, wallet);
-      await setSuccess('Harvest successfully');
-      this.onClose();
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ harvestLoading: false });
+    const params = {
+      senAddress, userAddress, stakePoolAddress
     }
+    const { status, msg } = await farm.harvest(params);
+    this.setState({ harvestLoading: false }, () => {
+      if (status) setSuccess(msg);
+      return setError(msg)
+    });
   };
 
   getMaxToken = (type) => {

@@ -1,4 +1,7 @@
 
+import sol from 'helpers/sol';
+
+
 class Farm {
   static bigIntToNumber(bigInt, decimal = 0) {
     return Number(bigInt.toString()) / Math.pow(10, decimal);
@@ -21,7 +24,7 @@ class Farm {
   static stake = async (data) => {
     const { wallet, farming: liteFarming } = window.senswap;
     const {
-      reserveStakeAmount: amount, stakePoolAddress,
+      reserveStake: amount, stakePoolAddress,
       LPAddress, senWallet,
       updateWallet
     } = data;
@@ -46,19 +49,29 @@ class Farm {
       }
       return { status: true, msg: 'The token has been staked!' };
     } catch (err) {
-      console.log(err, 'Error');
       return { status: false, msg: err };
     }
   }
 
   static unstake = async (data) => {
     const liteFarming = window.senswap.farming;
-    const { reserveUnstakeAmount: amount, stakePoolAddress, LPAddress, senWallet } = data;
+    const { reserveUnstake: amount, stakePoolAddress, LPAddress, senWallet } = data;
     try {
       await liteFarming.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
       return { status: true, msg: 'The token has been unstaked!' };
     } catch (err) {
-      console.log('err');
+      return { status: false, msg: err };
+    }
+  }
+
+  static harvest = async (data) => {
+    const { wallet, farming: liteFarming } = window.senswap;
+    const { senAddress, userAddress, stakePoolAddress } = data;
+    try {
+      const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
+      await liteFarming.harvest(stakePoolAddress, senWallet, wallet);
+      return { status: true, msg: 'Harvest successfully' };
+    } catch (err) {
       return { status: false, msg: err };
     }
   }
