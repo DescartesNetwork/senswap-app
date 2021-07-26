@@ -1,4 +1,4 @@
-import React, { Component, createRef, Fragment } from 'react';
+import React, { Component, createRef } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { withRouter } from 'react-router-dom';
@@ -19,9 +19,12 @@ import CircularProgress from 'senswap-ui/circularProgress';
 import Divider from 'senswap-ui/divider';
 
 import styles from '../styles';
-import Farm from 'helpers/farm';
+import farm from 'helpers/farm';
+import configs from 'configs';
+import sol from 'helpers/sol';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
+import { updateWallet } from 'modules/wallet.reducer';
 
 
 class Farming extends Component {
@@ -33,6 +36,9 @@ class Farming extends Component {
       maxUnstake: 0,
       disableStake: false,
       disableUnstake: false,
+      stakeLoading: false,
+      unStakeLoading: false,
+      harvestLoading: false,
     };
     this.stakeRef = createRef();
     this.unstakeRef = createRef();
@@ -45,19 +51,76 @@ class Farming extends Component {
     if (!isEqual(prevVisable, currVisable) && !currVisable) return this.setState({ maxStake: 0, maxUnstake: 0 });
   }
 
-  handleStake = (type) => {
+  handleStake = async (type) => {
     const {
-      onHandleStake,
-      detail: { mint },
+      detail, updateWallet,
+      wallet: {
+        user: { address: userAddress },
+        stakeAccounts, stakeAccount
+      }
     } = this.props;
-    const value = this.stakeRef.current.value;
-    if (!value) return setError('Amount is required');
-    onHandleStake(value, mint.address, type);
+    const { mint: { address }, pool: { address: stakePoolAddress }, } = detail;
+    const { sol: { senAddress } } = configs;
+
+    const amountStake = this.stakeRef.current.value;
+    const amountUnstake = this.unstakeRef.current.value;
+
+    if (!amountStake || !amountUnstake) return setError('Amount is required');
+
+    const { address: LPAddress } = await sol.scanAccount(address, userAddress);
+    const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
+    const reserveStake = ssjs.decimalize(amountStake, 9);
+    const reserveUnstake = ssjs.decimalize(amountUnstake, 9);
+    const params = {
+      reserveStake,
+      reserveUnstake,
+      stakePoolAddress,
+      LPAddress,
+      senWallet,
+      stakeAccounts, stakeAccount,
+      updateWallet,
+    };
+    if (type === 'unstake') return this.unstake(params);
+    return this.stake(params);
   }
 
-  handleHarvest = () => {
-    const { onHandleHarvest } = this.props;
-    onHandleHarvest();
+  stake = async (params) => {
+    const { onHandleStake } = this.props;
+    this.setState({ stakeLoading: true }, () => {
+      onHandleStake('Wait for staking');
+    });
+    const { status, msg } = await farm.stake(params);
+    return this.setState({ stakeLoading: false }, () => {
+      this.handleClose(status, msg);
+    });
+  }
+
+  unstake = async (params) => {
+    const { onHandleStake } = this.props;
+    this.setState({ unStakeLoading: true }, () => {
+      onHandleStake('Wait for unstaking');
+    });
+    const { status, msg } = await farm.unstake(params);
+    return this.setState({ unStakeLoading: false }, () => {
+      this.handleClose(status, msg);
+    });
+  }
+
+  handleHarvest = async () => {
+    const {
+      detail, wallet: {
+        user: { address: userAddress },
+      } } = this.props;
+    const { pool: { address: stakePoolAddress } } = detail;
+    const { sol: { senAddress } } = configs;
+    this.setState({ harvestLoading: true });
+    const params = {
+      senAddress, userAddress, stakePoolAddress
+    }
+    const { status, msg } = await farm.harvest(params);
+    this.setState({ harvestLoading: false }, () => {
+      this.handleClose(status, msg);
+    });
   }
 
   getMaxToken = (type) => {
@@ -91,19 +154,25 @@ class Farming extends Component {
     this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || value / value !== 1 });
   }
 
-  handleClose = () => {
-    const { onClose } = this.props;
-    // Clear input field
-    this.setState({ maxStake: 0, maxUnstake: 0 });
-    onClose();
+  handleClose = (status, msg) => {
+    const { onClose, setError, setSuccess } = this.props;
+    // Clear input field & show notification
+    this.setState({ maxStake: 0, maxUnstake: 0 }, () => {
+      onClose(status, msg);
+      if (status) return setSuccess(msg);
+      return setError(msg)
+    });
   }
 
   render() {
-    const { maxStake, maxUnstake, disableStake, disableUnstake } = this.state;
+    const {
+      maxStake, maxUnstake, disableStake,
+      disableUnstake, stakeLoading, unStakeLoading,
+      harvestLoading
+    } = this.state;
     const {
       classes, visible, onClose,
       detail: { account, mint, pool, debt },
-      stakeLoading, unStakeLoading, harvestLoading,
     } = this.props;
     // Render Stake Pool Element
     if (!pool || !pool.mintS) return null;
@@ -127,13 +196,9 @@ class Farming extends Component {
         <Grid container alignItems="center" spacing={1}>
           <Grid item>
             <AvatarGroup>
-              {icons ? (
-                icons.map((e, idx) => {
-                  return <Avatar size="small" src={e} key={idx} />;
-                })
-              ) : (
-                <Avatar />
-              )}
+              {icons ? icons.map((e, idx) => {
+                return <Avatar size="small" src={e} key={idx} />;
+              }) : <Avatar />}
             </AvatarGroup>
           </Grid>
           <Grid item>
@@ -185,7 +250,7 @@ class Farming extends Component {
                     </Grid>
                     <Grid item xs={10}>
                       <Typography>
-                        <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
+                        <b style={{ color: '#ff3122' }}>{numeral(farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
                       </Typography>
                     </Grid>
                   </Grid>
@@ -334,6 +399,7 @@ const mapDispatchToProps = (dispatch) => bindActionCreators({
   setError,
   setSuccess,
   getStakePools,
+  updateWallet
 }, dispatch);
 
 export default withRouter(connect(

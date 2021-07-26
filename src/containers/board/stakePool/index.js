@@ -19,15 +19,14 @@ import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import { Skeleton } from '@material-ui/lab';
 import Divider from 'senswap-ui/divider';
 
-import sol from 'helpers/sol';
 import configs from 'configs';
+import sol from 'helpers/sol';
+import farm from 'helpers/farm';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
 import { getStakePoolData, getAccountData, getPoolData } from 'modules/bucket.reducer';
 
 import styles from './styles';
-
-const liteFarming = new ssjs.LiteFarming();
 
 
 class Farming extends Component {
@@ -51,11 +50,11 @@ class Farming extends Component {
     this.stakeRef = createRef();
     this.unstakeRef = createRef();
   }
-  
+
   componentDidMount() {
     this.fecthStakePools();
   }
-  
+
   componentDidUpdate(prevProps) {
     const { stakePoolAddress: address } = this.state;
     const { bucket: currBucket } = this.props;
@@ -107,13 +106,13 @@ class Farming extends Component {
   }
 
   fetchDebtData = async (poolAddress) => {
-    const wallet = window.senswap.wallet;
+    const { wallet, farming: liteFarming } = window.senswap;
     let accountData = null;
     try {
       accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
     } catch (error) { }
     return accountData;
-  };
+  }
 
   fetchAccountData = async (mintAddress) => {
     const {
@@ -128,7 +127,7 @@ class Farming extends Component {
     if (!state) throw new Error('Invalid state');
     const account = await getAccountData(accountAddress);
     return account;
-  };
+  }
 
   handleStake = async (type) => {
     const {
@@ -150,55 +149,38 @@ class Farming extends Component {
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
     const reserveStake = ssjs.decimalize(stake, 9);
     const reserveUnstake = ssjs.decimalize(unstake, 9);
-    const data = {
+    const params = {
       reserveStake,
       reserveUnstake,
       stakePoolAddress,
       LPAddress,
       senWallet,
     };
-    if (type === 'unstake') return this.unstake(data);
-    return this.stake(data);
-  };
+    if (type === 'unstake') return this.unstake(params);
+    return this.stake(params);
+  }
 
-  stake = async (data) => {
+  stake = async (params) => {
     const { setError, setSuccess } = this.props;
-    const wallet = window.senswap.wallet;
-    this.setState({ stakeLoading: true, loadingMessage: 'Wait for staking' });
-    const { reserveStake: amount, stakePoolAddress, LPAddress, senWallet } = data;
-    try {
-      //Check Stake Pool Account
-      try {
-        await liteFarming.getStakeAccountData(stakePoolAddress, wallet);
-      } catch (error) {
-        await liteFarming.initializeAccount(stakePoolAddress, wallet);
-      }
-      //Stake
-      await liteFarming.stake(amount, stakePoolAddress, LPAddress, senWallet, wallet);
-      await setSuccess('The token has been staked!');
-    } catch (err) {
-      console.log('Error');
-      await setError(err);
-    } finally {
-      this.setState({ stakeLoading: false, maxStake: 0 });
-    }
-  };
+    this.setState({ stakeLoading: true });
+    const { status, msg } = await farm.stake(params);
+    this.setState({ stakeLoading: false, maxStake: 0 }, () => {
+      if (status) return setSuccess(msg);
+      return setError(msg);
+    });
+  }
 
-  unstake = async (data) => {
+  unstake = async (params) => {
     const { setError, setSuccess } = this.props;
-    this.setState({ unStakeLoading: true, loadingMessage: 'Wait for unstaking' });
-    const { reserveUnstake: amount, stakePoolAddress, LPAddress, senWallet } = data;
-    try {
-      await liteFarming.unstake(amount, stakePoolAddress, LPAddress, senWallet, window.senswap.wallet);
-      await setSuccess('The token has been unstaked!');
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ unStakeLoading: false, maxUnstake: 0 });
-    }
-  };
+    this.setState({ unStakeLoading: true });
+    const { status, msg } = await farm.unstake(params);
+    this.setState({ unStakeLoading: false, maxUnstake: 0 }, () => {
+      if (status) return setSuccess(msg);
+      return setError(msg)
+    });
+  }
 
-  onHandleHarvest = async () => {
+  handleHarvest = async () => {
     const { stakePoolAddress } = this.state;
     const {
       setError,
@@ -207,22 +189,17 @@ class Farming extends Component {
         user: { address: userAddress },
       },
     } = this.props;
-    const wallet = window.senswap.wallet;
-    const {
-      sol: { senAddress },
-    } = configs;
+    const { sol: { senAddress } } = configs;
     this.setState({ harvestLoading: true });
-    try {
-      const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
-      await liteFarming.harvest(stakePoolAddress, senWallet, wallet);
-      await setSuccess('Harvest successfully');
-      this.onClose();
-    } catch (err) {
-      await setError(err);
-    } finally {
-      this.setState({ harvestLoading: false });
+    const params = {
+      senAddress, userAddress, stakePoolAddress
     }
-  };
+    const { status, msg } = await farm.harvest(params);
+    this.setState({ harvestLoading: false }, () => {
+      if (status) setSuccess(msg);
+      return setError(msg)
+    });
+  }
 
   getMaxToken = (type) => {
     const {
@@ -241,7 +218,7 @@ class Farming extends Component {
     return this.setState({ maxStake: share }, () => {
       this.onStakeChange();
     });
-  };
+  }
 
   onStakeChange = () => {
     const {
@@ -253,7 +230,7 @@ class Farming extends Component {
     const share = Number(ssjs.undecimalize(amount, decimals));
     const value = Number(this.stakeRef.current.value);
     this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || value / value !== 1 });
-  };
+  }
 
   onUnstakeChange = () => {
     const {
@@ -265,7 +242,7 @@ class Farming extends Component {
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const value = Number(this.unstakeRef.current.value);
     this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || value / value !== 1 });
-  };
+  }
 
   render() {
     const {
@@ -289,216 +266,210 @@ class Farming extends Component {
     } = pool;
     const icons = [iconA, iconB, iconS];
     const name = `${symbolA || '.'} x ${symbolB || '.'} x ${symbolS || '.'}`;
-    //
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const total = Number(ssjs.undecimalize(total_shares, decimals));
     const portion = total ? lpt / total * 100 : 0;
-    return (
-      <Paper className={classes.paper}>
-        <Grid container alignItems="center" spacing={1}>
-          <Grid item xs={12}>
-            <Typography variant="subtitle1" color="textSecondary">Yeild farming</Typography>
-          </Grid>
-          <Drain size={1} />
-          <Grid item>
-            <AvatarGroup>
-              {icons ? (
-                icons.map((e, idx) => {
-                  return <Avatar size="small" src={e} key={idx} />;
-                })
-              ) : (
-                <Avatar />
-              )}
-            </AvatarGroup>
-          </Grid>
-          <Grid item>
-            <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
-          </Grid>
-          {/* Shares */}
-          <Grid item xs={12}>
-            <Grid container spacing={1}>
-              <Grid item>
-                <Typography color="textSecondary">Total shares:</Typography>
-              </Grid>
-              <Grid item>
-                <Typography>
-                  {pool && pool.total_shares ? numeral(ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals)).format('0,0.[00]') : 0}
-                </Typography>
-              </Grid>
-              <Grid item className={classes.leftLine}>
-                <Typography color="textSecondary">Your shares:</Typography>
-              </Grid>
-              <Grid item>
-                <Typography>{numeral(lpt).format('0,0.[00]')} ({numeral(portion).format('0.[0]')}%)</Typography>
-              </Grid>
+
+    return <Paper className={classes.paper}>
+      <Grid container alignItems="center" spacing={1}>
+        <Grid item xs={12}>
+          <Typography variant="subtitle1" color="textSecondary">Yeild farming</Typography>
+        </Grid>
+        <Drain size={1} />
+        <Grid item>
+          <AvatarGroup>
+            {icons ? icons.map((e, idx) => {
+              return <Avatar size="small" src={e} key={idx} />;
+            }) : <Avatar />}
+          </AvatarGroup>
+        </Grid>
+        <Grid item>
+          <Typography color="textSecondary">{name ? name : 'UNKNOWN'}</Typography>
+        </Grid>
+        {/* Shares */}
+        <Grid item xs={12}>
+          <Grid container spacing={1}>
+            <Grid item>
+              <Typography color="textSecondary">Total shares:</Typography>
+            </Grid>
+            <Grid item>
+              <Typography>
+                {pool && pool.total_shares ? numeral(ssjs.undecimalize(pool.total_shares, pool.mint_token.decimals)).format('0,0.[00]') : 0}
+              </Typography>
+            </Grid>
+            <Grid item className={classes.leftLine}>
+              <Typography color="textSecondary">Your shares:</Typography>
+            </Grid>
+            <Grid item>
+              <Typography>{numeral(lpt).format('0,0.[00]')} ({numeral(portion).format('0.[0]')}%)</Typography>
             </Grid>
           </Grid>
-          <Drain size={1} />
-          <Grid item xs={12}>
-            <Divider />
-          </Grid>
-          <Drain size={1} />
-
-          {/* Harvest */}
-          <Grid item xs={12}>
-            <Typography variant="body2" color="textSecondary">Pending reward</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Paper className={classes.formPaper}>
-              <Grid container alignItems="flex-end">
-                <Grid item xs={12} md={8}>
-                  <Grid container spacing={1}>
-                    <Grid item xs={3}>
-                      <Typography color="textSecondary">Period:</Typography>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <Typography>{numeral(pool.period).format('0,0')} second</Typography>
-                    </Grid>
-                    <Grid item xs={3}>
-                      <Typography color="textSecondary">Reward:</Typography>
-                    </Grid>
-                    <Grid item xs={9}>
-                      <Typography>
-                        <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
-                          </Typography>
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={12} md={4} align="end" className={classes.button}>
-                  <Button
-                    variant="contained"
-                    color="primary" onClick={this.handleHarvest}
-                    fullWidth
-                    disabled={harvestLoading}
-                    startIcon={harvestLoading ? <CircularProgress size={17} /> : null}
-                  >
-                    Harvest
-                      </Button>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
-
-          {/* Stake */}
-          <Drain size={1} />
-          <Grid item xs={12}>
-            <Typography variant="body2" color="textSecondary">Stake</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Paper className={classes.formPaper}>
-              <Grid container alignItems="flex-end">
-                <Grid item xs={8}>
-                  <Grid container justify="space-between" spacing={0}>
-                    <Grid item>
-                      <Typography variant="body2">LP Token</Typography>
-                    </Grid>
-                    <Grid item>
-                      <Typography variant="caption" color="textSecondary">
-                        Available: {account && mint ? numeral(ssjs.undecimalize(account.amount, mint.decimals)).format('0,0.[00]') : 0} LPT</Typography>
-                    </Grid>
-                  </Grid>
-                  <Grid container className={classes.outlineInput} spacing={0}>
-                    <Grid item xs={12}>
-                      <TextField
-                        variant="standard"
-                        value={maxStake}
-                        inputRef={this.stakeRef}
-                        onChange={this.onStakeChange}
-                        fullWidth
-                        InputProps={{
-                          disableUnderline: true,
-                          endAdornment: (
-                            <Typography
-                              color="error"
-                              style={{
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap'
-                              }}
-                              onClick={this.getMaxToken}>
-                              <strong>Max</strong>
-                            </Typography>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={4} className={classes.button}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => this.handleStake('stake')} fullWidth
-                    disabled={stakeLoading || disableStake}
-                    startIcon={stakeLoading ? <CircularProgress size={17} /> : null}
-                  >
-                    <Typography>Stake</Typography>
-                  </Button>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
-
-          {/* UnStake */}
-          <Drain size={1} />
-          <Grid item xs={12}>
-            <Typography variant="body2" color="textSecondary">Unstake</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Paper className={classes.formPaper}>
-              <Grid container alignItems="flex-end">
-                <Grid item xs={8}>
-                  <Grid container justify="space-between" spacing={0}>
-                    <Grid item>
-                      <Typography variant="body2">LP Token</Typography>
-                    </Grid>
-                    <Grid item>
-                      <Typography variant="caption" color="textSecondary">
-                        Available: {account && mint ? numeral(ssjs.undecimalize(account.amount, mint.decimals)).format('0,0.[00]') : 0} LPT</Typography>
-                    </Grid>
-                  </Grid>
-                  <Grid container className={classes.outlineInput} spacing={0}>
-                    <Grid item xs={12}>
-                      <TextField
-                        variant="standard"
-                        value={maxUnstake}
-                        inputRef={this.unstakeRef}
-                        onChange={this.onUnstakeChange}
-                        fullWidth
-                        InputProps={{
-                          disableUnderline: true,
-                          endAdornment: (
-                            <Typography
-                              color="error"
-                              style={{
-                                cursor: 'pointer',
-                                whiteSpace: 'nowrap'
-                              }}
-                              onClick={() => this.getMaxToken('unstake')}>
-                              <strong>Max</strong>
-                            </Typography>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                  </Grid>
-                </Grid>
-                <Grid item xs={4} className={classes.button}>
-                  <Button
-                    variant="outlined"
-                    onClick={() => this.handleStake('unstake')} fullWidth
-                    disabled={unStakeLoading || disableUnstake}
-                    startIcon={unStakeLoading ? <CircularProgress size={17} /> : null}
-                  >
-                    <Typography>Unstake</Typography>
-                  </Button>
-                </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
-          <Drain size={2} />
         </Grid>
-      </Paper>
-    );
+        <Drain size={1} />
+        <Grid item xs={12}>
+          <Divider />
+        </Grid>
+        <Drain size={1} />
+
+        {/* Harvest */}
+        <Grid item xs={12}>
+          <Typography variant="body2" color="textSecondary">Pending reward</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper className={classes.formPaper}>
+            <Grid container alignItems="flex-end">
+              <Grid item xs={12} md={8}>
+                <Grid container spacing={1}>
+                  <Grid item xs={3}>
+                    <Typography color="textSecondary">Period:</Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <Typography>{numeral(pool.period).format('0,0')} second</Typography>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <Typography color="textSecondary">Reward:</Typography>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <Typography>
+                      <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
+                          </Typography>
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={12} md={4} align="end" className={classes.button}>
+                <Button
+                  variant="contained"
+                  color="primary" onClick={this.handleHarvest}
+                  fullWidth
+                  disabled={harvestLoading}
+                  startIcon={harvestLoading ? <CircularProgress size={17} /> : null}
+                >
+                  Harvest
+                      </Button>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+
+        {/* Stake */}
+        <Drain size={1} />
+        <Grid item xs={12}>
+          <Typography variant="body2" color="textSecondary">Stake</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper className={classes.formPaper}>
+            <Grid container alignItems="flex-end">
+              <Grid item xs={8}>
+                <Grid container justify="space-between" spacing={0}>
+                  <Grid item>
+                    <Typography variant="body2">LP Token</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="caption" color="textSecondary">
+                      Available: {account && mint ? numeral(ssjs.undecimalize(account.amount, mint.decimals)).format('0,0.[00]') : 0} LPT</Typography>
+                  </Grid>
+                </Grid>
+                <Grid container className={classes.outlineInput} spacing={0}>
+                  <Grid item xs={12}>
+                    <TextField
+                      variant="standard"
+                      value={maxStake}
+                      inputRef={this.stakeRef}
+                      onChange={this.onStakeChange}
+                      fullWidth
+                      InputProps={{
+                        disableUnderline: true,
+                        endAdornment: (
+                          <Typography
+                            color="error"
+                            style={{
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap'
+                            }}
+                            onClick={this.getMaxToken}>
+                            <strong>Max</strong>
+                          </Typography>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={4} className={classes.button}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => this.handleStake('stake')} fullWidth
+                  disabled={stakeLoading || disableStake}
+                  startIcon={stakeLoading ? <CircularProgress size={17} /> : null}
+                >
+                  <Typography>Stake</Typography>
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+
+        {/* UnStake */}
+        <Drain size={1} />
+        <Grid item xs={12}>
+          <Typography variant="body2" color="textSecondary">Unstake</Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <Paper className={classes.formPaper}>
+            <Grid container alignItems="flex-end">
+              <Grid item xs={8}>
+                <Grid container justify="space-between" spacing={0}>
+                  <Grid item>
+                    <Typography variant="body2">LP Token</Typography>
+                  </Grid>
+                  <Grid item>
+                    <Typography variant="caption" color="textSecondary">
+                      Available: {numeral(lpt).format('0,0.[00]')} LPT</Typography>
+                  </Grid>
+                </Grid>
+                <Grid container className={classes.outlineInput} spacing={0}>
+                  <Grid item xs={12}>
+                    <TextField
+                      variant="standard"
+                      value={maxUnstake}
+                      inputRef={this.unstakeRef}
+                      onChange={this.onUnstakeChange}
+                      fullWidth
+                      InputProps={{
+                        disableUnderline: true,
+                        endAdornment: (
+                          <Typography
+                            color="error"
+                            style={{
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap'
+                            }}
+                            onClick={() => this.getMaxToken('unstake')}>
+                            <strong>Max</strong>
+                          </Typography>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Grid>
+              <Grid item xs={4} className={classes.button}>
+                <Button
+                  variant="outlined"
+                  onClick={() => this.handleStake('unstake')} fullWidth
+                  disabled={unStakeLoading || disableUnstake}
+                  startIcon={unStakeLoading ? <CircularProgress size={17} /> : null}
+                >
+                  <Typography>Unstake</Typography>
+                </Button>
+              </Grid>
+            </Grid>
+          </Paper>
+        </Grid>
+        <Drain size={2} />
+      </Grid>
+    </Paper>
   }
 }
 
