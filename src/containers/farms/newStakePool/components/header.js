@@ -15,7 +15,7 @@ function NewStakePoolHeader(props) {
   const { classes, onClose } = props;
   return (
     <DialogTitle>
-      <Grid container alignItems="center" className={classes.noWrap}>
+      <Grid container className={classes.noWrap} alignItems="center">
         <Grid item className={classes.stretch}>
           <Typography variant="subtitle1">New stake pool</Typography>
         </Grid>

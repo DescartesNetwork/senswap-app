@@ -51,7 +51,7 @@ function ListLPT({ classes, visible, onClose, onSelect }) {
     <Dialog open={visible} onClose={onClose} fullWidth>
       {/* Title */}
       <DialogTitle>
-        <Grid container alignItems="center" className={classes.noWrap}>
+        <Grid container className={classes.noWrap} alignItems="center">
           <Grid item className={classes.stretch}>
             <Typography variant="h6">
               <strong>Search</strong>
