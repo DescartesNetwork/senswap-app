@@ -138,7 +138,7 @@ class Sidebar extends Component {
                 <ListItemText primary="Wallet" />
               </ListItem>
               {/* Faucet */}
-              {cluster === 'devnet' ? <Fragment>
+              {cluster === 'devnet' && ssjs.isAddress(address) ? <Fragment>
                 <Drain size={2} />
                 <Divider />
                 <Drain size={2} />
