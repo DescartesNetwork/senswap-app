@@ -62,6 +62,30 @@ export const getBoardStat = (address) => {
 }
 
 /**
+ * Get board apr farming
+ */
+export const GET_BOARD_APR_FARMING = 'GET_BOARD_APR_FARMING';
+export const GET_BOARD_APR_FARMING_OK = 'GET_BOARD_APR_FARMING_OK';
+export const GET_BOARD_APR_FARMING_FAIL = 'GET_BOARD_APR_FARMING_FAIL';
+
+export const getBoardAprFarming = (address) => {
+  return async (dispatch, getState) => {
+    dispatch({ type: GET_BOARD_APR_FARMING });
+
+    const { api: { baseBoard } } = configs;
+    try {
+      const { data: aprData } = await API_INSTANCE.get(baseBoard + address);
+      const data = { apr_farming: aprData };
+      dispatch({ type: GET_BOARD_APR_FARMING_OK, data });
+      return aprData;
+    } catch (er) {
+      dispatch({ type: GET_BOARD_APR_FARMING_FAIL, reason: er.toString() });
+      throw new Error(er);
+    }
+  }
+}
+
+/**
  * Reducder
  */
 // eslint-disable-next-line

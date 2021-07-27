@@ -39,6 +39,7 @@ class TVL extends Component {
     try {
       const data = await getBoardDaily(address);
       if (data) {
+        data.sort((a, b) => a.time - b.time);
         const values = data.map(e => e.tvl);
         const labels = data.map(e => e.time % 100);
         this.setState({ chartData: values });

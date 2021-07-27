@@ -19,6 +19,7 @@ import Reserve from './reserve';
 import Price from './price';
 import Reference from './reference';
 import StakePool from './stakePool';
+import APR from './stakePool/apr';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';
@@ -96,6 +97,9 @@ class Board extends Component {
       </Grid>
       <Grid item xs={12} sm={6} md={4}>
         <Reference poolData={data} />
+      </Grid>
+      <Grid item xs={12} sm={6} md={4}>
+        <APR poolData={data} />
       </Grid>
       {/* Farming */}
       {ssjs.isAddress(walletAddress) ? <Grid item xs={12} sm={8} md={8}>
