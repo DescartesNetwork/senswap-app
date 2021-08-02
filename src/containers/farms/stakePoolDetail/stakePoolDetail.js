@@ -34,8 +34,8 @@ class Farming extends Component {
     this.state = {
       maxStake: '',
       maxUnstake: '',
-      disableStake: false,
-      disableUnstake: false,
+      disableStake: true,
+      disableUnstake: true,
       stakeLoading: false,
       unStakeLoading: false,
       harvestLoading: false,
@@ -57,16 +57,15 @@ class Farming extends Component {
       wallet: {
         user: { address: userAddress },
         stakeAccounts, stakeAccount
-      }
+      },
+      bucket, wallet
     } = this.props;
+    console.log(bucket, wallet, 'bkuc')
     const { mint: { address }, pool: { address: stakePoolAddress }, } = detail;
     const { sol: { senAddress } } = configs;
 
     const amountStake = this.stakeRef.current.value;
     const amountUnstake = this.unstakeRef.current.value;
-
-    if (!amountStake || !amountUnstake) return setError('Amount is required');
-
     const { address: LPAddress } = await sol.scanAccount(address, userAddress);
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
     const reserveStake = ssjs.decimalize(amountStake, 9);
