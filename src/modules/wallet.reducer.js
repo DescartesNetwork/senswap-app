@@ -3,6 +3,7 @@ import configs from 'configs';
 import session from 'helpers/session';
 import api from 'helpers/api';
 
+const farming = new ssjs.Farming();
 
 /**
  * Documents
@@ -93,7 +94,8 @@ export const setWallet = (wallet) => {
       api: { base },
       sol: { farmingAddress },
     } = configs;
-    const { farming, lamports, splt } = window.senswap;
+    const lamports = window.senswap.lamports;
+    const splt = window.senswap.splt;
     const connection = splt._splt.connection;
     const spltProgramId = splt._splt.spltProgramId;
     const data = {
