@@ -99,8 +99,6 @@ class Farming extends Component {
     const { mintLPT: mintAddress } = bucket[stakePoolAddress];
     const stake = this.stakeRef.current.value;
     const unstake = this.unstakeRef.current.value;
-    if (!stake) return setError('Stake amount isvalid');
-    if (!unstake) return setError('Unstake amount isvalid');
     const {
       sol: { senAddress },
     } = configs;

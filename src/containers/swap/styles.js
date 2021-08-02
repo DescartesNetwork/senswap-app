@@ -12,7 +12,7 @@ export default theme => ({
   paper: {
     borderRadius: theme.shape.borderRadius * 2,
     padding: theme.spacing(4),
-    height: `calc(100% - ${theme.spacing(8)}px)`
+    // height: `calc(100% - ${theme.spacing(8)}px)`
   },
   details: {
     padding: theme.spacing(2),
