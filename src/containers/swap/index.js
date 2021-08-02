@@ -60,10 +60,19 @@ class Swap extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    const { match: { params: prevParams }, wallet: { user: prevUser } } = prevProps;
-    const { match: { params }, wallet: { user } } = this.props;
+    const { bidPoolData : {address: bidPoolAddr}, askPoolData :{address: askPoolAddr}} = this.state
+    const { match: { params: prevParams }, wallet: { user: prevUser }, bucket :{ [bidPoolAddr]: prevBidPool, [askPoolAddr]: prevAskPool} } = prevProps;
+    const { match: { params }, wallet: { user },  bucket :{ [bidPoolAddr]: bidPool, [askPoolAddr]: askPool} } = this.props;
     if (!isEqual(prevParams, params)) this.parseParams();
     if (!isEqual(prevUser, user)) this.parseParams();
+    
+    if(!isEqual(prevBidPool, bidPool) || !isEqual(prevAskPool, askPool)){
+      this.setState({
+        bidPoolData: bidPool,
+        askPoolData:  askPool
+      }, () => this.estimateState(false));
+    }
+
   }
 
   parseParams = async () => {
@@ -75,6 +84,7 @@ class Swap extends Component {
       if (!ssjs.isAddress(address)) return setError('Cannot load pool data');
       const { address: mintAddressA } = mint_a || {};
       const { address: mintAddressB } = mint_b || {};
+
       if (!ssjs.isAddress(mintAddressA)) return setError('Cannot load token data');
       if (!ssjs.isAddress(mintAddressB)) return setError('Cannot load token data');
       const bidAccountData = await this.fetchAccountData(mintAddressA);
@@ -82,7 +92,9 @@ class Swap extends Component {
       return this.setState({
         defaultPoolAddress: poolAddress,
         bidPoolData: data, bidAccountData,
-        askPoolData: data, askAccountData
+        askPoolData: data, askAccountData,
+        mintAddressA,
+        mintAddressB
       }, () => this.estimateState(false));
     } catch (er) {
       return setError(er);
@@ -109,6 +121,13 @@ class Swap extends Component {
     }
   }
 
+  getDecimalInPool(mintAddress, poolData){
+    const mintKeys = ["mint_a", "mint_b", "mint_s", "mint_lpt"]
+    for (const key of mintKeys) {
+      if(mintAddress === poolData[key]?.address) return poolData[key]?.decimals
+    }
+  }
+
   estimateState = async (inverse = false) => {
     const { setError } = this.props;
     const {
@@ -117,10 +136,12 @@ class Swap extends Component {
     } = this.state;
     const { mint: bidMintData } = bidAccountData || {}
     const { mint: askMintData } = askAccountData || {}
-    const { address: srcMintAddress, decimals: bidDecimals } = bidMintData || {}
-    const { address: dstMintAddress, decimals: askDecimals } = askMintData || {}
+    const { address: srcMintAddress } = bidMintData || {}
+    const { address: dstMintAddress } = askMintData || {}
+    const bidDecimals = this.getDecimalInPool(srcMintAddress, bidPoolData);
+    const askDecimals = this.getDecimalInPool(dstMintAddress, askPoolData);
+    
     if (!ssjs.isAddress(srcMintAddress) || !ssjs.isAddress(dstMintAddress)) return;
-
     if (this.timeout) clearTimeout(this.timeout);
     this.timeout = setTimeout(async () => {
       this.setState({ loading: true });
