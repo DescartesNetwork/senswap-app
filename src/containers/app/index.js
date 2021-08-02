@@ -6,7 +6,6 @@ import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
 import { ThemeProvider, withStyles } from 'senswap-ui/styles';
 import Grid from 'senswap-ui/grid';
 import Drain from 'senswap-ui/drain';
-import CssBaseline from 'senswap-ui/cssBaseLine';
 
 // Components
 import PrivateRoute from 'containers/auth/privateRoute';
@@ -36,8 +35,6 @@ class App extends Component {
     const { classes } = this.props;
 
     return <ThemeProvider variant="dark">
-      {/* Support theme css */}
-      <CssBaseline />
       <Grid container>
         {/* Views */}
         <Grid item xs={12}>

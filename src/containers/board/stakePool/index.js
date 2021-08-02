@@ -121,7 +121,7 @@ class Farming extends Component {
     const { setError, setSuccess } = this.props;
     this.setState({ stakeLoading: true });
     const { status, msg } = await farm.stake(params);
-    this.setState({ stakeLoading: false, maxStake: 0 }, () => {
+    this.setState({ stakeLoading: false, maxStake: '' }, () => {
       if (status) return setSuccess(msg);
       return setError(msg);
     });
@@ -131,7 +131,7 @@ class Farming extends Component {
     const { setError, setSuccess } = this.props;
     this.setState({ unStakeLoading: true });
     const { status, msg } = await farm.unstake(params);
-    this.setState({ unStakeLoading: false, maxUnstake: 0 }, () => {
+    this.setState({ unStakeLoading: false, maxUnstake: '' }, () => {
       if (status) return setSuccess(msg);
       return setError(msg)
     });

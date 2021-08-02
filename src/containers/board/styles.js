@@ -8,7 +8,8 @@ export default theme => ({
   },
   paper: {
     padding: theme.spacing(4),
-    borderRadius: theme.shape.borderRadius * 2
+    borderRadius: theme.shape.borderRadius * 2,
+    height: `calc(100% - ${theme.spacing(8)}px)`
   },
   icon: {
     width: theme.spacing(3),
