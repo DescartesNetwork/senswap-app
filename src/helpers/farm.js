@@ -98,10 +98,11 @@ class Farm {
     }
   }
 
-  static getStakePoolAddress = async (data) => {
+  static getStakePoolAddress = (data) => {
     const { stakePools, mintAddress } = data;
     try {
-      const { address: stakePoolAddress } = stakePools.find(stakePool => stakePool.mintLPT === mintAddress || stakePool.mint_token.address === mintAddress);
+      const result = stakePools.find(stakePool => stakePool.mintLPT === mintAddress || stakePool.mint_token.address === mintAddress);
+      const { address: stakePoolAddress } = result;
       return stakePoolAddress;
     } catch (err) {
       console.log(err)

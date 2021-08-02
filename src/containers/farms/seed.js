@@ -26,7 +26,7 @@ class Seed extends Component {
     super();
 
     this.state = {
-      maxToken: 0,
+      maxToken: '',
       seedLoading: false,
       unSeedLoading: false,
     };
@@ -172,6 +172,8 @@ class Seed extends Component {
                     <TextField
                       variant="standard"
                       value={maxToken}
+                      type="number"
+                      placeholder="0"
                       inputRef={this.seedRef}
                       onChange={this.onChange}
                       fullWidth

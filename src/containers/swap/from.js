@@ -86,6 +86,7 @@ class From extends Component {
           label="From"
           placeholder="0"
           value={value}
+          type="number"
           onChange={this.onValue}
           InputProps={{
             startAdornment: <Grid container className={classes.noWrap}>

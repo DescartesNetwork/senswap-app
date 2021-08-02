@@ -26,7 +26,7 @@ export const getBoardDaily = (address) => {
 
     const { api: { baseBoard } } = configs;
     try {
-      const { data: dailyData } = await API_INSTANCE.get(baseBoard + '/daily/pools/' + address);
+      const { data: dailyData } = await API_INSTANCE.get(baseBoard + '/reports/daily/pools/' + address);
       const data = { daily: dailyData };
       dispatch({ type: GET_BOARD_DAILY_OK, data });
       return dailyData;
@@ -50,7 +50,7 @@ export const getBoardStat = (address) => {
 
     const { api: { baseBoard } } = configs;
     try {
-      const { data: statData } = await API_INSTANCE.get(baseBoard + '/stat/pools/' + address);
+      const { data: statData } = await API_INSTANCE.get(baseBoard + '/reports/stat/pools/' + address);
       const data = { stat: statData };
       dispatch({ type: GET_BOARD_STAT_OK, data });
       return statData;
@@ -68,13 +68,13 @@ export const GET_BOARD_APR_FARMING = 'GET_BOARD_APR_FARMING';
 export const GET_BOARD_APR_FARMING_OK = 'GET_BOARD_APR_FARMING_OK';
 export const GET_BOARD_APR_FARMING_FAIL = 'GET_BOARD_APR_FARMING_FAIL';
 
-export const getBoardAprFarming = (address) => {
+export const getBoardFarmingAprs = (conditions, address) => {
   return async (dispatch, getState) => {
     dispatch({ type: GET_BOARD_APR_FARMING });
 
     const { api: { baseBoard } } = configs;
     try {
-      const { data: aprData } = await API_INSTANCE.get(baseBoard + address);
+      const { data: aprData } = await API_INSTANCE.get(baseBoard + '/stake-pools/' + address + '/roi-reports', conditions);
       const data = { apr_farming: aprData };
       dispatch({ type: GET_BOARD_APR_FARMING_OK, data });
       return aprData;

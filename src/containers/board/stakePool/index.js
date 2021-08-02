@@ -41,8 +41,8 @@ class Farming extends Component {
       stakeLoading: false,
       unStakeLoading: false,
       harvestLoading: false,
-      maxStake: 0,
-      maxUnstake: 0,
+      maxStake: '',
+      maxUnstake: '',
       disableStake: false,
       disableUnstake: false,
     };
@@ -188,7 +188,7 @@ class Farming extends Component {
     } = this.state;
     const share = Number(ssjs.undecimalize(amount, decimals));
     const value = Number(this.stakeRef.current.value);
-    this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || value / value !== 1 });
+    this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || Math.sign(value) !== 1 });
   }
 
   onUnstakeChange = () => {
@@ -200,7 +200,7 @@ class Farming extends Component {
     } = this.state;
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const value = Number(this.unstakeRef.current.value);
-    this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || value / value !== 1 });
+    this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || Math.sign(value) !== 1 });
   }
 
   render() {
@@ -333,6 +333,8 @@ class Farming extends Component {
                     <TextField
                       variant="standard"
                       value={maxStake}
+                      type="number"
+                      placeholder="0"
                       inputRef={this.stakeRef}
                       onChange={this.onStakeChange}
                       fullWidth
@@ -392,6 +394,8 @@ class Farming extends Component {
                     <TextField
                       variant="standard"
                       value={maxUnstake}
+                      type="number"
+                      placeholder="0"
                       inputRef={this.unstakeRef}
                       onChange={this.onUnstakeChange}
                       fullWidth
