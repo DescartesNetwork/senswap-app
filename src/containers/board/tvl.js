@@ -41,7 +41,7 @@ class TVL extends Component {
       if (data) {
         data.sort((a, b) => a.time - b.time);
         const values = data.map(e => e.tvl);
-        const labels = data.map(e => e.time % 100);
+        const labels = data.map(e => e.time % 100 + '/' + Number.parseInt(e.time / 100) % 100);
         this.setState({ chartData: values, labels: labels });
       }
     } catch (err) {
@@ -70,13 +70,13 @@ class TVL extends Component {
     }
 
     if (isLoading) return <Skeleton variant="rect" height={320} className={classes.chart} />;
-    if (!data || data.length < 1) return null;
+    if (!data) return null;
 
     return <Paper className={classes.paper}>
       <Grid container>
         <Grid item xs={12}>
           <Typography variant="subtitle1" color="textSecondary">TVL</Typography>
-          <Typography variant="h5">{info && info.volume24h ? numeral(info.tvl).format('$0.[0]a') : '$0'}</Typography>
+          <Typography variant="h5">{info && info.volume24h ? numeral(info.tvl).format('$0,0.[0]a') : '$0'}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Chart data={data} labels={labels} type="line" styles={styles} fill={true} tension="0.4" pointRadius="0" />
