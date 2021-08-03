@@ -19,8 +19,8 @@ import Fab from '@material-ui/core/Fab';
 import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
   AccountBalanceWalletRounded, AccountBalanceRounded,
-  GroupWorkRounded, ColorizeRounded, DescriptionRounded,
-  DonutLargeRounded, MenuOpenRounded, MenuRounded, AllInclusive
+  GroupWorkRounded, ColorizeRounded, MenuOpenRounded,
+  MenuRounded, AllInclusive
 } from 'senswap-ui/icons';
 
 import styles from './styles';

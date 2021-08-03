@@ -16,7 +16,6 @@ import { HelpOutlineRounded } from 'senswap-ui/icons';
 import styles from '../styles';
 import { getStakePoolData } from 'modules/bucket.reducer';
 
-
 function StakePoolItem(props) {
   const { classes, stakePool, index, onOpenDetail, onOpenSeed } = props;
   const dispatch = useDispatch();
@@ -45,16 +44,18 @@ function StakePoolItem(props) {
     setTimeout(() => {
       if (!poolData) dispatch(getStakePoolData(stakePool.address));
     }, 500);
-  }, [dispatch]);
+  }, [dispatch, poolData, stakePool.address]);
 
   //Check loading
   function renderLoading() {
     return (
       <TableRow>
         {[1, 2, 3, 4, 5, 6].map((elm) => {
-          return <TableCell key={elm}>
-            <CircularProgress size={17} />
-          </TableCell>
+          return (
+            <TableCell key={elm}>
+              <CircularProgress size={17} />
+            </TableCell>
+          );
         })}
       </TableRow>
     );
@@ -76,11 +77,17 @@ function StakePoolItem(props) {
       <TableCell className={classes.columnIndex}>{index + 1}</TableCell>
       <TableCell className={classes.assets}>
         <AvatarGroup>
-          {icons ? icons.map((icon, idx) => {
-            return <Avatar src={icon} className={classes.icon} key={idx}>
-              <HelpOutlineRounded />
-            </Avatar>
-          }) : <Avatar />}
+          {icons ? (
+            icons.map((icon, idx) => {
+              return (
+                <Avatar src={icon} className={classes.icon} key={idx}>
+                  <HelpOutlineRounded />
+                </Avatar>
+              );
+            })
+          ) : (
+            <Avatar />
+          )}
         </AvatarGroup>
         <Grid item>
           <Typography>{name}</Typography>
