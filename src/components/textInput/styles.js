@@ -5,6 +5,7 @@ export default theme => ({
   },
   text: {
     overflowWrap: 'break-word',
+    outline: 'none',
     '&:empty::before': {
       content: 'attr(placeholder)',
       color: theme.palette.text.disabled
