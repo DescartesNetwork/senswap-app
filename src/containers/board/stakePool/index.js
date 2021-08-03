@@ -14,7 +14,6 @@ import TextField from 'senswap-ui/textField';
 import Button from 'senswap-ui/button';
 import CircularProgress from 'senswap-ui/circularProgress';
 import Paper from 'senswap-ui/paper';
-import Farm from 'helpers/farm';
 import Avatar, { AvatarGroup } from 'senswap-ui/avatar';
 import { Skeleton } from '@material-ui/lab';
 import Divider from 'senswap-ui/divider';
@@ -42,8 +41,8 @@ class Farming extends Component {
       stakeLoading: false,
       unStakeLoading: false,
       harvestLoading: false,
-      maxStake: 0,
-      maxUnstake: 0,
+      maxStake: '',
+      maxUnstake: '',
       disableStake: false,
       disableUnstake: false,
     };
@@ -52,7 +51,7 @@ class Farming extends Component {
   }
 
   componentDidMount() {
-    this.fecthStakePools();
+    this.fecthStakePool();
   }
 
   componentDidUpdate(prevProps) {
@@ -64,25 +63,26 @@ class Farming extends Component {
     if (!isEqual(currBucket[address], prevBucket[address])) return this.fecthStakePools();
   }
 
-  fecthStakePools = async () => {
+  fecthStakePool = async () => {
     const {
-      getStakePoolData, getStakePools,
+      getStakePoolData, getStakePools, getAccountData,
       poolData: { mint_lpt: { address: mintAddress } },
+      wallet: { user: { address: userAddress } }
     } = this.props;
+    const params = { userAddress, getAccountData, mintAddress };
     this.setState({ loading: true });
+    if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid mint address');
+    if (!ssjs.isAddress(userAddress)) throw new Error('Invalid wallet address');
     try {
       let poolAddresses = await getStakePools({}, 9999);
       const promise = poolAddresses.map(({ address }) => {
         return getStakePoolData(address);
       });
       const stakePools = await Promise.all(promise);
-      this.setState({ stakePools: stakePools }, async () => {
-        const stakePoolAddress = await this.getStakePoolAddress();
-        const debt = await this.fetchDebtData(stakePoolAddress);
-        this.setState({ debt: debt });
-      });
-      const account = await this.fetchAccountData(mintAddress);
-      this.setState({ account: account });
+      const stakePoolAddress = await farm.getStakePoolAddress({ stakePools, mintAddress });
+      const debt = await farm.fetchDebtData(stakePoolAddress);
+      const account = await farm.fetchAccountData(params);
+      this.setState({ account: account, debt: debt, stakePoolAddress: stakePoolAddress });
     } catch (err) {
       console.log(err, 'err');
     } finally {
@@ -90,58 +90,15 @@ class Farming extends Component {
     }
   }
 
-  getStakePoolAddress = async () => {
-    const { poolData: {
-      mint_lpt: { address: mintAddress }
-    },
-    } = this.props;
-    const { stakePools } = this.state;
-    try {
-      const { address: stakePoolAddress } = stakePools.find(stakePool => stakePool.mintLPT === mintAddress || stakePool.mint_token.address === mintAddress);
-      this.setState({ stakePoolAddress: stakePoolAddress });
-      return stakePoolAddress;
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
-  fetchDebtData = async (poolAddress) => {
-    const { wallet, farming: liteFarming } = window.senswap;
-    let accountData = null;
-    try {
-      accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
-    } catch (error) { }
-    return accountData;
-  }
-
-  fetchAccountData = async (mintAddress) => {
-    const {
-      wallet: {
-        user: { address: userAddress },
-      },
-      getAccountData,
-    } = this.props;
-    if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid mint address');
-    if (!ssjs.isAddress(userAddress)) throw new Error('Invalid wallet address');
-    const { address: accountAddress, state } = await sol.scanAccount(mintAddress, userAddress);
-    if (!state) throw new Error('Invalid state');
-    const account = await getAccountData(accountAddress);
-    return account;
-  }
-
   handleStake = async (type) => {
     const {
-      wallet: {
-        user: { address: userAddress },
-      },
+      wallet: { user: { address: userAddress } },
       bucket,
     } = this.props;
     const { stakePoolAddress } = this.state;
     const { mintLPT: mintAddress } = bucket[stakePoolAddress];
     const stake = this.stakeRef.current.value;
     const unstake = this.unstakeRef.current.value;
-    if (!stake) return setError('Stake amount isvalid');
-    if (!unstake) return setError('Unstake amount isvalid');
     const {
       sol: { senAddress },
     } = configs;
@@ -164,7 +121,7 @@ class Farming extends Component {
     const { setError, setSuccess } = this.props;
     this.setState({ stakeLoading: true });
     const { status, msg } = await farm.stake(params);
-    this.setState({ stakeLoading: false, maxStake: 0 }, () => {
+    this.setState({ stakeLoading: false, maxStake: '' }, () => {
       if (status) return setSuccess(msg);
       return setError(msg);
     });
@@ -174,7 +131,7 @@ class Farming extends Component {
     const { setError, setSuccess } = this.props;
     this.setState({ unStakeLoading: true });
     const { status, msg } = await farm.unstake(params);
-    this.setState({ unStakeLoading: false, maxUnstake: 0 }, () => {
+    this.setState({ unStakeLoading: false, maxUnstake: '' }, () => {
       if (status) return setSuccess(msg);
       return setError(msg)
     });
@@ -229,7 +186,7 @@ class Farming extends Component {
     } = this.state;
     const share = Number(ssjs.undecimalize(amount, decimals));
     const value = Number(this.stakeRef.current.value);
-    this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || value / value !== 1 });
+    this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || Math.sign(value) !== 1 });
   }
 
   onUnstakeChange = () => {
@@ -241,7 +198,7 @@ class Farming extends Component {
     } = this.state;
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const value = Number(this.unstakeRef.current.value);
-    this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || value / value !== 1 });
+    this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || Math.sign(value) !== 1 });
   }
 
   render() {
@@ -331,7 +288,7 @@ class Farming extends Component {
                   </Grid>
                   <Grid item xs={9}>
                     <Typography>
-                      <b style={{ color: '#ff3122' }}>{numeral(Farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
+                      <b style={{ color: '#ff3122' }}>{numeral(farm.calculateReward(pool, debt)).format('0.[00]')}</b> SEN
                           </Typography>
                   </Grid>
                 </Grid>
@@ -374,6 +331,8 @@ class Farming extends Component {
                     <TextField
                       variant="standard"
                       value={maxStake}
+                      type="number"
+                      placeholder="0"
                       inputRef={this.stakeRef}
                       onChange={this.onStakeChange}
                       fullWidth
@@ -433,6 +392,8 @@ class Farming extends Component {
                     <TextField
                       variant="standard"
                       value={maxUnstake}
+                      type="number"
+                      placeholder="0"
                       inputRef={this.unstakeRef}
                       onChange={this.onUnstakeChange}
                       fullWidth

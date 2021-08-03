@@ -17,6 +17,7 @@ import Seed from '../seed';
 import styles from '../styles';
 import configs from 'configs';
 import sol from 'helpers/sol';
+import farm from 'helpers/farm';
 import { setError, setSuccess } from 'modules/ui.reducer';
 import { getStakePools } from 'modules/stakePool.reducer';
 import { getAccountData, getStakePoolData } from 'modules/bucket.reducer';
@@ -88,77 +89,50 @@ class StakePool extends Component {
 
   onOpenDetail = async (stakePool) => {
     if (!stakePool) return;
+    const { mint_token: { address: mintAddress } } = stakePool;
     const {
-      mint_token: { address: mintAddress },
-    } = stakePool;
-    const wallet = window.senswap.wallet;
-    const account = await this.fetchAccountData(mintAddress, wallet);
-    const debt = await this.fetchDebtData(stakePool.address);
-    const poolDetail = {
-      pool: stakePool,
-      account,
-      mint: account.mint,
-      debt,
-    };
-    this.setState({ visible: true, poolDetail: poolDetail });
-  }
-
-  fetchDebtData = async (poolAddress) => {
-    const { setError } = this.props;
-    const { wallet, farming: liteFarming } = window.senswap;
-    let accountData = null;
-    try {
-      accountData = await liteFarming.getStakeAccountData(poolAddress, wallet);
-    } catch (error) {
-      return setError(error);
-    }
-    return accountData;
-  }
-
-  fetchAccountData = async (mintAddress) => {
-    const {
-      wallet: {
-        user: { address: userAddress },
-      },
-      getAccountData,
+      wallet: { user: { address: userAddress } },
+      setError, getAccountData
     } = this.props;
-    if (!ssjs.isAddress(mintAddress)) throw new Error('Invalid mint address');
-    if (!ssjs.isAddress(userAddress)) throw new Error('Invalid wallet address');
-    const { address: accountAddress, state } = await sol.scanAccount(mintAddress, userAddress);
-    if (!state) throw new Error('Invalid state');
-    const account = await getAccountData(accountAddress);
-    return account;
+    const params = { userAddress, getAccountData, mintAddress };
+    try {
+      const account = await farm.fetchAccountData(params);
+      const debt = await farm.fetchDebtData(stakePool.address);
+      const poolDetail = {
+        pool: stakePool,
+        account,
+        mint: account.mint,
+        debt,
+      };
+      this.setState({ visible: true, poolDetail: poolDetail });
+    } catch (err) {
+      setError(err);
+    }
   }
 
   onOpenSeed = async (stakePool) => {
     if (!stakePool) return;
+    const { mint_token: { address: mintAddress } } = stakePool;
     const {
-      mint_token: { address: mintAddress },
-    } = stakePool;
-    const wallet = window.senswap.wallet;
-
-    const {
-      wallet: {
-        user: { address: userAddress },
-      },
+      wallet: { user: { address: userAddress } },
+      setError, getAccountData
     } = this.props;
-    const {
-      sol: { senAddress },
-    } = configs;
+    const { sol: { senAddress } } = configs;
+    const params = { userAddress, getAccountData, mintAddress };
     // Amount is availabel of Sen wallet
-    const { address: senWallet, amount } = await sol.scanAccount(senAddress, userAddress);
-
-    const account = await this.fetchAccountData(mintAddress, wallet);
-    const debt = await this.fetchDebtData(stakePool.address);
-    const poolDetail = {
-      pool: stakePool,
-      account,
-      mint: account.mint,
-      debt,
-      amount,
-      senWallet,
-    };
-    this.setState({ visibleSeed: true, poolDetail: poolDetail });
+    try {
+      const { address: senWallet, amount } = await sol.scanAccount(senAddress, userAddress);
+      const account = await farm.fetchAccountData(params);
+      const debt = await farm.fetchDebtData(stakePool.address);
+      const poolDetail = {
+        pool: stakePool, account,
+        mint: account.mint, debt,
+        amount, senWallet,
+      };
+      this.setState({ visibleSeed: true, poolDetail: poolDetail });
+    } catch (err) {
+      setError(err);
+    }
   }
 
   onCloseSeed = () => {

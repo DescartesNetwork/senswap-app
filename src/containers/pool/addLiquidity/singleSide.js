@@ -113,8 +113,9 @@ class SingleSide extends Component {
       <Grid item xs={12}>
         <TextField
           variant="contained"
-          placeholder="0"
           value={amount}
+          type="number"
+          placeholder="0"
           onChange={this.onAmount}
           InputProps={{
             startAdornment: <Grid container className={classes.noWrap}>

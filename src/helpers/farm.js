@@ -75,6 +75,39 @@ class Farm {
       return { status: false, msg: err };
     }
   }
+
+  static fetchDebtData = async (address) => {
+    const { wallet, farming: liteFarming } = window.senswap;
+    try {
+      const debt = await liteFarming.getStakeAccountData(address, wallet);
+      return debt;
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  static fetchAccountData = async (data) => {
+    const { userAddress, getAccountData, mintAddress } = data;
+    try {
+      const { address: accountAddress, state } = await sol.scanAccount(mintAddress, userAddress);
+      if (!state) throw new Error('Invalid state');
+      const account = await getAccountData(accountAddress);
+      return account;
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  static getStakePoolAddress = (data) => {
+    const { stakePools, mintAddress } = data;
+    try {
+      const result = stakePools.find(stakePool => stakePool.mintLPT === mintAddress || stakePool.mint_token.address === mintAddress);
+      const { address: stakePoolAddress } = result;
+      return stakePoolAddress;
+    } catch (err) {
+      console.log(err)
+    }
+  }
 }
 
 export default Farm;

@@ -40,9 +40,10 @@ class Field extends Component {
     return <Grid container>
       <Grid item xs={12} >
         <TextField
-          placeholder="0"
           variant="contained"
           value={value}
+          type="number"
+          placeholder="0"
           onChange={this.onChange}
           InputProps={{
             startAdornment: <Grid container className={classes.noWrap}>

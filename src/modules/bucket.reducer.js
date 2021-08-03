@@ -3,7 +3,7 @@ import ssjs from 'senswapjs';
 import configs from 'configs';
 import api from 'helpers/api';
 
-const farming = new ssjs.Farming();
+
 /**
  * Documents
  * @default defaultData
@@ -78,7 +78,7 @@ export const GET_DEBT_DATA_FAIL = 'GET_DEBT_DATA_FAIL';
 export const getStakeAccountData = (debtAddress, force = false) => {
   return async (dispatch, getState) => {
     dispatch({ type: GET_DEBT_DATA });
-    console.log(ssjs.isAddress(debtAddress), 'ss')
+    const { farming } = window.senswap;
     if (!ssjs.isAddress(debtAddress)) {
       const er = 'Invalid account address';
       dispatch({ type: GET_DEBT_DATA_FAIL, reason: er });
@@ -218,11 +218,11 @@ export const getStakePoolData = (stakePoolAddress, force = false) => {
       const {
         api: { base },
       } = configs;
-      const liteFarming = window.senswap.farming;
+      const { farming } = window.senswap;
       const { data: poolData } = await api.get(base + '/stake-pool', { address: stakePoolAddress });
       if (!poolData?.address) return;
 
-      const stakePoolData = await liteFarming.getStakePoolData(stakePoolAddress);
+      const stakePoolData = await farming.getStakePoolData(stakePoolAddress);
       const dataStore = { [stakePoolAddress]: { ...poolData, ...stakePoolData } };
       dispatch({ type: GET_STAKE_POOL_DATA_OK, data: dataStore });
       return stakePoolData;

@@ -225,6 +225,7 @@ class NewPool extends Component {
                     variant="contained"
                     placeholder="0"
                     value={amounts[index]}
+                    type="number"
                     onChange={(e) => this.onAmount(index, e)}
                     InputProps={{
                       startAdornment: <Grid container className={classes.noWrap}>

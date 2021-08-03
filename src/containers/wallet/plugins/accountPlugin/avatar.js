@@ -19,7 +19,7 @@ class AccountAvatar extends Component {
 
     return <Badge
       badgeContent={<Avatar className={classes.badgeIcon} src={icon} />}
-      overlap="circle"
+      overlap="circular"
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       invisible={!icon}
     >

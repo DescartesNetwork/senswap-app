@@ -34,7 +34,7 @@ class App extends Component {
   render() {
     const { classes } = this.props;
 
-    return <ThemeProvider>
+    return <ThemeProvider variant="dark">
       <Grid container>
         {/* Views */}
         <Grid item xs={12}>

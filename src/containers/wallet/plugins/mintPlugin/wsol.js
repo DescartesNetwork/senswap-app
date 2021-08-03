@@ -136,6 +136,7 @@ class WSOL extends Component {
       variant="contained"
       placeholder="0"
       value={amount}
+      type="number"
       onChange={input ? this.onAmount : () => { }}
       InputProps={{
         startAdornment: <MintAvatar icon={icon} />,

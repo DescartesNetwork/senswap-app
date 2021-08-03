@@ -56,9 +56,7 @@ class LatestPromotion extends Component {
     const { loading, data } = this.state;
 
     return <Grid container spacing={2}>
-      {data.map(({ address: poolAddress }, i) => <Grid item key={i} xs={12} md={6} lg={4}>
-        <PoolCard poolAddress={poolAddress} />
-      </Grid>)}
+      {data.map(({ address: poolAddress }, i) => <PoolCard poolAddress={poolAddress} key={i} />)}
       <Grid item xs={12}>
         <Drain size={1} />
       </Grid>

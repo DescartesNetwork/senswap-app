@@ -41,8 +41,8 @@ class NewStakePool extends Component {
       poolInfo: null,
       index: 0,
       visibleAccountSelection: false,
-      reward: 0,
-      period: 0,
+      reward: '',
+      period: '',
     };
 
     this.swap = window.senswap.swap;
@@ -212,6 +212,8 @@ class NewStakePool extends Component {
                 label="Reward (Sen/Period)"
                 variant="contained"
                 value={reward}
+                type="number"
+                placeholder="0"
                 onChange={(e) => this.onChange(e)}
                 onFocus={(e) => {
                   e.target.select();
@@ -225,6 +227,8 @@ class NewStakePool extends Component {
                 name="period"
                 label="Period (Seconds)"
                 value={period}
+                type="number"
+                placeholder="0"
                 variant="contained"
                 onChange={(e) => this.onChange(e)}
                 onFocus={(e) => {

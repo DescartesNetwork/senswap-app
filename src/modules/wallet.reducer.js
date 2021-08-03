@@ -154,14 +154,14 @@ export const setWallet = (wallet) => {
           },
         ],
       });
-     
+
       //Filter DebtAddress with stakePools in database
       const ownerAddress = await wallet.getAccount();
       let { data: stakePools } = await api.get(base + '/stake-pools', { condition: {}, limit: -1, page: 0 });
-      const debtAddressInvalid  = await Promise.all(stakePools.map(pool=> farming._deriveDebtAddress(ownerAddress,pool.address)))
+      const debtAddressInvalid = await Promise.all(stakePools.map(pool => farming._deriveDebtAddress(ownerAddress, pool.address)))
 
-      const ownerDebtAddr = farmingAccounts.filter(debtData=> debtAddressInvalid.includes(debtData.pubkey.toBase58()))
-      data.stakeAccounts =  ownerDebtAddr.map((acc) => acc.pubkey.toBase58());
+      const ownerDebtAddr = farmingAccounts.filter(debtData => debtAddressInvalid.includes(debtData.pubkey.toBase58()))
+      data.stakeAccounts = ownerDebtAddr.map((acc) => acc.pubkey.toBase58());
 
       // Add user to database
       let userData = await api.get(base + '/user', { address: data.user.address });

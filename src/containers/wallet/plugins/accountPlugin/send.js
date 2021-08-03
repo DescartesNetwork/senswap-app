@@ -120,6 +120,7 @@ class Send extends Component {
               label="Amount"
               placeholder="Minimum 0"
               value={amount}
+              type="number"
               onChange={this.onAmount}
               error={amountError}
               helperTextSecondary={`Available: ${utils.prettyNumber(ssjs.undecimalize(balance, decimals))} ${symbol}`}

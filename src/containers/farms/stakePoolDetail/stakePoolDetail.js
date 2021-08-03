@@ -32,10 +32,10 @@ class Farming extends Component {
     super();
 
     this.state = {
-      maxStake: 0,
-      maxUnstake: 0,
-      disableStake: false,
-      disableUnstake: false,
+      maxStake: '',
+      maxUnstake: '',
+      disableStake: true,
+      disableUnstake: true,
       stakeLoading: false,
       unStakeLoading: false,
       harvestLoading: false,
@@ -57,16 +57,15 @@ class Farming extends Component {
       wallet: {
         user: { address: userAddress },
         stakeAccounts, stakeAccount
-      }
+      },
+      bucket, wallet
     } = this.props;
+    console.log(bucket, wallet, 'bkuc')
     const { mint: { address }, pool: { address: stakePoolAddress }, } = detail;
     const { sol: { senAddress } } = configs;
 
     const amountStake = this.stakeRef.current.value;
     const amountUnstake = this.unstakeRef.current.value;
-
-    if (!amountStake || !amountUnstake) return setError('Amount is required');
-
     const { address: LPAddress } = await sol.scanAccount(address, userAddress);
     const { address: senWallet } = await sol.scanAccount(senAddress, userAddress);
     const reserveStake = ssjs.decimalize(amountStake, 9);
@@ -144,14 +143,14 @@ class Farming extends Component {
     } = this.props;
     const share = Number(ssjs.undecimalize(account.amount, decimals));
     const value = Number(this.stakeRef.current.value);
-    this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || value / value !== 1 });
+    this.setState({ maxStake: this.stakeRef.current.value, disableStake: value > share || Math.sign(value) !== 1 });
   }
 
   onUnstakeChange = () => {
     const { detail: { mint: { decimals }, debt } } = this.props;
     const lpt = Number(ssjs.undecimalize(debt?.account?.amount || 0, decimals));
     const value = Number(this.unstakeRef.current.value);
-    this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || value / value !== 1 });
+    this.setState({ maxUnstake: this.unstakeRef.current.value, disableUnstake: value > lpt || Math.sign(value) !== 1 });
   }
 
   handleClose = (status, msg) => {
@@ -293,6 +292,8 @@ class Farming extends Component {
                       <TextField
                         variant="standard"
                         value={maxStake}
+                        type="number"
+                        placeholder="0"
                         inputRef={this.stakeRef}
                         onChange={this.onStakeChange}
                         fullWidth
@@ -350,6 +351,8 @@ class Farming extends Component {
                       <TextField
                         variant="standard"
                         value={maxUnstake}
+                        type="number"
+                        placeholder="0"
                         inputRef={this.unstakeRef}
                         onChange={this.onUnstakeChange}
                         fullWidth
