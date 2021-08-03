@@ -60,7 +60,7 @@ class App extends Component {
                     <PrivateRoute path='/issuer' component={Issuer} />
                     <PrivateRoute path='/dao' component={DAO} />
                     <Route path='/wallet' component={Wallet} />
-                    <Route path='/farms' component={Farms} />
+                    {/* <Route path='/farms' component={Farms} /> */}
                     <Route exact path='*' component={NotFound} />
                   </Switch>
                 </Grid>

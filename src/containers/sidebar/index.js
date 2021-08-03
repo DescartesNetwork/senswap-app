@@ -138,7 +138,7 @@ class Sidebar extends Component {
                 </ListItemIcon>
                 <ListItemText primary="Wallet" />
               </ListItem>
-              <ListItem
+              {/* <ListItem
                 button
                 component={RouterLink}
                 to="/farms"
@@ -148,7 +148,7 @@ class Sidebar extends Component {
                   <AllInclusive />
                 </ListItemIcon>
                 <ListItemText primary="Farms" />
-              </ListItem>
+              </ListItem> */}
               {/* Faucet */}
               {cluster === 'devnet' ? <Fragment>
                 <Drain size={2} />
