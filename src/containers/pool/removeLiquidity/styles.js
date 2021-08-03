@@ -14,7 +14,7 @@ export default theme => ({
   input: {
     margin: `0px 0px ${-theme.spacing(2)}px 0px`,
     fontFamily: 'Poppins',
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: 40,
     textTransform: 'None'
   }
