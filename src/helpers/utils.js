@@ -5,7 +5,7 @@ import ssjs from 'senswapjs';
 import configs from 'configs';
 
 const cache = {
-  coinGecko:{}
+  coinGecko: {}
 };
 
 const Utils = {}
@@ -69,11 +69,14 @@ Utils.fetchValue = async (balance, ticket) => {
 
 Utils.fetchCGK = async (ticket, force) => {
   const cacheValue = cache.coinGecko[ticket];
-  if(cacheValue && !force) return cacheValue;
-
-  const dataCGK =  await ssjs.parseCGK(ticket);
-  cache.coinGecko[ticket] = dataCGK
-  return dataCGK;
+  if (cacheValue && !force) return cacheValue;
+  try {
+    const dataCGK = await ssjs.parseCGK(ticket);
+    cache.coinGecko[ticket] = dataCGK
+    return dataCGK;
+  } catch (error) {
+    return { price: 0 }
+  }
 }
 
 Utils.getAnnualPercentage = (roi, time = 1) => {
