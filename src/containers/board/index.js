@@ -18,8 +18,8 @@ import ROI from './roi';
 import Reserve from './reserve';
 import Price from './price';
 import Reference from './reference';
-import StakePool from './stakePool';
-import APR from './stakePool/apr';
+// import StakePool from './stakePool';
+// import APR from './stakePool/apr';
 import { BucketWatcher } from 'containers/wallet';
 
 import styles from './styles';

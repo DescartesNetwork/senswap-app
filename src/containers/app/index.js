@@ -21,7 +21,7 @@ import Faucet from 'containers/faucet';
 import Issuer from 'containers/issuer';
 import DAO from 'containers/dao';
 import Board from 'containers/board';
-import Farms from 'containers/farms';
+// import Farms from 'containers/farms';
 
 // CSS
 import styles from './styles';

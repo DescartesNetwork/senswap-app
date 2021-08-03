@@ -20,7 +20,8 @@ import {
   WidgetsRounded, SwapCallsRounded, LayersRounded,
   AccountBalanceWalletRounded, AccountBalanceRounded,
   GroupWorkRounded, ColorizeRounded, MenuOpenRounded,
-  MenuRounded, AllInclusive
+  MenuRounded,
+  // AllInclusive
 } from 'senswap-ui/icons';
 
 import styles from './styles';
