@@ -21,6 +21,7 @@ import Faucet from 'containers/faucet';
 import Issuer from 'containers/issuer';
 import DAO from 'containers/dao';
 import Board from 'containers/board';
+import Farms from 'containers/farms';
 
 // CSS
 import styles from './styles';
@@ -33,7 +34,7 @@ class App extends Component {
   render() {
     const { classes } = this.props;
 
-    return <ThemeProvider>
+    return <ThemeProvider variant="dark">
       <Grid container>
         {/* Views */}
         <Grid item xs={12}>
@@ -59,6 +60,7 @@ class App extends Component {
                     <PrivateRoute path='/issuer' component={Issuer} />
                     <PrivateRoute path='/dao' component={DAO} />
                     <Route path='/wallet' component={Wallet} />
+                    <Route path='/farms' component={Farms} />
                     <Route exact path='*' component={NotFound} />
                   </Switch>
                 </Grid>

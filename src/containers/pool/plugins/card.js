@@ -153,69 +153,71 @@ class PoolCard extends Component {
     const roi = 0;
     const stake = utils.prettyNumber(ssjs.undecimalize(amount, decimals));
 
-    return <Card className={classes.card}>
-      <BucketWatcher addresses={[poolAddress]} onChange={this.fetchData} />
-      <CardContent className={classes.cardContent}>
-        <Grid container>
-          <Grid item xs={12}>
-            <Grid container className={classes.noWrap} alignItems="center">
-              <Grid item className={classes.stretch}>
-                <AvatarGroup max={3}>
-                  {icons.map((icon, i) => <Avatar key={i} size="small" src={icon} />)}
-                </AvatarGroup>
+    return <Grid item xs={12} md={6} lg={4}>
+      <Card className={classes.card}>
+        <BucketWatcher addresses={[poolAddress]} onChange={this.fetchData} />
+        <CardContent className={classes.cardContent}>
+          <Grid container>
+            <Grid item xs={12}>
+              <Grid container className={classes.noWrap} alignItems="center">
+                <Grid item className={classes.stretch}>
+                  <AvatarGroup max={3}>
+                    {icons.map((icon, i) => <Avatar key={i} size="small" src={icon} />)}
+                  </AvatarGroup>
+                </Grid>
+                <Grid item>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    component={RouterLink}
+                    to={`/board/${poolAddress}`}
+                  >
+                    <Typography variant="caption" color="textSecondary">Details</Typography>
+                  </Button>
+                </Grid>
               </Grid>
-              <Grid item>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  component={RouterLink}
-                  to={`/board/${poolAddress}`}
-                >
-                  <Typography variant="caption" color="textSecondary">Details</Typography>
-                </Button>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="subtitle1">{symbols.join(' x ')}</Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+        <Divider />
+        <CardContent className={classes.cardContent}>
+          <Grid container spacing={1}>
+            <Grid item xs={12}>
+              <Typography variant="body2">TVL</Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h4">${numeral(tvl).format('0.0[0]a')} </Typography>
+            </Grid>
+          </Grid>
+        </CardContent>
+        <CardContent className={classes.cardInfo}>
+          <Grid container spacing={1}>
+            {roi ? <Fragment>
+              <Grid item xs={6}>
+                <Typography variant="body2">ROI:</Typography>
               </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="subtitle1">{symbols.join(' x ')}</Typography>
-          </Grid>
-        </Grid>
-      </CardContent>
-      <Divider />
-      <CardContent className={classes.cardContent}>
-        <Grid container spacing={1}>
-          <Grid item xs={12}>
-            <Typography variant="body2">TVL</Typography>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h4">${numeral(tvl).format('0.0[0]a')} </Typography>
-          </Grid>
-        </Grid>
-      </CardContent>
-      <CardContent className={classes.cardInfo}>
-        <Grid container spacing={1}>
-          {roi ? <Fragment>
+              <Grid item xs={6}>
+                <Typography align="right" variant="body2"><strong>{roi}%</strong></Typography>
+              </Grid>
+            </Fragment> : null}
             <Grid item xs={6}>
-              <Typography variant="body2">ROI:</Typography>
+              <Typography variant="body2">Your stake:</Typography>
             </Grid>
             <Grid item xs={6}>
-              <Typography align="right" variant="body2"><strong>{roi}%</strong></Typography>
+              <Typography align="right" variant="body2"><strong>{stake || 0}</strong></Typography>
             </Grid>
-          </Fragment> : null}
-          <Grid item xs={6}>
-            <Typography variant="body2">Your stake:</Typography>
           </Grid>
-          <Grid item xs={6}>
-            <Typography align="right" variant="body2"><strong>{stake || 0}</strong></Typography>
+        </CardContent>
+        <CardContent className={classes.cardAction}>
+          <Grid container>
+            {this.onAction()}
           </Grid>
-        </Grid>
-      </CardContent>
-      <CardContent className={classes.cardAction}>
-        <Grid container>
-          {this.onAction()}
-        </Grid>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </Grid>
   }
 }
 

@@ -39,16 +39,15 @@ class Volume extends Component {
     try {
       const data = await getBoardDaily(address);
       if (data) {
+        data.sort((a, b) => a.time - b.time);
         const values = data.map(e => e.volume);
         const labels = data.map(e => e.time % 100);
-        this.setState({ chartData: values });
-        this.setState({ labels: labels });
-        setTimeout(() => {
-          this.setState({ isLoading: false });
-        }, 800);
+        this.setState({ chartData: values, labels: labels });
       }
     } catch (err) {
       return setError(err);
+    } finally {
+      this.setState({ isLoading: false });
     }
   }
 
@@ -71,6 +70,7 @@ class Volume extends Component {
     }
 
     if (isLoading) return <Skeleton variant="rect" height={320} className={classes.chart} />;
+    if (!data || data.length < 1) return null;
 
     return <Paper className={classes.paper}>
       <Grid container>
