@@ -173,8 +173,9 @@ export const setWallet = (wallet) => {
       dispatch({ type: SET_WALLET_OK, data });
       return data;
     } catch (er) {
-      dispatch({ type: SET_WALLET_FAIL, reason: er.toString() });
-      throw new Error(er);
+      const err = er?.message ? er.message : JSON.stringify(er);
+      dispatch({ type: SET_WALLET_FAIL, reason: JSON.stringify(er) });
+      throw new Error(err);
     }
   }
 }
